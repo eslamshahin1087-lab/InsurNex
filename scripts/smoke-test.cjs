@@ -7,6 +7,8 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const required = [
   "index.html",
+  "InsurNex-User.html",
+  "InsurNex-admin.html",
   "user.html",
   "admin.html",
   "manifest.json",
@@ -26,8 +28,6 @@ const required = [
 ];
 
 const forbiddenNames = [
-  "InsurNex-User.html",
-  "InsurNex-admin.html",
   "securepath-firebase-migration.js",
   "test-firebase.html",
   "wathiqati-app.html"
@@ -72,7 +72,7 @@ for (const abs of walk(root)) {
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));
 if (manifest.name !== "InsurNex" || manifest.short_name !== "InsurNex") failures.push("Manifest identity is not InsurNex.");
-if (manifest.start_url !== "./user.html") failures.push("Manifest start_url must be ./user.html.");
+if (manifest.start_url !== "./InsurNex-User.html") failures.push("Manifest start_url must be ./InsurNex-User.html.");
 
 const firebase = JSON.parse(fs.readFileSync(path.join(root, "firebase.json"), "utf8"));
 if (!firebase.firestore?.rules || !firebase.firestore?.indexes || !firebase.storage?.rules || !firebase.hosting?.public) {
