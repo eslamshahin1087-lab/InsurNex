@@ -13,7 +13,7 @@
   ];
   var shortNav=[["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["renewals","renewals","🔄"],["account","account","⚙️"]];
 
-  function mark(){return '<div class="brand-mark">IN</div>';}
+  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"></div>';}
   function modal(title,html){
     document.getElementById("modalTitle").textContent=title;
     document.getElementById("modalBody").innerHTML=html;
