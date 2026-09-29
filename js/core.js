@@ -248,7 +248,12 @@
   async function queryDocs(collection,workspace=state.workspace,limit=100){
     const key=collection+"|"+workspace.type+"|"+(workspace.id||"personal")+"|"+limit;
     if(state.cache.has(key))return state.cache.get(key);
-    let snap;\n    if(collection==="insurers"||collection==="insuranceProducts"){ snap=await db.collection(collection).where("status","==","active").limit(Math.max(1,Math.min(limit,100))).get(); }\n    else { snap=await scopedQuery(collection,workspace,limit).get(); }
+    let snap;
+    if(collection==="insurers"||collection==="insuranceProducts"){
+      snap=await db.collection(collection).where("status","==","active").limit(Math.max(1,Math.min(limit,100))).get();
+    } else {
+      snap=await scopedQuery(collection,workspace,limit).get();
+    }
     const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
     rows.sort((a,b)=>{
       const ta=a.createdAt?.toMillis?a.createdAt.toMillis():Date.parse(a.createdAt||"");
