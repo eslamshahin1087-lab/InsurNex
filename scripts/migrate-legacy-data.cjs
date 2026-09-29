@@ -72,15 +72,17 @@ async function main(){
       if(commits.length===400){
         const batch=db.batch();
         commits.splice(0).forEach(x=>batch.set(db.collection(x.target).doc(targetId(x.source,x.id)),x.payload,{merge:true}));
+        const written=commits.length;
         await batch.commit();
-        migrated+=400;
+        migrated+=written;
       }
     }
     if(commits.length){
       const batch=db.batch();
       commits.splice(0).forEach(x=>batch.set(db.collection(x.target).doc(targetId(x.source,x.id)),x.payload,{merge:true}));
+      const written=commits.length;
       await batch.commit();
-      migrated+=commits.length;
+      migrated+=written;
     }
     summary.push({source,target,migrated,skipped});
   }
