@@ -293,3 +293,20 @@
   .insurnex-user .auth-logo .brand-name{font-size:23px!important}
   .insurnex-user .auth-title{font-size:22px!important}
 }
+
+
+/* Full logo rendering for all InsurNex surfaces */
+.brand-mark.image-mark{
+  background-image:none!important;
+  background-color:#fff!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:3px!important;
+}
+.brand-mark.image-mark img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
