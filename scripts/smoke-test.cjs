@@ -34,10 +34,8 @@ const forbiddenNames = [
 ];
 
 const legacyTokens = [
-  /SecurePath/i,
-  /Wathiqati/i,
-  /securepath/i,
-  /wathiqati/i
+  new RegExp("Secure" + "Path", "i"),
+  new RegExp("Wathi" + "qati", "i")
 ];
 
 const ignore = new Set([".git", "node_modules"]);
