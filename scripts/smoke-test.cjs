@@ -62,6 +62,7 @@ for (const rel of forbiddenNames) {
 const textExt = new Set([".html",".js",".cjs",".json",".css",".md",".rules",".xml",".yml",".yaml"]);
 for (const abs of walk(root)) {
   const rel = path.relative(root, abs);
+  if (rel === "scripts/smoke-test.cjs") continue;
   if (!textExt.has(path.extname(abs)) && ![".firebaserc",".gitignore",".env.example"].includes(path.basename(abs))) continue;
   const content = fs.readFileSync(abs, "utf8");
   for (const re of legacyTokens) {
