@@ -595,3 +595,35 @@
   font-size:21px!important;
   border-radius:15px!important;
 }
+
+
+/* Official InsurNex logo layout */
+.insurnex-user .auth-brand{
+  flex:1 1 auto!important;
+  justify-content:center!important;
+}
+.insurnex-user .auth-brand-copy{
+  display:none!important;
+}
+.insurnex-user .auth-logo-mark{
+  width:240px!important;
+  height:165px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.insurnex-user .auth-logo-mark img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+@media(max-width:520px){
+  .insurnex-user .auth-logo-mark{
+    width:220px!important;
+    height:150px!important;
+  }
+}
