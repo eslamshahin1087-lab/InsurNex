@@ -14,7 +14,7 @@
   ];
   var shortNav=[["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["renewals","renewals","🔄"],["account","account","⚙️"]];
 
-  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo.svg" alt="InsurNex"></div>';}
+  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo.svg" alt="InsurNex" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logo-fallback" hidden>IN</span></div>';}
   function modal(title,html){
     document.getElementById("modalTitle").textContent=title;
     document.getElementById("modalBody").innerHTML=html;
@@ -34,7 +34,7 @@
 
   function authPage(mode,error){
     var login=mode==="login";
-    var logo='<div class="auth-logo-mark"><img src="assets/logo.svg" alt="InsurNex" loading="eager" decoding="async"></div>';
+    var logo='<div class="auth-logo-mark"><img src="assets/logo.svg" alt="InsurNex" loading="eager" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="auth-logo-fallback" hidden>IN</span></div>';
     var companyFields=!login?(
       '<section id="companyFields" class="auth-company" style="display:none">'+
       '<div class="auth-section-label">'+t("companyInfo")+'</div>'+
@@ -84,9 +84,9 @@
         (login?'<button id="forgot" type="button" class="auth-link">'+t("forgotPassword")+'</button>':'')+
       '</div>'+
       '<div class="auth-security">'+
-        '<span><b>Firebase Auth</b><small>Authentication</small></span>'+
-        '<span><b>Firestore</b><small>Workspace data</small></span>'+
-        '<span><b>RBAC</b><small>Access control</small></span>'+
+        '<span><b>Firebase Auth</b><small>تسجيل الحساب</small></span>'+
+        '<span><b>Firestore</b><small>بيانات مساحة العمل</small></span>'+
+        '<span><b>'+InsurNex.firebaseProject+'</b><small>Firebase Project</small></span>'+
       '</div>'+
       '</section></main>';
 
