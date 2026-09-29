@@ -152,7 +152,7 @@ service cloud.firestore {
     }
 
     match /insurers/{id} {
-      allow read: if isPlatformAdmin() || resource.data.get('published', false) == true;
+      allow read: if signedIn();
       allow create, update, delete: if isPlatformAdmin();
     }
 
