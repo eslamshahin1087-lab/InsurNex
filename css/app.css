@@ -572,3 +572,26 @@
   }
   .insurnex-user .auth-card-pro{padding:13px!important}
 }
+
+
+/* Logo failure fallback: never show a broken-image glyph */
+.insurnex-user .logo-fallback,
+.insurnex-user .auth-logo-fallback{
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:100%!important;
+  border-radius:inherit!important;
+  background:linear-gradient(145deg,#082f67,#0a72d8)!important;
+  color:#fff!important;
+  font-weight:950!important;
+  letter-spacing:-.06em!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)!important;
+}
+.insurnex-user .brand-mark.image-mark .logo-fallback{
+  font-size:13px!important;
+}
+.insurnex-user .auth-logo-mark .auth-logo-fallback{
+  font-size:21px!important;
+  border-radius:15px!important;
+}
