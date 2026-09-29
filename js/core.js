@@ -248,7 +248,7 @@
   async function queryDocs(collection,workspace=state.workspace,limit=100){
     const key=collection+"|"+workspace.type+"|"+(workspace.id||"personal")+"|"+limit;
     if(state.cache.has(key))return state.cache.get(key);
-    const snap=await scopedQuery(collection,workspace,limit).get();
+    let snap;\n    if(collection==="insurers"||collection==="insuranceProducts"){ snap=await db.collection(collection).where("status","==","active").limit(Math.max(1,Math.min(limit,100))).get(); }\n    else { snap=await scopedQuery(collection,workspace,limit).get(); }
     const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
     rows.sort((a,b)=>{
       const ta=a.createdAt?.toMillis?a.createdAt.toMillis():Date.parse(a.createdAt||"");
@@ -362,6 +362,7 @@
       ["plan","plan","select","Free,Professional,Business,Enterprise"],["status","status","select","trial,active,pastDue,cancelled"],
       ["renewalDate","renewalDate","date"],["customerLimit","total","number"],["userLimit","employees","number"]
     ]},
+    payments:{title:"payments",icon:"💳",collection:"payments",fields:[["policyNumber","policyNumber","text"],["customerName","customers","text"],["amount","amount","number"],["date","date","date"],["method","method","select","Cash,Bank transfer,Card,Online"],["status","status","select","pending,partial,paid,refunded"]]},
     teams:{title:"team",icon:"👨‍👩‍👧‍👦",collection:"teams",fields:[
       ["name","name","text"],["managerName","assignedBroker","text"],["description","description","textarea"],["status","status","select","active,inactive"]
     ]}
