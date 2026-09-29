@@ -1,0 +1,1 @@
+window.INSURNEX_CONFIG = { firebase: { apiKey: "AIzaSyCkRYPffAEBRivC2Si5T-ILL99ZrSq-dWM", authDomain: "path-1a672.firebaseapp.com", projectId: "path-1a672", storageBucket: "path-1a672.firebasestorage.app", messagingSenderId: "616651183121", appId: "1:616651183121:web:ba7f3cdec65a9df8014db0" }, app: { name:"InsurNex", version:"1.0.0", environment:"production" } };
