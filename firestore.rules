@@ -120,7 +120,8 @@ service cloud.firestore {
 
     match /notifications/{id} {
       allow read: if isPlatformAdmin() || (signedIn() && resource.data.recipientId == request.auth.uid);
-      allow create: if isPlatformAdmin();
+      allow create: if isPlatformAdmin()
+        || (signedIn() && request.resource.data.recipientId == request.auth.uid);
       allow update: if isPlatformAdmin()
         || (
           signedIn()
