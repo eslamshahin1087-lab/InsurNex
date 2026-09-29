@@ -1,4 +1,5 @@
 (function(){
+  document.body.classList.add("insurnex-user");
   var auth=InsurNex.auth, db=InsurNex.db, storage=InsurNex.storage, state=InsurNex.state, Domain=InsurNex.Domain;
   var t=InsurNex.t, esc=InsurNex.esc, fmtDate=InsurNex.fmtDate, fmtMoney=InsurNex.fmtMoney, toast=InsurNex.toast, friendlyError=InsurNex.friendlyError;
   var view=(location.hash||"#home").slice(1), search="";
@@ -260,13 +261,22 @@
   }
 
   async function syncRenewalAutomation(policies,existingRenewals){
-    var thresholds={90:"90 Days",60:"60 Days",45:"45 Days",30:"30 Days",15:"15 Days",7:"7 Days",1:"Expired"};
+    function checkpoint(days){
+      if(days<=0)return "Expired";
+      if(days<=7)return "7 Days";
+      if(days<=15)return "15 Days";
+      if(days<=30)return "30 Days";
+      if(days<=45)return "45 Days";
+      if(days<=60)return "60 Days";
+      if(days<=90)return "90 Days";
+      return null;
+    }
     var current=existingRenewals||[];
     for(var i=0;i<policies.length;i++){
       var p=policies[i],expiry=p.expiryDate?new Date(p.expiryDate):null;
       if(!expiry||Number.isNaN(expiry.getTime()))continue;
-      var days=Math.round((expiry.getTime()-Date.now())/86400000),stage=thresholds[Math.max(1,days)]||thresholds[days];
-      if(!stage||days<0||days>90)continue;
+      var days=Math.ceil((expiry.getTime()-Date.now())/86400000),stage=checkpoint(days);
+      if(!stage)continue;
       var exists=current.some(function(r){return (r.policyId===p.id||r.policyNumber===p.policyNumber)&&r.stage===stage;});
       if(exists)continue;
       var key=String(p.id||p.policyNumber||"policy").replace(/[^a-zA-Z0-9_-]/g,"_")+"_"+stage.replace(/\s+/g,"_");
@@ -282,7 +292,9 @@
   async function home(){
     var names=["customers","leads","opportunities","policies","renewals","claims","tasks","commissions"];
     var all=await Promise.all(names.map(function(c){return InsurNex.queryDocs(Domain[c]?Domain[c].collection:c);}));
-    var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7]; await syncRenewalAutomation(policies,renewals);
+    var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7];
+    var payments=await InsurNex.queryDocs("payments");
+    await syncRenewalAutomation(policies,renewals);
     var exp=policies.filter(function(p){return InsurNex.isExpiring(p.expiryDate,30);}).length;
     var activePolicies=policies.filter(function(p){return ["Active","active","Renewed"].includes(p.status);}).length;
     var premium=policies.reduce(function(n,p){return n+Number(p.premium||0);},0);
@@ -293,6 +305,18 @@
     var renewed=renewals.filter(function(r){return r.status==="Renewed";}).length;
     var renewalRate=renewals.length?Math.round(renewed/renewals.length*100):0;
     var hot=leads.filter(function(l){return l.priority==="hot";}).length;
+    var paidByPolicy={};
+    payments.forEach(function(p){
+      var key=String(p.policyNumber||"");
+      if(!key||!["paid","partial"].includes(String(p.status||"").toLowerCase()))return;
+      paidByPolicy[key]=(paidByPolicy[key]||0)+Number(p.amount||0);
+    });
+    var outstanding=policies.reduce(function(total,p){
+      var premium=Number(p.premium||0),status=String(p.paymentStatus||"").toLowerCase(),policyNo=String(p.policyNumber||"");
+      if(!premium||status==="paid")return total;
+      if(status==="partial")return total+Math.max(0,premium-(paidByPolicy[policyNo]||0));
+      return total+premium;
+    },0);
     var cross=await crossSellSuggestions(customersRows,policies);
     return '<div class="page-head"><div><div class="eyebrow">InsurNex</div><h1>'+t("dashboard")+'</h1>'+
       '<div class="muted">'+esc(state.profile&&state.profile.name||state.user.email)+' · '+esc(state.workspace.name||t("personalWorkspace"))+
@@ -313,7 +337,7 @@
       '<div class="list-row"><span>'+t("premium")+'</span><strong>'+fmtMoney(premium)+'</strong></div>'+
       '<div class="list-row"><span>'+t("expectedCommission")+'</span><strong>'+fmtMoney(expected)+'</strong></div>'+
       '<div class="list-row"><span>'+t("paidCommission")+'</span><strong>'+fmtMoney(paid)+'</strong></div>'+
-      '<div class="list-row"><span>'+t("outstandingPayments")+'</span><strong>'+fmtMoney(Math.max(0,premium-paid))+'</strong></div></div></div></div>'+
+      '<div class="list-row"><span>'+t("outstandingPayments")+'</span><strong>'+fmtMoney(outstanding)+'</strong></div></div></div></div>'+
       '<div class="grid grid-2" style="margin-top:14px"><div class="card"><div class="page-head"><h3>'+t("renewalRisk")+'</h3></div>'+
       renewalRiskList(policies,renewals)+'</div><div class="card"><div class="page-head"><h3>'+t("crossSell")+'</h3></div>'+
       (cross.length?'<div class="list">'+cross.slice(0,5).map(function(x){return '<div class="list-row"><div><div class="list-title">'+esc(x.customer)+'</div><div class="list-sub">'+esc(x.suggestion)+'</div></div><span class="badge warn">'+t("crossSell")+'</span></div>';}).join("")+
@@ -418,6 +442,22 @@
           '</div>':'<div class="empty">—</div>')+'</div>';}).join("")+'</div>';
   }
 
+  function mobileRecordCards(viewName,rows,def){
+    if(!rows.length)return '<div class="mobile-list"><div class="mobile-empty">'+t("empty")+'</div></div>';
+    return '<div class="mobile-list">'+rows.map(function(r){
+      var status=r.status||"—";
+      var title=r[def.fields[0][0]]||r.customerName||r.policyNumber||"—";
+      var metas=def.fields.slice(1,4).map(function(f){
+        var v=r[f[0]];
+        return v==null||v===""?"":'<span>'+esc(v)+'</span>';
+      }).filter(Boolean).join("");
+      return '<article class="record-card"><div class="record-card-head"><div><div class="record-card-title">'+esc(title)+'</div><div class="record-card-meta">'+metas+'</div></div><span class="badge '+(String(status).toLowerCase().indexOf("active")>=0||["Won","Paid","Approved","Completed","Renewed"].includes(status)?"success":"")+'">'+esc(status)+'</span></div>'+
+        '<div class="record-card-actions">'+(viewName==="customers"?'<button class="btn btn-ghost" data-customer="'+r.id+'">'+t("customer360")+'</button>':'')+
+        '<button class="btn btn-primary" data-edit="'+viewName+':'+r.id+'">'+t("edit")+'</button>'+
+        '<button class="btn btn-danger" data-del="'+viewName+':'+r.id+'">'+t("delete")+'</button></div></article>';
+    }).join("")+'</div>';
+  }
+
   async function records(viewName){
     var def=Domain[viewName];
     if(!def)return '<div class="card empty">'+t("empty")+'</div>';
@@ -435,9 +475,10 @@
     return '<div class="page-head"><div><div class="eyebrow">'+def.icon+' '+localLabel(def.title)+'</div><h1>'+localLabel(def.title)+'</h1></div>'+
       '<div class="actions"><button class="btn btn-primary" data-add="'+viewName+'">'+t("add")+'</button><button class="btn" data-csv="'+viewName+'">CSV</button></div></div>'+
       '<div class="card" style="margin-bottom:14px"><div class="field"><label>'+t("search")+'</label><input id="search" value="'+esc(search)+'"></div></div>'+
-      (rows.length?'<div class="table-wrap"><table class="data-table"><thead><tr>'+head+'<th>'+t("status")+'</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
-      '<div class="section-note" style="margin-top:10px">'+rows.length+' records · '+(state.online?t("online"):t("offline"))+'</div>'+
-      '':'<div class="card empty">'+def.icon+'<br>'+t("empty")+'</div>');
+      (rows.length?'<div class="table-wrap desktop-table"><table class="data-table"><thead><tr>'+head+'<th>'+t("status")+'</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+      '<div class="section-note desktop-table-note" style="margin-top:10px">'+rows.length+' records · '+(state.online?t("online"):t("offline"))+'</div>'+
+      '':'<div class="card empty desktop-table-empty">'+def.icon+'<br>'+t("empty")+'</div>')+
+      mobileRecordCards(viewName,rows,def);
   }
 
   function formHtml(c,row){
