@@ -377,13 +377,14 @@
       '<div class="muted">'+t("customer360")+'</div></div><div class="actions"><button class="btn btn-primary" data-add="customers">'+t("add")+
       '</button><button class="btn" data-csv="customers">CSV</button></div></div>'+
       '<div class="card" style="margin-bottom:14px"><div class="field"><label>'+t("search")+'</label><input id="search" value="'+esc(search)+'" placeholder="'+t("globalSearch")+'"></div></div>'+
-      (rows.length?'<div class="table-wrap"><table class="data-table"><thead><tr><th>'+t("name")+'</th><th>'+t("category")+
+      (rows.length?'<div class="table-wrap desktop-table"><table class="data-table"><thead><tr><th>'+t("name")+'</th><th>'+t("category")+
       '</th><th>'+t("mobile")+'</th><th>'+t("email")+'</th><th>'+t("status")+'</th><th></th></tr></thead><tbody>'+
       rows.map(function(r){return '<tr><td><button class="btn btn-sm" data-customer="'+r.id+'">'+esc(r.fullName||"—")+'</button></td><td>'+esc(r.type||"—")+
       '</td><td>'+esc(r.mobile||"—")+'</td><td>'+esc(r.email||"—")+'</td><td><span class="badge success">'+esc(r.status||"active")+
       '</span></td><td><div class="actions"><button class="btn" data-edit="customers:'+r.id+'">'+t("edit")+
       '</button><button class="btn btn-danger" data-del="customers:'+r.id+'">'+t("delete")+'</button></div></td></tr>';}).join("")+
-      '</tbody></table></div>':'<div class="card empty">👥<br>'+t("empty")+'</div>');
+      '</tbody></table></div>':'<div class="card empty desktop-table-empty">👥<br>'+t("empty")+'</div>')+
+      mobileRecordCards("customers",rows,Domain.customers);
   }
 
   async function customer360(id){
