@@ -1,168 +1,486 @@
-# SecurePath (Wathiqati) — وثيقتي
+# InsurNex
 
-![SecurePath logo](https://github.com/eslamshahin1087-lab/securepath-app/raw/main/icon-512.png)
+**Professional Insurance Broker Management & CRM Platform**
 
-**منصة رقمية للوساطة التأمينية — تدير علاقتك بوثائقك التأمينية وتربطك بوسيطك المرخّص في مكان واحد.**
+InsurNex is a production-oriented insurance broker operations platform for individual brokers, brokerage companies, and company employees. It combines CRM, policy operations, claims, renewals, quoting, documents, tasks, support, analytics, subscriptions, and platform administration.
 
-📱 Progressive Web App (PWA) + Android APK ·
-🔒 مرخّص بالهيئة العامة للرقابة المالية — رقم FRA 38062
+## Applications
 
-> ℹ️ **ملاحظة على الاستضافة:** التطبيق مستضاف حاليًا على GitHub Pages بدون دومين مخصص (لا يوجد ملف `CNAME` في المستودع). الرابط الحي هو رابط GitHub Pages الافتراضي:
-> `https://eslamshahin1087-lab.github.io/securepath-app/`
-> دومين `securepath.app` **غير مملوك** لهذا المشروع (يخص جهة أخرى: securepathinsurance.com)، ولا يجب استخدامه أو الإشارة إليه كرابط رسمي للتطبيق حتى يتم شراء وربط دومين مخصص فعليًا.
+### InsurNex User App
 
----
+Entry point: `user.html`
 
-## نظرة عامة
+Designed for day-to-day broker operations:
 
-**SecurePath (وثيقتي)** هي منصة غير مباشرة لبيع/توليد عملاء التأمين (Indirect-Sale / Lead-Generation)، مُقدَّمة من وسيط تأمين حر مرخّص، **وليست شركة تأمين**. التطبيق يساعد العميل على:
+- Authentication and profile
+- Personal Workspace
+- Organization Workspace
+- Workspace switching
+- Clients
+- Leads and pipeline
+- Policies
+- Quotes
+- Renewals
+- Claims
+- Payments
+- Documents
+- Tasks
+- Calendar/Appointments
+- Notifications
+- Messages and Support
+- Analytics
+- Account management
 
-- متابعة كل وثائقه التأمينية (سارية، قريبة من التجديد) في مكان واحد
-- رفع وتوثيق مستنداته التأمينية
-- تقييم مستوى حمايته التأمينية والحصول على توصيات مخصصة
-- طلب عروض أسعار ومقارنتها بين شركات مختلفة
-- كسب نقاط مقابل سلوكيات تأمينية وصحية وقيادة آمنة (قابلة للاستبدال بخصومات)
-- التواصل المباشر مع وسيطه المرخّص
+### InsurNex Admin
 
-ويوفّر للوسيط (عبر لوحة التحكم) إدارة كاملة للعملاء، الوثائق، العملاء المحتملين (Leads)، المواعيد، الشكاوى، والإعلانات الترويجية لشركات التأمين.
+Entry point: `admin.html`
 
-> ⚖️ **الامتثال القانوني:** التطبيق يعمل كمنصة توعوية/تعريفية وتوليد عملاء محتملين فقط، طبقًا لقانون التأمين الموحد المصري. لا يُصدر التطبيق أي وثيقة تأمين مباشرة، ولا يُعتبر بديلاً عن شركة التأمين المرخّصة.
+A separate administrative application with its own authorization boundary:
 
----
+- Platform dashboard
+- Users
+- Organizations
+- Brokers and profiles
+- Clients
+- Leads
+- Policies
+- Quotes
+- Renewals
+- Claims
+- Support tickets
+- Knowledge Base
+- Announcements
+- Subscriptions
+- Invoices
+- Audit Logs
+- System Settings
 
-## ⚡ لمحة سريعة (Quick Facts)
+Admin access is based on a Firebase Authentication custom claim named `platformRole` with either `superAdmin` or `platformAdmin`.
 
-|                       |                                                                 |
-| --------------------- | --------------------------------------------------------------- |
-| **النوع**             | Progressive Web App (PWA) — بدون إطار عمل (Vanilla JS/HTML/CSS) |
-| **قاعدة البيانات**    | Firebase Firestore مع قواعد وصول، وSecurePath Worker كمالك للعمليات الحساسة |
-| **المصادقة**          | Firebase Authentication (بريد إلكتروني/كلمة مرور)               |
-| **تخزين المستندات**   | Cloudinary عبر توقيع server-side من SecurePath Worker |
-| **الاستضافة**        | GitHub Pages للواجهة/PWA، مع SecurePath Worker كطبقة API موثوقة |
-| **النشر على أندرويد** | APK مبني من الـ PWA — يُوزَّع عبر GitHub Releases (غير متتبَّع في المستودع نفسه) |
-| **اللغة**             | عربي (افتراضي، RTL) / إنجليزي — تبديل فوري داخل التطبيق         |
+## Architecture
 
----
-
-## 🗂️ هيكل المشروع
-
-```
-securepath-app/
-├── wathiqati-app.html               # تطبيق العميل (SPA كامل - HTML/CSS/JS في ملف واحد)
-├── securepath-admin.html            # لوحة تحكم الوسيط/الأدمن
-├── index.html                       # صفحة الهبوط التسويقية (landing page)
-├── manifest.json                    # إعداد الـ PWA (اسم، أيقونات، ألوان)
-├── sw.js                            # Service Worker (كاش + عمل أوفلاين)
-├── securepath-firebase-migration.js # سكربت Node.js لإدارة حسابات اختبار/أدمن عبر Firebase Admin SDK
-├── firebase.json                    # إعداد Firestore (rules + indexes فقط - الاستضافة عبر GitHub Pages)
-├── firestore.rules / firestore.indexes.json
-├── functions/                       # Cloud Functions (مسار ترقية مستقبلي لـ Blaze - غير مُفعّل حاليًا)
-├── .well-known/                     # ملفات تحقق/ربط (Digital Asset Links لأندرويد، إلخ)
-└── icon-192.png / icon-512.png / icon-512-maskable.png / apple-touch-icon.png
-```
-
-> ملاحظة: ملفات الـ APK (`SecurePath.apk` / `SecurePath-Production.apk`) غير متتبَّعة في المستودع - يتم توزيعها عبر GitHub Releases بدلاً من ذلك.
-
-> ملاحظة: لا يوجد ملف `CNAME` في المستودع حاليًا، وبالتالي لا يوجد دومين مخصص مربوط بالـ Pages في الوقت الحالي.
-
----
-
-## ✨ الميزات الرئيسية
-
-### تطبيق العميل (`wathiqati-app.html`)
-
-- تسجيل دخول/تسجيل حساب جديد + **توثيق إلزامي للبريد الإلكتروني** (مع استثناء حسابات تجريبية عبر دومين مضبوط مسبقًا)
-- عرض ومتابعة الوثائق التأمينية (سارية / قريبة من التجديد)
-- رفع وتوثيق المستندات (صور/PDF) عبر Cloudinary
-- **تقييم الحماية الشاملة** — نقاط قوة/ضعف التغطية التأمينية للعميل
-- **نظام نقاط الأمان (InsuraPoints)** — نقاط مقابل:
-  * سلوكيات تأمينية (تقييم الحماية، رفع مستندات، تنويع التغطية، التجديد المبكر، دعوة صديق)
-  * عادات صحية يومية (مشي، جري، أكل صحي) بمكافآت تتابع (streak)
-  * القيادة الآمنة — تسجيل يدوي يومي **+ رحلة بتتبع GPS حي** تراقب الالتزام بحد السرعة (مدينة/طريق رئيسي/طريق سريع) وتمنح نقاطًا عند الالتزام
-  * استبدال النقاط بخصم يصل حتى 15% على طلب عرض السعر التالي
-- مقارنة عروض التأمين بين الشركات
-- صفحة **نصائح تأمينية** تثقيفية
-- برنامج إحالة (روابط دعوة أصدقاء + إحالة عروض)
-- إعلانات شركات التأمين (تُدار من لوحة التحكم)
-- طلب مواعيد استشارة، وتقديم شكاوى
-- محادثة مباشرة مع الوسيط + زر واتساب عائم
-- دعم كامل للغتين عربي/إنجليزي مع RTL/LTR ديناميكي
-- عمل أوفلاين جزئي عبر Service Worker
-
-### لوحة التحكم (`securepath-admin.html`)
-
-- إدارة العملاء، الوثائق (بمتابعة حية Real-time)، المنتجات، العروض
-- لوحة **العملاء المحتملين (Leads)** مع إحصاءات ومصدر كل عميل محتمل
-- إدارة **المواعيد** و**الشكاوى** (حالة، فلترة، شارات غير مقروء)
-- إدارة **إعلانات شركات التأمين** المعروضة للعملاء
-- إعدادات الوسيط (الاسم، رقم الترخيص، رقم واتساب) — تُغذّي تلقائيًا الإفصاح القانوني في تطبيق العميل
-
----
-
-## 🔧 الإعداد والتشغيل
-
-### المتطلبات
-
-- مشروع Firebase (خطة Spark المجانية كافية) مفعّل عليه: **Authentication** (بريد/كلمة مرور) و**Firestore**
-- حساب Cloudinary (لرفع المستندات دون الحاجة لترقية Firebase لخطة Blaze) مع Upload Preset غير موقّع (Unsigned)
-
-### خطوات التشغيل محليًا
-
-هذا المشروع بدون build step — ملفات HTML/JS/CSS مباشرة:
+The existing lightweight PWA approach is intentionally preserved. The business model is rebuilt around InsurNex and the previous monolithic pages are split into reusable layers.
 
 ```
-git clone https://github.com/eslamshahin1087-lab/securepath-app.git
-cd securepath-app
-# أي خادم استاتيك بسيط، مثال:
+InsurNex/
+├── user.html
+├── admin.html
+├── index.html
+├── js/
+│   ├── config.js
+│   ├── core.js
+│   ├── user.js
+│   └── admin.js
+├── css/
+│   └── app.css
+├── assets/
+│   ├── logo.svg
+│   └── icon.svg
+├── firestore.rules
+├── firestore.indexes.json
+├── storage.rules
+├── firebase.json
+├── manifest.json
+├── sw.js
+├── scripts/
+│   ├── smoke-test.cjs
+│   └── set-admin-claims.cjs
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── MIGRATION.md
+└── .github/workflows/ci.yml
+```
+
+## Technology Stack
+
+- HTML5
+- CSS
+- Vanilla JavaScript
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage
+- Firebase Hosting
+- Progressive Web App
+- GitHub Actions
+
+## Authentication
+
+InsurNex uses Firebase Authentication with:
+
+- Registration
+- Login
+- Logout
+- Password reset
+- Local session persistence
+- Email verification request
+- Profile storage in Firestore
+
+Supported account types:
+
+- Individual Broker
+- Brokerage Company
+- Company Employee
+
+## Workspace Architecture
+
+Every operational record is explicitly scoped.
+
+### Personal Workspace
+
+```
+workspaceType: "personal"
+ownerId: <auth uid>
+organizationId: null
+```
+
+### Organization Workspace
+
+```
+workspaceType: "organization"
+organizationId: <organization id>
+ownerId: <record creator uid>
+```
+
+Organization membership is stored in `organizationMembers` using:
+
+```
+<organizationId>_<userId>
+```
+
+This model enables organization isolation and workspace switching without mixing personal and company records.
+
+## Roles
+
+The platform role vocabulary is:
+
+- superAdmin
+- platformAdmin
+- organizationOwner
+- organizationAdmin
+- broker
+- salesAgent
+- customerService
+- operations
+- claimsOfficer
+- finance
+- manager
+- viewer
+
+Role enforcement is applied at:
+
+1. User interface visibility.
+2. Navigation.
+3. Service behavior.
+4. Firestore Security Rules.
+5. Admin custom claims.
+
+## Firebase Services
+
+### Authentication
+
+Firebase Authentication provides identity and session management.
+
+### Firestore
+
+Firestore is the main application database. Core collections include:
+
+`users`, `organizations`, `organizationMembers`, `brokerProfiles`, `clients`, `leads`, `policies`, `policyDocuments`, `quotes`, `quoteRequests`, `insurers`, `insuranceProducts`, `renewals`, `claims`, `payments`, `tasks`, `appointments`, `activities`, `notes`, `messages`, `notifications`, `conversations`, `subscriptions`, `invoices`, `reports`, `analytics`, `auditLogs`, `supportTickets`, `knowledgeBase`, `settings`.
+
+### Storage
+
+Documents are stored under workspace-scoped paths:
+
+```
+documents/<userId>/<file>
+documents/<organizationId>/<file>
+```
+
+The Storage rules prevent cross-workspace access and limit normal uploads to 10 MB.
+
+### Notifications
+
+Notifications are stored in `notifications` and are recipient-scoped. Push delivery can be added later through Firebase Cloud Messaging without changing the authorization model.
+
+## CRM
+
+### Clients
+
+Supports individual and corporate client records.
+
+### Leads
+
+Pipeline stages:
+
+```
+New
+Contacted
+Qualified
+Proposal
+Negotiation
+Won
+Lost
+```
+
+## Policies
+
+A policy can include:
+
+- Policy number
+- Client
+- Insurer
+- Product
+- Start date
+- Expiry date
+- Premium
+- Commission
+- Status
+- Related documents
+
+## Renewals
+
+Renewal workflows support the required checkpoints:
+
+```
+90 Days
+60 Days
+45 Days
+30 Days
+15 Days
+7 Days
+1 Day
+```
+
+The operational model can connect renewal records to tasks and notifications.
+
+## Claims
+
+Claim status vocabulary:
+
+```
+New
+Submitted
+Under Review
+Additional Documents
+Approved
+Rejected
+Paid
+Closed
+```
+
+## Quotes
+
+Quotes track:
+
+- Client
+- Insurer
+- Product
+- Premium
+- Validity
+- Status
+- Follow-up actions
+
+## Tasks & Calendar
+
+Tasks and appointments cover follow-ups, meetings, renewals, and operational actions.
+
+## Support Center
+
+Support tickets use:
+
+```
+Open
+In Progress
+Waiting for User
+Resolved
+Closed
+```
+
+## Knowledge Base
+
+The Admin application manages articles and guides through the `knowledgeBase` collection.
+
+## Analytics
+
+The current User App calculates bounded operational metrics including:
+
+- Lead conversion
+- Policy count
+- Premium
+- Commission
+- Renewal count
+- Claim count
+- Open claim amount
+
+The data model leaves room for broader sales, client, renewal, and claims analytics.
+
+## Security
+
+The UI is not the security boundary.
+
+Firestore rules enforce:
+
+- Authenticated access
+- Personal ownership
+- Organization membership
+- Organization role permissions
+- Platform admin custom claims
+- Recipient-scoped notifications
+- Audit creation
+- Deny-by-default fallback
+
+Storage rules enforce the same workspace isolation model.
+
+## Audit Logs
+
+Sensitive operations are recorded in `auditLogs` with:
+
+- Actor ID
+- Actor email
+- Organization ID when applicable
+- Action
+- Target type
+- Target ID
+- Timestamp
+- Optional metadata
+
+## Localization
+
+Arabic is the default language:
+
+- RTL
+- Arabic UI strings
+
+English is supported:
+
+- LTR
+- English UI strings
+
+Strings are centralized in the shared application core.
+
+## Performance
+
+The application is designed for a free-tier Firebase deployment where practical:
+
+- Bounded Firestore queries
+- Workspace filters
+- Limited listener scope
+- No unbounded collection loads in the User App
+- Lazy document upload operations
+- Minimal compound indexes
+- PWA caching for the application shell
+
+## Environment Variables
+
+`.env.example` documents deployment-time variables.
+
+Do not commit:
+
+- Service account JSON files
+- `.env`
+- Production secrets
+
+The browser Firebase configuration is intentionally public client configuration. Authorization must always be enforced by Firebase Security Rules and Auth claims.
+
+## Local Development
+
+Serve the repository with any static HTTP server.
+
+Example:
+
+```bash
+git clone https://github.com/eslamshahin1087-lab/InsurNex.git
+cd InsurNex
 npx serve .
-# أو
-python3 -m http.server 8080
 ```
 
-ثم افتح `wathiqati-app.html` (تطبيق العميل) أو `securepath-admin.html` (لوحة التحكم) على المتصفح.
+Then open:
 
-### إعداد Firebase
+- `http://localhost:3000/`
+- `http://localhost:3000/user.html`
+- `http://localhost:3000/admin.html`
 
-في كلا الملفين (`wathiqati-app.html` و`securepath-admin.html`) داخل الكود، حدّث كائن `firebaseConfig` ببيانات مشروعك:
+Use a real hosted Firebase project for Authentication/Firestore/Storage integration.
 
+## Firebase Setup
+
+1. Create or select a Firebase project.
+2. Enable Email/Password authentication.
+3. Enable Firestore.
+4. Enable Storage.
+5. Configure the project values in `js/config.js` or generate that file during deployment.
+6. Deploy rules and indexes.
+7. Configure Firebase Hosting if the hosted PWA surface is required.
+
+Deploy rules with:
+
+```bash
+firebase deploy --only firestore:rules,storage
 ```
-apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId
+
+Deploy Hosting with:
+
+```bash
+firebase deploy --only hosting
 ```
 
-> ملاحظة أمنية: ظهور `apiKey` داخل كود العميل أمر طبيعي ومتوقع في تطبيقات Firebase من جهة العميل — الحماية الفعلية تكون عبر **Firestore Security Rules**، وليس عبر إخفاء المفتاح.
+## Platform Admin Setup
 
-### إعداد Cloudinary
+Never set platform roles from the browser.
 
-حدّث اسم الـ Cloud Name واسم الـ Upload Preset في دوال رفع المستندات داخل `wathiqati-app.html` و`securepath-admin.html` (البحث عن `cloudinary`).
+Use the server-side utility:
 
-### مجموعات Firestore المستخدمة
-
-```
-clients · policies · documents · products · offers · leads · appointments
-complaints · companyAds · pointsLog · notifications · settings · admin
-insuranceAssessments · insuranceTypes · claims · renewals
-payments · messages · activity · companies · users
+```bash
+export FIREBASE_SERVICE_ACCOUNT_JSON='{"project_id":"..."}'
+node scripts/set-admin-claims.cjs --uid <firebase-auth-uid> --role platformAdmin
 ```
 
----
+The custom claim is then refreshed by the Auth session.
 
-## 🔐 الأمان والتوثيق
+## Testing
 
-- **توثيق البريد الإلكتروني إلزامي** لتسجيل الدخول (`user.emailVerified`)، إلا للحسابات على دومين مستثنى صراحة عبر `VERIFICATION_EXEMPT_DOMAINS` داخل `wathiqati-app.html` — **يُستخدم فقط لدومينات تملكها بالكامل**.
-- سكربت `securepath-firebase-migration.js` هو الطريقة **الأكثر أمانًا** لتفعيل حسابات اختبار: يستخدم Firebase Admin SDK لتحديد حسابات بعينها (بالبريد/UID صراحة) وتعيين `emailVerified = true` عبر Custom Claims من جهة السيرفر — **بدون** الاعتماد على الدومين وحده كإثبات ملكية. يُفضَّل الانتقال التدريجي لهذه الطريقة بدلًا من الاستثناء بالدومين على العميل إن أمكن.
-- لا تضع ملف `service-account.json` الخاص بـ Firebase Admin في المستودع أبدًا — مرره عبر متغير بيئة `FIREBASE_SERVICE_ACCOUNT_JSON`.
-- **Firestore Security Rules** مُدارة داخل هذا المستودع (`firestore.rules`) وتُنشر عبر `firebase deploy --only firestore:rules` — تأكد أن أي تعديل على مجموعة بيانات جديدة (collection) في الكود مصحوب بقاعدة مطابقة هنا.
+Repository smoke test:
 
----
+```bash
+node scripts/smoke-test.cjs
+```
 
-## 🚀 النشر
+The smoke test verifies:
 
-- **الويب:** يُنشر تلقائيًا عبر GitHub Pages على الرابط الافتراضي `https://eslamshahin1087-lab.github.io/securepath-app/` — بدون دومين مخصص حاليًا.
-- **أندرويد:** يُبنى APK من الـ PWA ويُوزَّع عبر [GitHub Releases](https://github.com/eslamshahin1087-lab/securepath-app/releases) لهذا المستودع (غير متتبَّع كملف داخل الكود)، مع نشر بصمة SHA-256 لكل إصدار مع الـ Release نفسه.
+- required files exist
+- expected application entry points exist
+- no forbidden legacy files remain
+- no forbidden legacy references remain
+- manifest identity is InsurNex
+- Firebase configuration includes Firestore, Storage, and Hosting
 
----
+GitHub Actions runs the smoke test and JavaScript syntax checks on push and pull request.
 
-## 📄 الترخيص والامتثال
+## Deployment
 
-هذا التطبيق مقدَّم من وسيط تأمين حر **مرخّص من الهيئة العامة للرقابة المالية المصرية** — رقم الترخيص **FRA 38062** — كمنصة وساطة غير مباشرة (توليد عملاء محتملين) طبقًا لقانون التأمين الموحد. جميع طلبات عروض الأسعار تمر عبر نموذج/تواصل مباشر مع الوسيط، ولا يُصدر التطبيق أي وثيقة تأمين مباشرة.
-`firestore.rules`** قبل النشر.
+Recommended production order:
+
+1. Configure Firebase.
+2. Deploy Firestore rules.
+3. Deploy Storage rules.
+4. Verify the first platform admin claim.
+5. Deploy Hosting.
+6. Open `user.html` and complete a real registration.
+7. Create a personal or organization workspace.
+8. Create test CRM records.
+9. Upload a document.
+10. Verify that a second organization cannot read the first organization's data.
+11. Test Admin authorization.
+12. Review audit logs.
+
+## Security Model
+
+The security model follows least privilege. Organization A must not read or modify Organization B records, even if a user manipulates UI state or directly calls Firestore from the browser.
+
+## Documentation
+
+- `docs/ARCHITECTURE.md` — runtime and data architecture.
+- `docs/MIGRATION.md` — what was retained, rebuilt, and removed.
+
+## Repository Identity
+
+The repository is intended to be entirely InsurNex-facing at runtime and in its documentation, configuration, tests, routes, assets, and deployment metadata.
