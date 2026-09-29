@@ -3,9 +3,11 @@
   if (!firebaseConfig?.projectId) throw new Error("InsurNex Firebase configuration is missing.");
   if (!window.firebase?.apps?.length) firebase.initializeApp(firebaseConfig);
 
+  if (firebase.app().options.projectId !== "insurnex-8a9df") throw new Error("InsurNex is configured for the wrong Firebase project.");
   const auth = firebase.auth();
   const db = firebase.firestore();
   const storage = firebase.storage();
+  const firebaseProject = firebase.app().options.projectId;
 
   const I18N = {
     ar: {
@@ -379,6 +381,6 @@
 
   window.InsurNex={
     auth,db,storage,state,I18N,Domain,ROLES,ROLE_LABELS,t,setLanguage,locale,esc,fmtDate,fmtMoney,toast,friendlyError,
-    roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring
+    roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring,firebaseProject
   };
 })();
