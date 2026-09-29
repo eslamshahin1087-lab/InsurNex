@@ -30,6 +30,7 @@ jobs:
           node --check js/config.js
           node --check js/core.js
           node --check js/user.js
-          node --check js/admin.js
+          node --check js/admin-app.js
+          node --check scripts/migrate-legacy-data.cjs
       - name: Validate Firebase rules
         run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "node -e \"console.log('Firestore rules loaded')\""
