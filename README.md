@@ -8,7 +8,7 @@ InsurNex is a production-oriented insurance broker operations platform for indiv
 
 ### InsurNex User App
 
-Entry point: `user.html`
+Entry point: `InsurNex-User.html`
 
 Designed for day-to-day broker operations:
 
@@ -33,7 +33,7 @@ Designed for day-to-day broker operations:
 
 ### InsurNex Admin
 
-Entry point: `admin.html`
+Entry point: `InsurNex-admin.html`
 
 A separate administrative application with its own authorization boundary:
 
@@ -63,6 +63,8 @@ The existing lightweight PWA approach is intentionally preserved. The business m
 
 ```
 InsurNex/
+├── InsurNex-User.html
+├── InsurNex-admin.html
 ├── user.html
 ├── admin.html
 ├── index.html
@@ -396,8 +398,10 @@ npx serve .
 Then open:
 
 - `http://localhost:3000/`
-- `http://localhost:3000/user.html`
-- `http://localhost:3000/admin.html`
+- `http://localhost:3000/InsurNex-User.html`
+- `http://localhost:3000/InsurNex-admin.html`
+- `http://localhost:3000/user.html` (compatibility)
+- `http://localhost:3000/admin.html` (compatibility)
 
 Use a real hosted Firebase project for Authentication/Firestore/Storage integration.
 
