@@ -26,3 +26,5 @@ jobs:
           node --check js/core.js
           node --check js/user.js
           node --check js/admin.js
+      - name: Validate Firebase rules
+        run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "node -e \"console.log('Firestore rules loaded')\""
