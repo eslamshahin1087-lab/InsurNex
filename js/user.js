@@ -6,7 +6,7 @@
   var nav=[
     ["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["opportunities","opportunities","💼"],
     ["quotations","quotations","📑"],["policies","policies","🛡️"],["renewals","renewals","🔄"],["claims","claims","🧾"],
-    ["tasks","tasks","✅"],["calendarEvents","calendar","📅"],["documents","documents","📎"],["insurers","insurers","🏢"],
+    ["tasks","tasks","✅"],["payments","payments","💳"],["calendarEvents","calendar","📅"],["documents","documents","📎"],["insurers","insurers","🏢"],
     ["insuranceProducts","insuranceProducts","📦"],["commissions","commissions","💰"],["communications","communications","💬"],
     ["reports","reports","📈"],["analytics","analytics","📊"],["team","team","👨‍👩‍👧‍👦"],["notifications","notifications","🔔"],
     ["subscriptions","subscriptions","💳"],["supportTickets","support","🎧"],["account","account","⚙️"]
@@ -259,10 +259,30 @@
     }
   }
 
+  async function syncRenewalAutomation(policies,existingRenewals){
+    var thresholds={90:"90 Days",60:"60 Days",45:"45 Days",30:"30 Days",15:"15 Days",7:"7 Days",1:"Expired"};
+    var current=existingRenewals||[];
+    for(var i=0;i<policies.length;i++){
+      var p=policies[i],expiry=p.expiryDate?new Date(p.expiryDate):null;
+      if(!expiry||Number.isNaN(expiry.getTime()))continue;
+      var days=Math.round((expiry.getTime()-Date.now())/86400000),stage=thresholds[Math.max(1,days)]||thresholds[days];
+      if(!stage||days<0||days>90)continue;
+      var exists=current.some(function(r){return (r.policyId===p.id||r.policyNumber===p.policyNumber)&&r.stage===stage;});
+      if(exists)continue;
+      var key=String(p.id||p.policyNumber||"policy").replace(/[^a-zA-Z0-9_-]/g,"_")+"_"+stage.replace(/\s+/g,"_");
+      var renewalData=InsurNex.docPayload({policyId:p.id,policyNumber:p.policyNumber||"",customerId:p.customerId||null,customerName:p.customerName||"",expiryDate:p.expiryDate,stage:stage,status:"Open",assignedBrokerName:state.profile?.name||""});
+      await db.collection("renewals").doc(key).set(renewalData,{merge:true});
+      await db.collection("tasks").doc(key+"_task").set(InsurNex.docPayload({title:"Renew "+(p.policyNumber||"policy"),description:"Policy expires in "+days+" days.",dueDate:p.expiryDate,priority:days<=15?"high":"medium",status:"To Do",linkedEntityType:"renewal",linkedEntityId:key}),{merge:true});
+      await db.collection("notifications").doc(key+"_notification").set({recipientId:state.user.uid,title:"Renewal reminder",body:"Policy "+(p.policyNumber||"")+" reaches "+stage+" reminder stage.",type:"renewal",organizationId:state.workspace.type==="organization"?state.workspace.id:null,createdAt:firebase.firestore.FieldValue.serverTimestamp(),read:false},{merge:true});
+      current.push({...renewalData,stage});
+    }
+    state.cache.clear();
+  }
+
   async function home(){
     var names=["customers","leads","opportunities","policies","renewals","claims","tasks","commissions"];
     var all=await Promise.all(names.map(function(c){return InsurNex.queryDocs(Domain[c]?Domain[c].collection:c);}));
-    var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7];
+    var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7]; await syncRenewalAutomation(policies,renewals);
     var exp=policies.filter(function(p){return InsurNex.isExpiring(p.expiryDate,30);}).length;
     var activePolicies=policies.filter(function(p){return ["Active","active","Renewed"].includes(p.status);}).length;
     var premium=policies.reduce(function(n,p){return n+Number(p.premium||0);},0);
