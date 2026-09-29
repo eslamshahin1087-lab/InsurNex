@@ -2,30 +2,30 @@
 
 ## Product
 
-InsurNex is a Professional Insurance Broker Management & CRM Platform for individual brokers and brokerage companies.
+InsurNex is a Professional Insurance Broker Management & CRM Platform for individual brokers, brokerage companies, managers, sales agents and brokerage operations teams.
 
 ## Runtime architecture
 
-- User App: `user.html` + `js/user.js`
-- Admin App: `admin.html` + `js/admin.js`
-- Shared frontend: `js/core.js`, `css/app.css`
+- User App: `InsurNex-User.html` + `js/user.js`
+- Admin App: `InsurNex-admin.html` + `js/admin-app.js`
+- Shared frontend: `js/core.js` + `css/app.css`
 - Firebase: Authentication, Firestore, Storage
 - PWA: `manifest.json` + `sw.js`
 - Hosting: Firebase Hosting configuration in `firebase.json`
 
-The repository stays framework-light because the existing foundation was a static PWA. The business model and data layer are rebuilt around InsurNex while keeping the reusable browser/PWA approach.
+The repository remains framework-light because the original foundation is a static PWA. Reusable mobile/navigation patterns were retained while the business model and workflows were rebuilt around insurance broker operations.
 
 ## Workspace model
 
-A user can operate a personal workspace or an organization workspace.
-
 Personal records carry:
-- `workspaceType = "personal"`
+
+- `workspaceType = personal`
 - `ownerId = auth.uid`
 - `organizationId = null`
 
 Organization records carry:
-- `workspaceType = "organization"`
+
+- `workspaceType = organization`
 - `organizationId`
 - `ownerId` for the record creator
 
@@ -33,10 +33,11 @@ Membership is stored in `organizationMembers` using the deterministic document I
 
 ## Roles
 
-The supported role vocabulary is:
-
+Platform roles:
 - superAdmin
 - platformAdmin
+
+Organization roles:
 - organizationOwner
 - organizationAdmin
 - broker
@@ -48,69 +49,49 @@ The supported role vocabulary is:
 - manager
 - viewer
 
-Platform roles are enforced with Firebase Auth custom claims. Organization roles are enforced through membership documents and Firestore rules.
+Additional account types are represented in user profiles: individual_broker, brokerage_company, broker_employee, manager and customer.
+
+UI role checks are implemented in `js/core.js`; Firestore/Storage rules remain the final security boundary.
 
 ## Core domains
 
-- Authentication and profiles
-- Organizations and membership
-- CRM: clients and leads
+- Authentication and onboarding
+- CRM and Customer 360
+- Leads and pipeline
+- Opportunities
+- Quotations
 - Policies
-- Quotes and quote requests
-- Renewals
+- Renewals and renewal automation
 - Claims
+- Tasks and calendar events
 - Payments
+- Commissions
 - Documents
-- Tasks and appointments
-- Notifications
-- Messages and conversations
-- Support tickets
-- Knowledge base
-- Analytics and reports
-- Subscriptions and invoices
-- Audit logs
-- Settings
 - Insurers and insurance products
+- Communications
+- Notifications
+- Reports and analytics
+- Teams
+- Subscriptions and plans
+- Support and Knowledge Base
+- Announcements
+- Audit Logs
+- Settings
 
 ## Firestore collections
 
-The production schema is organized around:
+Production broker collections include:
 
-`users`, `organizations`, `organizationMembers`, `brokerProfiles`, `clients`, `leads`, `policies`, `quotes`, `quoteRequests`, `insurers`, `insuranceProducts`, `renewals`, `claims`, `payments`, `tasks`, `appointments`, `activities`, `notes`, `documents`, `messages`, `notifications`, `conversations`, `subscriptions`, `invoices`, `reports`, `analytics`, `auditLogs`, `supportTickets`, `knowledgeBase`, `announcements`, `settings`.
+`users`, `organizations`, `organizationMembers`, `brokerProfiles`, `customers`, `leads`, `opportunities`, `quotations`, `policies`, `renewals`, `claims`, `payments`, `tasks`, `calendarEvents`, `documents`, `insurers`, `insuranceProducts`, `commissions`, `communications`, `notifications`, `activities`, `notes`, `messages`, `conversations`, `teams`, `subscriptions`, `invoices`, `reports`, `analytics`, `supportTickets`, `knowledgeBase`, `announcements`, `plans`, `auditLogs`, `settings`.
+
+Compatibility collections such as `clients`, `quotes`, `appointments`, `products` and `messages` remain available where existing data may require migration.
 
 ## Security
 
-The UI is not treated as a security boundary. Firestore rules enforce:
+Security rules enforce authentication, workspace ownership, organization membership, organization roles, platform custom claims, recipient-scoped notifications, audit creation and default deny.
 
-1. Authentication.
-2. Personal ownership.
-3. Organization membership.
-4. Role-based writes.
-5. Platform administration through custom claims.
-6. Append-only audit creation for authenticated actors.
-7. Recipient-scoped notifications.
-8. Deny-by-default fallback rules.
+Storage rules enforce user/organization workspace isolation and a 10 MB upload limit.
 
-Storage rules mirror the workspace isolation model and restrict ordinary uploads to 10 MB.
+## Migration
 
-## Performance
-
-The browser uses bounded queries and workspace filters. The core query helper limits normal collection reads to 50 records per call. Indexes are added only where the application performs compound queries.
-
-## Localization
-
-The shared core exposes Arabic RTL and English LTR strings through one localization object. UI copy is centralized instead of being duplicated across business components.
-
-## Admin
-
-Admin is a separate route/application surface. It does not rely on hiding User App UI. Access is rejected unless Firebase Auth exposes a valid `platformRole` custom claim.
-
-## Extension path
-
-Future modules can be added by:
-1. Defining the Firestore contract.
-2. Adding role-aware rules.
-3. Registering a domain definition.
-4. Adding the User/Admin workflow.
-5. Adding indexes only when a query requires them.
-6. Adding tests and audit events.
+`scripts/migrate-legacy-data.cjs` is a non-destructive migration bridge. It maps compatible legacy collections into broker-first collections without deleting source records.
