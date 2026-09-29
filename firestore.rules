@@ -178,7 +178,10 @@ service cloud.firestore {
 
     match /subscriptions/{id} {
       allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
-      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager']);
+      allow create: if isPlatformAdmin() || (
+        request.resource.data.workspaceType == 'organization'
+        && createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager'])
+      );
       allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager']);
     }
 
