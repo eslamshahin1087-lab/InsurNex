@@ -34,44 +34,61 @@
 
   function authPage(mode,error){
     var login=mode==="login";
-    document.getElementById("app").innerHTML=
-      '<main class="auth-wrap"><section class="auth-card"><div class="auth-logo">'+mark()+
-      '<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(t("tagline"))+
-      '</div></div></div><div class="login-split"><div><div class="eyebrow">InsurTech CRM</div><h1 class="auth-title">'+
-      (login?t("login"):t("register"))+'</h1><p class="auth-copy">'+esc(t("tagline"))+'</p>'+
-      (error?'<div class="error-box">'+esc(error)+'</div>':'')+
-      '<form id="authForm" class="form-stack">'+
-      (!login?
-        '<div class="form-grid"><div class="field"><label>'+t("name")+'</label><input name="name" required></div>'+
-        '<div class="field"><label>'+t("mobile")+'</label><input name="mobile" required></div></div>'+
-        '<div class="form-grid"><div class="field"><label>'+t("country")+'</label><input name="country" value="Egypt"></div>'+
-        '<div class="field"><label>'+t("city")+'</label><input name="city"></div></div>':'')+
-      '<div class="field"><label>'+t("email")+'</label><input type="email" name="email" autocomplete="email" required></div>'+
-      '<div class="form-grid"><div class="field"><label>'+t("password")+'</label><input type="password" name="password" minlength="6" autocomplete="'+
-      (login?"current-password":"new-password")+'" required></div>'+
-      (!login?'<div class="field"><label>'+t("confirmPassword")+'</label><input type="password" name="confirmPassword" minlength="6" autocomplete="new-password" required></div>':'')+
-      '</div>'+
-      (!login?'<div class="field"><label>'+t("accountType")+'</label><select id="accountType" name="accountType">'+accountTypeOptions()+'</select></div>'+
-      '<div id="companyFields" class="card" style="display:none;padding:12px">'+
-      '<div class="eyebrow">'+t("companyInfo")+'</div><div class="form-grid">'+
-      '<div class="field"><label>'+t("legalName")+'</label><input name="legalName"></div>'+
+    var logo='<div class="auth-logo-mark"><img src="assets/logo.svg" alt="InsurNex" loading="eager" decoding="async"></div>';
+    var companyFields=!login?(
+      '<section id="companyFields" class="auth-company" style="display:none">'+
+      '<div class="auth-section-label">'+t("companyInfo")+'</div>'+
+      '<div class="form-grid">'+
+      '<div class="field"><label>'+t("legalName")+'</label><input name="legalName" autocomplete="organization"></div>'+
       '<div class="field"><label>'+t("registrationNumber")+'</label><input name="registrationNumber"></div>'+
       '<div class="field"><label>'+t("brokerLicense")+'</label><input name="companyLicense"></div>'+
       '<div class="field"><label>'+t("employees")+'</label><input name="employees" type="number" min="1"></div>'+
-      '<div class="field" style="grid-column:1/-1"><label>'+t("address")+'</label><input name="companyAddress"></div>'+
-      '<div class="field"><label>'+t("website")+'</label><input name="website"></div>'+
+      '<div class="field field-full"><label>'+t("address")+'</label><input name="companyAddress" autocomplete="street-address"></div>'+
+      '<div class="field"><label>'+t("website")+'</label><input name="website" type="url"></div>'+
       '<div class="field"><label>'+t("specialization")+'</label><input name="specialization"></div>'+
-      '</div></div>'+
-      '<div class="checkbox"><input type="checkbox" name="terms" required><span>أوافق على شروط الاستخدام وسياسة الخصوصية.</span></div>':'')+
-      '<button class="btn btn-primary">'+(login?t("login"):t("register"))+'</button></form></div>'+
-      '<div class="card"><div class="eyebrow">InsurNex</div><h3>'+t("professionalInfo")+'</h3>'+
-      '<div class="list"><div class="list-row"><span>'+t("customers")+'</span><strong>CRM 360°</strong></div>'+
-      '<div class="list-row"><span>'+t("policies")+'</span><strong>Lifecycle</strong></div>'+
-      '<div class="list-row"><span>'+t("renewals")+'</span><strong>Automation-ready</strong></div>'+
-      '<div class="list-row"><span>'+t("commissions")+'</span><strong>Production</strong></div></div>'+
-      '<div class="actions" style="margin-top:14px"><button class="btn" id="switchAuth">'+(login?t("register"):t("login"))+
-      '</button><button class="btn" id="lang">'+(InsurNex.locale()==="ar"?"English":"العربية")+'</button>'+
-      (login?'<button class="btn" id="forgot">'+t("forgotPassword")+'</button>':'')+'</div></div></div></section></main>';
+      '</div></section>'
+    ):'';
+
+    document.getElementById("app").innerHTML=
+      '<main class="auth-wrap"><section class="auth-card auth-card-pro">'+
+      '<div class="auth-top">'+
+        '<div class="auth-brand">'+logo+'<div class="auth-brand-copy"><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(t("tagline"))+'</div></div></div>'+
+        '<div class="auth-language"><button id="lang" type="button" class="auth-icon-btn">'+(InsurNex.locale()==="ar"?"EN":"ع")+'</button></div>'+
+      '</div>'+
+      '<div class="auth-divider"></div>'+
+      '<div class="auth-intro">'+
+        '<div class="eyebrow">INSURTECH BROKER OS</div>'+
+        '<h1 class="auth-title">'+(login?t("login"):t("register"))+'</h1>'+
+        '<p class="auth-copy">إدارة العملاء، الوثائق، عروض الأسعار، التجديدات والمطالبات من مساحة عمل واحدة.</p>'+
+      '</div>'+
+      (error?'<div class="error-box auth-error">'+esc(error)+'</div>':'')+
+      '<form id="authForm" class="form-stack auth-form">'+
+      (!login?
+        '<div class="form-grid">'+
+          '<div class="field"><label>'+t("name")+'</label><input name="name" autocomplete="name" required></div>'+
+          '<div class="field"><label>'+t("mobile")+'</label><input name="mobile" type="tel" autocomplete="tel" required></div>'+
+          '<div class="field"><label>'+t("country")+'</label><input name="country" value="Egypt" autocomplete="country-name"></div>'+
+          '<div class="field"><label>'+t("city")+'</label><input name="city" autocomplete="address-level2"></div>'+
+        '</div>':'')+
+      '<div class="field"><label>'+t("email")+'</label><input type="email" name="email" autocomplete="email" inputmode="email" required></div>'+
+      '<div class="field"><label>'+t("password")+'</label><input type="password" name="password" minlength="6" autocomplete="'+(login?"current-password":"new-password")+'" required></div>'+
+      (!login?
+        '<div class="field"><label>'+t("confirmPassword")+'</label><input type="password" name="confirmPassword" minlength="6" autocomplete="new-password" required></div>'+
+        '<div class="field"><label>'+t("accountType")+'</label><select id="accountType" name="accountType">'+accountTypeOptions()+'</select></div>'+
+        companyFields+
+        '<label class="checkbox auth-terms"><input type="checkbox" name="terms" required><span>أوافق على شروط الاستخدام وسياسة الخصوصية.</span></label>':'')+
+      '<button class="btn btn-primary auth-submit" type="submit">'+(login?t("login"):t("register"))+'</button>'+
+      '</form>'+
+      '<div class="auth-actions">'+
+        '<button id="switchAuth" type="button" class="auth-secondary">'+(login?t("register"):t("login"))+'</button>'+
+        (login?'<button id="forgot" type="button" class="auth-link">'+t("forgotPassword")+'</button>':'')+
+      '</div>'+
+      '<div class="auth-security">'+
+        '<span><b>Firebase Auth</b><small>Authentication</small></span>'+
+        '<span><b>Firestore</b><small>Workspace data</small></span>'+
+        '<span><b>RBAC</b><small>Access control</small></span>'+
+      '</div>'+
+      '</section></main>';
 
     document.getElementById("switchAuth").onclick=function(){authPage(login?"register":"login");};
     document.getElementById("lang").onclick=function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");authPage(mode);};
@@ -82,8 +99,15 @@
     }
     document.getElementById("authForm").onsubmit=async function(e){
       e.preventDefault();
-      try{var f=new FormData(e.currentTarget);if(login)await doLogin(f);else await doRegister(f);}
-      catch(err){authPage(mode,friendlyError(err));}
+      var form=e.currentTarget;
+      var submit=form.querySelector(".auth-submit");
+      if(submit){submit.disabled=true;submit.textContent=login?"جاري تسجيل الدخول…":"جاري إنشاء الحساب…";}
+      try{
+        var f=new FormData(form);
+        if(login)await doLogin(f);else await doRegister(f);
+      }catch(err){
+        authPage(mode,friendlyError(err));
+      }
     };
   }
 
