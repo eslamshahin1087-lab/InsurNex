@@ -16,10 +16,10 @@ Designed for day-to-day broker operations:
 - Personal Workspace
 - Organization Workspace
 - Workspace switching
-- Clients
+- Customers / Customer 360
 - Leads and pipeline
-- Policies
-- Quotes
+- Opportunities
+- Quotations
 - Renewals
 - Claims
 - Payments
@@ -72,7 +72,7 @@ InsurNex/
 │   ├── config.js
 │   ├── core.js
 │   ├── user.js
-│   └── admin.js
+│   └── admin-app.js
 ├── css/
 │   └── app.css
 ├── assets/
@@ -488,3 +488,12 @@ The security model follows least privilege. Organization A must not read or modi
 ## Repository Identity
 
 The repository is intended to be entirely InsurNex-facing at runtime and in its documentation, configuration, tests, routes, assets, and deployment metadata.
+
+
+## Broker CRM domains
+
+The production User App now includes Customers, Customer 360, Leads, Opportunities, Quotations, Policies, Renewals, Claims, Tasks, Calendar, Payments, Commissions, Insurers, Insurance Products, Documents, Communications, Notifications, Reports, Analytics, Teams and Subscriptions.
+
+## Safe legacy migration
+
+Use `scripts/migrate-legacy-data.cjs` through `npm run migrate-data` from a trusted environment to copy compatible legacy records without deleting source data.
