@@ -14,7 +14,7 @@
   ];
   var shortNav=[["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["renewals","renewals","🔄"],["account","account","⚙️"]];
 
-  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo.svg" alt="InsurNex" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logo-fallback" hidden>IN</span></div>';}
+  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo-mark.svg" alt="InsurNex" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logo-fallback" hidden>IN</span></div>';}
   function modal(title,html){
     document.getElementById("modalTitle").textContent=title;
     document.getElementById("modalBody").innerHTML=html;
