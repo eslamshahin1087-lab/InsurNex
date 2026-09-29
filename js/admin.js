@@ -3,7 +3,7 @@
   var view=(location.hash||"#dashboard").slice(1), cache={};
   var modules={
     users:{title:"Users",fields:[["name","name","text"],["email","email","email"],["mobile","mobile","tel"],["accountType","accountType","text"],["status","status","select","active,suspended"]]},
-    organizations:{title:"Organizations",fields:[["name","companyName","text"],["ownerId","ownerId","text"],["status","status","select","active,suspended"]]},
+    brokerProfiles:{title:"Brokers",fields:[["userId","userId","text"],["licenseNumber","brokerLicense","text"],["companyName","companyName","text"],["status","status","select","active,suspended"]]},organizations:{title:"Organizations",fields:[["name","companyName","text"],["ownerId","ownerId","text"],["status","status","select","active,suspended"]]},
     clients:{title:"Clients",fields:[["fullName","name","text"],["type","type","select","individual,corporate"],["email","email","email"],["phone","mobile","tel"],["status","status","select","active,inactive"]]},
     leads:{title:"Leads",fields:[["fullName","name","text"],["companyName","companyName","text"],["stage","stage","select","New,Contacted,Qualified,Proposal,Negotiation,Won,Lost"],["source","source","text"],["status","status","select","open,closed"]]},
     policies:{title:"Policies",fields:[["policyNumber","policyNumber","text"],["clientName","clientName","text"],["insurer","insurer","text"],["product","product","text"],["premium","premium","number"],["expiryDate","expiryDate","date"],["status","status","select","active,expired,cancelled,pending"]]},
@@ -17,7 +17,7 @@
     invoices:{title:"Invoices",fields:[["customerId","ownerId","text"],["amount","amount","number"],["status","status","select","draft,open,paid,void"],["dueDate","dueDate","date"]]},
     settings:{title:"System Settings",fields:[["key","type","text"],["value","description","textarea"]]}
   };
-  var nav=["dashboard","users","organizations","clients","leads","policies","quotes","renewals","claims","supportTickets","knowledgeBase","announcements","subscriptions","invoices","auditLogs","settings"];
+  var nav=["dashboard","users","organizations","brokerProfiles","clients","leads","policies","quotes","renewals","claims","supportTickets","knowledgeBase","announcements","subscriptions","invoices","auditLogs","settings"];
 
   function mark(){return '<div class="brand-mark">IN</div>';}
   function shell(){
