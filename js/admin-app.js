@@ -20,7 +20,7 @@ claims:["Claims",[["claimNumber","Claim","text"],["customerName","Customer","tex
 commissions:["Commissions",[["policyNumber","Policy","text"],["customerName","Customer","text"],["insurer","Insurer","text"],["premium","Premium","number"],["commissionAmount","Commission","number"],["status","Status","select","Expected,Pending,Approved,Paid,Cancelled"]]]
 };
 const nav=["dashboard","organizations","users","brokerProfiles","teams","insurers","insuranceProducts","plans","subscriptions","policies","renewals","claims","commissions","supportTickets","knowledgeBase","announcements","analytics","auditLogs","settings"];
-function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"></div>'}
+function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo.svg" alt="InsurNex"></div>'}
 function ico(n){return ({dashboard:"⌂",organizations:"🏢",users:"👤",brokerProfiles:"🪪",teams:"👨‍👩‍👧‍👦",insurers:"🏦",insuranceProducts:"📦",plans:"💳",subscriptions:"🔖",policies:"🛡️",renewals:"🔄",claims:"🧾",commissions:"💰",supportTickets:"🎧",knowledgeBase:"📚",announcements:"📢",analytics:"📊",auditLogs:"🔎",settings:"⚙️"}[n]||"•")}
 function shell(){
   const links=nav.map(n=>'<a class="drawer-link" href="#'+n+'" data-nav="'+n+'"><span>'+ico(n)+' '+(mod[n]?mod[n][0]:(n==="auditLogs"?"Audit Logs":n==="analytics"?"Analytics":"Dashboard"))+'</span><span>›</span></a>').join("");
