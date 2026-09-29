@@ -1,0 +1,47 @@
+# Built APKs are distributed via GitHub Releases, not tracked in git history.
+*.apk
+
+# ===== Python helper scripts =====
+fix_*.py
+
+# ===== Backup files =====
+*.backup
+*.backup.*
+*.theme-backup
+*.landing-backup
+
+# ===== Temp files =====
+classes.txt
+*.tmp
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== IDE =====
+.vscode/
+.idea/
+backup-local/
+fix.py
+securepath-admin.html.*
+
+backup-local/
+fix.py
+securepath-admin.html.*
+add_icons.py
+index.html.before-icons
+*.before-*
+add_*.py
+service-account.json
+node_modules/
+package-lock.json
+add-admin-claim.js
+add-admin-claim.js
+published-rules.txt
+.firebaserc
+
+# ===== Cloudflare Worker local secrets =====
+workers/securepath-api/.dev.vars*
+workers/securepath-api/.env*
+*service-account*.json
