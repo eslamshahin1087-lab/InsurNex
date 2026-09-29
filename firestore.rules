@@ -2,312 +2,298 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---------- helpers ----------
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
-    function isOwner(clientId) {
-      return isSignedIn() && request.auth.uid == clientId;
-    }
-    // Admin status is recognized two ways, since the project has used both
-    // over time: a custom auth claim (set by securepath-firebase-migration.js)
-    // and a Firestore admin/{uid} doc (checked by securepath-admin.html's own
-    // login gate). Either one is sufficient so neither mechanism is silently
-    // broken by the other.
-    function isAdmin() {
-      return isSignedIn()
-        && (request.auth.token.securepathAdmin == true
-            || exists(/databases/$(database)/documents/admin/$(request.auth.uid)));
-    }
-    function ownsAsClient() {
-      return isSignedIn() && request.resource.data.clientId == request.auth.uid;
+
+    function isPlatformAdmin() {
+      return signedIn()
+        && request.auth.token.platformRole in ['superAdmin', 'platformAdmin'];
     }
 
-    // ---------- Corporate HR Hub ----------
-    // A "company" is owned by exactly one client (the business-owner account
-    // that created it via ensureCorporateHRCompany() in wathiqati-app.html).
-    // Every sub-collection (employees/documents/requests/medical analyses/
-    // audit log) carries a companyId field but no ownerClientId of its own,
-    // so ownership is resolved by looking up the parent corporateCompanies
-    // doc's ownerClientId. isAdmin() always overrides.
-    function ownsCompany(companyId) {
-      return isSignedIn() && companyId != null
-        && exists(/databases/$(database)/documents/corporateCompanies/$(companyId))
-        && get(/databases/$(database)/documents/corporateCompanies/$(companyId)).data.ownerClientId == request.auth.uid;
+    function memberPath(orgId, userId) {
+      return /databases/$(database)/documents/organizationMembers/$(orgId + '_' + userId);
     }
 
-    function touchesProtectedFields() {
-      let protectedKeys = [
-        'insuraPoints', 'insuraPointsLifetime', 'insuraPointsRedeemed',
-        'pointsFlags', 'habitData', 'drivingData', 'gpsDrivingData', 'role', 'companyId', 'wheelLastSpin', 'wheelResult', 'wheelPrizeIndex'
-      ];
-      return request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedKeys);
+    function isMember(orgId) {
+      return signedIn()
+        && orgId is string
+        && exists(memberPath(orgId, request.auth.uid))
+        && get(memberPath(orgId, request.auth.uid)).data.status == 'active';
     }
 
-    // ---------- identity / access ----------
-    function isSameClientRecord(data) {
-      return isSignedIn()
-        && (
-          data.get('uid', '') == request.auth.uid
-          || data.get('email', '') == request.auth.token.email
+    function hasOrgRole(orgId, roles) {
+      return isMember(orgId)
+        && get(memberPath(orgId, request.auth.uid)).data.role in roles;
+    }
+
+    function ownsPersonal(data) {
+      return signedIn()
+        && data.workspaceType == 'personal'
+        && data.ownerId == request.auth.uid;
+    }
+
+    function readsWorkspace(data) {
+      return isPlatformAdmin()
+        || ownsPersonal(data)
+        || (
+          signedIn()
+          && data.workspaceType == 'organization'
+          && isMember(data.organizationId)
         );
     }
 
-    match /clients/{clientId} {
-      // Backward compatibility for legacy client documents whose Firestore
-      // document ID is not the Firebase Auth UID. Access is still limited to
-      // the authenticated user's own UID/email; nothing becomes public.
-      allow read: if isOwner(clientId)
-        || (resource != null && isSameClientRecord(resource.data))
-        || isAdmin();
-
-      allow create: if (isOwner(clientId) || isSameClientRecord(request.resource.data))
-        && request.resource.data.role == 'client'
-        && request.resource.data.get('insuraPoints', 0) == 0
-        && request.resource.data.get('insuraPointsLifetime', 0) == 0
-        && request.resource.data.get('insuraPointsRedeemed', 0) == 0;
-
-      allow update: if isAdmin()
-        || ((isOwner(clientId) || isSameClientRecord(resource.data))
-            && !touchesProtectedFields());
-
-      allow update: if (isOwner(clientId) || isSameClientRecord(resource.data))
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['companyId'])
-        && ownsCompany(request.resource.data.companyId);
-
-      allow delete: if isAdmin();
+    function createsWorkspace(data, roles) {
+      return signedIn()
+        && (
+          (data.workspaceType == 'personal' && data.ownerId == request.auth.uid)
+          || (
+            data.workspaceType == 'organization'
+            && hasOrgRole(data.organizationId, roles)
+            && data.organizationId is string
+          )
+        );
     }
 
-    match /admin/{adminId} {
-      allow read: if isOwner(adminId);
-      allow write: if isAdmin();
+    function canWriteExisting(data, roles) {
+      return isPlatformAdmin()
+        || (
+          readsWorkspace(data)
+          && (
+            ownsPersonal(data)
+            || hasOrgRole(data.organizationId, roles)
+          )
+        );
+    }
+
+    function sameWorkspace() {
+      return resource.data.workspaceType == request.resource.data.workspaceType
+        && resource.data.ownerId == request.resource.data.ownerId
+        && resource.data.organizationId == request.resource.data.organizationId;
+    }
+
+    function canWriteNewUser() {
+      return signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && !request.resource.data.keys().hasAny(['platformRole']);
     }
 
     match /users/{uid} {
-      allow read, create: if isOwner(uid);
-      allow update: if (isOwner(uid) && !touchesProtectedFields()) || isAdmin();
-      allow delete: if isAdmin();
+      allow read: if isPlatformAdmin() || (signedIn() && uid == request.auth.uid);
+      allow create: if canWriteNewUser();
+      allow update: if isPlatformAdmin()
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'platformRole'])
+        );
+      allow delete: if isPlatformAdmin();
     }
 
-    match /settings/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
+    match /organizations/{orgId} {
+      allow read: if isPlatformAdmin() || isMember(orgId);
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isPlatformAdmin() || hasOrgRole(orgId, ['organizationOwner', 'organizationAdmin']);
+      allow delete: if isPlatformAdmin() || hasOrgRole(orgId, ['organizationOwner']);
     }
 
-    // ---------- points log (client creates its own entries only) ----------
-    match /pointsLog/{logId} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow create, update, delete: if isAdmin();
+    match /organizationMembers/{memberId} {
+      allow read: if isPlatformAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid)
+        || hasOrgRole(resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
+      allow create: if isPlatformAdmin()
+        || (
+          signedIn()
+          && request.resource.data.userId == request.auth.uid
+          && getAfter(/databases/$(database)/documents/organizations/$(request.resource.data.organizationId)).data.ownerId == request.auth.uid
+        )
+        || hasOrgRole(request.resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
+      allow update, delete: if isPlatformAdmin()
+        || hasOrgRole(resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
     }
 
-    // ---------- leads / conversions ----------
-    match /leads/{leadId} {
-      // Client lead creation is now server-owned by the SecurePath Worker.
-      // This prevents arbitrary lead/source fields from being written directly.
-      allow read: if isAdmin();
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
+    match /brokerProfiles/{uid} {
+      allow read: if isPlatformAdmin() || (signedIn() && uid == request.auth.uid);
+      allow create, update: if isPlatformAdmin() || (signedIn() && uid == request.auth.uid);
+      allow delete: if isPlatformAdmin() || (signedIn() && uid == request.auth.uid);
+    }
+
+    match /notifications/{id} {
+      allow read: if isPlatformAdmin() || (signedIn() && resource.data.recipientId == request.auth.uid);
+      allow create: if isPlatformAdmin();
+      allow update: if isPlatformAdmin()
+        || (
+          signedIn()
+          && resource.data.recipientId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+        );
+      allow delete: if isPlatformAdmin();
+    }
+
+    match /auditLogs/{id} {
+      allow read: if isPlatformAdmin();
+      allow create: if signedIn()
+        && request.resource.data.actorId == request.auth.uid
+        && (
+          request.resource.data.organizationId == null
+          || isMember(request.resource.data.organizationId)
+        );
+      allow update, delete: if isPlatformAdmin();
+    }
+
+    match /knowledgeBase/{id} {
+      allow read: if isPlatformAdmin() || resource.data.status == 'published';
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    match /announcements/{id} {
+      allow read: if isPlatformAdmin() || resource.data.status == 'published';
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    match /insurers/{id} {
+      allow read: if isPlatformAdmin() || resource.data.get('published', false) == true;
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    match /insuranceProducts/{id} {
+      allow read: if isPlatformAdmin() || resource.data.get('published', false) == true;
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    match /settings/{id} {
+      allow read, write: if isPlatformAdmin();
+    }
+
+    match /reports/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer', 'finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer', 'finance']);
+    }
+
+    match /analytics/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    match /subscriptions/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || (
+        request.resource.data.workspaceType == 'organization'
+        && createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager'])
+      );
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager']);
+    }
+
+    match /invoices/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'finance']);
+    }
+
+    match /supportTickets/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'viewer']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'customerService', 'operations']);
+    }
+
+    match /documents/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance']);
+    }
+
+    match /clients/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService']);
+    }
+
+    match /leads/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent']);
+    }
+
+    match /policies/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'operations']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'operations']);
+    }
+
+    match /quotes/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent']);
     }
 
     match /renewals/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      // Created by the trusted Worker after validating policy ownership.
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations']);
     }
 
-    // ---------- documents / assessments ----------
-    match /documents/{docId} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow create: if ownsAsClient();
-      allow update, delete: if isAdmin();
-    }
-
-    // insuranceAssessments is keyed by the client's own uid as the document
-    // ID (db.collection('insuranceAssessments').doc(uid).set(..., {merge:true})),
-    // written repeatedly over time (re-run assessment) and never carries a
-    // 'clientId' data field - so ownership must be checked against the doc
-    // ID itself, not a data field, and the client needs 'update' too (not
-    // just 'create'), since every re-run after the first is an update.
-    match /insuranceAssessments/{clientId} {
-      allow read: if isOwner(clientId) || isAdmin();
-      allow create, update: if isOwner(clientId);
-      allow delete: if isAdmin();
-    }
-
-    // Smart Matching Engine: full assessment record (5-step wizard result).
-    // Created once per run by the owning client; read by the client who owns
-    // it or by admin; only admin may triage (status/adminNotes/reviewedBy).
-    match /protectionAssessments/{assessmentId} {
-      allow create: if ownsAsClient();
-      allow read: if isSignedIn()
-                  && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow update, delete: if isAdmin();
-    }
-
-    // Smart Matching Engine: lightweight funnel-stage tracking events.
-    match /journeyTracking/{trackId} {
-      allow create: if isSignedIn()
-                    && request.resource.data.userId == request.auth.uid;
-      allow read: if isSignedIn()
-                  && (resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isAdmin();
-    }
-
-    // Admin-only inbox of system-generated alerts (new assessment, etc).
-    // Any signed-in client action may trigger a notification via the app,
-    // but only admin can ever read/manage the inbox itself.
-    match /adminNotifications/{notifId} {
-      // System-generated notifications are created by trusted Cloud Functions.
-      allow read, update, delete: if isAdmin();
-      allow create: if isAdmin();
-    }
-
-    // ---------- client-owned records, admin-authored ----------
-    match /policies/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
-    }
     match /claims/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'claimsOfficer', 'operations']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'claimsOfficer', 'operations']);
     }
+
     match /payments/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'finance']);
     }
 
-    // ---------- appointments / complaints ----------
+    match /tasks/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance']);
+    }
+
     match /appointments/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      // Created by the trusted Worker.
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
-    }
-    match /complaints/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      // Created by the trusted Worker.
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService']);
     }
 
-    // ---------- messaging / notifications ----------
+    match /activities/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if signedIn() && (isPlatformAdmin() || ownsPersonal(request.resource.data) || hasOrgRole(request.resource.data.organizationId, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService','operations','claimsOfficer','finance']));
+      allow update, delete: if isPlatformAdmin();
+    }
+
+    match /notes/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService','operations','claimsOfficer','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService','operations','claimsOfficer','finance']);
+    }
+
     match /messages/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-      // Client messages now go through the trusted Worker.
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();    }
-    match /notifications/{id} {
-      allow read: if isSignedIn() && (resource.data.clientId == request.auth.uid || isAdmin());
-
-      // SECURITY: Notifications are created by admins (broadcast/targeted),
-      // OR by a client's own Corporate HR Hub action (notifyHR() in
-      // wathiqati-app.html self-notifies the requesting owner, e.g. "your
-      // request was submitted") — never on behalf of another client.
-      allow create: if (isAdmin()
-          && request.resource.data.clientId is string
-          && request.resource.data.clientId.size() > 0
-          && request.resource.data.title is string
-          && request.resource.data.title.size() > 0
-          && request.resource.data.title.size() <= 100
-          && request.resource.data.body is string
-          && request.resource.data.body.size() > 0
-          && request.resource.data.body.size() <= 500)
-        || (ownsAsClient()
-          && request.resource.data.type == 'corporate_request_created'
-          && ownsCompany(request.resource.data.companyId));
-
-      // Client can mark as read/unread only. Admin can do anything.
-      allow update: if (isSignedIn() && resource.data.clientId == request.auth.uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']))
-        || isAdmin();
-
-      allow delete: if isAdmin();
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService']);
     }
 
-    // ---------- activity log ----------
-    match /activity/{id} {
-      allow read: if isAdmin();
-      allow create: if ownsAsClient();
-      allow update, delete: if isAdmin();
+    match /conversations/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService']);
     }
 
-    // ---------- public catalog content (admin-managed, client read-only) ----------
-    match /products/{id} {
-      allow read: if resource.data.get('published', false) == true || isAdmin();
-      allow write: if isAdmin();
-    }
-    match /companies/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /insuranceTypes/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /offers/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /companyAds/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
+    match /organizationRequests/{id} {
+      allow read: if isPlatformAdmin() || (
+        signedIn() && (
+          resource.data.requesterId == request.auth.uid
+          || hasOrgRole(resource.data.organizationId, ['organizationOwner','organizationAdmin','manager'])
+        )
+      );
+      allow create: if signedIn() && request.resource.data.requesterId == request.auth.uid;
+      allow update, delete: if isPlatformAdmin() || hasOrgRole(resource.data.organizationId, ['organizationOwner','organizationAdmin','manager']);
     }
 
-    match /awarenessVideos/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // ---------- Corporate HR Hub ----------
-    // Company profile: created by the first owning client (ensureCorporateHRCompany),
-    // then read/updated only by that same owner or admin.
-    match /corporateCompanies/{companyId} {
-      // resource == null the first time a client checks "does my company doc
-      // exist yet" (ensureCorporateHRCompany's initial .get()); allowing that
-      // leaks nothing (no data on a doc that isn't there) and must be allowed
-      // or the very first company creation would be denied before it starts.
-      allow read: if resource == null || isAdmin() || (isSignedIn() && resource.data.ownerClientId == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.ownerClientId == request.auth.uid;
-      allow update: if isAdmin() || (isSignedIn() && resource.data.ownerClientId == request.auth.uid);
-      allow delete: if isAdmin();
-    }
-
-    match /corporateEmployees/{id} {
-      allow read: if isAdmin() || ownsCompany(resource.data.companyId);
-      allow create: if isAdmin() || ownsCompany(request.resource.data.companyId);
-      allow update: if isAdmin() || ownsCompany(resource.data.companyId);
-      allow delete: if isAdmin() || ownsCompany(resource.data.companyId);
-    }
-
-    match /corporateDocuments/{id} {
-      allow read: if isAdmin() || ownsCompany(resource.data.companyId);
-      // Client app only ever creates documents (no client-side edit/delete yet).
-      allow create: if isAdmin() || ownsCompany(request.resource.data.companyId);
-      allow update, delete: if isAdmin();
-    }
-
-    match /corporateRequests/{id} {
-      allow read: if isAdmin() || ownsCompany(resource.data.companyId);
-      allow create: if isAdmin() || ownsCompany(request.resource.data.companyId);
-      // Status changes (approve/reject/etc) are triaged by the broker only.
-      allow update, delete: if isAdmin();
-    }
-
-    match /corporateMedicalAnalyses/{id} {
-      allow read: if isAdmin() || ownsCompany(resource.data.companyId);
-      allow create: if isAdmin() || ownsCompany(request.resource.data.companyId);
-      allow update: if isAdmin() || (ownsCompany(resource.data.companyId) && request.resource.data.companyId == resource.data.companyId);
-      allow delete: if isAdmin();
-    }
-
-    // Append-only audit trail: owning client may add entries for their own
-    // company, but never read, edit or delete them back (audit integrity).
-    match /corporateAuditLogs/{id} {
-      allow read: if isAdmin();
-      allow create: if isAdmin()
-        || (ownsCompany(request.resource.data.companyId) && request.resource.data.actorId == request.auth.uid);
-      allow update, delete: if isAdmin();
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

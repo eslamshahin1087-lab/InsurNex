@@ -1,0 +1,41 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function isPlatformAdmin() {
+      return signedIn() && request.auth.token.platformRole in ['superAdmin', 'platformAdmin'];
+    }
+    function memberPath(orgId, userId) {
+      return /databases/(default)/documents/organizationMembers/$(orgId + '_' + userId);
+    }
+    function isMember(orgId) {
+      return signedIn()
+        && exists(memberPath(orgId, request.auth.uid))
+        && get(memberPath(orgId, request.auth.uid)).data.status == 'active';
+    }
+    function validUpload() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    match /documents/{workspaceId}/{allPaths=**} {
+      allow read: if isPlatformAdmin()
+        || (signedIn() && (workspaceId == request.auth.uid || isMember(workspaceId)));
+      allow write: if isPlatformAdmin()
+        || (signedIn() && (workspaceId == request.auth.uid || isMember(workspaceId)) && validUpload());
+      allow delete: if isPlatformAdmin()
+        || (signedIn() && (workspaceId == request.auth.uid || isMember(workspaceId)));
+    }
+
+    match /users/{uid}/{allPaths=**} {
+      allow read, write: if isPlatformAdmin() || (signedIn() && uid == request.auth.uid && validUpload());
+    }
+
+    match /organizations/{orgId}/{allPaths=**} {
+      allow read, write: if isPlatformAdmin() || isMember(orgId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

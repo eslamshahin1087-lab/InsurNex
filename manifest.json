@@ -1,18 +1,1 @@
-{
-  "name": "SecurePath",
-  "short_name": "SecurePath",
-  "description": "متابعة وثائق التأمين الخاصة بك في مكان واحد",
-  "start_url": "./wathiqati-app.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0E2A5C",
-  "theme_color": "#0E2A5C",
-  "lang": "ar",
-  "dir": "rtl",
-  "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
-}
+{"name":"InsurNex","short_name":"InsurNex","description":"Professional Insurance Broker Management & CRM Platform","start_url":"./user.html","scope":"./","display":"standalone","orientation":"portrait","background_color":"#f4f7fb","theme_color":"#0b2a4a","lang":"ar","dir":"rtl","icons":[{"src":"assets/icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}
