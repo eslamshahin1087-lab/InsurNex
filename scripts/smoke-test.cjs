@@ -18,7 +18,8 @@ const required = [
   "js/config.js",
   "js/core.js",
   "js/user.js",
-  "js/admin.js",
+  "js/admin-app.js",
+  "scripts/migrate-legacy-data.cjs",
   "css/app.css",
   "assets/logo.svg",
   "assets/icon.svg",
@@ -29,6 +30,7 @@ const required = [
 
 const forbiddenNames = [
   "securepath-firebase-migration.js",
+  "js/admin.js",
   "test-firebase.html",
   "wathiqati-app.html"
 ];
