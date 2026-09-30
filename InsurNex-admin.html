@@ -5,27 +5,1239 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a72d8">
 <meta name="description" content="InsurNex Admin — Platform administration console">
-<link rel="icon" href="assets/logo.svg">
-<link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="assets/logo-mark.svg">
 <title>InsurNex Admin</title>
+<style>:root{--bg:#f4f7fb;--surface:#fff;--surface2:#eef3f8;--text:#14243a;--muted:#718197;--line:#dce5ef;--navy:#0b2a4a;--navy2:#174a7a;--gold:#d8a23a;--green:#0e7b58;--red:#bf4c3b;--blue:#2c6db2;--shadow:0 14px 34px rgba(11,42,74,.08);--radius:20px;--safe-bottom:env(safe-area-inset-bottom,0px)}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.app-shell{min-height:100vh;display:flex}.main{min-width:0;flex:1;padding-bottom:88px}.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#d8a23a,#f1cc7a);display:grid;place-items:center;color:#10233a;font-weight:900;box-shadow:0 8px 18px rgba(216,162,58,.22)}.brand-mark.image-mark{background-color:#fff;background-image:url("../assets/logo.svg");background-repeat:no-repeat;background-position:center 22%;background-size:210% auto;border:1px solid var(--line);box-shadow:0 8px 18px rgba(11,42,74,.10);overflow:hidden}.brand-name{font-weight:900;letter-spacing:-.02em}.subtitle{font-size:11px;color:var(--muted)}.content{max-width:1180px;margin:0 auto;padding:18px}.grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}.card h2,.card h3{margin:0 0 4px;font-size:17px}.muted{color:var(--muted)}.eyebrow{font-size:11px;color:var(--gold);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.page-head h1{margin:3px 0;font-size:24px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--surface);color:var(--text);padding:10px 14px;border-radius:12px;font-weight:800}.btn:hover{border-color:var(--gold)}.btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-color:transparent}.btn-accent{background:linear-gradient(135deg,#d8a23a,#f0cc7b);color:#192b40;border-color:transparent}.btn-danger{background:#fff3f0;color:var(--red);border-color:#f0d2cc}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:12px;font-weight:800;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;color:var(--text);outline:none}.field textarea{min-height:96px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(216,162,58,.12)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.stat .value{font-size:26px;font-weight:900}.stat .label{font-size:11px;color:var(--muted);font-weight:700}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}.data-table{width:100%;border-collapse:collapse;min-width:720px}.data-table th,.data-table td{text-align:start;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}.data-table th{background:var(--surface2);font-size:11px;color:var(--muted);font-weight:900}.data-table tr:last-child td{border-bottom:0}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;background:var(--surface2);color:var(--muted)}.badge.success{background:#e7f6ef;color:var(--green)}.badge.warn{background:#fff7df;color:#8d6812}.badge.danger{background:#fff0ed;color:var(--red)}.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safe-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;backdrop-filter:blur(18px)}.bottom-nav button{border:0;background:transparent;padding:7px 4px;border-radius:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:800}.bottom-nav button.active{color:var(--navy);background:#edf3f8}.bottom-nav .icon{font-size:18px}.drawer{position:fixed;inset:0;z-index:90;background:rgba(5,18,31,.46);display:none}.drawer.show{display:block}.drawer-panel{position:absolute;top:0;bottom:0;width:min(340px,88vw);background:var(--surface);padding:20px;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.18)}[dir=ltr] .drawer-panel{right:0}[dir=rtl] .drawer-panel{left:0}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.drawer-link{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:800}.drawer-link:hover{background:var(--surface2)}.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 15% 15%,rgba(23,74,122,.18),transparent 42%),radial-gradient(circle at 85% 80%,rgba(216,162,58,.15),transparent 35%),var(--bg)}.auth-card{width:min(520px,100%);background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(11,42,74,.13);padding:24px}.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:22px}.auth-logo .brand-mark{width:48px;height:48px}.auth-title{font-size:26px;font-weight:900;margin:0}.auth-copy{color:var(--muted);font-size:13px;line-height:1.7}.form-stack{display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.switcher{display:flex;gap:8px;flex-wrap:wrap}.switch-pill{border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:999px;font-weight:800;font-size:11px}.switch-pill.active{background:var(--navy);color:#fff;border-color:var(--navy)}.hero{background:linear-gradient(145deg,#0b2a4a,#174a7a);color:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow);overflow:hidden;position:relative}.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;background:rgba(216,162,58,.16);top:-70px;inset-inline-end:-50px}.hero h2{font-size:24px;margin:0 0 6px}.hero p{margin:0;color:rgba(255,255,255,.78);font-size:12px;max-width:620px}.modal{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;background:rgba(5,18,31,.52);padding:12px}.modal.show{display:flex}.modal-card{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--surface);border-radius:24px;padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0;font-size:18px}.close{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);font-size:18px}.empty{padding:34px 16px;text-align:center;color:var(--muted)}.empty .emoji{font-size:32px;margin-bottom:6px}.loading{padding:32px;text-align:center;color:var(--muted)}.error-box{padding:16px;border:1px solid #f0d2cc;background:#fff5f2;color:var(--red);border-radius:14px}.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);opacity:0;z-index:150;padding:11px 14px;border-radius:12px;background:#15263b;color:#fff;font-size:12px;font-weight:800;box-shadow:0 16px 35px rgba(0,0,0,.2);transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.error{background:var(--red)}.list{display:grid;gap:8px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.list-row:last-child{border-bottom:0}.list-main{min-width:0}.list-title{font-size:13px;font-weight:900}.list-sub{font-size:11px;color:var(--muted);margin-top:2px}.workspace-card{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}.login-split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.section-note{font-size:12px;color:var(--muted);line-height:1.7}.checkbox{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--muted)}@media(min-width:900px){.bottom-nav{display:none}.main{padding-bottom:0}.desktop-drawer{position:sticky;top:0;height:100vh;width:250px;display:block;background:var(--surface);border-inline-end:1px solid var(--line);padding:18px;overflow:auto}.content{padding:24px}.modal{align-items:center}.modal-card{border-radius:24px}.auth-card{padding:34px}}@media(max-width:760px){.grid-2,.grid-3,.grid-4,.form-grid,.stats,.login-split{grid-template-columns:1fr 1fr}.page-head{align-items:stretch;flex-direction:column}.page-head .actions{width:100%}.page-head .actions .btn{flex:1}.content{padding:14px}.card{padding:14px}}@media(max-width:480px){.grid-2,.grid-3,.grid-4,.form-grid,.stats,.login-split{grid-template-columns:1fr}.auth-card{padding:20px}.hero{padding:17px}.hero h2{font-size:21px}}
+
+/* === InsurNex Mobile App UI === */
+.insurnex-user{
+  --navy:#0a2f66;--navy2:#0a72d8;--gold:#23a4f2;--bg:#edf4fa;--surface:#fff;--surface2:#f5f8fc;
+  --text:#10243f;--muted:#6b7d93;--line:#dbe6f1;--blue:#0a72d8;--green:#13865f;
+  background:var(--bg);
+}
+.insurnex-user #app{min-height:100dvh;display:flex;align-items:center;justify-content:center}
+.insurnex-user .app-shell{
+  width:100%;max-width:430px;height:min(900px,calc(100dvh - 18px));min-height:100dvh;
+  margin:9px auto;display:block;position:relative;overflow:hidden;background:var(--surface);
+  border-radius:30px;box-shadow:0 24px 80px rgba(12,47,86,.18);border:1px solid rgba(141,170,200,.25)
+}
+.insurnex-user .desktop-drawer{display:none!important}
+.insurnex-user .main{width:100%;height:100%;min-height:0;padding:0;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;background:linear-gradient(180deg,#fff 0%,#f8fbfe 100%)}
+.insurnex-user .main::-webkit-scrollbar{width:0;height:0}
+.insurnex-user .topbar{
+  position:sticky;top:0;z-index:30;min-height:70px;padding:12px 14px 10px;
+  padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid rgba(219,230,241,.85);
+  background:rgba(255,255,255,.92);backdrop-filter:blur(20px);box-shadow:0 4px 16px rgba(20,57,91,.04)
+}
+.insurnex-user .brand{gap:9px;min-width:0}.insurnex-user .brand>div:last-child{min-width:0}
+.insurnex-user .brand-name{font-size:14px;font-weight:900;line-height:1.1;white-space:nowrap}
+.insurnex-user .subtitle{font-size:9px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insurnex-user .brand-mark.image-mark{
+  flex:none;width:38px;height:38px;border-radius:12px;background-color:#fff;
+  background-image:url("../assets/logo.svg");background-repeat:no-repeat;background-position:center 22%;
+  background-size:320% auto;border:1px solid #dfe9f3;box-shadow:0 7px 16px rgba(9,91,170,.12)
+}
+.insurnex-user .actions{gap:6px;flex-wrap:nowrap}.insurnex-user .actions .badge{display:none}
+.insurnex-user .actions .btn{
+  width:38px;height:38px;min-width:38px;padding:0;border-radius:12px;display:grid;place-items:center;
+  font-size:15px;background:#f3f7fb;border:1px solid #e4edf6;color:var(--navy)
+}
+.insurnex-user .actions #logout{color:#b2433b}.insurnex-user .actions #menu{display:none}
+.insurnex-user .content{max-width:none;padding:16px 15px calc(96px + env(safe-area-inset-bottom))}
+.insurnex-user .page-head{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.insurnex-user .page-head h1{font-size:21px;line-height:1.2;margin:2px 0 0;font-weight:900}
+.insurnex-user .eyebrow{color:#0a72d8;font-size:10px;letter-spacing:.08em}
+.insurnex-user .muted{font-size:11px;line-height:1.45}
+.insurnex-user .actions .btn.btn-primary,.insurnex-user .page-head .btn.btn-primary{
+  background:linear-gradient(135deg,#0a2f66,#0a72d8);border-color:transparent;color:#fff
+}
+.insurnex-user .btn{
+  min-height:42px;padding:10px 13px;border-radius:13px;font-size:11px;font-weight:850;
+  background:#fff;border:1px solid #dbe6f1;box-shadow:none
+}
+.insurnex-user .btn-sm{min-height:36px;padding:8px 10px;border-radius:11px}
+.insurnex-user .btn-accent{background:linear-gradient(135deg,#16a9f4,#0a72d8);color:#fff;border:0}
+.insurnex-user .btn-ghost{background:#f5f8fc}
+.insurnex-user .btn-danger{background:#fff4f2;color:#b2433b;border-color:#f2d5d0}
+.insurnex-user .hero{
+  margin-bottom:13px!important;padding:17px;border-radius:22px;
+  background:linear-gradient(145deg,#082e63 0%,#0a72d8 100%);box-shadow:0 18px 34px rgba(10,96,184,.20)
+}
+.insurnex-user .hero:after{width:150px;height:150px;background:rgba(70,198,255,.20);top:-60px;inset-inline-end:-50px}
+.insurnex-user .hero h2{font-size:20px;line-height:1.25;margin-bottom:6px;position:relative;z-index:1}
+.insurnex-user .hero p{font-size:11px;line-height:1.65;position:relative;z-index:1}
+.insurnex-user .stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.insurnex-user .stat{
+  min-height:84px;padding:13px 12px;border-radius:17px;background:#fff;border:1px solid #e2ebf4;
+  box-shadow:0 7px 20px rgba(21,61,98,.06)
+}
+.insurnex-user .stat .value{font-size:22px;line-height:1.1;color:var(--navy)}
+.insurnex-user .stat .label{margin-top:5px;font-size:10px;line-height:1.35;color:var(--muted)}
+.insurnex-user .grid-2,.insurnex-user .grid-3,.insurnex-user .grid-4{grid-template-columns:1fr!important}
+.insurnex-user .card{
+  padding:14px;border-radius:18px;box-shadow:0 7px 22px rgba(22,58,92,.055);border:1px solid #e1eaf3
+}
+.insurnex-user .card h3{font-size:14px}.insurnex-user .list{gap:1px}
+.insurnex-user .list-row{min-height:48px;padding:9px 0}.insurnex-user .list-title{font-size:12px}.insurnex-user .list-sub{font-size:10px}
+.insurnex-user .badge{font-size:9px;padding:5px 8px}
+.insurnex-user .field input,.insurnex-user .field select,.insurnex-user .field textarea{
+  min-height:46px;padding:12px;border-radius:13px;background:#fbfdff;border-color:#dce7f2;font-size:12px
+}
+.insurnex-user .field label{font-size:10px}.insurnex-user .form-grid,.insurnex-user .login-split{grid-template-columns:1fr!important}
+.insurnex-user .auth-wrap{width:100%;min-height:100dvh;padding:16px;background:linear-gradient(180deg,#eef6fd,#f9fbfe)}
+.insurnex-user .auth-card{width:min(430px,100%);padding:20px;border-radius:26px;box-shadow:0 22px 60px rgba(19,62,100,.12)}
+.insurnex-user .auth-logo{justify-content:center;flex-direction:column;text-align:center;gap:9px;margin-bottom:18px}
+.insurnex-user .auth-logo .brand-mark.image-mark{width:84px;height:84px;border-radius:22px;background-size:285% auto;background-position:center 21%}
+.insurnex-user .auth-logo .brand-name{font-size:23px}.insurnex-user .auth-logo .subtitle{font-size:10px}
+.insurnex-user .auth-title{font-size:23px}.insurnex-user .auth-copy{font-size:11px;line-height:1.75}
+.insurnex-user .mobile-list{display:none}.insurnex-user .desktop-table-note{display:block}
+.insurnex-user .drawer{background:rgba(5,18,31,.42);backdrop-filter:blur(3px)}
+.insurnex-user .drawer-panel{
+  left:0!important;right:0!important;top:auto!important;bottom:0;width:100%;max-width:430px;
+  height:min(78dvh,640px);padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  border-radius:24px 24px 0 0;box-shadow:0 -18px 50px rgba(7,32,58,.22)
+}
+.insurnex-user .drawer-head{margin-bottom:12px}.insurnex-user .drawer-link{padding:12px;border-radius:13px;font-size:12px}
+.insurnex-user .workspace-card{padding:11px;border-radius:13px}.insurnex-user .bottom-nav{
+  position:absolute!important;left:0!important;right:0!important;bottom:0!important;display:grid!important;
+  grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.96);border-top:1px solid #dbe6f1;box-shadow:0 -8px 28px rgba(23,58,94,.10);backdrop-filter:blur(20px)
+}
+.insurnex-user .bottom-nav button{min-height:52px;border-radius:14px;padding:6px 3px;font-size:8.5px;gap:3px;color:#7a8a9f}
+.insurnex-user .bottom-nav button.active{background:#edf5fd;color:#0a72d8}
+.insurnex-user .bottom-nav .icon{font-size:17px}
+.insurnex-user .modal{align-items:flex-end;padding:0;background:rgba(5,18,31,.52)}
+.insurnex-user .modal-card{
+  width:100%;max-width:430px;max-height:90dvh;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))
+}
+.insurnex-user .modal-head{padding-bottom:8px;border-bottom:1px solid #e6edf5}
+.insurnex-user .toast{bottom:104px;font-size:10px}
+.insurnex-user .table-wrap{border-radius:14px}
+@media(min-width:700px){
+  .insurnex-user .app-shell{min-height:0}
+}
+@media(max-width:699px){
+  .insurnex-user #app{align-items:stretch}
+  .insurnex-user .app-shell{min-height:100dvh;height:100dvh;margin:0;border-radius:0;border:0;box-shadow:none}
+  .insurnex-user .desktop-table,.insurnex-user .desktop-table-note,.insurnex-user .desktop-table-empty{display:none!important}
+  .insurnex-user .mobile-list{display:grid;gap:9px}
+  .insurnex-user .record-card{
+    padding:13px;border:1px solid #e0e9f3;background:#fff;border-radius:17px;
+    box-shadow:0 7px 18px rgba(18,57,94,.05)
+  }
+  .insurnex-user .record-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .insurnex-user .record-card-title{font-size:13px;font-weight:900;color:var(--navy);line-height:1.35}
+  .insurnex-user .record-card-meta{display:flex;flex-wrap:wrap;gap:5px 9px;margin-top:5px;color:var(--muted);font-size:9.5px;line-height:1.4}
+  .insurnex-user .record-card-meta span+span{position:relative;padding-inline-start:9px}
+  .insurnex-user .record-card-meta span+span:before{content:"•";position:absolute;inset-inline-start:0}
+  .insurnex-user .record-card-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+  .insurnex-user .record-card-actions .btn{min-width:0;min-height:38px;padding:8px 7px;font-size:9px}
+  .insurnex-user .mobile-empty{padding:30px 12px;text-align:center;color:var(--muted);border:1px dashed #ccd9e6;border-radius:16px;background:#fff}
+  .insurnex-user .page-head .actions{width:100%}
+  .insurnex-user .page-head .actions .btn{flex:1}
+}
+@media(min-width:700px){
+  .insurnex-user .content{padding-bottom:28px}
+  .insurnex-user .bottom-nav{display:none!important}
+}
+
+
+/* === InsurNex Brand & Authentication Polish === */
+.insurnex-user .brand-mark.image-mark{
+  display:grid!important;
+  place-items:center!important;
+  padding:3px!important;
+  background:#fff!important;
+  background-image:none!important;
+  border:1px solid #d8e6f3!important;
+  border-radius:13px!important;
+  box-shadow:0 8px 20px rgba(8,66,126,.14)!important;
+  overflow:hidden!important;
+}
+.insurnex-user .brand-mark.image-mark img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.insurnex-user .auth-wrap{
+  position:relative!important;
+  isolation:isolate;
+  overflow:auto!important;
+  background:
+    radial-gradient(180px 180px at 88% 6%,rgba(25,160,242,.17),transparent 72%),
+    radial-gradient(220px 220px at 8% 88%,rgba(10,114,216,.10),transparent 74%),
+    linear-gradient(180deg,#eef7ff 0%,#f8fbff 48%,#eef5fb 100%)!important;
+}
+.insurnex-user .auth-wrap:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  opacity:.38;
+  background-image:
+    linear-gradient(rgba(10,114,216,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(10,114,216,.035) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+.insurnex-user .auth-card{
+  width:min(420px,calc(100% - 20px))!important;
+  margin:0 auto!important;
+  padding:18px!important;
+  border:1px solid rgba(192,214,232,.82)!important;
+  border-radius:28px!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 28px 72px rgba(12,61,106,.15)!important;
+}
+.insurnex-user .auth-logo{
+  padding:4px 4px 16px!important;
+  margin-bottom:16px!important;
+  border-bottom:1px solid #edf2f7!important;
+}
+.insurnex-user .auth-logo .brand-mark.image-mark{
+  width:92px!important;
+  height:92px!important;
+  padding:5px!important;
+  border-radius:26px!important;
+  box-shadow:0 12px 28px rgba(6,83,157,.18)!important;
+}
+.insurnex-user .auth-logo .brand-name{
+  font-size:26px!important;
+  letter-spacing:-.04em!important;
+  color:#092d60!important;
+}
+.insurnex-user .auth-logo .subtitle{
+  max-width:260px;
+  margin:4px auto 0!important;
+  color:#6f8197!important;
+  font-size:10px!important;
+  line-height:1.65!important;
+}
+.insurnex-user .auth-title{
+  margin-top:4px!important;
+  color:#092d60!important;
+  font-size:25px!important;
+  letter-spacing:-.03em!important;
+}
+.insurnex-user .auth-copy{
+  margin:7px 0 14px!important;
+  color:#75879a!important;
+}
+.insurnex-user .eyebrow{
+  font-weight:900!important;
+  color:#0a72d8!important;
+}
+.insurnex-user .auth-card .field{
+  gap:6px!important;
+}
+.insurnex-user .auth-card .field label{
+  color:#51657b!important;
+  font-size:10.5px!important;
+  font-weight:850!important;
+}
+.insurnex-user .auth-card .field input,
+.insurnex-user .auth-card .field select{
+  min-height:48px!important;
+  border-radius:14px!important;
+  border:1px solid #d7e4ef!important;
+  background:#fafdff!important;
+  color:#102a45!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.insurnex-user .auth-card .field input:focus,
+.insurnex-user .auth-card .field select:focus{
+  border-color:#4caaf0!important;
+  box-shadow:0 0 0 4px rgba(10,114,216,.10)!important;
+}
+.insurnex-user .auth-card #authForm > .btn.btn-primary{
+  width:100%!important;
+  min-height:50px!important;
+  margin-top:4px!important;
+  border-radius:15px!important;
+  background:linear-gradient(135deg,#082f67 0%,#0a72d8 100%)!important;
+  box-shadow:0 12px 24px rgba(10,114,216,.22)!important;
+  font-size:12px!important;
+  letter-spacing:.01em;
+}
+.insurnex-user .auth-card .card{
+  border-radius:18px!important;
+  background:linear-gradient(180deg,#fbfdff,#f6f9fc)!important;
+  border-color:#e0e9f2!important;
+  box-shadow:none!important;
+}
+.insurnex-user .auth-card .card h3{
+  color:#102d4d!important;
+  font-size:13px!important;
+}
+.insurnex-user .auth-card .list-row{
+  min-height:44px!important;
+}
+.insurnex-user .auth-card .actions .btn{
+  min-height:38px!important;
+  border-radius:12px!important;
+}
+.insurnex-user .auth-card .actions #switchAuth{
+  flex:1 1 100%;
+  background:#edf6ff!important;
+  border-color:#d2e7f7!important;
+  color:#075fae!important;
+}
+.insurnex-user .auth-card .actions #lang,
+.insurnex-user .auth-card .actions #forgot{
+  flex:1 1 30%;
+  color:#526a82!important;
+}
+@media(max-width:699px){
+  .insurnex-user .auth-wrap{padding:12px 10px calc(12px + env(safe-area-inset-bottom))!important}
+  .insurnex-user .auth-card{
+    width:min(420px,100%)!important;
+    padding:16px!important;
+    border-radius:25px!important;
+  }
+  .insurnex-user .auth-logo .brand-mark.image-mark{
+    width:84px!important;
+    height:84px!important;
+  }
+  .insurnex-user .auth-logo .brand-name{font-size:23px!important}
+  .insurnex-user .auth-title{font-size:22px!important}
+}
+
+
+/* Full logo rendering for all InsurNex surfaces */
+.brand-mark.image-mark{
+  background-image:none!important;
+  background-color:#fff!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:3px!important;
+}
+.brand-mark.image-mark img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+
+/* === InsurNex Professional Auth v2 === */
+.insurnex-user .auth-wrap{
+  min-height:100dvh!important;
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:24px 14px calc(24px + env(safe-area-inset-bottom))!important;
+  overflow:auto!important;
+  background:
+    radial-gradient(520px 360px at 90% 8%,rgba(43,174,255,.19),transparent 68%),
+    radial-gradient(480px 340px at 8% 92%,rgba(8,114,216,.14),transparent 70%),
+    linear-gradient(180deg,#edf7ff 0%,#f7fbff 45%,#edf5fb 100%)!important;
+}
+.insurnex-user .auth-card-pro{
+  width:min(430px,100%)!important;
+  margin:0 auto!important;
+  padding:18px 18px 14px!important;
+  border:1px solid rgba(186,211,232,.92)!important;
+  border-radius:30px!important;
+  background:rgba(255,255,255,.985)!important;
+  box-shadow:0 30px 90px rgba(14,61,101,.17)!important;
+  backdrop-filter:blur(18px);
+}
+.insurnex-user .auth-top{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+.insurnex-user .auth-brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  min-width:0!important;
+}
+.insurnex-user .auth-logo-mark{
+  flex:0 0 auto!important;
+  width:62px!important;
+  height:62px!important;
+  padding:6px!important;
+  border-radius:19px!important;
+  background:#fff!important;
+  border:1px solid #d8e7f4!important;
+  box-shadow:0 10px 24px rgba(7,75,140,.16)!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+}
+.insurnex-user .auth-logo-mark img{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  image-rendering:auto!important;
+}
+.insurnex-user .auth-brand-copy{min-width:0!important}
+.insurnex-user .auth-brand-copy .brand-name{
+  color:#072e63!important;
+  font-size:19px!important;
+  font-weight:950!important;
+  letter-spacing:-.035em!important;
+  line-height:1.05!important;
+}
+.insurnex-user .auth-brand-copy .subtitle{
+  margin-top:4px!important;
+  color:#71859b!important;
+  font-size:9px!important;
+  line-height:1.5!important;
+  white-space:normal!important;
+}
+.insurnex-user .auth-language{display:flex!important;align-items:center!important}
+.insurnex-user .auth-icon-btn{
+  width:38px!important;
+  height:38px!important;
+  border-radius:12px!important;
+  background:#f3f8fd!important;
+  border:1px solid #dbe8f4!important;
+  color:#0a72d8!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+.insurnex-user .auth-divider{
+  height:1px!important;
+  background:#e7eef6!important;
+  margin:15px 0 17px!important;
+}
+.insurnex-user .auth-intro{margin-bottom:14px!important}
+.insurnex-user .auth-intro .eyebrow{
+  margin-bottom:5px!important;
+  color:#0a72d8!important;
+  font-size:9px!important;
+  font-weight:950!important;
+  letter-spacing:.14em!important;
+}
+.insurnex-user .auth-intro .auth-title{
+  margin:0!important;
+  color:#082f65!important;
+  font-size:25px!important;
+  font-weight:950!important;
+  letter-spacing:-.035em!important;
+}
+.insurnex-user .auth-intro .auth-copy{
+  margin:6px 0 0!important;
+  color:#73869b!important;
+  font-size:10.5px!important;
+  line-height:1.7!important;
+}
+.insurnex-user .auth-form{gap:10px!important}
+.insurnex-user .auth-form .form-grid{
+  grid-template-columns:1fr 1fr!important;
+  gap:9px!important;
+}
+.insurnex-user .auth-form .field{
+  gap:5px!important;
+}
+.insurnex-user .auth-form .field-full{
+  grid-column:1/-1!important;
+}
+.insurnex-user .auth-form .field label{
+  color:#4f667e!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+.insurnex-user .auth-form .field input,
+.insurnex-user .auth-form .field select{
+  min-height:47px!important;
+  width:100%!important;
+  padding:11px 12px!important;
+  border-radius:13px!important;
+  border:1px solid #d6e3ef!important;
+  background:#fbfdff!important;
+  color:#112b45!important;
+  font-size:12px!important;
+  outline:none!important;
+  transition:border-color .18s,box-shadow .18s,background .18s!important;
+}
+.insurnex-user .auth-form .field input:focus,
+.insurnex-user .auth-form .field select:focus{
+  background:#fff!important;
+  border-color:#55aef1!important;
+  box-shadow:0 0 0 4px rgba(10,114,216,.09)!important;
+}
+.insurnex-user .auth-submit{
+  width:100%!important;
+  min-height:50px!important;
+  margin-top:3px!important;
+  border:0!important;
+  border-radius:15px!important;
+  color:#fff!important;
+  background:linear-gradient(135deg,#072f67 0%,#0a72d8 100%)!important;
+  box-shadow:0 14px 28px rgba(10,114,216,.24)!important;
+  font-size:12px!important;
+  font-weight:950!important;
+}
+.insurnex-user .auth-submit:hover{filter:brightness(1.03)!important}
+.insurnex-user .auth-submit:disabled{opacity:.72!important;cursor:wait!important}
+.insurnex-user .auth-error{margin:0 0 10px!important}
+.insurnex-user .auth-company{
+  padding:12px!important;
+  margin-top:0!important;
+  border:1px solid #e1ebf4!important;
+  border-radius:17px!important;
+  background:linear-gradient(180deg,#fbfdff,#f5f9fc)!important;
+}
+.insurnex-user .auth-section-label{
+  margin-bottom:9px!important;
+  color:#0a72d8!important;
+  font-size:10px!important;
+  font-weight:950!important;
+}
+.insurnex-user .auth-company .form-grid{grid-template-columns:1fr 1fr!important}
+.insurnex-user .auth-terms{
+  margin-top:0!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:8px!important;
+  color:#73869a!important;
+  font-size:9px!important;
+  line-height:1.6!important;
+}
+.insurnex-user .auth-terms input{
+  margin-top:2px!important;
+  accent-color:#0a72d8!important;
+}
+.insurnex-user .auth-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:8px!important;
+  margin-top:11px!important;
+}
+.insurnex-user .auth-secondary{
+  grid-column:1/-1!important;
+  min-height:42px!important;
+  border:1px solid #cfe4f6!important;
+  border-radius:13px!important;
+  background:#eff7ff!important;
+  color:#075da8!important;
+  font-size:11px!important;
+  font-weight:900!important;
+}
+.insurnex-user .auth-link{
+  min-height:38px!important;
+  border:1px solid #e1eaf3!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  color:#5d738b!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+.insurnex-user .auth-security{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:6px!important;
+  margin-top:13px!important;
+  padding-top:12px!important;
+  border-top:1px solid #edf2f7!important;
+}
+.insurnex-user .auth-security span{
+  min-width:0!important;
+  padding:7px 4px!important;
+  text-align:center!important;
+  border-radius:11px!important;
+  background:#f7fafc!important;
+}
+.insurnex-user .auth-security b{
+  display:block!important;
+  color:#173957!important;
+  font-size:8px!important;
+  font-weight:950!important;
+}
+.insurnex-user .auth-security small{
+  display:block!important;
+  margin-top:2px!important;
+  color:#8697aa!important;
+  font-size:7px!important;
+}
+@media(max-width:520px){
+  .insurnex-user .auth-wrap{
+    align-items:flex-start!important;
+    padding:10px 9px calc(10px + env(safe-area-inset-bottom))!important;
+  }
+  .insurnex-user .auth-card-pro{
+    width:min(430px,100%)!important;
+    margin:0 auto!important;
+    padding:15px!important;
+    border-radius:25px!important;
+  }
+  .insurnex-user .auth-logo-mark{width:56px!important;height:56px!important;border-radius:17px!important}
+  .insurnex-user .auth-brand-copy .brand-name{font-size:18px!important}
+  .insurnex-user .auth-intro .auth-title{font-size:23px!important}
+}
+@media(max-width:390px){
+  .insurnex-user .auth-form .form-grid,
+  .insurnex-user .auth-company .form-grid{
+    grid-template-columns:1fr!important;
+  }
+  .insurnex-user .auth-card-pro{padding:13px!important}
+}
+
+
+/* Logo failure fallback: never show a broken-image glyph */
+.insurnex-user .logo-fallback,
+.insurnex-user .auth-logo-fallback{
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:100%!important;
+  border-radius:inherit!important;
+  background:linear-gradient(145deg,#082f67,#0a72d8)!important;
+  color:#fff!important;
+  font-weight:950!important;
+  letter-spacing:-.06em!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)!important;
+}
+.insurnex-user .brand-mark.image-mark .logo-fallback{
+  font-size:13px!important;
+}
+.insurnex-user .auth-logo-mark .auth-logo-fallback{
+  font-size:21px!important;
+  border-radius:15px!important;
+}
+
+
+/* Official InsurNex logo layout */
+.insurnex-user .auth-brand{
+  flex:1 1 auto!important;
+  justify-content:center!important;
+}
+.insurnex-user .auth-brand-copy{
+  display:none!important;
+}
+.insurnex-user .auth-logo-mark{
+  width:240px!important;
+  height:165px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.insurnex-user .auth-logo-mark img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+@media(max-width:520px){
+  .insurnex-user .auth-logo-mark{
+    width:220px!important;
+    height:150px!important;
+  }
+}
+
+
+/* === InsurNex Mobile Product Frame v3 === */
+.insurnex-user{background:#eaf2fa!important}
+.insurnex-user .auth-wrap{
+  box-sizing:border-box!important;width:100%!important;max-width:430px!important;
+  height:100dvh!important;min-height:100dvh!important;margin:0 auto!important;
+  padding:14px 10px calc(14px + env(safe-area-inset-bottom))!important;
+  border:0!important;border-radius:0!important;overflow:auto!important;
+}
+.insurnex-user .auth-card-pro{
+  width:100%!important;max-width:430px!important;margin:0 auto!important;
+  min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;
+  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+  justify-content:flex-start!important;border-radius:28px!important;
+}
+.insurnex-user .auth-top{min-height:74px!important}
+.insurnex-user .auth-brand{justify-content:center!important}
+.insurnex-user .auth-logo-mark{width:188px!important;height:92px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.insurnex-user .auth-logo-mark img{width:100%!important;height:100%!important;object-fit:contain!important}
+.insurnex-user .auth-language{gap:6px!important}
+.insurnex-user .auth-icon-btn{width:34px!important;height:34px!important;border-radius:11px!important}
+.insurnex-user .auth-firebase-status{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:29px!important;margin:-3px 0 10px!important;padding:6px 9px!important;border:1px solid #dce8f3!important;border-radius:10px!important;background:#f7fbff!important;color:#60758b!important;font-size:8.5px!important;font-weight:800!important}
+.insurnex-user .auth-firebase-status.ok{color:#15704c!important;background:#f1fbf6!important;border-color:#cfeadb!important}
+.insurnex-user .auth-firebase-status.warn{color:#9a5a00!important;background:#fff9ef!important;border-color:#f1dfbe!important}
+.insurnex-user .auth-firebase-status .status-dot{width:7px;height:7px;border-radius:50%;background:#f0ad2e;box-shadow:0 0 0 3px rgba(240,173,46,.12)}
+.insurnex-user .auth-firebase-status.ok .status-dot{background:#1faa70;box-shadow:0 0 0 3px rgba(31,170,112,.12)}
+@media(min-width:700px){
+  .insurnex-user .auth-wrap{height:min(860px,calc(100dvh - 32px))!important;min-height:0!important;margin:16px auto!important;padding:14px 10px!important;border:1px solid #d4e2ef!important;border-radius:32px!important;box-shadow:0 26px 80px rgba(12,47,86,.16)!important}
+  .insurnex-user .auth-card-pro{min-height:0!important;align-self:flex-start!important}
+  body.insurnex-user{min-height:100dvh;display:grid;place-items:center}
+}
+@media(max-width:699px){
+  .insurnex-user .auth-wrap{max-width:430px!important}
+  .insurnex-user .auth-card-pro{min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;border-radius:24px!important}
+}
+
+
+/* =========================================================
+   InsurNex SINGLE-FILE MOBILE PRODUCT SKIN
+   The User/Admin HTML files are self-contained.
+   Edit the corresponding HTML file directly.
+   ========================================================= */
+html,body{min-height:100%}
+body.insurnex-user{background:#e9f1f8!important}
+body.insurnex-user #app{width:100%;min-height:100dvh}
+.insurnex-user .auth-wrap{
+  box-sizing:border-box!important;
+  min-height:100dvh!important;
+  padding:12px 10px calc(12px + env(safe-area-inset-bottom))!important;
+  background:
+    radial-gradient(420px 280px at 95% 0%,rgba(70,178,240,.16),transparent 68%),
+    radial-gradient(380px 260px at 0% 100%,rgba(10,114,216,.10),transparent 70%),
+    #e9f1f8!important;
+}
+.insurnex-user .auth-card-pro{
+  box-sizing:border-box!important;
+  width:min(100%,390px)!important;
+  min-height:0!important;
+  padding:16px!important;
+  margin:0 auto!important;
+  border-radius:26px!important;
+  border:1px solid #d6e4f0!important;
+  background:#fff!important;
+  box-shadow:0 18px 50px rgba(17,62,101,.12)!important;
+}
+.insurnex-user .auth-top{min-height:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+.insurnex-user .auth-brand{flex:1!important;justify-content:center!important}
+.insurnex-user .auth-logo-mark{
+  width:176px!important;height:76px!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+.insurnex-user .auth-logo-mark img{width:100%!important;height:100%!important;object-fit:contain!important}
+.insurnex-user .auth-language{display:flex!important;gap:5px!important}
+.insurnex-user .auth-icon-btn{
+  width:32px!important;height:32px!important;border-radius:10px!important;
+  background:#f4f8fc!important;border:1px solid #dce8f2!important;color:#075fae!important;
+}
+.insurnex-user .auth-divider{margin:11px 0 13px!important}
+.insurnex-user .auth-intro{margin-bottom:12px!important}
+.insurnex-user .auth-intro .eyebrow{font-size:8px!important;margin-bottom:4px!important}
+.insurnex-user .auth-intro .auth-title{font-size:22px!important;line-height:1.2!important}
+.insurnex-user .auth-intro .auth-copy{font-size:10px!important;line-height:1.65!important;margin-top:5px!important}
+.insurnex-user .auth-form{gap:9px!important}
+.insurnex-user .auth-form .form-grid{gap:8px!important}
+.insurnex-user .auth-form .field label{font-size:9.5px!important}
+.insurnex-user .auth-form .field input,
+.insurnex-user .auth-form .field select{
+  min-height:46px!important;padding:10px 11px!important;border-radius:12px!important;font-size:11.5px!important;
+}
+.insurnex-user .auth-submit{
+  min-height:48px!important;border-radius:13px!important;
+  box-shadow:0 10px 22px rgba(10,114,216,.18)!important;font-size:11.5px!important;
+}
+.insurnex-user .auth-company{padding:10px!important;border-radius:15px!important}
+.insurnex-user .auth-actions{gap:7px!important;margin-top:9px!important}
+.insurnex-user .auth-secondary{min-height:40px!important}
+.insurnex-user .auth-link{min-height:36px!important}
+.insurnex-user .auth-firebase-status{
+  min-height:26px!important;margin:7px 0 7px!important;padding:5px 8px!important;
+  font-size:8px!important;border-radius:9px!important;
+}
+.insurnex-user .auth-security{margin-top:10px!important;padding-top:9px!important;gap:5px!important}
+.insurnex-user .auth-security span{padding:6px 3px!important;border-radius:9px!important}
+@media(min-width:700px){
+  body.insurnex-user{display:grid;place-items:center;background:#dfeaf4!important}
+  .insurnex-user .auth-wrap{
+    width:min(430px,100%)!important;height:min(860px,calc(100dvh - 32px))!important;
+    min-height:0!important;margin:16px auto!important;padding:10px!important;
+    border:1px solid #cbdbea!important;border-radius:32px!important;
+    box-shadow:0 24px 70px rgba(12,47,86,.15)!important;
+    overflow:auto!important;
+  }
+}
+@media(max-width:699px){
+  .insurnex-user .auth-wrap{width:100%!important;max-width:430px!important;margin:0 auto!important}
+}
+</style>
 </head>
-<body>
+<body class="insurnex-admin">
+<!-- InsurNex Admin — SINGLE FILE. Edit this file directly. -->
 <div id="toastHost"></div>
 <div id="adminApp"></div>
 <div id="modal" class="modal">
   <div class="modal-card">
-    <div class="modal-head">
-      <h3 id="modalTitle"></h3>
-      <button class="close" data-close-modal aria-label="Close">×</button>
-    </div>
+    <div class="modal-head"><h3 id="modalTitle"></h3><button class="close" data-close-modal aria-label="Close">×</button></div>
     <div id="modalBody"></div>
   </div>
 </div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="js/config.js"></script>
-<script src="js/core.js"></script>
-<script src="js/admin-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script>window.INSURNEX_CONFIG = { firebase: { apiKey: "AIzaSyCAM6QLAwB5nE_naV7pIRN6N8DnUir14Iw", authDomain: "insurnex-8a9df.firebaseapp.com", projectId: "insurnex-8a9df", storageBucket: "insurnex-8a9df.firebasestorage.app", messagingSenderId: "487585634264", appId: "1:487585634264:web:dc1e8f82a2ca94bf8484ad" }, app: { name:"InsurNex", version:"1.0.0", environment:"production" } };</script>
+<script>(() => {
+  const firebaseConfig = window.INSURNEX_CONFIG?.firebase;
+  if (!firebaseConfig?.projectId) throw new Error("InsurNex Firebase configuration is missing.");
+  if (!window.firebase?.apps?.length) firebase.initializeApp(firebaseConfig);
+
+  if (firebase.app().options.projectId !== "insurnex-8a9df") throw new Error("InsurNex is configured for the wrong Firebase project.");
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+  const firebaseProject = firebase.app().options.projectId;
+
+  const I18N = {
+    ar: {
+      appName:"InsurNex", tagline:"منصة إدارة وCRM متكاملة لوسطاء التأمين",
+      home:"الرئيسية", dashboard:"لوحة المتابعة", crm:"CRM", customers:"العملاء", clients:"العملاء",
+      leads:"الفرص", opportunities:"الفرص البيعية", quotations:"عروض الأسعار", quotes:"عروض الأسعار",
+      policies:"الوثائق", renewals:"التجديدات", claims:"المطالبات", tasks:"المهام", calendar:"التقويم",
+      documents:"المستندات", insurers:"شركات التأمين", insuranceProducts:"المنتجات التأمينية",
+      commissions:"العمولات", communications:"الاتصالات", reports:"التقارير", analytics:"التحليلات",
+      team:"الفريق", notifications:"الإشعارات", settings:"الإعدادات", support:"الدعم",
+      subscriptions:"الاشتراك", account:"الحساب", globalSearch:"بحث شامل",
+      login:"تسجيل الدخول", register:"إنشاء حساب", logout:"تسجيل الخروج", forgotPassword:"نسيت كلمة المرور؟",
+      email:"البريد الإلكتروني", password:"كلمة المرور", confirmPassword:"تأكيد كلمة المرور", name:"الاسم الكامل",
+      mobile:"رقم الهاتف", country:"الدولة", city:"المدينة", accountType:"نوع الحساب", companyName:"اسم الشركة",
+      individualBroker:"وسيط تأمين فردي", brokerageCompany:"شركة وساطة", brokerEmployee:"موظف شركة",
+      manager:"مدير", customer:"عميل", admin:"مدير المنصة",
+      personalWorkspace:"المساحة الشخصية", organizationWorkspace:"مساحة المؤسسة", switchWorkspace:"تبديل المساحة",
+      save:"حفظ", cancel:"إلغاء", add:"إضافة", edit:"تعديل", delete:"حذف", search:"بحث", loading:"جاري التحميل...",
+      retry:"إعادة المحاولة", close:"إغلاق", empty:"لا توجد بيانات بعد", saved:"تم الحفظ بنجاح.", deleted:"تم الحذف بنجاح.",
+      noPermission:"ليس لديك صلاحية للوصول إلى هذه البيانات.", network:"تعذر الاتصال بالخدمة. تحقق من الاتصال وحاول مرة أخرى.",
+      invalidEmail:"البريد الإلكتروني غير صالح.", invalidPassword:"كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
+      passwordsMismatch:"كلمتا المرور غير متطابقتين.", accountCreated:"تم إنشاء الحساب. أكمل إعداد مساحة العمل.",
+      resetSent:"تم إرسال رابط استعادة كلمة المرور.", verifyEmail:"يرجى توثيق بريدك الإلكتروني أولًا ثم تسجيل الدخول مرة أخرى.",
+      brokerLicense:"رقم ترخيص الوسيط", legalName:"الاسم القانوني", registrationNumber:"رقم التسجيل",
+      address:"العنوان", website:"الموقع الإلكتروني", employees:"عدد الموظفين", specialization:"التخصص",
+      insuranceLines:"أنواع التأمين", nationalId:"الرقم القومي/جواز السفر", dateOfBirth:"تاريخ الميلاد", gender:"الجنس",
+      occupation:"المهنة", category:"التصنيف", industry:"النشاط", source:"المصدر", stage:"المرحلة",
+      priority:"الأولوية", expectedPremium:"القسط المتوقع", expectedCommission:"العمولة المتوقعة",
+      closingDate:"تاريخ الإغلاق المتوقع", assignedBroker:"الوسيط المسؤول", insurer:"شركة التأمين", product:"المنتج",
+      coverage:"التغطية", sumInsured:"مبلغ التأمين", premium:"القسط", deductible:"التحمل", commission:"العمولة",
+      validity:"الصلاحية", policyNumber:"رقم الوثيقة", startDate:"تاريخ البداية", expiryDate:"تاريخ الانتهاء",
+      paymentStatus:"حالة الدفع", policyStatus:"حالة الوثيقة", claimNumber:"رقم المطالبة", claimType:"نوع المطالبة",
+      lossDate:"تاريخ الخسارة", claimAmount:"مبلغ المطالبة", dueDate:"تاريخ الاستحقاق", amount:"المبلغ",
+      description:"الوصف", title:"العنوان", type:"النوع", status:"الحالة", date:"التاريخ", method:"الطريقة",
+      plan:"الخطة", renewalDate:"تاريخ التجديد", body:"المحتوى", role:"الدور", permissions:"الصلاحيات",
+      online:"متصل", offline:"غير متصل", syncing:"جاري المزامنة", hot:"ساخن", warm:"دافئ", cold:"بارد",
+      renewalRisk:"مخاطر التجديد", crossSell:"فرصة بيع إضافي", today:"اليوم", thisMonth:"هذا الشهر",
+      totalCustomers:"إجمالي العملاء", newLeads:"الفرص الجديدة", openOpportunities:"الفرص المفتوحة",
+      activePolicies:"الوثائق النشطة", expiringSoon:"تنتهي قريبًا", renewalRate:"معدل التجديد",
+      pendingClaims:"المطالبات المفتوحة", outstandingPayments:"المدفوعات المستحقة",
+      paidCommission:"العمولة المحصلة", pendingCommission:"العمولة المعلقة", expected:"متوقع", pending:"معلق", paid:"مدفوع",
+      open:"مفتوح", inProgress:"قيد التنفيذ", completed:"مكتمل", overdue:"متأخر", create:"إنشاء",
+      pipeline:"مسار المبيعات", performance:"الأداء", teamPerformance:"أداء الفريق", customer360:"ملف العميل 360°",
+      timeline:"الخط الزمني", overview:"نظرة عامة", portfolio:"المحفظة التأمينية", activities:"الأنشطة",
+      notes:"الملاحظات", payments:"المدفوعات", claimsHistory:"سجل المطالبات", policyHistory:"سجل الوثائق",
+      legalDisclaimer:"إخلاء المسؤولية", language:"اللغة", security:"الأمان", profile:"الملف الشخصي",
+      professionalInfo:"البيانات المهنية", companyInfo:"بيانات الشركة", workspaceSetup:"إعداد مساحة العمل",
+      complete:"إتمام الإعداد", onboarding:"إعداد الحساب", organizationCreated:"تم إنشاء المؤسسة وإعداد عضويتك كمالك.",
+      newLead:"جديد", contacted:"تم التواصل", qualified:"مؤهل", quotation:"عرض سعر", proposal:"مقترح",
+      negotiation:"تفاوض", won:"فوز", lost:"خسارة", viewed:"تمت المشاهدة", accepted:"مقبول", rejected:"مرفوض", expired:"منتهي",
+      draft:"مسودة", active:"نشط", cancelled:"ملغى", suspended:"موقوف", renewed:"مجدد", reported:"مُبلغ عنه",
+      underReview:"قيد المراجعة", documentsRequired:"مستندات مطلوبة", submitted:"مُقدم", underAssessment:"قيد التقييم",
+      approved:"معتمد", settled:"تمت التسوية", closed:"مغلق"
+    },
+    en: {
+      appName:"InsurNex", tagline:"Insurance Broker CRM & Operating System",
+      home:"Home", dashboard:"Dashboard", crm:"CRM", customers:"Customers", clients:"Customers",
+      leads:"Leads", opportunities:"Opportunities", quotations:"Quotations", quotes:"Quotations",
+      policies:"Policies", renewals:"Renewals", claims:"Claims", tasks:"Tasks", calendar:"Calendar",
+      documents:"Documents", insurers:"Insurers", insuranceProducts:"Insurance Products", commissions:"Commissions",
+      communications:"Communications", reports:"Reports", analytics:"Analytics", team:"Team", notifications:"Notifications",
+      settings:"Settings", support:"Support", subscriptions:"Subscription", account:"Account", globalSearch:"Global search",
+      login:"Sign in", register:"Create account", logout:"Sign out", forgotPassword:"Forgot password?",
+      email:"Email", password:"Password", confirmPassword:"Confirm password", name:"Full name",
+      mobile:"Mobile", country:"Country", city:"City", accountType:"Account type", companyName:"Company name",
+      individualBroker:"Individual Broker", brokerageCompany:"Brokerage Company", brokerEmployee:"Broker Employee",
+      manager:"Manager", customer:"Customer", admin:"Platform Admin", personalWorkspace:"Personal Workspace",
+      organizationWorkspace:"Organization Workspace", switchWorkspace:"Switch workspace", save:"Save", cancel:"Cancel",
+      add:"Add", edit:"Edit", delete:"Delete", search:"Search", loading:"Loading...", retry:"Retry",
+      close:"Close", empty:"No data yet", saved:"Saved successfully.", deleted:"Deleted successfully.",
+      noPermission:"You do not have permission to access this data.", network:"Service unavailable. Check your connection and retry.",
+      invalidEmail:"Invalid email address.", invalidPassword:"Password must be at least 6 characters.", passwordsMismatch:"Passwords do not match.",
+      accountCreated:"Account created. Complete your workspace setup.", resetSent:"Password reset link sent.",
+      verifyEmail:"Please verify your email before signing in.", brokerLicense:"Broker license number", legalName:"Legal name",
+      registrationNumber:"Registration number", address:"Address", website:"Website", employees:"Employee count",
+      specialization:"Specialization", insuranceLines:"Insurance lines", nationalId:"National ID / Passport",
+      dateOfBirth:"Date of birth", gender:"Gender", occupation:"Occupation", category:"Category", industry:"Industry",
+      source:"Source", stage:"Stage", priority:"Priority", expectedPremium:"Estimated premium", expectedCommission:"Expected commission",
+      closingDate:"Expected closing date", assignedBroker:"Assigned broker", insurer:"Insurer", product:"Product",
+      coverage:"Coverage", sumInsured:"Sum insured", premium:"Premium", deductible:"Deductible", commission:"Commission",
+      validity:"Validity", policyNumber:"Policy number", startDate:"Start date", expiryDate:"Expiry date",
+      paymentStatus:"Payment status", policyStatus:"Policy status", claimNumber:"Claim number", claimType:"Claim type",
+      lossDate:"Date of loss", claimAmount:"Claim amount", dueDate:"Due date", amount:"Amount", description:"Description",
+      title:"Title", type:"Type", status:"Status", date:"Date", method:"Method", plan:"Plan", renewalDate:"Renewal date",
+      body:"Body", role:"Role", permissions:"Permissions", online:"Online", offline:"Offline", syncing:"Syncing",
+      hot:"Hot", warm:"Warm", cold:"Cold", renewalRisk:"Renewal risk", crossSell:"Cross-sell opportunity", today:"Today",
+      thisMonth:"This month", totalCustomers:"Total customers", newLeads:"New leads", openOpportunities:"Open opportunities",
+      activePolicies:"Active policies", expiringSoon:"Expiring soon", renewalRate:"Renewal rate", pendingClaims:"Open claims",
+      outstandingPayments:"Outstanding payments", paidCommission:"Collected commission", pendingCommission:"Pending commission",
+      expected:"Expected", pending:"Pending", paid:"Paid", open:"Open", inProgress:"In progress", completed:"Completed",
+      overdue:"Overdue", create:"Create", pipeline:"Sales pipeline", performance:"Performance", teamPerformance:"Team performance",
+      customer360:"Customer 360°", timeline:"Timeline", overview:"Overview", portfolio:"Insurance portfolio", activities:"Activities",
+      notes:"Notes", payments:"Payments", claimsHistory:"Claims history", policyHistory:"Policy history",
+      legalDisclaimer:"Legal disclaimer", language:"Language", security:"Security", profile:"Profile",
+      professionalInfo:"Professional details", companyInfo:"Company details", workspaceSetup:"Workspace setup",
+      complete:"Complete setup", onboarding:"Account setup", organizationCreated:"Organization created and you are the owner.",
+      newLead:"New", contacted:"Contacted", qualified:"Qualified", quotation:"Quotation", proposal:"Proposal",
+      negotiation:"Negotiation", won:"Won", lost:"Lost", viewed:"Viewed", accepted:"Accepted", rejected:"Rejected", expired:"Expired",
+      draft:"Draft", active:"Active", cancelled:"Cancelled", suspended:"Suspended", renewed:"Renewed", reported:"Reported",
+      underReview:"Under review", documentsRequired:"Documents required", submitted:"Submitted", underAssessment:"Under assessment",
+      approved:"Approved", settled:"Settled", closed:"Closed"
+    }
+  };
+
+  let lang=localStorage.getItem("insurnex-language")||"ar";
+  const state={
+    user:null, profile:null, memberships:[], adminRole:null,
+    workspace:{type:"personal",id:null,name:null}, cache:new Map(), online:navigator.onLine
+  };
+
+  const ROLES={
+    individual_broker:["broker"],
+    brokerage_company:["organizationOwner","broker"],
+    broker_employee:["broker","salesAgent","customerService","operations","claimsOfficer","finance","viewer"],
+    manager:["manager"],
+    customer:["customer"],
+    admin:["platformAdmin"]
+  };
+
+  const ROLE_LABELS={
+    organizationOwner:["organizationOwner","مدير الشركة","Company Owner"],
+    organizationAdmin:["organizationAdmin","مسؤول الشركة","Company Admin"],
+    manager:["manager","مدير","Manager"],
+    broker:["broker","وسيط","Broker"],
+    salesAgent:["salesAgent","مبيعات","Sales Agent"],
+    customerService:["customerService","خدمة العملاء","Customer Service"],
+    operations:["operations","العمليات","Operations"],
+    claimsOfficer:["claimsOfficer","المطالبات","Claims Officer"],
+    finance:["finance","المالية","Finance"],
+    viewer:["viewer","مشاهد","Viewer"],
+    customer:["customer","عميل","Customer"]
+  };
+
+  function setLanguage(next){
+    lang=next==="en"?"en":"ar";
+    localStorage.setItem("insurnex-language",lang);
+    document.documentElement.lang=lang;
+    document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+    document.dispatchEvent(new CustomEvent("insurnex:language",{detail:lang}));
+  }
+  function t(key){return I18N[lang]?.[key] ?? I18N.en[key] ?? key;}
+  function locale(){return lang;}
+  function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+  function fmtDate(v){
+    if(!v)return"—";
+    const d=v?.toDate?v.toDate():new Date(v);
+    return Number.isNaN(d.getTime())?"—":d.toLocaleDateString(lang==="ar"?"ar-EG":"en-US",{year:"numeric",month:"short",day:"numeric"});
+  }
+  function fmtMoney(v,currency="EGP"){
+    return new Intl.NumberFormat(lang==="ar"?"ar-EG":"en-US",{style:"currency",currency,maximumFractionDigits:0}).format(Number(v||0));
+  }
+  function toast(message,type="success"){
+    const host=document.querySelector("#toastHost")||document.body;
+    const el=document.createElement("div"); el.className="toast "+type; el.textContent=message; host.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add("show"));
+    setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),250)},3200);
+  }
+  function friendlyError(err){
+    const code=String(err?.code||"");
+    const map={
+      "auth/invalid-credential":t("login")+" — بيانات الاعتماد غير صحيحة.",
+      "auth/user-not-found":"الحساب غير موجود.",
+      "auth/wrong-password":"كلمة المرور غير صحيحة.",
+      "auth/email-already-in-use":"هذا البريد مستخدم بالفعل.",
+      "auth/weak-password":t("invalidPassword"),
+      "auth/invalid-email":t("invalidEmail"),
+      "auth/email-not-verified":t("verifyEmail"),
+      "permission-denied":t("noPermission"),
+      "storage/unauthorized":t("noPermission"),
+      "storage/canceled":"تم إلغاء رفع الملف.",
+      "storage/quota-exceeded":"تم تجاوز سعة التخزين المتاحة.",
+      "auth/network-request-failed":"تعذر الوصول إلى Firebase Authentication. افحص اتصال الإنترنت واسمح باتصالات Firebase ثم أعد المحاولة.",
+      "auth/operation-not-allowed":"تسجيل الدخول بالبريد وكلمة المرور غير مفعّل في Firebase Authentication.",
+      "auth/too-many-requests":"تم تقييد محاولات تسجيل الدخول مؤقتًا. انتظر قليلًا ثم أعد المحاولة.",
+      "auth/internal-error":"حدث خطأ داخلي في Firebase Authentication.",
+      "unavailable":"Firestore غير متاح حاليًا. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
+      "failed-precondition":"Firestore يحتاج إلى إعداد إضافي أو توجد مشكلة في الفهرسة/المشروع.",
+      "deadline-exceeded":"انتهت مهلة الاتصال بـ Firestore.",
+      "resource-exhausted":"تم تجاوز حصة خدمة Firebase المتاحة حاليًا."
+    };
+    if(map[code]) return map[code];
+    const raw=String(err?.message||"").trim();
+    if(code) return "Firebase: "+code+(raw? " — "+raw:"");
+    if(raw) return "Firebase: "+raw;
+    return t("network");
+  }
+
+  function firebaseStatus(){
+    const cfg=window.INSURNEX_CONFIG?.firebase||{};
+    const appOk=!!window.firebase?.apps?.length && firebase.app().options.projectId==="insurnex-8a9df";
+    return {online:navigator.onLine,configProject:cfg.projectId||null,appProject:appOk?firebase.app().options.projectId:null,authReady:!!firebase?.auth};
+  }
+
+  function roles(){
+    const r=state.profile?.roles||[];
+    return Array.isArray(r)?r:[String(r)];
+  }
+  function hasRole(...wanted){const r=roles();return wanted.some(x=>r.includes(x));}
+  function isPlatformAdmin(){return ["superAdmin","platformAdmin"].includes(state.adminRole)||["superAdmin","platformAdmin"].some(x=>roles().includes(x));}
+  function can(module,action="read"){
+    if(isPlatformAdmin())return true;
+    const r=roles();
+    if(action==="read")return true;
+    if(["settings","team","subscriptions"].includes(module))return r.some(x=>["organizationOwner","organizationAdmin","manager"].includes(x));
+    if(module==="commissions")return r.some(x=>["organizationOwner","organizationAdmin","manager","finance","broker"].includes(x));
+    if(module==="claims")return r.some(x=>["organizationOwner","organizationAdmin","manager","broker","claimsOfficer","operations"].includes(x));
+    if(module==="policies"||module==="quotations"||module==="opportunities")return r.some(x=>["organizationOwner","organizationAdmin","manager","broker","salesAgent","operations"].includes(x));
+    if(module==="customers"||module==="leads")return r.some(x=>["organizationOwner","organizationAdmin","manager","broker","salesAgent","customerService"].includes(x));
+    return r.some(x=>["organizationOwner","organizationAdmin","manager","broker","salesAgent","customerService","operations","claimsOfficer","finance"].includes(x));
+  }
+
+  async function loadIdentity(){
+    const u=auth.currentUser;
+    state.user=u;
+    if(!u){state.profile=null;state.memberships=[];return null;}
+    const snap=await db.collection("users").doc(u.uid).get();
+    state.profile=snap.exists?snap.data():{};
+    const ms=await db.collection("organizationMembers").where("userId","==",u.uid).limit(30).get();
+    state.memberships=ms.docs.map(d=>({id:d.id,...d.data()}));
+    const saved=localStorage.getItem("insurnex-workspace");
+    if(saved){try{const p=JSON.parse(saved);if(p.type==="organization"&&state.memberships.some(m=>m.organizationId===p.id))state.workspace=p;}catch{}}
+    if(state.workspace.id===null&&state.memberships.length===0)state.workspace={type:"personal",id:null,name:t("personalWorkspace")};
+    if(state.memberships.length && !state.memberships.some(m=>m.organizationId===state.workspace.id))state.workspace={type:"organization",id:state.memberships[0].organizationId,name:state.memberships[0].organizationName||t("organizationWorkspace")};
+    return state.profile;
+  }
+
+  function setWorkspace(ws){
+    state.workspace=ws;
+    localStorage.setItem("insurnex-workspace",JSON.stringify(ws));
+    state.cache.clear();
+    document.dispatchEvent(new CustomEvent("insurnex:workspace",{detail:ws}));
+  }
+
+  function scopedQuery(name,workspace=state.workspace,limit=100){
+    let q=db.collection(name);
+    if(workspace.type==="organization"&&workspace.id){
+      q=q.where("organizationId","==",workspace.id).where("workspaceType","==","organization");
+    }else{
+      q=q.where("ownerId","==",auth.currentUser.uid).where("workspaceType","==","personal");
+    }
+    return q.limit(Math.max(1,Math.min(limit,100)));
+  }
+
+  function docPayload(data={},workspace=state.workspace){
+    const user=auth.currentUser;
+    if(!user)throw new Error("Not authenticated");
+    return {
+      ...data,
+      workspaceType:workspace.type,
+      organizationId:workspace.type==="organization"?workspace.id:null,
+      ownerId:user.uid,
+      createdBy:user.uid,
+      createdAt:data.createdAt||firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+  }
+
+  async function queryDocs(collection,workspace=state.workspace,limit=100){
+    const key=collection+"|"+workspace.type+"|"+(workspace.id||"personal")+"|"+limit;
+    if(state.cache.has(key))return state.cache.get(key);
+    let snap;
+    if(collection==="insurers"||collection==="insuranceProducts"){
+      snap=await db.collection(collection).where("status","==","active").limit(Math.max(1,Math.min(limit,100))).get();
+    } else {
+      snap=await scopedQuery(collection,workspace,limit).get();
+    }
+    const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+    rows.sort((a,b)=>{
+      const ta=a.createdAt?.toMillis?a.createdAt.toMillis():Date.parse(a.createdAt||"");
+      const tb=b.createdAt?.toMillis?b.createdAt.toMillis():Date.parse(b.createdAt||"");
+      return (tb||0)-(ta||0);
+    });
+    state.cache.set(key,rows);
+    return rows;
+  }
+
+  async function writeAudit(action,targetType,targetId,metadata={},before=null,after=null){
+    if(!auth.currentUser)return;
+    try{
+      await db.collection("auditLogs").add({
+        action,targetType,targetId,actorId:auth.currentUser.uid,actorEmail:auth.currentUser.email||"",
+        organizationId:state.workspace.type==="organization"?state.workspace.id:null,
+        metadata,before:before||null,after:after||null,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e){console.warn("audit",e);}
+  }
+
+  async function logActivity(type,subject,metadata={}){
+    try{
+      const ref=await db.collection("activities").add(docPayload({
+        type,subject,metadata,actorId:auth.currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      }));
+      return ref.id;
+    }catch(e){console.warn("activity",e);return null;}
+  }
+
+  function isExpiring(date,days=30){
+    if(!date)return false;
+    const d=date?.toDate?date.toDate():new Date(date); if(Number.isNaN(d.getTime()))return false;
+    const diff=Math.ceil((d.getTime()-Date.now())/86400000);
+    return diff>=0&&diff<=days;
+  }
+
+  const Domain={
+    customers:{title:"customers",icon:"👥",collection:"customers",fields:[
+      ["fullName","name","text"],["type","category","select","individual,SME,corporate,VIP,family,other"],
+      ["mobile","mobile","tel"],["email","email","email"],["nationalId","nationalId","text"],["occupation","occupation","text"],
+      ["country","country","text"],["city","city","text"],["status","status","select","active,inactive,lost"]
+    ]},
+    leads:{title:"leads",icon:"🎯",collection:"leads",fields:[
+      ["fullName","name","text"],["phone","mobile","tel"],["email","email","email"],["source","source","select","Website,Facebook,Instagram,WhatsApp,Referral,Phone,Email,Advertisement,Existing Customer,Other"],
+      ["insuranceType","type","text"],["estimatedPremium","expectedPremium","number"],["priority","priority","select","hot,warm,cold"],
+      ["stage","stage","select","New,Contacted,Qualified,Quotation,Negotiation,Won,Lost"],["expectedCloseDate","closingDate","date"]
+    ]},
+    opportunities:{title:"opportunities",icon:"💼",collection:"opportunities",fields:[
+      ["customerName","customers","text"],["insuranceType","type","text"],["product","product","text"],["insurer","insurer","text"],
+      ["estimatedPremium","expectedPremium","number"],["expectedCommission","expectedCommission","number"],["probability","priority","number"],
+      ["closingDate","closingDate","date"],["assignedBrokerName","assignedBroker","text"],["status","status","select","New,Quotation,Proposal,Negotiation,Won,Lost"]
+    ]},
+    quotations:{title:"quotations",icon:"📑",collection:"quotations",fields:[
+      ["customerName","customers","text"],["product","product","text"],["insurer","insurer","text"],["coverage","coverage","textarea"],
+      ["sumInsured","sumInsured","number"],["premium","premium","number"],["deductible","deductible","number"],["commissionAmount","commission","number"],
+      ["validUntil","validity","date"],["status","status","select","Draft,Sent,Viewed,Accepted,Rejected,Expired"]
+    ]},
+    policies:{title:"policies",icon:"🛡️",collection:"policies",fields:[
+      ["policyNumber","policyNumber","text"],["customerName","customers","text"],["insurer","insurer","text"],["product","product","text"],
+      ["insuranceType","type","text"],["startDate","startDate","date"],["expiryDate","expiryDate","date"],["premium","premium","number"],
+      ["commissionRate","commission","number"],["commissionAmount","commission","number"],["paymentStatus","paymentStatus","select","pending,partial,paid,overdue"],
+      ["status","policyStatus","select","Draft,Active,Expired,Cancelled,Suspended,Renewed"]
+    ]},
+    renewals:{title:"renewals",icon:"🔄",collection:"renewals",fields:[
+      ["policyNumber","policyNumber","text"],["customerName","customers","text"],["expiryDate","expiryDate","date"],
+      ["stage","stage","select","90 Days,60 Days,45 Days,30 Days,15 Days,7 Days,Expired"],["status","status","select","Open,In Progress,Renewed,Lost,Expired"],
+      ["assignedBrokerName","assignedBroker","text"],["notes","notes","textarea"]
+    ]},
+    claims:{title:"claims",icon:"🧾",collection:"claims",fields:[
+      ["claimNumber","claimNumber","text"],["customerName","customers","text"],["policyNumber","policyNumber","text"],["insurer","insurer","text"],
+      ["claimType","claimType","text"],["dateOfLoss","lossDate","date"],["amount","claimAmount","number"],
+      ["status","status","select","Reported,Under Review,Documents Required,Submitted,Under Assessment,Approved,Rejected,Settled,Closed"],["description","description","textarea"]
+    ]},
+    tasks:{title:"tasks",icon:"✅",collection:"tasks",fields:[
+      ["title","title","text"],["description","description","textarea"],["dueDate","dueDate","date"],["priority","priority","select","low,medium,high,urgent"],
+      ["assignedToName","assignedBroker","text"],["status","status","select","To Do,In Progress,Completed,Overdue"],
+      ["linkedEntityType","type","text"],["linkedEntityId","policyNumber","text"]
+    ]},
+    calendarEvents:{title:"calendar",icon:"📅",collection:"calendarEvents",fields:[
+      ["title","title","text"],["date","date","datetime-local"],["type","type","select","Meeting,Call,Follow-up,Renewal,Claim deadline,Task,Policy expiry"],
+      ["customerName","customers","text"],["assignedToName","assignedBroker","text"],["status","status","select","scheduled,completed,cancelled"],["notes","notes","textarea"]
+    ]},
+    documents:{title:"documents",icon:"📎",collection:"documents",fields:[
+      ["name","name","text"],["entityType","type","select","Customer,Policy,Claim,Quotation,Company"],["entityId","policyNumber","text"],
+      ["category","category","text"],["fileName","title","text"],["mimeType","type","text"],["status","status","select","active,archived"]
+    ]},
+    insurers:{title:"insurers",icon:"🏢",collection:"insurers",fields:[
+      ["name","name","text"],["license","brokerLicense","text"],["contactName","assignedBroker","text"],["email","email","email"],
+      ["phone","mobile","tel"],["website","website","url"],["commissionStructure","commission","textarea"],["status","status","select","active,inactive"]
+    ]},
+    insuranceProducts:{title:"insuranceProducts",icon:"📦",collection:"insuranceProducts",fields:[
+      ["name","name","text"],["insuranceType","type","text"],["insurer","insurer","text"],["coverage","coverage","textarea"],
+      ["exclusions","description","textarea"],["premiumRange","premium","text"],["commission","commission","number"],
+      ["eligibility","notes","textarea"],["status","status","select","active,inactive"]
+    ]},
+    commissions:{title:"commissions",icon:"💰",collection:"commissions",fields:[
+      ["policyNumber","policyNumber","text"],["customerName","customers","text"],["insurer","insurer","text"],["brokerName","assignedBroker","text"],
+      ["premium","premium","number"],["commissionRate","commission","number"],["commissionAmount","amount","number"],["paidCommission","paidCommission","number"],
+      ["commissionDate","date","date"],["status","status","select","Expected,Pending,Approved,Paid,Cancelled"]
+    ]},
+    communications:{title:"communications",icon:"💬",collection:"communications",fields:[
+      ["customerName","customers","text"],["channel","type","select","Email,SMS,WhatsApp,In-app,Phone"],["subject","subject","text"],
+      ["message","description","textarea"],["relatedType","type","text"],["relatedId","policyNumber","text"],["status","status","select","draft,sent,failed"]
+    ]},
+    supportTickets:{title:"support",icon:"🎧",collection:"supportTickets",fields:[
+      ["subject","subject","text"],["priority","priority","select","low,medium,high,urgent"],["status","status","select","Open,In Progress,Waiting for User,Resolved,Closed"],
+      ["message","description","textarea"]
+    ]},
+    subscriptions:{title:"subscriptions",icon:"💼",collection:"subscriptions",fields:[
+      ["plan","plan","select","Free,Professional,Business,Enterprise"],["status","status","select","trial,active,pastDue,cancelled"],
+      ["renewalDate","renewalDate","date"],["customerLimit","total","number"],["userLimit","employees","number"]
+    ]},
+    payments:{title:"payments",icon:"💳",collection:"payments",fields:[["policyNumber","policyNumber","text"],["customerName","customers","text"],["amount","amount","number"],["date","date","date"],["method","method","select","Cash,Bank transfer,Card,Online"],["status","status","select","pending,partial,paid,refunded"]]},
+    teams:{title:"team",icon:"👨‍👩‍👧‍👦",collection:"teams",fields:[
+      ["name","name","text"],["managerName","assignedBroker","text"],["description","description","textarea"],["status","status","select","active,inactive"]
+    ]}
+  };
+
+  window.addEventListener("online",()=>{state.online=true;document.dispatchEvent(new CustomEvent("insurnex:network",{detail:true}));});
+  window.addEventListener("offline",()=>{state.online=false;document.dispatchEvent(new CustomEvent("insurnex:network",{detail:false}));});
+  setLanguage(lang);
+
+  window.InsurNex={
+    auth,db,storage,state,I18N,Domain,ROLES,ROLE_LABELS,t,setLanguage,locale,esc,fmtDate,fmtMoney,toast,friendlyError,
+    roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring,firebaseProject,firebaseStatus
+  };
+})();</script>
+<script>(function(){
+const A=InsurNex.auth,db=InsurNex.db,S=InsurNex.state,t=InsurNex.t,E=InsurNex.esc,D=InsurNex.fmtDate,M=InsurNex.fmtMoney,toast=InsurNex.toast,err=InsurNex.friendlyError;
+let view=(location.hash||"#dashboard").slice(1),cache={};
+const mod={
+organizations:["Organizations",[["name","Company","text"],["legalName","Legal","text"],["ownerId","Owner","text"],["licenseNumber","License","text"],["status","Status","select","active,suspended"]]],
+users:["Users",[["name","Name","text"],["email","Email","email"],["mobile","Mobile","tel"],["accountType","Account type","text"],["status","Status","select","active,suspended"]]],
+brokerProfiles:["Brokers",[["userId","User","text"],["licenseNumber","License","text"],["specialization","Specialization","text"],["companyName","Company","text"],["status","Status","select","active,suspended"]]],
+teams:["Teams",[["name","Name","text"],["managerName","Manager","text"],["description","Description","textarea"],["status","Status","select","active,inactive"]]],
+insurers:["Insurers",[["name","Name","text"],["license","License","text"],["email","Email","email"],["phone","Phone","tel"],["website","Website","url"],["status","Status","select","active,inactive"]]],
+insuranceProducts:["Products",[["name","Name","text"],["insuranceType","Type","text"],["insurer","Insurer","text"],["premiumRange","Premium range","text"],["commission","Commission","number"],["status","Status","select","active,inactive"]]],
+plans:["Plans",[["name","Name","text"],["customerLimit","Customers","number"],["userLimit","Users","number"],["policyLimit","Policies","number"],["monthlyPrice","Monthly price","number"],["status","Status","select","active,inactive"]]],
+subscriptions:["Subscriptions",[["ownerId","Owner","text"],["plan","Plan","select","Free,Professional,Business,Enterprise"],["status","Status","select","trial,active,pastDue,cancelled"],["renewalDate","Renewal","date"]]],
+supportTickets:["Support",[["subject","Subject","text"],["priority","Priority","select","low,medium,high,urgent"],["status","Status","select","Open,In Progress,Waiting for User,Resolved,Closed"],["message","Message","textarea"]]],
+knowledgeBase:["Knowledge Base",[["title","Title","text"],["category","Category","text"],["status","Status","select","draft,published"],["body","Body","textarea"]]],
+announcements:["Announcements",[["title","Title","text"],["type","Type","text"],["status","Status","select","draft,published"],["body","Body","textarea"]]],
+settings:["Settings",[["key","Key","text"],["value","Value","textarea"]]],
+policies:["Policies",[["policyNumber","Policy","text"],["customerName","Customer","text"],["insurer","Insurer","text"],["product","Product","text"],["premium","Premium","number"],["expiryDate","Expiry","date"],["status","Status","select","Active,Expired,Cancelled,Suspended,Renewed"]]],
+renewals:["Renewals",[["policyNumber","Policy","text"],["customerName","Customer","text"],["expiryDate","Expiry","date"],["stage","Stage","select","90 Days,60 Days,45 Days,30 Days,15 Days,7 Days,Expired"],["status","Status","select","Open,In Progress,Renewed,Lost,Expired"]]],
+claims:["Claims",[["claimNumber","Claim","text"],["customerName","Customer","text"],["policyNumber","Policy","text"],["amount","Amount","number"],["status","Status","select","Reported,Under Review,Documents Required,Submitted,Under Assessment,Approved,Rejected,Settled,Closed"]]],
+commissions:["Commissions",[["policyNumber","Policy","text"],["customerName","Customer","text"],["insurer","Insurer","text"],["premium","Premium","number"],["commissionAmount","Commission","number"],["status","Status","select","Expected,Pending,Approved,Paid,Cancelled"]]]
+};
+const nav=["dashboard","organizations","users","brokerProfiles","teams","insurers","insuranceProducts","plans","subscriptions","policies","renewals","claims","commissions","supportTickets","knowledgeBase","announcements","analytics","auditLogs","settings"];
+function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="assets/logo-mark.svg" alt="InsurNex"></div>'}
+function ico(n){return ({dashboard:"⌂",organizations:"🏢",users:"👤",brokerProfiles:"🪪",teams:"👨‍👩‍👧‍👦",insurers:"🏦",insuranceProducts:"📦",plans:"💳",subscriptions:"🔖",policies:"🛡️",renewals:"🔄",claims:"🧾",commissions:"💰",supportTickets:"🎧",knowledgeBase:"📚",announcements:"📢",analytics:"📊",auditLogs:"🔎",settings:"⚙️"}[n]||"•")}
+function shell(){
+  const links=nav.map(n=>'<a class="drawer-link" href="#'+n+'" data-nav="'+n+'"><span>'+ico(n)+' '+(mod[n]?mod[n][0]:(n==="auditLogs"?"Audit Logs":n==="analytics"?"Analytics":"Dashboard"))+'</span><span>›</span></a>').join("");
+  document.getElementById("adminApp").innerHTML='<div class="app-shell"><aside class="desktop-drawer"><div class="drawer-head">'+mark()+' <strong>InsurNex Admin</strong></div>'+links+'<button class="btn btn-danger" id="logout" style="margin-top:12px">'+t("logout")+'</button></aside><main class="main"><header class="topbar"><div class="brand">'+mark()+'<div><div class="brand-name">InsurNex Admin</div><div class="subtitle">Platform administration</div></div></div><div class="actions"><span class="badge success">'+E(S.adminRole||"platformAdmin")+'</span><button class="btn" id="lang">AR/EN</button><button class="btn" id="menu">☰</button><button class="btn" id="logout2">⇥</button></div></header><section id="adminView" class="content"></section></main><div class="drawer" id="drawer"><div class="drawer-panel"><div class="drawer-head"><strong>InsurNex Admin</strong><button class="close" id="closeDrawer">×</button></div>'+links+'<button class="btn btn-danger" id="logout3" style="margin-top:12px">'+t("logout")+'</button></div></div></div>';
+  document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=e=>{e.preventDefault();view=b.dataset.nav;location.hash=view;render();drawer(false)});
+  document.getElementById("logout").onclick=logout;document.getElementById("logout2").onclick=logout;document.getElementById("logout3").onclick=logout;
+  document.getElementById("menu").onclick=()=>drawer(true);document.getElementById("closeDrawer").onclick=()=>drawer(false);
+  document.getElementById("lang").onclick=()=>{InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");shell();render()};
+}
+function drawer(show){document.getElementById("drawer")?.classList.toggle("show",show)}
+function login(message){
+ document.getElementById("adminApp").innerHTML='<main class="auth-wrap"><section class="auth-card"><div class="auth-logo">'+mark()+'<div><div class="brand-name">InsurNex Admin</div><div class="subtitle">Restricted platform administration</div></div></div><h1 class="auth-title">'+t("login")+'</h1>'+(message?'<div class="error-box">'+E(message)+'</div>':'')+'<form id="adminLogin" class="form-stack"><div class="field"><label>'+t("email")+'</label><input name="email" type="email" required></div><div class="field"><label>'+t("password")+'</label><input name="password" type="password" required></div><button class="btn btn-primary">'+t("login")+'</button></form><div class="section-note" style="margin-top:12px">platformRole must be superAdmin or platformAdmin.</div></section></main>';
+ document.getElementById("adminLogin").onsubmit=async e=>{e.preventDefault();try{let f=new FormData(e.currentTarget);await A.signInWithEmailAndPassword(String(f.get("email")).trim(),String(f.get("password")));await guard()}catch(x){login(err(x))}}
+}
+async function guard(){
+ if(!A.currentUser){login();return}
+ try{let r=(await A.currentUser.getIdTokenResult(true)).claims.platformRole;if(!["superAdmin","platformAdmin"].includes(r)){await A.signOut();login("الحساب لا يملك صلاحية InsurNex Admin.");return}S.user=A.currentUser;S.adminRole=r;shell();render()}catch(x){login(err(x))}
+}
+async function load(c){if(cache[c])return cache[c];let s=await db.collection(c).limit(100).get();return cache[c]=s.docs.map(d=>({id:d.id,...d.data()}))}
+function invalidate(){cache={}}
+async function dashboard(){
+ let a=await Promise.all(["users","organizations","policies","claims","renewals","supportTickets","subscriptions","commissions"].map(load));
+ let [u,o,p,c,r,s,sub,cm]=a, expected=cm.reduce((n,x)=>n+Number(x.commissionAmount||0),0),paid=cm.filter(x=>x.status==="Paid").reduce((n,x)=>n+Number(x.paidCommission||x.commissionAmount||0),0);
+ return '<div class="page-head"><div><div class="eyebrow">InsurNex Admin</div><h1>Dashboard</h1><div class="muted">'+E(S.adminRole)+'</div></div></div><div class="stats"><div class="stat"><div class="value">'+u.length+'</div><div class="label">Users</div></div><div class="stat"><div class="value">'+o.length+'</div><div class="label">Organizations</div></div><div class="stat"><div class="value">'+p.length+'</div><div class="label">Policies</div></div><div class="stat"><div class="value">'+c.length+'</div><div class="label">Claims</div></div><div class="stat"><div class="value">'+r.length+'</div><div class="label">Renewals</div></div><div class="stat"><div class="value">'+s.length+'</div><div class="label">Support</div></div><div class="stat"><div class="value">'+sub.length+'</div><div class="label">Subscriptions</div></div><div class="stat"><div class="value">'+fmt(expected-paid)+'</div><div class="label">Pending commission</div></div></div><div class="grid grid-2" style="margin-top:14px"><div class="card"><h3>Commission control</h3><div class="list"><div class="list-row"><span>Expected</span><strong>'+fmt(expected)+'</strong></div><div class="list-row"><span>Paid</span><strong>'+fmt(paid)+'</strong></div><div class="list-row"><span>Pending</span><strong>'+fmt(Math.max(0,expected-paid))+'</strong></div></div></div><div class="card"><h3>Governance</h3><p class="section-note">Platform administration is isolated from brokerage workspaces. Authentication claims, Firestore Rules and audit logs remain the authorization boundary.</p></div></div>'
+}
+function fmt(v){return M(v)}
+async function table(c){
+ let [title,fields]=mod[c],rows=await load(c),q=(document.getElementById("search")?.value||"").toLowerCase();if(q)rows=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(q));
+ return '<div class="page-head"><div><div class="eyebrow">Admin</div><h1>'+E(title)+'</h1></div><div class="actions"><button class="btn btn-primary" data-add="'+c+'">'+t("add")+'</button><button class="btn" data-csv="'+c+'">CSV</button></div></div><div class="card" style="margin-bottom:14px"><div class="field"><label>'+t("search")+'</label><input id="search"></div></div>'+(rows.length?'<div class="table-wrap"><table class="data-table"><thead><tr>'+fields.map(f=>'<th>'+E(f[1])+'</th>').join("")+'<th></th></tr></thead><tbody>'+rows.map(r=>'<tr>'+fields.map(f=>'<td>'+E(r[f[0]]==null||r[f[0]]===""?"—":r[f[0]])+'</td>').join("")+'<td><div class="actions"><button class="btn" data-edit="'+c+':'+r.id+'">'+t("edit")+'</button><button class="btn btn-danger" data-del="'+c+':'+r.id+'">'+t("delete")+'</button></div></td></tr>').join("")+'</tbody></table></div>':'<div class="card empty">'+t("empty")+'</div>')
+}
+async function analytics(){let p=await load("policies"),c=await load("claims"),r=await load("renewals"),cm=await load("commissions");let premium=p.reduce((n,x)=>n+Number(x.premium||0),0),commission=cm.reduce((n,x)=>n+Number(x.commissionAmount||0),0),renewal=r.length?Math.round(r.filter(x=>x.status==="Renewed").length/r.length*100):0,open=c.filter(x=>!["Settled","Closed","Rejected"].includes(x.status)).length;return '<div class="page-head"><div><div class="eyebrow">📊 Analytics</div><h1>Platform Analytics</h1></div></div><div class="stats"><div class="stat"><div class="value">'+fmt(premium)+'</div><div class="label">Premium</div></div><div class="stat"><div class="value">'+fmt(commission)+'</div><div class="label">Commission</div></div><div class="stat"><div class="value">'+renewal+'%</div><div class="label">Renewal rate</div></div><div class="stat"><div class="value">'+open+'</div><div class="label">Open claims</div></div></div>'}
+async function audit(){let rows=await load("auditLogs");return '<div class="page-head"><div><div class="eyebrow">🔎 Audit</div><h1>Audit Logs</h1></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Action</th><th>Target</th><th>Actor</th><th>Workspace</th><th>Created</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+E(r.action||"")+'</td><td>'+E((r.targetType||"")+" / "+(r.targetId||""))+'</td><td>'+E(r.actorEmail||r.actorId||"")+'</td><td>'+E(r.organizationId||"platform")+'</td><td>'+D(r.createdAt)+'</td></tr>').join("")+'</tbody></table></div>'}
+function form(c,row){let fs=mod[c][1];return '<form id="adminForm" class="form-stack"><div class="form-grid">'+fs.map(f=>{let v=row[f[0]]??"";if(f[2]==="textarea")return '<div class="field" style="grid-column:1/-1"><label>'+E(f[1])+'</label><textarea name="'+f[0]+'">'+E(v)+'</textarea></div>';if(f[2]==="select")return '<div class="field"><label>'+E(f[1])+'</label><select name="'+f[0]+'">'+String(f[3]).split(",").map(x=>x=x.trim()).map(x=>'<option value="'+E(x)+'" '+(String(v)===x?"selected":"")+'>'+E(x)+'</option>').join("")+'</select></div>';return '<div class="field"><label>'+E(f[1])+'</label><input type="'+f[2]+'" name="'+f[0]+'" value="'+E(v)+'"></div>'}).join("")+'</div><div class="form-actions"><button type="button" class="btn" data-close-modal>'+t("cancel")+'</button><button class="btn btn-primary">'+t("save")+'</button></div></form>'}
+function edit(c,id){let row=id?(cache[c]||[]).find(x=>x.id===id)||{}:{};document.getElementById("modalTitle").textContent=(id?t("edit"):t("add"))+" "+mod[c][0];document.getElementById("modalBody").innerHTML=form(c,row);document.getElementById("modal").classList.add("show");document.getElementById("adminForm").onsubmit=async e=>{e.preventDefault();let f=new FormData(e.currentTarget),d={};mod[c][1].forEach(x=>d[x[0]]=x[2]==="number"&&f.get(x[0])!==""?Number(f.get(x[0])):f.get(x[0]));try{if(id)await db.collection(c).doc(id).update({...d,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});else{let ref=await db.collection(c).add({...d,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:S.user.uid});id=ref.id}await db.collection("auditLogs").add({action:id?"admin_save":"admin_create",targetType:c,targetId:id,actorId:S.user.uid,actorEmail:S.user.email||"",createdAt:firebase.firestore.FieldValue.serverTimestamp()});invalidate();close();toast(t("saved"));render()}catch(x){toast(err(x),"error")}}}
+async function del(c,id){if(!confirm(t("delete")+"?"))return;try{await db.collection(c).doc(id).delete();await db.collection("auditLogs").add({action:"admin_delete",targetType:c,targetId:id,actorId:S.user.uid,actorEmail:S.user.email||"",createdAt:firebase.firestore.FieldValue.serverTimestamp()});invalidate();toast(t("deleted"));render()}catch(x){toast(err(x),"error")}}
+function close(){document.getElementById("modal").classList.remove("show")}
+async function render(){let root=document.getElementById("adminView");if(!root)return;root.innerHTML='<div class="loading">'+t("loading")+'</div>';try{root.innerHTML=view==="dashboard"?await dashboard():view==="analytics"?await analytics():view==="auditLogs"?await audit():mod[view]?await table(view):'<div class="card empty">'+t("empty")+'</div>';wire()}catch(x){root.innerHTML='<div class="error-box">'+E(err(x))+'</div>'}}
+function wire(){document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>edit(b.dataset.add,null));document.querySelectorAll("[data-edit]").forEach(b=>{let p=b.dataset.edit.split(":");b.onclick=()=>edit(p[0],p[1])});document.querySelectorAll("[data-del]").forEach(b=>{let p=b.dataset.del.split(":");b.onclick=()=>del(p[0],p[1])});document.getElementById("search")?.addEventListener("input",()=>{let q=document.getElementById("search").value.toLowerCase();document.querySelectorAll(".data-table tbody tr").forEach(tr=>tr.style.display=tr.textContent.toLowerCase().includes(q)?"":"none")})}
+function logout(){A.signOut().then(()=>login())}
+A.onAuthStateChanged(()=>guard());window.addEventListener("hashchange",()=>{view=(location.hash||"#dashboard").slice(1);if(A.currentUser)render()});document.addEventListener("click",e=>{if(e.target.matches("[data-close-modal]")||e.target.id==="modal")close()});
+})();</script>
 </body>
 </html>
