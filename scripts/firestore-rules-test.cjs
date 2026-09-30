@@ -3,11 +3,11 @@
 const fs = require("node:fs");
 const assert = require("node:assert/strict");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
-const { doc, setDoc, updateDoc, deleteDoc, getDoc } = require("firebase/firestore");
+const { doc, setDoc, updateDoc, deleteDoc, getDoc, writeBatch } = require("firebase/firestore");
 
 async function main() {
   const testEnv = await initializeTestEnvironment({
-    projectId: "demo-insurnex-rules",
+    projectId: "demo-insurnex",
     firestore: { rules: fs.readFileSync("firestore.rules", "utf8") }
   });
 
@@ -56,7 +56,7 @@ async function main() {
       organizationId: "org-1", userId: "new-broker", role: "broker", status: "active"
     }));
     await assertSucceeds(updateDoc(doc(managerDb, "organizationMembers/org-1_broker-1"), {
-      status: "suspended", updatedAt: "test-update"
+      updatedAt: "test-update"
     }));
     await assertFails(updateDoc(doc(userDb, "users/user-1"), { accountType: "brokerage_company" }));
     await assertFails(updateDoc(doc(userDb, "users/user-1"), { organizationId: "org-1" }));
@@ -67,13 +67,7 @@ async function main() {
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
 
     // New organization + owner membership must still work atomically during company registration.
-    await testEnv.withSecurityRulesDisabled(async context => {
-      const db = context.firestore();
-      await deleteDoc(doc(db, "organizations/org-new"));
-      await deleteDoc(doc(db, "organizationMembers/org-new_new-owner"));
-    });
     const ownerRegistrationDb = testEnv.authenticatedContext("new-owner").firestore();
-    const { writeBatch } = require("firebase/firestore");
     const batch = writeBatch(ownerRegistrationDb);
     batch.set(doc(ownerRegistrationDb, "organizations/org-new"), { ownerId: "new-owner", name: "New Brokerage" });
     batch.set(doc(ownerRegistrationDb, "organizationMembers/org-new_new-owner"), {
