@@ -69,6 +69,13 @@ async function main() {
     // New organization + owner membership must still work atomically during company registration.
     const ownerRegistrationDb = testEnv.authenticatedContext("new-owner").firestore();
     const batch = writeBatch(ownerRegistrationDb);
+    batch.set(doc(ownerRegistrationDb, "users/new-owner"), {
+      uid: "new-owner", accountType: "brokerage_company", roles: ["organizationOwner", "broker"],
+      email: "new-owner@example.invalid", onboardingComplete: false
+    });
+    batch.set(doc(ownerRegistrationDb, "brokerProfiles/new-owner"), {
+      userId: "new-owner", licenseNumber: "", companyName: "New Brokerage"
+    });
     batch.set(doc(ownerRegistrationDb, "organizations/org-new"), { ownerId: "new-owner", name: "New Brokerage" });
     batch.set(doc(ownerRegistrationDb, "organizationMembers/org-new_new-owner"), {
       organizationId: "org-new", userId: "new-owner", role: "organizationOwner", status: "active"
