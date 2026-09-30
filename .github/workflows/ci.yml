@@ -24,7 +24,7 @@ jobs:
           distribution: temurin
           java-version: "21"
       - name: Repository smoke test
-        run: node scripts/smoke-test.cjs
+        run: npm test
       - name: Syntax check
         run: |
           node --check js/config.js
@@ -32,5 +32,8 @@ jobs:
           node --check js/user.js
           node --check js/admin-app.js
           node --check scripts/migrate-legacy-data.cjs
+          node --check scripts/migration-utils.cjs
+          node --check scripts/migration-test.cjs
+          node --check scripts/check-firebase-auth.cjs
       - name: Validate Firebase rules
         run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "node -e \"console.log('Firestore rules loaded')\""
