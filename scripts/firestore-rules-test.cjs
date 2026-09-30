@@ -70,6 +70,12 @@ async function main() {
       workspaceType: "organization", organizationId: "org-1", ownerId: "outsider-1", title: "Must be denied"
     }));
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
+    await assertFails(updateDoc(doc(brokerDb, "leads/org-lead"), {
+      organizationId: "org-other", workspaceType: "organization"
+    }));
+    await assertFails(updateDoc(doc(brokerDb, "leads/org-lead"), {
+      workspaceType: "personal", organizationId: null, ownerId: "broker-1"
+    }));
 
     // New organization + owner membership must still work atomically during company registration.
     const ownerRegistrationDb = testEnv.authenticatedContext("new-owner").firestore();
