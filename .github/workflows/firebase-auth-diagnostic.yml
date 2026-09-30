@@ -1,6 +1,8 @@
 name: Firebase Auth Diagnostic
 
 on:
+  push:
+    branches: ["diagnostics/firebase-auth-live-check"]
   workflow_dispatch:
     inputs:
       app_origin:
