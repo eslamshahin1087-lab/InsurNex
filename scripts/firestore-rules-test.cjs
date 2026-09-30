@@ -42,6 +42,11 @@ async function main() {
     const outsiderDb = testEnv.authenticatedContext("outsider-1").firestore();
     const userDb = testEnv.authenticatedContext("user-1").firestore();
 
+    await assertFails(updateDoc(doc(ownerDb, "organizations/org-1"), { ownerId: "manager-1" }));
+    await assertFails(deleteDoc(doc(ownerDb, "organizations/org-1")));
+    await assertSucceeds(updateDoc(doc(ownerDb, "organizations/org-1"), {
+      name: "Renamed Brokerage", updatedAt: "test-update"
+    }));
     await assertFails(updateDoc(doc(managerDb, "organizationMembers/org-1_manager-1"), { role: "organizationOwner" }));
     await assertFails(deleteDoc(doc(managerDb, "organizationMembers/org-1_owner-1")));
     await assertFails(setDoc(doc(managerDb, "organizationMembers/org-1_escalation"), {
