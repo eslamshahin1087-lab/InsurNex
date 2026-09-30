@@ -27,6 +27,101 @@ service cloud.firestore {
         && get(memberPath(orgId, request.auth.uid)).data.role in roles;
     }
 
+    function validOrgRole(role) {
+      return role in ['organizationOwner', 'organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance', 'viewer'];
+    }
+
+    function ownerAssignableRole(role) {
+      return role in ['organizationAdmin', 'manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance', 'viewer'];
+    }
+
+    function adminAssignableRole(role) {
+      return role in ['manager', 'broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance', 'viewer'];
+    }
+
+    function managerAssignableRole(role) {
+      return role in ['broker', 'salesAgent', 'customerService', 'operations', 'claimsOfficer', 'finance', 'viewer'];
+    }
+
+    function validMemberStatus(status) {
+      return status in ['active', 'invited', 'suspended'];
+    }
+
+    function createsInitialOwnerMember(orgId, memberId) {
+      return signedIn()
+        && memberId == orgId + '_' + request.auth.uid
+        && request.resource.data.organizationId == orgId
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.role == 'organizationOwner'
+        && request.resource.data.status == 'active'
+        && getAfter(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId == request.auth.uid;
+    }
+
+    function canCreateOrgMember(orgId, memberId) {
+      return signedIn()
+        && request.resource.data.organizationId == orgId
+        && request.resource.data.userId is string
+        && memberId == orgId + '_' + request.resource.data.userId
+        && validMemberStatus(request.resource.data.status)
+        && validOrgRole(request.resource.data.role)
+        && (
+          (hasOrgRole(orgId, ['organizationOwner']) && ownerAssignableRole(request.resource.data.role))
+          || (hasOrgRole(orgId, ['organizationAdmin']) && adminAssignableRole(request.resource.data.role))
+          || (hasOrgRole(orgId, ['manager']) && managerAssignableRole(request.resource.data.role))
+        );
+    }
+
+    function canUpdateOrgMember(orgId, memberId) {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isPlatformAdmin()
+        || (
+          request.resource.data.organizationId == resource.data.organizationId
+          && request.resource.data.userId == resource.data.userId
+          && memberId == orgId + '_' + resource.data.userId
+          && validMemberStatus(request.resource.data.status)
+          && (
+            (
+              hasOrgRole(orgId, ['organizationOwner'])
+              && (
+                !changed.hasAny(['role'])
+                || (resource.data.role != 'organizationOwner' && ownerAssignableRole(request.resource.data.role))
+              )
+              && (resource.data.role != 'organizationOwner' || request.resource.data.status == 'active')
+            )
+            || (
+              hasOrgRole(orgId, ['organizationAdmin'])
+              && resource.data.role != 'organizationOwner'
+              && resource.data.role != 'organizationAdmin'
+              && (
+                !changed.hasAny(['role'])
+                || adminAssignableRole(request.resource.data.role)
+              )
+            )
+            || (
+              hasOrgRole(orgId, ['manager'])
+              && managerAssignableRole(resource.data.role)
+              && managerAssignableRole(request.resource.data.role)
+              && changed.hasOnly(['role', 'status', 'updatedAt', 'teamId', 'title', 'department'])
+            )
+          )
+        );
+    }
+
+    function canDeleteOrgMember(orgId, memberId) {
+      return isPlatformAdmin()
+        || (
+          memberId == orgId + '_' + resource.data.userId
+          && resource.data.role != 'organizationOwner'
+          && (
+            hasOrgRole(orgId, ['organizationOwner'])
+            || (
+              hasOrgRole(orgId, ['organizationAdmin'])
+              && resource.data.role != 'organizationAdmin'
+            )
+          )
+        );
+    }
+
     function ownsPersonal(data) {
       return signedIn()
         && data.workspaceType == 'personal'
@@ -69,6 +164,9 @@ service cloud.firestore {
     function canWriteNewUser() {
       return signedIn()
         && request.resource.data.uid == request.auth.uid
+        && request.resource.data.accountType in ['individual_broker', 'brokerage_company', 'broker_employee', 'manager', 'customer']
+        && request.resource.data.roles is list
+        && request.resource.data.roles.hasOnly(['organizationOwner', 'broker', 'manager', 'customer'])
         && !request.resource.data.keys().hasAny(['platformRole']);
     }
 
@@ -79,7 +177,7 @@ service cloud.firestore {
         || (
           signedIn()
           && uid == request.auth.uid
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'platformRole'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'platformRole', 'accountType', 'organizationId', 'role', 'permissions', 'uid'])
         );
       allow delete: if isPlatformAdmin();
     }
@@ -96,14 +194,10 @@ service cloud.firestore {
         || (signedIn() && resource.data.userId == request.auth.uid)
         || hasOrgRole(resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
       allow create: if isPlatformAdmin()
-        || (
-          signedIn()
-          && request.resource.data.userId == request.auth.uid
-          && getAfter(/databases/$(database)/documents/organizations/$(request.resource.data.organizationId)).data.ownerId == request.auth.uid
-        )
-        || hasOrgRole(request.resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
-      allow update, delete: if isPlatformAdmin()
-        || hasOrgRole(resource.data.organizationId, ['organizationOwner', 'organizationAdmin', 'manager']);
+        || createsInitialOwnerMember(request.resource.data.organizationId, memberId)
+        || canCreateOrgMember(request.resource.data.organizationId, memberId);
+      allow update: if canUpdateOrgMember(resource.data.organizationId, memberId);
+      allow delete: if canDeleteOrgMember(resource.data.organizationId, memberId);
     }
 
     match /brokerProfiles/{uid} {
