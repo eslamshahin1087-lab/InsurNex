@@ -145,8 +145,9 @@ service cloud.firestore {
           (data.workspaceType == 'personal' && data.ownerId == request.auth.uid)
           || (
             data.workspaceType == 'organization'
-            && hasOrgRole(data.organizationId, roles)
             && data.organizationId is string
+            && data.ownerId == request.auth.uid
+            && hasOrgRole(data.organizationId, roles)
           )
         );
     }
