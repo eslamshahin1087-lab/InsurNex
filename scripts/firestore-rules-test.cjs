@@ -69,6 +69,9 @@ async function main() {
     await assertFails(setDoc(doc(outsiderDb, "leads/outsider-lead"), {
       workspaceType: "organization", organizationId: "org-1", ownerId: "outsider-1", title: "Must be denied"
     }));
+    await assertFails(setDoc(doc(managerDb, "leads/misattributed-lead"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "Wrong owner"
+    }));
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
     await assertFails(updateDoc(doc(brokerDb, "leads/org-lead"), {
       organizationId: "org-other", workspaceType: "organization"
