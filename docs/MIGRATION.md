@@ -81,3 +81,12 @@ Admin modules cover organizations, users, brokers, teams, insurers, products, pl
 
 ## Verification
 The latest GitHub Actions run completed successfully after repository smoke tests, JavaScript syntax checks and Firebase rule validation.
+
+## Safe verification commands
+
+- `npm test`: repository checks plus unit tests for migration mapping and history preservation.
+- `npm run check:firebase-auth`: optional live Firebase Authentication configuration probe. It sends a sign-in request using a reserved `.invalid` email and a fake password; it never creates a user. It distinguishes an invalid/restricted API key from a disabled Email/Password provider. Run it only when internet access is available.
+- `node scripts/migrate-legacy-data.cjs`: dry-run only; no Firestore writes.
+- `node scripts/migrate-legacy-data.cjs --apply`: performs the migration. Requires `FIREBASE_SERVICE_ACCOUNT_JSON` and should only be run after reviewing dry-run results and taking a backup.
+
+The static smoke test and CI do not prove live Authentication, Firestore CRUD, Storage permissions, or end-to-end UI workflows. Those require a separate runtime test with authorized test accounts and controlled test records.

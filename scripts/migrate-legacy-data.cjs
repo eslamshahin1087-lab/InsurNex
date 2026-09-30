@@ -1,92 +1,96 @@
 #!/usr/bin/env node
 "use strict";
 
-const admin=require("firebase-admin");
+const admin = require("firebase-admin");
+const { sourceWorkspace, mapRecord, TARGET_COLLECTIONS } = require("./migration-utils.cjs");
 
-function env(name, fallback){
-  return process.env[name] || fallback;
-}
-function sourceWorkspace(data){
-  const organizationId=data.organizationId || null;
-  const ownerId=data.ownerId || data.userId || data.createdBy || data.uid || null;
-  if(organizationId){
-    return {workspaceType:"organization",organizationId,ownerId};
+const PAGE_SIZE = 200;
+const BATCH_SIZE = 400;
+const APPLY = process.argv.includes("--apply");
+
+async function main() {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is required.");
+  if (!APPLY) {
+    console.log("DRY RUN: no documents will be written. Pass --apply to execute the migration.");
   }
-  return ownerId ? {workspaceType:"personal",organizationId:null,ownerId} : null;
-}
-function clean(value){return value===undefined||value===null?"":value;}
-function mapDoc(source,data){
-  const ws=sourceWorkspace(data);
-  if(!ws)return null;
-  return {
-    ...data,...ws,
-    migratedFrom:{collection:source,documentId:data.__sourceId||null},
-    migratedAt:admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt:admin.firestore.FieldValue.serverTimestamp()
-  };
-}
-const MAP={
-  clients:"customers",
-  quotes:"quotations",
-  appointments:"calendarEvents",
-  messages:"communications",
-  products:"insuranceProducts"
-};
-const targetId=(source,id)=>"legacy_"+source+"_"+id;
 
-async function main(){
-  const raw=process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if(!raw)throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is required.");
-  const service=JSON.parse(raw);
-  if(!admin.apps.length)admin.initializeApp({credential:admin.credential.cert(service)});
-  const db=admin.firestore();
+  const service = JSON.parse(raw);
+  if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(service) });
+  const db = admin.firestore();
+  const summary = [];
 
-  const summary=[];
-  for(const [source,target] of Object.entries(MAP)){
-    const snap=await db.collection(source).get();
-    let migrated=0,skipped=0;
-    const commits=[];
-    for(const doc of snap.docs){
-      const data={...doc.data(),__sourceId:doc.id};
-      const payload=mapDoc(source,data);
-      if(!payload){skipped++;continue;}
-      delete payload.__sourceId;
-      if(target==="customers"){
-        payload.fullName=clean(payload.fullName||payload.name||payload.displayName);
-        payload.type=payload.type||"individual";
-      }
-      if(target==="quotations"){
-        payload.status=payload.status||"Draft";
-      }
-      if(target==="calendarEvents"){
-        payload.status=payload.status||"scheduled";
-      }
-      if(target==="communications"){
-        payload.channel=payload.channel||"In-app";
-      }
-      if(target==="insuranceProducts"){
-        payload.status=payload.status||"active";
-        payload.published=true;
-      }
-      commits.push({source, target, id:doc.id, payload});
-      if(commits.length===400){
-        const batch=db.batch();
-        commits.splice(0).forEach(x=>batch.set(db.collection(x.target).doc(targetId(x.source,x.id)),x.payload,{merge:true}));
-        const written=commits.length;
-        await batch.commit();
-        migrated+=written;
-      }
-    }
-    if(commits.length){
-      const batch=db.batch();
-      commits.splice(0).forEach(x=>batch.set(db.collection(x.target).doc(targetId(x.source,x.id)),x.payload,{merge:true}));
-      const written=commits.length;
+  for (const [source, target] of Object.entries(TARGET_COLLECTIONS)) {
+    let cursor = null;
+    let eligible = 0;
+    let migrated = 0;
+    let skippedNoWorkspace = 0;
+    let skippedExisting = 0;
+    let pending = [];
+
+    async function flush() {
+      if (!pending.length) return;
+      const count = pending.length;
+      const batch = db.batch();
+      for (const item of pending) batch.create(item.ref, item.payload);
       await batch.commit();
-      migrated+=written;
+      migrated += count;
+      pending = [];
     }
-    summary.push({source,target,migrated,skipped});
+
+    while (true) {
+      let query = db.collection(source)
+        .orderBy(admin.firestore.FieldPath.documentId())
+        .limit(PAGE_SIZE);
+      if (cursor) query = query.startAfter(cursor);
+      const snap = await query.get();
+      if (snap.empty) break;
+
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        if (!sourceWorkspace(data)) {
+          skippedNoWorkspace++;
+          continue;
+        }
+        eligible++;
+        if (!APPLY) continue;
+
+        const targetRef = db.collection(target).doc(doc.id);
+        if ((await targetRef.get()).exists) {
+          skippedExisting++;
+          continue;
+        }
+
+        const payload = mapRecord(source, doc.id, data, {
+          serverTimestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+        if (target === "customers") {
+          payload.fullName = payload.fullName || payload.name || payload.displayName || "";
+          payload.type = payload.type || "individual";
+        }
+        if (target === "quotations") payload.status = payload.status || "Draft";
+        if (target === "calendarEvents") payload.status = payload.status || "scheduled";
+        if (target === "communications") payload.channel = payload.channel || "In-app";
+        if (target === "insuranceProducts") payload.status = payload.status || "active";
+        pending.push({ ref: targetRef, payload });
+        if (pending.length >= BATCH_SIZE) await flush();
+      }
+
+      cursor = snap.docs[snap.docs.length - 1];
+      if (snap.size < PAGE_SIZE) break;
+    }
+
+    await flush();
+    summary.push({ source, target, eligible, migrated, skippedNoWorkspace, skippedExisting });
   }
+
   console.table(summary);
-  console.log("Migration is non-destructive: source collections are never deleted or modified.");
+  console.log(APPLY
+    ? "Migration completed. Source collections and source document IDs were not modified."
+    : "Dry run completed. Source collections were not modified; target collisions are checked only during --apply.");
 }
-main().catch(e=>{console.error(e);process.exit(1);});
+
+main().catch(error => {
+  console.error("InsurNex migration failed safely:", error.message || error);
+  process.exit(1);
+});

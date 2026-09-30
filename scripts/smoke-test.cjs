@@ -54,6 +54,27 @@ function walk(dir) {
 }
 
 const failures = [];
+const firebaseRc = JSON.parse(fs.readFileSync(path.join(root, ".firebaserc"), "utf8"));
+const expectedProjectId = "insurnex-8a9df";
+if (firebaseRc.projects?.default !== expectedProjectId) {
+  failures.push("Firebase default project does not match the existing InsurNex project.");
+}
+for (const [label, rel] of [
+  ["shared config", "js/config.js"],
+  ["user app", "InsurNex-User.html"],
+  ["admin app", "InsurNex-admin.html"]
+]) {
+  const source = fs.readFileSync(path.join(root, rel), "utf8");
+  if (!source.includes('projectId: "insurnex-8a9df"')) {
+    failures.push("Firebase projectId is missing or inconsistent in " + label + ".");
+  }
+  if (!/apiKey:\s*["'][^"']{20,}["']/.test(source)) {
+    failures.push("Firebase Web API key is missing or looks like a placeholder in " + label + ".");
+  }
+  if (!source.includes("insurnex-8a9df.firebaseapp.com")) {
+    failures.push("Firebase Auth domain is missing or inconsistent in " + label + ".");
+  }
+}
 for (const rel of required) {
   if (!fs.existsSync(path.join(root, rel))) failures.push("Missing required file: " + rel);
 }
