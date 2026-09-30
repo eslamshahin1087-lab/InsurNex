@@ -155,6 +155,9 @@ service cloud.firestore {
       return isPlatformAdmin()
         || (
           readsWorkspace(data)
+          && request.resource.data.workspaceType == data.workspaceType
+          && request.resource.data.organizationId == data.organizationId
+          && request.resource.data.ownerId == data.ownerId
           && (
             ownsPersonal(data)
             || hasOrgRole(data.organizationId, roles)
