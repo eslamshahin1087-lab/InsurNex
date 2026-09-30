@@ -186,8 +186,13 @@ service cloud.firestore {
     match /organizations/{orgId} {
       allow read: if isPlatformAdmin() || isMember(orgId);
       allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isPlatformAdmin() || hasOrgRole(orgId, ['organizationOwner', 'organizationAdmin']);
-      allow delete: if isPlatformAdmin() || hasOrgRole(orgId, ['organizationOwner']);
+      allow update: if isPlatformAdmin()
+        || (
+          hasOrgRole(orgId, ['organizationOwner', 'organizationAdmin'])
+          && request.resource.data.ownerId == resource.data.ownerId
+        );
+      // Keep organization records recoverable; organization deletion is reserved for platform administration.
+      allow delete: if isPlatformAdmin();
     }
 
     match /organizationMembers/{memberId} {
