@@ -70,7 +70,7 @@ for (const [label, source] of [
   if (!source.includes('projectId: "insurnex-8a9df"')) {
     failures.push("Firebase projectId is missing or inconsistent in " + label + ".");
   }
-  if (!/apiKey:\\s*["'][^"']{20,}["']/.test(source)) {
+  if (!/apiKey:\s*["'][^"']{20,}["']/.test(source)) {
     failures.push("Firebase Web API key is missing or looks like a placeholder in " + label + ".");
   }
   if (!source.includes("insurnex-8a9df.firebaseapp.com")) {
