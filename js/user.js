@@ -53,7 +53,7 @@
       '<main class="auth-wrap"><section class="auth-card auth-card-pro">'+
       '<div class="auth-top">'+
         '<div class="auth-brand">'+logo+'<div class="auth-brand-copy"><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(t("tagline"))+'</div></div></div>'+
-        '<div class="auth-language"><button id="lang" type="button" class="auth-icon-btn">'+(InsurNex.locale()==="ar"?"EN":"ع")+'</button></div>'+
+        '<div class="auth-language"><button id="lang" type="button" class="auth-icon-btn">'+(InsurNex.locale()==="ar"?"EN":"ع")+'</button><button id="firebaseCheck" type="button" class="auth-icon-btn" title="Firebase">●</button></div>'+
       '</div>'+
       '<div class="auth-divider"></div>'+
       '<div class="auth-intro">'+
@@ -83,6 +83,7 @@
         '<button id="switchAuth" type="button" class="auth-secondary">'+(login?t("register"):t("login"))+'</button>'+
         (login?'<button id="forgot" type="button" class="auth-link">'+t("forgotPassword")+'</button>':'')+
       '</div>'+
+      '<div class="auth-firebase-status" id="firebaseStatus"><span class="status-dot"></span><span>Firebase: جاري الفحص…</span></div>'+
       '<div class="auth-security">'+
         '<span><b>Firebase Auth</b><small>تسجيل الحساب</small></span>'+
         '<span><b>Firestore</b><small>بيانات مساحة العمل</small></span>'+
@@ -92,6 +93,8 @@
 
     document.getElementById("switchAuth").onclick=function(){authPage(login?"register":"login");};
     document.getElementById("lang").onclick=function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");authPage(mode);};
+    try{var fs=InsurNex.firebaseStatus(), el=document.getElementById("firebaseStatus"); if(el){var ok=fs.online&&fs.configProject==="insurnex-8a9df"&&fs.appProject==="insurnex-8a9df"; el.className="auth-firebase-status "+(ok?"ok":"warn"); el.innerHTML='<span class="status-dot"></span><span>Firebase · '+esc(fs.appProject||fs.configProject||"غير مهيأ")+' · '+(fs.online?"Online":"Offline")+'</span>';}}catch(_e){}
+    document.getElementById("firebaseCheck")?.addEventListener("click",function(){var fs=InsurNex.firebaseStatus();var ok=fs.online&&fs.configProject==="insurnex-8a9df"&&fs.appProject==="insurnex-8a9df";authPage(mode,ok?"Firebase متصل ومهيأ للمشروع insurnex-8a9df.":"Firebase غير مهيأ أو الاتصال بالإنترنت غير متاح.");});
     if(login)document.getElementById("forgot").onclick=forgot;
     if(!login){
       var type=document.getElementById("accountType"),box=document.getElementById("companyFields");
