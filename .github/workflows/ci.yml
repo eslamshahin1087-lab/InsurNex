@@ -23,6 +23,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+      - name: Install test dependencies
+        run: npm install --no-package-lock
       - name: Repository smoke test
         run: npm test
       - name: Syntax check
@@ -35,5 +37,6 @@ jobs:
           node --check scripts/migration-utils.cjs
           node --check scripts/migration-test.cjs
           node --check scripts/check-firebase-auth.cjs
+          node --check scripts/firestore-rules-test.cjs
       - name: Validate Firebase rules
-        run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "node -e \"console.log('Firestore rules loaded')\""
+        run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "npm run test:rules"

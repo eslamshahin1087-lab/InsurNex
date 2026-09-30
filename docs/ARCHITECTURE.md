@@ -88,7 +88,7 @@ Compatibility collections such as `clients`, `quotes`, `appointments`, `products
 
 ## Security
 
-Security rules enforce authentication, workspace ownership, organization membership, organization roles, platform custom claims, recipient-scoped notifications, audit creation and default deny.
+Security rules enforce authentication, workspace ownership, organization membership, organization roles, platform custom claims, recipient-scoped notifications, audit creation and default deny. Organization member IDs are deterministic (`{organizationId}_{userId}`); only owners can assign organization-admin roles, organization admins cannot create peer admins, and managers can manage only non-privileged operational roles. User profiles cannot self-edit their account type, organization association, role fields or platform role. Emulator tests cover role escalation, owner onboarding and cross-organization isolation.
 
 Storage rules enforce user/organization workspace isolation and a 10 MB upload limit.
 
