@@ -1,0 +1,27 @@
+name: Firebase Auth Diagnostic
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_origin:
+        description: "Exact public origin hosting InsurNex, e.g. https://your-app.web.app"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  firebase-auth-diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Probe Firebase Authentication without creating a user
+        env:
+          INSURNEX_APP_ORIGIN: ${{ inputs.app_origin }}
+        run: node scripts/check-firebase-auth.cjs
