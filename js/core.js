@@ -178,9 +178,27 @@
       "permission-denied":t("noPermission"),
       "storage/unauthorized":t("noPermission"),
       "storage/canceled":"تم إلغاء رفع الملف.",
-      "storage/quota-exceeded":"تم تجاوز سعة التخزين المتاحة."
+      "storage/quota-exceeded":"تم تجاوز سعة التخزين المتاحة.",
+      "auth/network-request-failed":"تعذر الوصول إلى Firebase Authentication. افحص اتصال الإنترنت واسمح باتصالات Firebase ثم أعد المحاولة.",
+      "auth/operation-not-allowed":"تسجيل الدخول بالبريد وكلمة المرور غير مفعّل في Firebase Authentication.",
+      "auth/too-many-requests":"تم تقييد محاولات تسجيل الدخول مؤقتًا. انتظر قليلًا ثم أعد المحاولة.",
+      "auth/internal-error":"حدث خطأ داخلي في Firebase Authentication.",
+      "unavailable":"Firestore غير متاح حاليًا. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
+      "failed-precondition":"Firestore يحتاج إلى إعداد إضافي أو توجد مشكلة في الفهرسة/المشروع.",
+      "deadline-exceeded":"انتهت مهلة الاتصال بـ Firestore.",
+      "resource-exhausted":"تم تجاوز حصة خدمة Firebase المتاحة حاليًا."
     };
-    return map[code]||t("network");
+    if(map[code]) return map[code];
+    const raw=String(err?.message||"").trim();
+    if(code) return "Firebase: "+code+(raw? " — "+raw:"");
+    if(raw) return "Firebase: "+raw;
+    return t("network");
+  }
+
+  function firebaseStatus(){
+    const cfg=window.INSURNEX_CONFIG?.firebase||{};
+    const appOk=!!window.firebase?.apps?.length && firebase.app().options.projectId==="insurnex-8a9df";
+    return {online:navigator.onLine,configProject:cfg.projectId||null,appProject:appOk?firebase.app().options.projectId:null,authReady:!!firebase?.auth};
   }
 
   function roles(){
@@ -381,6 +399,6 @@
 
   window.InsurNex={
     auth,db,storage,state,I18N,Domain,ROLES,ROLE_LABELS,t,setLanguage,locale,esc,fmtDate,fmtMoney,toast,friendlyError,
-    roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring,firebaseProject
+    roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring,firebaseProject,firebaseStatus
   };
 })();
