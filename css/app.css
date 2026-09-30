@@ -627,3 +627,39 @@
     height:150px!important;
   }
 }
+
+
+/* === InsurNex Mobile Product Frame v3 === */
+.insurnex-user{background:#eaf2fa!important}
+.insurnex-user .auth-wrap{
+  box-sizing:border-box!important;width:100%!important;max-width:430px!important;
+  height:100dvh!important;min-height:100dvh!important;margin:0 auto!important;
+  padding:14px 10px calc(14px + env(safe-area-inset-bottom))!important;
+  border:0!important;border-radius:0!important;overflow:auto!important;
+}
+.insurnex-user .auth-card-pro{
+  width:100%!important;max-width:430px!important;margin:0 auto!important;
+  min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;
+  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+  justify-content:flex-start!important;border-radius:28px!important;
+}
+.insurnex-user .auth-top{min-height:74px!important}
+.insurnex-user .auth-brand{justify-content:center!important}
+.insurnex-user .auth-logo-mark{width:188px!important;height:92px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.insurnex-user .auth-logo-mark img{width:100%!important;height:100%!important;object-fit:contain!important}
+.insurnex-user .auth-language{gap:6px!important}
+.insurnex-user .auth-icon-btn{width:34px!important;height:34px!important;border-radius:11px!important}
+.insurnex-user .auth-firebase-status{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-height:29px!important;margin:-3px 0 10px!important;padding:6px 9px!important;border:1px solid #dce8f3!important;border-radius:10px!important;background:#f7fbff!important;color:#60758b!important;font-size:8.5px!important;font-weight:800!important}
+.insurnex-user .auth-firebase-status.ok{color:#15704c!important;background:#f1fbf6!important;border-color:#cfeadb!important}
+.insurnex-user .auth-firebase-status.warn{color:#9a5a00!important;background:#fff9ef!important;border-color:#f1dfbe!important}
+.insurnex-user .auth-firebase-status .status-dot{width:7px;height:7px;border-radius:50%;background:#f0ad2e;box-shadow:0 0 0 3px rgba(240,173,46,.12)}
+.insurnex-user .auth-firebase-status.ok .status-dot{background:#1faa70;box-shadow:0 0 0 3px rgba(31,170,112,.12)}
+@media(min-width:700px){
+  .insurnex-user .auth-wrap{height:min(860px,calc(100dvh - 32px))!important;min-height:0!important;margin:16px auto!important;padding:14px 10px!important;border:1px solid #d4e2ef!important;border-radius:32px!important;box-shadow:0 26px 80px rgba(12,47,86,.16)!important}
+  .insurnex-user .auth-card-pro{min-height:0!important;align-self:flex-start!important}
+  body.insurnex-user{min-height:100dvh;display:grid;place-items:center}
+}
+@media(max-width:699px){
+  .insurnex-user .auth-wrap{max-width:430px!important}
+  .insurnex-user .auth-card-pro{min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;border-radius:24px!important}
+}
