@@ -8,6 +8,7 @@ service cloud.firestore {
 
     function isPlatformAdmin() {
       return signedIn()
+        && request.auth.token.keys().hasAny(['platformRole'])
         && request.auth.token.platformRole in ['superAdmin', 'platformAdmin'];
     }
 
