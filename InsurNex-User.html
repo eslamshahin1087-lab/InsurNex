@@ -561,6 +561,57 @@ html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
   transform-origin:50% 50%;
 }
 </style>
+
+<style id="insurnex-mobile-crm-refresh">
+/* InsurNex mobile-first CRM polish — visual layer only */
+:root{--navy:#0E2A5C;--navy2:#163E7A;--navy3:#071D40;--gold:#F2BD63;--gold2:#FFD98F;--paper:#F5F8FC;--card:#FFF;--line:#E2E9F2;--slate:#25324A;--muted:#718096}
+html,body{min-height:100%;margin:0}body{padding:18px 8px;background:#EAF0F7;user-select:auto;overflow-x:hidden}
+.phone-shell.app-phone{width:390px;max-width:100%;height:min(820px,calc(100dvh - 36px));min-height:620px;max-height:calc(100dvh - 36px);border:7px solid var(--navy3);border-radius:34px;box-shadow:0 24px 64px rgba(7,29,64,.2);isolation:isolate}
+html[data-theme="dark"] body{background:#060A14}html[data-theme="dark"] .phone-shell.app-phone{border-color:#1A2540}
+.phone-shell.app-phone .main{min-height:0;min-width:0;overflow:hidden;padding:0;display:flex;flex:1;flex-direction:column}
+.phone-shell.app-phone .app-topbar{position:relative;top:auto;z-index:15;flex:0 0 auto;padding:12px 12px 11px;background:var(--card);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+.topbar-main{min-width:0;gap:8px}.topbar-main .brand{min-width:0;gap:8px}.topbar-main .brand-mark{width:38px;height:38px;flex:0 0 38px;border-radius:12px}
+.topbar-main .brand-name{font-size:14px;line-height:1.2;color:var(--navy);font-weight:900}html[data-theme="dark"] .topbar-main .brand-name{color:var(--slate)}
+.topbar-main .subtitle{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}.topbar-actions{gap:5px;flex:0 0 auto}
+.icon-btn{width:34px;height:34px;min-width:34px;padding:0;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--navy);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1;transition:background .18s,border-color .18s,transform .18s}
+html[data-theme="dark"] .icon-btn{background:#1A2236;color:#DDE8F6;border-color:var(--line)}
+.icon-btn .app-icon,.nav-icon .app-icon,.drawer-link .app-icon,.qicon .app-icon{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;filter:none}
+.icon-btn .app-icon svg,.nav-icon .app-icon svg,.drawer-link .app-icon svg,.qicon .app-icon svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.9;fill:none}
+.icon-btn:hover,.icon-btn:focus-visible{border-color:var(--gold);background:var(--gold-soft)}.icon-btn:active{transform:scale(.96)}.icon-btn.lang-icon-btn{font-family:var(--font-ui);font-size:10px}
+.phone-shell.app-phone .content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 0 calc(88px + var(--safe-bottom));scrollbar-width:none}.phone-shell.app-phone .content::-webkit-scrollbar{display:none}
+.page-head{padding:17px 15px 13px;margin:0 0 2px;align-items:center;gap:10px;background:var(--card);border-bottom:1px solid var(--line)}
+.page-head h1{font-size:21px;line-height:1.35;letter-spacing:-.25px;color:var(--slate);margin:3px 0}.page-head .muted{font-size:10px;line-height:1.6;overflow-wrap:anywhere}
+.page-head .actions{flex:0 0 auto;gap:6px;max-width:46%}.btn{min-height:36px;padding:9px 11px;border-radius:11px;font-size:11px;line-height:1.35;white-space:normal}
+.page-head .actions .btn{max-width:100%;padding:9px 10px;font-size:10.5px;line-height:1.35}.btn-primary,.btn-accent{font-weight:800;box-shadow:0 5px 14px rgba(14,42,92,.12)}
+.hero{margin:13px 14px 17px;padding:19px 17px;border-radius:22px;min-height:112px;box-shadow:0 10px 24px rgba(14,42,92,.13);background:radial-gradient(circle at 100% 0,rgba(242,189,99,.22),transparent 44%),linear-gradient(135deg,#071D40,#0E2A5C 72%,#1262B7)}
+.hero:before{content:"";position:absolute;left:-42px;top:-54px;width:140px;height:140px;border-radius:50%;background:rgba(40,133,205,.2);pointer-events:none}
+.hero h2{position:relative;margin:5px 0 4px;font-size:20px;line-height:1.4;font-weight:900;color:#fff}.hero p{position:relative;margin:0;font-size:11px;line-height:1.7;color:rgba(255,255,255,.84)}
+.home-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 15px 10px}.home-section-title h2{font-size:14px;font-weight:900;margin:0;color:var(--slate)}.home-section-title small{font-size:10px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0 14px}
+.stat{min-width:0;min-height:82px;padding:13px 13px 11px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 4px 14px rgba(14,42,92,.035);display:flex;flex-direction:column;justify-content:center;gap:4px}
+.stat .value{font-size:24px;line-height:1.15;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}html[data-theme="dark"] .stat .value{color:#F2BD63}
+.stat .label{font-size:10px;line-height:1.55;color:var(--muted);overflow-wrap:anywhere}
+.home-quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 14px}
+.home-quick-card{min-width:0;min-height:84px;padding:11px 7px;border:1px solid var(--line);border-radius:15px;background:var(--card);box-shadow:0 3px 12px rgba(14,42,92,.035);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--slate);text-align:center;transition:transform .18s,border-color .18s,box-shadow .18s}
+.home-quick-card:hover,.home-quick-card:focus-visible{border-color:var(--gold);box-shadow:0 7px 18px rgba(14,42,92,.08);transform:translateY(-1px)}.home-quick-card:active{transform:scale(.98)}
+.home-quick-card .qicon{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto}.home-quick-card .quick-label{font-size:10px;line-height:1.35;font-weight:800;overflow-wrap:anywhere}
+.qicon.navy{background:#E8EFF8;color:#0E2A5C}.qicon.blue{background:#E6F2FF;color:#2168A8}.qicon.purple{background:#F0EBFF;color:#7255B7}.qicon.gold{background:#FFF2D7;color:#8A6418}.qicon.red{background:#FFF0ED;color:#C9543E}.qicon.green{background:#E6F7ED;color:#16805B}
+html[data-theme="dark"] .qicon.navy{background:#1B2B43;color:#B9D1F0}html[data-theme="dark"] .qicon.blue{background:#122B45;color:#8FC5F4}html[data-theme="dark"] .qicon.purple{background:#251B3B;color:#C4B1F1}html[data-theme="dark"] .qicon.gold{background:#302719;color:#F2BD63}html[data-theme="dark"] .qicon.red{background:#351F22;color:#F0A49A}html[data-theme="dark"] .qicon.green{background:#143127;color:#7CD7AF}
+.home-metric-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px}.home-metric-actions .btn{width:100%;margin:0}
+.card{border-radius:17px;padding:13px;box-shadow:0 4px 14px rgba(14,42,92,.035)}.card .page-head{padding:0 0 10px;margin:0 0 10px;background:transparent;border:0}.card .page-head h3{font-size:13px;line-height:1.5}
+.grid{gap:10px}.list-row{gap:8px;padding:10px 0}.list-title{font-size:12px}.list-sub,.section-note{font-size:10px;line-height:1.6}
+.bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:80;display:flex!important;align-items:stretch;justify-content:space-around;height:calc(68px + var(--safe-bottom));padding:5px 5px var(--safe-bottom);background:rgba(255,255,255,.97);border-top:1px solid var(--line);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.97);border-top-color:var(--line)}
+.bottom-nav button{position:relative;min-width:0;flex:1;gap:4px;padding:3px 0 4px;border:0;border-radius:12px;background:transparent;color:#8A98AB;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1.2}
+.bottom-nav button.active{color:var(--navy);background:rgba(14,42,92,.055)}html[data-theme="dark"] .bottom-nav button.active{color:#F2BD63;background:rgba(242,189,99,.08)}
+.bottom-nav button.active:after{content:"";position:absolute;width:4px;height:4px;bottom:4px;border-radius:50%;background:var(--gold)}.bottom-nav .nav-icon{display:flex;align-items:center;justify-content:center;width:22px;height:22px}
+.drawer{z-index:100}.drawer-panel{max-height:calc(100% - 16px);padding-bottom:calc(16px + var(--safe-bottom))}.drawer-link{min-height:43px;font-size:12px}
+.field input,.field select,.field textarea{user-select:text}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(242,189,99,.7);outline-offset:2px}
+@media(max-width:480px){body{padding:0;background:var(--paper)}.phone-shell.app-phone{width:100%;height:100dvh;min-height:0;max-height:none;border:0;border-radius:0;box-shadow:none}.phone-shell.app-phone .app-topbar{padding-top:calc(10px + var(--safe-top))}.page-head{padding-top:15px}}
+@media(max-width:350px){.topbar-actions{gap:3px}.icon-btn{width:30px;height:32px;min-width:30px}.topbar-main .subtitle{display:none}.home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.page-head .actions{max-width:42%}.page-head .actions .btn{font-size:10px;padding:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head><body><div id="toastHost"></div><div id="app"></div><div id="modal" class="modal"><div class="modal-panel"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.js"></script>
 <script>if(!(window.firebase))document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"><\/script>');</script>
 <script>if(!(window.firebase))document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>');</script>
@@ -1238,6 +1289,10 @@ html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
 
     function navIcon(id){
     var paths={
+      search:'<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>',
+      menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+      sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/>',
+      moon:'<path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/>',
       home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',
       crm:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
       leads:'<path d="M4 18 18 4"/><path d="M7 4h11v11"/><path d="M4 4h.01"/>',
@@ -1291,7 +1346,7 @@ html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
       '<div class="phone-shell app-phone"><main class="main">'+
         '<header class="topbar app-topbar">'+
           '<div class="topbar-main"><div class="brand">'+mark()+'<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(state.workspace.name||t("personalWorkspace"))+'</div></div></div>'+
-          '<div class="topbar-actions"><button class="icon-btn" id="globalSearch" aria-label="'+t("globalSearch")+'">'+navIcon("reports")+'</button><button class="icon-btn notification-btn" id="topNotifications" aria-label="'+t("notifications")+'">'+navIcon("notifications")+'<i></i></button><button class="icon-btn" id="themeTop" aria-label="'+t("theme")+'">'+(InsurNex.currentTheme()==="dark"?"☀":"☾")+'</button><button class="icon-btn" id="lang">'+(InsurNex.locale()==="ar"?"EN":"AR")+'</button><button class="icon-btn" id="menu" aria-label="Menu">☰</button></div></div>'+
+          '<div class="topbar-actions"><button class="icon-btn" id="globalSearch" aria-label="'+t("globalSearch")+'" title="'+t("globalSearch")+'">'+navIcon("search")+'</button><button class="icon-btn notification-btn" id="topNotifications" aria-label="'+t("notifications")+'" title="'+t("notifications")+'">'+navIcon("notifications")+'<i></i></button><button class="icon-btn" id="themeTop" aria-label="'+t("theme")+'" title="'+t("theme")+'">'+navIcon(InsurNex.currentTheme()==="dark"?"sun":"moon")+'</button><button class="icon-btn lang-icon-btn" id="lang" aria-label="Language" title="Language">'+(InsurNex.locale()==="ar"?"EN":"AR")+'</button><button class="icon-btn" id="menu" aria-label="'+t("settings")+'" title="'+t("settings")+'">'+navIcon("menu")+'</button></div></div>'+
         '</header><section id="view" class="content"></section></main>'+
         '<nav class="bottom-nav">'+bottom+'</nav>'+
         '<div class="drawer" id="drawer"><div class="drawer-panel"><div class="drawer-handle"></div><div class="drawer-head"><div class="brand">'+mark()+'<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(state.workspace.name||t("personalWorkspace"))+'</div></div></div><button class="close" id="closeDrawer">×</button></div>'+
@@ -1333,7 +1388,7 @@ html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
     root.innerHTML='<div class="loading">'+t("loading")+'</div>';
     try{
       if(view==="home")root.innerHTML=await home();
-      if(view==="home")injectQuickAccess();
+      if(view==="home"){ /* Dashboard already renders its own quick-access grid. */ }
       else if(view==="crm")root.innerHTML=await customers();
       else if(view==="analytics")root.innerHTML=await analytics();
       else if(view==="reports")root.innerHTML=await reports();
