@@ -440,6 +440,14 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
+    // Medical consumption analysis is scoped to the same personal or organization workspace.
+    // Organization workspaces are limited to authorized broker/management roles.
+    match /medicalAnalyses/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker']);
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
