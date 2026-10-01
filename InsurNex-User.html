@@ -1,769 +1,58 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a72d8">
-<meta name="description" content="InsurNex — Insurance Broker CRM & Operating System">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="assets/logo-mark.svg">
-<title>InsurNex User App</title>
-<style>:root{--bg:#f4f7fb;--surface:#fff;--surface2:#eef3f8;--text:#14243a;--muted:#718197;--line:#dce5ef;--navy:#0b2a4a;--navy2:#174a7a;--gold:#d8a23a;--green:#0e7b58;--red:#bf4c3b;--blue:#2c6db2;--shadow:0 14px 34px rgba(11,42,74,.08);--radius:20px;--safe-bottom:env(safe-area-inset-bottom,0px)}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.app-shell{min-height:100vh;display:flex}.main{min-width:0;flex:1;padding-bottom:88px}.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#d8a23a,#f1cc7a);display:grid;place-items:center;color:#10233a;font-weight:900;box-shadow:0 8px 18px rgba(216,162,58,.22)}.brand-mark.image-mark{background-color:#fff;background-image:url("../assets/logo.svg");background-repeat:no-repeat;background-position:center 22%;background-size:210% auto;border:1px solid var(--line);box-shadow:0 8px 18px rgba(11,42,74,.10);overflow:hidden}.brand-name{font-weight:900;letter-spacing:-.02em}.subtitle{font-size:11px;color:var(--muted)}.content{max-width:1180px;margin:0 auto;padding:18px}.grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}.card h2,.card h3{margin:0 0 4px;font-size:17px}.muted{color:var(--muted)}.eyebrow{font-size:11px;color:var(--gold);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.page-head h1{margin:3px 0;font-size:24px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--surface);color:var(--text);padding:10px 14px;border-radius:12px;font-weight:800}.btn:hover{border-color:var(--gold)}.btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-color:transparent}.btn-accent{background:linear-gradient(135deg,#d8a23a,#f0cc7b);color:#192b40;border-color:transparent}.btn-danger{background:#fff3f0;color:var(--red);border-color:#f0d2cc}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:12px;font-weight:800;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;color:var(--text);outline:none}.field textarea{min-height:96px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(216,162,58,.12)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.stat .value{font-size:26px;font-weight:900}.stat .label{font-size:11px;color:var(--muted);font-weight:700}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}.data-table{width:100%;border-collapse:collapse;min-width:720px}.data-table th,.data-table td{text-align:start;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}.data-table th{background:var(--surface2);font-size:11px;color:var(--muted);font-weight:900}.data-table tr:last-child td{border-bottom:0}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;background:var(--surface2);color:var(--muted)}.badge.success{background:#e7f6ef;color:var(--green)}.badge.warn{background:#fff7df;color:#8d6812}.badge.danger{background:#fff0ed;color:var(--red)}.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safe-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;backdrop-filter:blur(18px)}.bottom-nav button{border:0;background:transparent;padding:7px 4px;border-radius:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:800}.bottom-nav button.active{color:var(--navy);background:#edf3f8}.bottom-nav .icon{font-size:18px}.drawer{position:fixed;inset:0;z-index:90;background:rgba(5,18,31,.46);display:none}.drawer.show{display:block}.drawer-panel{position:absolute;top:0;bottom:0;width:min(340px,88vw);background:var(--surface);padding:20px;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.18)}[dir=ltr] .drawer-panel{right:0}[dir=rtl] .drawer-panel{left:0}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.drawer-link{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:800}.drawer-link:hover{background:var(--surface2)}.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 15% 15%,rgba(23,74,122,.18),transparent 42%),radial-gradient(circle at 85% 80%,rgba(216,162,58,.15),transparent 35%),var(--bg)}.auth-card{width:min(520px,100%);background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px rgba(11,42,74,.13);padding:24px}.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:22px}.auth-logo .brand-mark{width:48px;height:48px}.auth-title{font-size:26px;font-weight:900;margin:0}.auth-copy{color:var(--muted);font-size:13px;line-height:1.7}.form-stack{display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.switcher{display:flex;gap:8px;flex-wrap:wrap}.switch-pill{border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:999px;font-weight:800;font-size:11px}.switch-pill.active{background:var(--navy);color:#fff;border-color:var(--navy)}.hero{background:linear-gradient(145deg,#0b2a4a,#174a7a);color:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow);overflow:hidden;position:relative}.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;background:rgba(216,162,58,.16);top:-70px;inset-inline-end:-50px}.hero h2{font-size:24px;margin:0 0 6px}.hero p{margin:0;color:rgba(255,255,255,.78);font-size:12px;max-width:620px}.modal{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;background:rgba(5,18,31,.52);padding:12px}.modal.show{display:flex}.modal-card{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--surface);border-radius:24px;padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0;font-size:18px}.close{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);font-size:18px}.empty{padding:34px 16px;text-align:center;color:var(--muted)}.empty .emoji{font-size:32px;margin-bottom:6px}.loading{padding:32px;text-align:center;color:var(--muted)}.error-box{padding:16px;border:1px solid #f0d2cc;background:#fff5f2;color:var(--red);border-radius:14px}.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);opacity:0;z-index:150;padding:11px 14px;border-radius:12px;background:#15263b;color:#fff;font-size:12px;font-weight:800;box-shadow:0 16px 35px rgba(0,0,0,.2);transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.error{background:var(--red)}.list{display:grid;gap:8px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.list-row:last-child{border-bottom:0}.list-main{min-width:0}.list-title{font-size:13px;font-weight:900}.list-sub{font-size:11px;color:var(--muted);margin-top:2px}.workspace-card{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}.login-split{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.section-note{font-size:12px;color:var(--muted);line-height:1.7}.checkbox{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--muted)}@media(min-width:900px){.bottom-nav{display:none}.main{padding-bottom:0}.desktop-drawer{position:sticky;top:0;height:100vh;width:250px;display:block;background:var(--surface);border-inline-end:1px solid var(--line);padding:18px;overflow:auto}.content{padding:24px}.modal{align-items:center}.modal-card{border-radius:24px}.auth-card{padding:34px}}@media(max-width:760px){.grid-2,.grid-3,.grid-4,.form-grid,.stats,.login-split{grid-template-columns:1fr 1fr}.page-head{align-items:stretch;flex-direction:column}.page-head .actions{width:100%}.page-head .actions .btn{flex:1}.content{padding:14px}.card{padding:14px}}@media(max-width:480px){.grid-2,.grid-3,.grid-4,.form-grid,.stats,.login-split{grid-template-columns:1fr}.auth-card{padding:20px}.hero{padding:17px}.hero h2{font-size:21px}}
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E2A5C"><meta name="description" content="InsurNex — Professional Insurance Broker CRM & Operating System"><meta name="color-scheme" content="light dark"><link rel="manifest" href="manifest.json"><title>InsurNex</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>:root{
+  --navy:#0E2A5C;--navy2:#16407A;--navy3:#071D40;--gold:#F2BD63;--gold2:#FFD98F;--gold-soft:#FFF2D7;
+  --paper:#F5F8FC;--card:#FFFFFF;--line:#E2E9F2;--slate:#25324A;--muted:#718096;--green:#16805B;--red:#C9543E;--purple:#7255B7;
+  --shadow:0 8px 24px rgba(14,42,92,.07);--shadow-lg:0 18px 45px rgba(14,42,92,.14);--shadow-xl:0 26px 70px rgba(14,42,92,.18);
+  --radius-sm:10px;--radius-md:16px;--radius-lg:24px;--radius-xl:30px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  --font-ui:"Plus Jakarta Sans","Tajawal",system-ui,sans-serif;--font-ar:"Tajawal","Cairo","Plus Jakarta Sans",system-ui,sans-serif;
+  --field-bg:#F9FBFE;--focus-bg:#FFFFFF;--body-bg:#EAF0F7;--screen-top:#F8FAFD;--danger-bg:#FFF0ED;
+}
+html[data-theme="dark"]{
+  --paper:#0A0E1A;--card:#141A28;--line:#2A3344;--slate:#E8EDF5;--muted:#96A6BC;--gold-soft:#2A2518;
+  --body-bg:#060A14;--screen-top:#101624;--field-bg:#1A2236;--focus-bg:#141A28;
+  --shadow:0 8px 24px rgba(0,0,0,.35);--shadow-lg:0 18px 45px rgba(0,0,0,.5);--shadow-xl:0 26px 70px rgba(0,0,0,.65);
+}
+html[data-theme="dark"] .field input,html[data-theme="dark"] .field select,html[data-theme="dark"] .field textarea{border-color:var(--line);color:var(--slate);background:var(--field-bg);}
+html[data-theme="dark"] .auth-panel,html[data-theme="dark"] .card,html[data-theme="dark"] .stat,html[data-theme="dark"] .home-quick-card,html[data-theme="dark"] .list-row{border-color:var(--line);}
+html[data-theme="dark"] .auth-panel,html[data-theme="dark"] .card,html[data-theme="dark"] .stat,html[data-theme="dark"] .home-quick-card{box-shadow:0 8px 24px rgba(0,0,0,.28);}
+html[data-theme="dark"] .page-head{background:var(--card);}
+html[data-theme="dark"] .btn-secondary{background:#1A2A40;color:#CFE0F3;border-color:#31465F;}
+html[data-theme="dark"] .btn-outline{color:var(--slate);border-color:var(--line);}
+html[data-theme="dark"] .auth-company{background:#0F1625;border-color:var(--line);}
+html[data-theme="dark"] .badge.success{background:#0F2A1E;color:#73D4A7;}
 
-/* === InsurNex Mobile App UI === */
-.insurnex-user{
-  --navy:#0a2f66;--navy2:#0a72d8;--gold:#23a4f2;--bg:#edf4fa;--surface:#fff;--surface2:#f5f8fc;
-  --text:#10243f;--muted:#6b7d93;--line:#dbe6f1;--blue:#0a72d8;--green:#13865f;
-  background:var(--bg);
-}
-.insurnex-user #app{min-height:100dvh;display:flex;align-items:center;justify-content:center}
-.insurnex-user .app-shell{
-  width:100%;max-width:430px;height:min(900px,calc(100dvh - 18px));min-height:100dvh;
-  margin:9px auto;display:block;position:relative;overflow:hidden;background:var(--surface);
-  border-radius:30px;box-shadow:0 24px 80px rgba(12,47,86,.18);border:1px solid rgba(141,170,200,.25)
-}
-.insurnex-user .desktop-drawer{display:none!important}
-.insurnex-user .main{width:100%;height:100%;min-height:0;padding:0;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;background:linear-gradient(180deg,#fff 0%,#f8fbfe 100%)}
-.insurnex-user .main::-webkit-scrollbar{width:0;height:0}
-.insurnex-user .topbar{
-  position:sticky;top:0;z-index:30;min-height:70px;padding:12px 14px 10px;
-  padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid rgba(219,230,241,.85);
-  background:rgba(255,255,255,.92);backdrop-filter:blur(20px);box-shadow:0 4px 16px rgba(20,57,91,.04)
-}
-.insurnex-user .brand{gap:9px;min-width:0}.insurnex-user .brand>div:last-child{min-width:0}
-.insurnex-user .brand-name{font-size:14px;font-weight:900;line-height:1.1;white-space:nowrap}
-.insurnex-user .subtitle{font-size:9px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.insurnex-user .brand-mark.image-mark{
-  flex:none;width:38px;height:38px;border-radius:12px;background-color:#fff;
-  background-image:url("../assets/logo.svg");background-repeat:no-repeat;background-position:center 22%;
-  background-size:320% auto;border:1px solid #dfe9f3;box-shadow:0 7px 16px rgba(9,91,170,.12)
-}
-.insurnex-user .actions{gap:6px;flex-wrap:nowrap}.insurnex-user .actions .badge{display:none}
-.insurnex-user .actions .btn{
-  width:38px;height:38px;min-width:38px;padding:0;border-radius:12px;display:grid;place-items:center;
-  font-size:15px;background:#f3f7fb;border:1px solid #e4edf6;color:var(--navy)
-}
-.insurnex-user .actions #logout{color:#b2433b}.insurnex-user .actions #menu{display:none}
-.insurnex-user .content{max-width:none;padding:16px 15px calc(96px + env(safe-area-inset-bottom))}
-.insurnex-user .page-head{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
-.insurnex-user .page-head h1{font-size:21px;line-height:1.2;margin:2px 0 0;font-weight:900}
-.insurnex-user .eyebrow{color:#0a72d8;font-size:10px;letter-spacing:.08em}
-.insurnex-user .muted{font-size:11px;line-height:1.45}
-.insurnex-user .actions .btn.btn-primary,.insurnex-user .page-head .btn.btn-primary{
-  background:linear-gradient(135deg,#0a2f66,#0a72d8);border-color:transparent;color:#fff
-}
-.insurnex-user .btn{
-  min-height:42px;padding:10px 13px;border-radius:13px;font-size:11px;font-weight:850;
-  background:#fff;border:1px solid #dbe6f1;box-shadow:none
-}
-.insurnex-user .btn-sm{min-height:36px;padding:8px 10px;border-radius:11px}
-.insurnex-user .btn-accent{background:linear-gradient(135deg,#16a9f4,#0a72d8);color:#fff;border:0}
-.insurnex-user .btn-ghost{background:#f5f8fc}
-.insurnex-user .btn-danger{background:#fff4f2;color:#b2433b;border-color:#f2d5d0}
-.insurnex-user .hero{
-  margin-bottom:13px!important;padding:17px;border-radius:22px;
-  background:linear-gradient(145deg,#082e63 0%,#0a72d8 100%);box-shadow:0 18px 34px rgba(10,96,184,.20)
-}
-.insurnex-user .hero:after{width:150px;height:150px;background:rgba(70,198,255,.20);top:-60px;inset-inline-end:-50px}
-.insurnex-user .hero h2{font-size:20px;line-height:1.25;margin-bottom:6px;position:relative;z-index:1}
-.insurnex-user .hero p{font-size:11px;line-height:1.65;position:relative;z-index:1}
-.insurnex-user .stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
-.insurnex-user .stat{
-  min-height:84px;padding:13px 12px;border-radius:17px;background:#fff;border:1px solid #e2ebf4;
-  box-shadow:0 7px 20px rgba(21,61,98,.06)
-}
-.insurnex-user .stat .value{font-size:22px;line-height:1.1;color:var(--navy)}
-.insurnex-user .stat .label{margin-top:5px;font-size:10px;line-height:1.35;color:var(--muted)}
-.insurnex-user .grid-2,.insurnex-user .grid-3,.insurnex-user .grid-4{grid-template-columns:1fr!important}
-.insurnex-user .card{
-  padding:14px;border-radius:18px;box-shadow:0 7px 22px rgba(22,58,92,.055);border:1px solid #e1eaf3
-}
-.insurnex-user .card h3{font-size:14px}.insurnex-user .list{gap:1px}
-.insurnex-user .list-row{min-height:48px;padding:9px 0}.insurnex-user .list-title{font-size:12px}.insurnex-user .list-sub{font-size:10px}
-.insurnex-user .badge{font-size:9px;padding:5px 8px}
-.insurnex-user .field input,.insurnex-user .field select,.insurnex-user .field textarea{
-  min-height:46px;padding:12px;border-radius:13px;background:#fbfdff;border-color:#dce7f2;font-size:12px
-}
-.insurnex-user .field label{font-size:10px}.insurnex-user .form-grid,.insurnex-user .login-split{grid-template-columns:1fr!important}
-.insurnex-user .auth-wrap{width:100%;min-height:100dvh;padding:16px;background:linear-gradient(180deg,#eef6fd,#f9fbfe)}
-.insurnex-user .auth-card{width:min(430px,100%);padding:20px;border-radius:26px;box-shadow:0 22px 60px rgba(19,62,100,.12)}
-.insurnex-user .auth-logo{justify-content:center;flex-direction:column;text-align:center;gap:9px;margin-bottom:18px}
-.insurnex-user .auth-logo .brand-mark.image-mark{width:84px;height:84px;border-radius:22px;background-size:285% auto;background-position:center 21%}
-.insurnex-user .auth-logo .brand-name{font-size:23px}.insurnex-user .auth-logo .subtitle{font-size:10px}
-.insurnex-user .auth-title{font-size:23px}.insurnex-user .auth-copy{font-size:11px;line-height:1.75}
-.insurnex-user .mobile-list{display:none}.insurnex-user .desktop-table-note{display:block}
-.insurnex-user .drawer{background:rgba(5,18,31,.42);backdrop-filter:blur(3px)}
-.insurnex-user .drawer-panel{
-  left:0!important;right:0!important;top:auto!important;bottom:0;width:100%;max-width:430px;
-  height:min(78dvh,640px);padding:18px 16px calc(20px + env(safe-area-inset-bottom));
-  border-radius:24px 24px 0 0;box-shadow:0 -18px 50px rgba(7,32,58,.22)
-}
-.insurnex-user .drawer-head{margin-bottom:12px}.insurnex-user .drawer-link{padding:12px;border-radius:13px;font-size:12px}
-.insurnex-user .workspace-card{padding:11px;border-radius:13px}.insurnex-user .bottom-nav{
-  position:absolute!important;left:0!important;right:0!important;bottom:0!important;display:grid!important;
-  grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-  background:rgba(255,255,255,.96);border-top:1px solid #dbe6f1;box-shadow:0 -8px 28px rgba(23,58,94,.10);backdrop-filter:blur(20px)
-}
-.insurnex-user .bottom-nav button{min-height:52px;border-radius:14px;padding:6px 3px;font-size:8.5px;gap:3px;color:#7a8a9f}
-.insurnex-user .bottom-nav button.active{background:#edf5fd;color:#0a72d8}
-.insurnex-user .bottom-nav .icon{font-size:17px}
-.insurnex-user .modal{align-items:flex-end;padding:0;background:rgba(5,18,31,.52)}
-.insurnex-user .modal-card{
-  width:100%;max-width:430px;max-height:90dvh;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))
-}
-.insurnex-user .modal-head{padding-bottom:8px;border-bottom:1px solid #e6edf5}
-.insurnex-user .toast{bottom:104px;font-size:10px}
-.insurnex-user .table-wrap{border-radius:14px}
-@media(min-width:700px){
-  .insurnex-user .app-shell{min-height:0}
-}
-@media(max-width:699px){
-  .insurnex-user #app{align-items:stretch}
-  .insurnex-user .app-shell{min-height:100dvh;height:100dvh;margin:0;border-radius:0;border:0;box-shadow:none}
-  .insurnex-user .desktop-table,.insurnex-user .desktop-table-note,.insurnex-user .desktop-table-empty{display:none!important}
-  .insurnex-user .mobile-list{display:grid;gap:9px}
-  .insurnex-user .record-card{
-    padding:13px;border:1px solid #e0e9f3;background:#fff;border-radius:17px;
-    box-shadow:0 7px 18px rgba(18,57,94,.05)
-  }
-  .insurnex-user .record-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-  .insurnex-user .record-card-title{font-size:13px;font-weight:900;color:var(--navy);line-height:1.35}
-  .insurnex-user .record-card-meta{display:flex;flex-wrap:wrap;gap:5px 9px;margin-top:5px;color:var(--muted);font-size:9.5px;line-height:1.4}
-  .insurnex-user .record-card-meta span+span{position:relative;padding-inline-start:9px}
-  .insurnex-user .record-card-meta span+span:before{content:"•";position:absolute;inset-inline-start:0}
-  .insurnex-user .record-card-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
-  .insurnex-user .record-card-actions .btn{min-width:0;min-height:38px;padding:8px 7px;font-size:9px}
-  .insurnex-user .mobile-empty{padding:30px 12px;text-align:center;color:var(--muted);border:1px dashed #ccd9e6;border-radius:16px;background:#fff}
-  .insurnex-user .page-head .actions{width:100%}
-  .insurnex-user .page-head .actions .btn{flex:1}
-}
-@media(min-width:700px){
-  .insurnex-user .content{padding-bottom:28px}
-  .insurnex-user .bottom-nav{display:none!important}
-}
-
-
-/* === InsurNex Brand & Authentication Polish === */
-.insurnex-user .brand-mark.image-mark{
-  display:grid!important;
-  place-items:center!important;
-  padding:3px!important;
-  background:#fff!important;
-  background-image:none!important;
-  border:1px solid #d8e6f3!important;
-  border-radius:13px!important;
-  box-shadow:0 8px 20px rgba(8,66,126,.14)!important;
-  overflow:hidden!important;
-}
-.insurnex-user .brand-mark.image-mark img{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-}
-.insurnex-user .auth-wrap{
-  position:relative!important;
-  isolation:isolate;
-  overflow:auto!important;
-  background:
-    radial-gradient(180px 180px at 88% 6%,rgba(25,160,242,.17),transparent 72%),
-    radial-gradient(220px 220px at 8% 88%,rgba(10,114,216,.10),transparent 74%),
-    linear-gradient(180deg,#eef7ff 0%,#f8fbff 48%,#eef5fb 100%)!important;
-}
-.insurnex-user .auth-wrap:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:-1;
-  opacity:.38;
-  background-image:
-    linear-gradient(rgba(10,114,216,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(10,114,216,.035) 1px,transparent 1px);
-  background-size:24px 24px;
-}
-.insurnex-user .auth-card{
-  width:min(420px,calc(100% - 20px))!important;
-  margin:0 auto!important;
-  padding:18px!important;
-  border:1px solid rgba(192,214,232,.82)!important;
-  border-radius:28px!important;
-  background:rgba(255,255,255,.97)!important;
-  box-shadow:0 28px 72px rgba(12,61,106,.15)!important;
-}
-.insurnex-user .auth-logo{
-  padding:4px 4px 16px!important;
-  margin-bottom:16px!important;
-  border-bottom:1px solid #edf2f7!important;
-}
-.insurnex-user .auth-logo .brand-mark.image-mark{
-  width:92px!important;
-  height:92px!important;
-  padding:5px!important;
-  border-radius:26px!important;
-  box-shadow:0 12px 28px rgba(6,83,157,.18)!important;
-}
-.insurnex-user .auth-logo .brand-name{
-  font-size:26px!important;
-  letter-spacing:-.04em!important;
-  color:#092d60!important;
-}
-.insurnex-user .auth-logo .subtitle{
-  max-width:260px;
-  margin:4px auto 0!important;
-  color:#6f8197!important;
-  font-size:10px!important;
-  line-height:1.65!important;
-}
-.insurnex-user .auth-title{
-  margin-top:4px!important;
-  color:#092d60!important;
-  font-size:25px!important;
-  letter-spacing:-.03em!important;
-}
-.insurnex-user .auth-copy{
-  margin:7px 0 14px!important;
-  color:#75879a!important;
-}
-.insurnex-user .eyebrow{
-  font-weight:900!important;
-  color:#0a72d8!important;
-}
-.insurnex-user .auth-card .field{
-  gap:6px!important;
-}
-.insurnex-user .auth-card .field label{
-  color:#51657b!important;
-  font-size:10.5px!important;
-  font-weight:850!important;
-}
-.insurnex-user .auth-card .field input,
-.insurnex-user .auth-card .field select{
-  min-height:48px!important;
-  border-radius:14px!important;
-  border:1px solid #d7e4ef!important;
-  background:#fafdff!important;
-  color:#102a45!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)!important;
-}
-.insurnex-user .auth-card .field input:focus,
-.insurnex-user .auth-card .field select:focus{
-  border-color:#4caaf0!important;
-  box-shadow:0 0 0 4px rgba(10,114,216,.10)!important;
-}
-.insurnex-user .auth-card #authForm > .btn.btn-primary{
-  width:100%!important;
-  min-height:50px!important;
-  margin-top:4px!important;
-  border-radius:15px!important;
-  background:linear-gradient(135deg,#082f67 0%,#0a72d8 100%)!important;
-  box-shadow:0 12px 24px rgba(10,114,216,.22)!important;
-  font-size:12px!important;
-  letter-spacing:.01em;
-}
-.insurnex-user .auth-card .card{
-  border-radius:18px!important;
-  background:linear-gradient(180deg,#fbfdff,#f6f9fc)!important;
-  border-color:#e0e9f2!important;
-  box-shadow:none!important;
-}
-.insurnex-user .auth-card .card h3{
-  color:#102d4d!important;
-  font-size:13px!important;
-}
-.insurnex-user .auth-card .list-row{
-  min-height:44px!important;
-}
-.insurnex-user .auth-card .actions .btn{
-  min-height:38px!important;
-  border-radius:12px!important;
-}
-.insurnex-user .auth-card .actions #switchAuth{
-  flex:1 1 100%;
-  background:#edf6ff!important;
-  border-color:#d2e7f7!important;
-  color:#075fae!important;
-}
-.insurnex-user .auth-card .actions #lang,
-.insurnex-user .auth-card .actions #forgot{
-  flex:1 1 30%;
-  color:#526a82!important;
-}
-@media(max-width:699px){
-  .insurnex-user .auth-wrap{padding:12px 10px calc(12px + env(safe-area-inset-bottom))!important}
-  .insurnex-user .auth-card{
-    width:min(420px,100%)!important;
-    padding:16px!important;
-    border-radius:25px!important;
-  }
-  .insurnex-user .auth-logo .brand-mark.image-mark{
-    width:84px!important;
-    height:84px!important;
-  }
-  .insurnex-user .auth-logo .brand-name{font-size:23px!important}
-  .insurnex-user .auth-title{font-size:22px!important}
-}
-
-
-/* Full logo rendering for all InsurNex surfaces */
-.brand-mark.image-mark{
-  background-image:none!important;
-  background-color:#fff!important;
-  display:grid!important;
-  place-items:center!important;
-  padding:3px!important;
-}
-.brand-mark.image-mark img{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-}
-
-
-/* === InsurNex Professional Auth v2 === */
-.insurnex-user .auth-wrap{
-  min-height:100dvh!important;
-  width:100%!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  padding:24px 14px calc(24px + env(safe-area-inset-bottom))!important;
-  overflow:auto!important;
-  background:
-    radial-gradient(520px 360px at 90% 8%,rgba(43,174,255,.19),transparent 68%),
-    radial-gradient(480px 340px at 8% 92%,rgba(8,114,216,.14),transparent 70%),
-    linear-gradient(180deg,#edf7ff 0%,#f7fbff 45%,#edf5fb 100%)!important;
-}
-.insurnex-user .auth-card-pro{
-  width:min(430px,100%)!important;
-  margin:0 auto!important;
-  padding:18px 18px 14px!important;
-  border:1px solid rgba(186,211,232,.92)!important;
-  border-radius:30px!important;
-  background:rgba(255,255,255,.985)!important;
-  box-shadow:0 30px 90px rgba(14,61,101,.17)!important;
-  backdrop-filter:blur(18px);
-}
-.insurnex-user .auth-top{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-}
-.insurnex-user .auth-brand{
-  display:flex!important;
-  align-items:center!important;
-  gap:11px!important;
-  min-width:0!important;
-}
-.insurnex-user .auth-logo-mark{
-  flex:0 0 auto!important;
-  width:62px!important;
-  height:62px!important;
-  padding:6px!important;
-  border-radius:19px!important;
-  background:#fff!important;
-  border:1px solid #d8e7f4!important;
-  box-shadow:0 10px 24px rgba(7,75,140,.16)!important;
-  display:grid!important;
-  place-items:center!important;
-  overflow:hidden!important;
-}
-.insurnex-user .auth-logo-mark img{
-  width:100%!important;
-  height:100%!important;
-  display:block!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  image-rendering:auto!important;
-}
-.insurnex-user .auth-brand-copy{min-width:0!important}
-.insurnex-user .auth-brand-copy .brand-name{
-  color:#072e63!important;
-  font-size:19px!important;
-  font-weight:950!important;
-  letter-spacing:-.035em!important;
-  line-height:1.05!important;
-}
-.insurnex-user .auth-brand-copy .subtitle{
-  margin-top:4px!important;
-  color:#71859b!important;
-  font-size:9px!important;
-  line-height:1.5!important;
-  white-space:normal!important;
-}
-.insurnex-user .auth-language{display:flex!important;align-items:center!important}
-.insurnex-user .auth-icon-btn{
-  width:38px!important;
-  height:38px!important;
-  border-radius:12px!important;
-  background:#f3f8fd!important;
-  border:1px solid #dbe8f4!important;
-  color:#0a72d8!important;
-  font-size:10px!important;
-  font-weight:900!important;
-}
-.insurnex-user .auth-divider{
-  height:1px!important;
-  background:#e7eef6!important;
-  margin:15px 0 17px!important;
-}
-.insurnex-user .auth-intro{margin-bottom:14px!important}
-.insurnex-user .auth-intro .eyebrow{
-  margin-bottom:5px!important;
-  color:#0a72d8!important;
-  font-size:9px!important;
-  font-weight:950!important;
-  letter-spacing:.14em!important;
-}
-.insurnex-user .auth-intro .auth-title{
-  margin:0!important;
-  color:#082f65!important;
-  font-size:25px!important;
-  font-weight:950!important;
-  letter-spacing:-.035em!important;
-}
-.insurnex-user .auth-intro .auth-copy{
-  margin:6px 0 0!important;
-  color:#73869b!important;
-  font-size:10.5px!important;
-  line-height:1.7!important;
-}
-.insurnex-user .auth-form{gap:10px!important}
-.insurnex-user .auth-form .form-grid{
-  grid-template-columns:1fr 1fr!important;
-  gap:9px!important;
-}
-.insurnex-user .auth-form .field{
-  gap:5px!important;
-}
-.insurnex-user .auth-form .field-full{
-  grid-column:1/-1!important;
-}
-.insurnex-user .auth-form .field label{
-  color:#4f667e!important;
-  font-size:10px!important;
-  font-weight:850!important;
-}
-.insurnex-user .auth-form .field input,
-.insurnex-user .auth-form .field select{
-  min-height:47px!important;
-  width:100%!important;
-  padding:11px 12px!important;
-  border-radius:13px!important;
-  border:1px solid #d6e3ef!important;
-  background:#fbfdff!important;
-  color:#112b45!important;
-  font-size:12px!important;
-  outline:none!important;
-  transition:border-color .18s,box-shadow .18s,background .18s!important;
-}
-.insurnex-user .auth-form .field input:focus,
-.insurnex-user .auth-form .field select:focus{
-  background:#fff!important;
-  border-color:#55aef1!important;
-  box-shadow:0 0 0 4px rgba(10,114,216,.09)!important;
-}
-.insurnex-user .auth-submit{
-  width:100%!important;
-  min-height:50px!important;
-  margin-top:3px!important;
-  border:0!important;
-  border-radius:15px!important;
-  color:#fff!important;
-  background:linear-gradient(135deg,#072f67 0%,#0a72d8 100%)!important;
-  box-shadow:0 14px 28px rgba(10,114,216,.24)!important;
-  font-size:12px!important;
-  font-weight:950!important;
-}
-.insurnex-user .auth-submit:hover{filter:brightness(1.03)!important}
-.insurnex-user .auth-submit:disabled{opacity:.72!important;cursor:wait!important}
-.insurnex-user .auth-error{margin:0 0 10px!important}
-.insurnex-user .auth-company{
-  padding:12px!important;
-  margin-top:0!important;
-  border:1px solid #e1ebf4!important;
-  border-radius:17px!important;
-  background:linear-gradient(180deg,#fbfdff,#f5f9fc)!important;
-}
-.insurnex-user .auth-section-label{
-  margin-bottom:9px!important;
-  color:#0a72d8!important;
-  font-size:10px!important;
-  font-weight:950!important;
-}
-.insurnex-user .auth-company .form-grid{grid-template-columns:1fr 1fr!important}
-.insurnex-user .auth-terms{
-  margin-top:0!important;
-  display:flex!important;
-  align-items:flex-start!important;
-  gap:8px!important;
-  color:#73869a!important;
-  font-size:9px!important;
-  line-height:1.6!important;
-}
-.insurnex-user .auth-terms input{
-  margin-top:2px!important;
-  accent-color:#0a72d8!important;
-}
-.insurnex-user .auth-actions{
-  display:grid!important;
-  grid-template-columns:1fr 1fr!important;
-  gap:8px!important;
-  margin-top:11px!important;
-}
-.insurnex-user .auth-secondary{
-  grid-column:1/-1!important;
-  min-height:42px!important;
-  border:1px solid #cfe4f6!important;
-  border-radius:13px!important;
-  background:#eff7ff!important;
-  color:#075da8!important;
-  font-size:11px!important;
-  font-weight:900!important;
-}
-.insurnex-user .auth-link{
-  min-height:38px!important;
-  border:1px solid #e1eaf3!important;
-  border-radius:12px!important;
-  background:#fff!important;
-  color:#5d738b!important;
-  font-size:10px!important;
-  font-weight:800!important;
-}
-.insurnex-user .auth-security{
-  display:grid!important;
-  grid-template-columns:repeat(3,1fr)!important;
-  gap:6px!important;
-  margin-top:13px!important;
-  padding-top:12px!important;
-  border-top:1px solid #edf2f7!important;
-}
-.insurnex-user .auth-security span{
-  min-width:0!important;
-  padding:7px 4px!important;
-  text-align:center!important;
-  border-radius:11px!important;
-  background:#f7fafc!important;
-}
-.insurnex-user .auth-security b{
-  display:block!important;
-  color:#173957!important;
-  font-size:8px!important;
-  font-weight:950!important;
-}
-.insurnex-user .auth-security small{
-  display:block!important;
-  margin-top:2px!important;
-  color:#8697aa!important;
-  font-size:7px!important;
-}
-@media(max-width:520px){
-  .insurnex-user .auth-wrap{
-    align-items:flex-start!important;
-    padding:10px 9px calc(10px + env(safe-area-inset-bottom))!important;
-  }
-  .insurnex-user .auth-card-pro{
-    width:min(430px,100%)!important;
-    margin:0 auto!important;
-    padding:15px!important;
-    border-radius:25px!important;
-  }
-  .insurnex-user .auth-logo-mark{width:56px!important;height:56px!important;border-radius:17px!important}
-  .insurnex-user .auth-brand-copy .brand-name{font-size:18px!important}
-  .insurnex-user .auth-intro .auth-title{font-size:23px!important}
-}
-@media(max-width:390px){
-  .insurnex-user .auth-form .form-grid,
-  .insurnex-user .auth-company .form-grid{
-    grid-template-columns:1fr!important;
-  }
-  .insurnex-user .auth-card-pro{padding:13px!important}
-}
-
-
-/* Logo failure fallback: never show a broken-image glyph */
-.insurnex-user .logo-fallback,
-.insurnex-user .auth-logo-fallback{
-  display:grid!important;
-  place-items:center!important;
-  width:100%!important;
-  height:100%!important;
-  border-radius:inherit!important;
-  background:linear-gradient(145deg,#082f67,#0a72d8)!important;
-  color:#fff!important;
-  font-weight:950!important;
-  letter-spacing:-.06em!important;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)!important;
-}
-.insurnex-user .brand-mark.image-mark .logo-fallback{
-  font-size:13px!important;
-}
-.insurnex-user .auth-logo-mark .auth-logo-fallback{
-  font-size:21px!important;
-  border-radius:15px!important;
-}
-
-
-/* Official InsurNex logo layout */
-.insurnex-user .auth-brand{
-  flex:1 1 auto!important;
-  justify-content:center!important;
-}
-.insurnex-user .auth-brand-copy{
-  display:none!important;
-}
-.insurnex-user .auth-logo-mark{
-  width:240px!important;
-  height:165px!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  overflow:visible!important;
-}
-.insurnex-user .auth-logo-mark img{
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-}
-@media(max-width:520px){
-  .insurnex-user .auth-logo-mark{
-    width:220px!important;
-    height:150px!important;
-  }
-}
-
-
-/* === InsurNex Mobile Product Frame v3 === */
-.insurnex-user{background:#eaf2fa!important}
-.insurnex-user .auth-wrap{
-  box-sizing:border-box!important;width:100%!important;max-width:430px!important;
-  height:100dvh!important;min-height:100dvh!important;margin:0 auto!important;
-  padding:14px 10px calc(14px + env(safe-area-inset-bottom))!important;
-  border:0!important;border-radius:0!important;overflow:auto!important;
-}
-.insurnex-user .auth-card-pro{
-  width:100%!important;max-width:430px!important;margin:0 auto!important;
-  min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;
-  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
-  justify-content:flex-start!important;border-radius:28px!important;
-}
-.insurnex-user .auth-top{min-height:74px!important}
-.insurnex-user .auth-brand{justify-content:center!important}
-.insurnex-user .auth-logo-mark{width:188px!important;height:92px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-.insurnex-user .auth-logo-mark img{width:100%!important;height:100%!important;object-fit:contain!important}
-.insurnex-user .auth-language{gap:6px!important}
-.insurnex-user .auth-icon-btn{width:34px!important;height:34px!important;border-radius:11px!important}
-@media(min-width:700px){
-  .insurnex-user .auth-wrap{height:min(860px,calc(100dvh - 32px))!important;min-height:0!important;margin:16px auto!important;padding:14px 10px!important;border:1px solid #d4e2ef!important;border-radius:32px!important;box-shadow:0 26px 80px rgba(12,47,86,.16)!important}
-  .insurnex-user .auth-card-pro{min-height:0!important;align-self:flex-start!important}
-  body.insurnex-user{min-height:100dvh;display:grid;place-items:center}
-}
-@media(max-width:699px){
-  .insurnex-user .auth-wrap{max-width:430px!important}
-  .insurnex-user .auth-card-pro{min-height:calc(100dvh - 28px - env(safe-area-inset-bottom))!important;border-radius:24px!important}
-}
-
-
-/* =========================================================
-   InsurNex SINGLE-FILE MOBILE PRODUCT SKIN
-   The User/Admin HTML files are self-contained.
-   Edit the corresponding HTML file directly.
-   ========================================================= */
-html,body{min-height:100%}
-body.insurnex-user{background:#e9f1f8!important}
-body.insurnex-user #app{width:100%;min-height:100dvh}
-.insurnex-user .auth-wrap{
-  box-sizing:border-box!important;
-  min-height:100dvh!important;
-  padding:12px 10px calc(12px + env(safe-area-inset-bottom))!important;
-  background:
-    radial-gradient(420px 280px at 95% 0%,rgba(70,178,240,.16),transparent 68%),
-    radial-gradient(380px 260px at 0% 100%,rgba(10,114,216,.10),transparent 70%),
-    #e9f1f8!important;
-}
-.insurnex-user .auth-card-pro{
-  box-sizing:border-box!important;
-  width:min(100%,390px)!important;
-  min-height:0!important;
-  padding:16px!important;
-  margin:0 auto!important;
-  border-radius:26px!important;
-  border:1px solid #d6e4f0!important;
-  background:#fff!important;
-  box-shadow:0 18px 50px rgba(17,62,101,.12)!important;
-}
-.insurnex-user .auth-top{min-height:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-.insurnex-user .auth-brand{flex:1!important;justify-content:center!important}
-.insurnex-user .auth-logo-mark{
-  width:176px!important;height:76px!important;
-  padding:0!important;border:0!important;border-radius:0!important;
-  background:transparent!important;box-shadow:none!important;
-}
-.insurnex-user .auth-logo-mark img{width:100%!important;height:100%!important;object-fit:contain!important}
-.insurnex-user .auth-language{display:flex!important;gap:5px!important}
-.insurnex-user .auth-icon-btn{
-  width:32px!important;height:32px!important;border-radius:10px!important;
-  background:#f4f8fc!important;border:1px solid #dce8f2!important;color:#075fae!important;
-}
-.insurnex-user .auth-divider{margin:11px 0 13px!important}
-.insurnex-user .auth-intro{margin-bottom:12px!important}
-.insurnex-user .auth-intro .eyebrow{font-size:8px!important;margin-bottom:4px!important}
-.insurnex-user .auth-intro .auth-title{font-size:22px!important;line-height:1.2!important}
-.insurnex-user .auth-intro .auth-copy{font-size:10px!important;line-height:1.65!important;margin-top:5px!important}
-.insurnex-user .auth-form{gap:9px!important}
-.insurnex-user .auth-form .form-grid{gap:8px!important}
-.insurnex-user .auth-form .field label{font-size:9.5px!important}
-.insurnex-user .auth-form .field input,
-.insurnex-user .auth-form .field select{
-  min-height:46px!important;padding:10px 11px!important;border-radius:12px!important;font-size:11.5px!important;
-}
-.insurnex-user .auth-submit{
-  min-height:48px!important;border-radius:13px!important;
-  box-shadow:0 10px 22px rgba(10,114,216,.18)!important;font-size:11.5px!important;
-}
-.insurnex-user .auth-company{padding:10px!important;border-radius:15px!important}
-.insurnex-user .auth-actions{gap:7px!important;margin-top:9px!important}
-.insurnex-user .auth-secondary{min-height:40px!important}
-.insurnex-user .auth-link{min-height:36px!important}
-.insurnex-user .auth-security{margin-top:10px!important;padding-top:9px!important;gap:5px!important}
-.insurnex-user .auth-security span{padding:6px 3px!important;border-radius:9px!important}
-@media(min-width:700px){
-  body.insurnex-user{display:grid;place-items:center;background:#dfeaf4!important}
-  .insurnex-user .auth-wrap{
-    width:min(430px,100%)!important;height:min(860px,calc(100dvh - 32px))!important;
-    min-height:0!important;margin:16px auto!important;padding:10px!important;
-    border:1px solid #cbdbea!important;border-radius:32px!important;
-    box-shadow:0 24px 70px rgba(12,47,86,.15)!important;
-    overflow:auto!important;
-  }
-}
-@media(max-width:699px){
-  .insurnex-user .auth-wrap{width:100%!important;max-width:430px!important;margin:0 auto!important}
-}
-</style>
-</head>
-<body>
-<!-- InsurNex User App — SINGLE FILE. Production repair build 2026-09-30. -->
-<div id="toastHost"></div>
-<div id="app"></div>
-<div id="modal" class="modal">
-  <div class="modal-card">
-    <div class="modal-head"><h3 id="modalTitle"></h3><button class="close" data-close-modal aria-label="Close">×</button></div>
-    <div id="modalBody"></div>
-  </div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+html,body{margin:0;min-height:100%;font-family:var(--font-ui);background:var(--body-bg);color:var(--slate)}
+html[dir="rtl"] body{font-family:var(--font-ar)}body{display:flex;justify-content:center;min-height:100vh;overflow-x:hidden}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.phone-shell{width:390px;max-width:100%;height:820px;max-height:100vh;background:var(--paper);border:8px solid var(--navy3);border-radius:38px;box-shadow:0 30px 75px rgba(7,29,64,.28);position:relative;overflow:hidden;display:flex;flex-direction:column}
+@media(max-width:480px){body{background:var(--paper)}.phone-shell{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none}}
+ .screen{flex:1;display:flex;flex-direction:column;overflow-y:auto;background:linear-gradient(180deg,var(--screen-top) 0%,var(--paper) 100%);scroll-behavior:smooth}.screen::-webkit-scrollbar,.drawer-scroll::-webkit-scrollbar{display:none}
+/* Auth */
+.auth-shell{background:var(--paper);border-color:var(--navy3)}.auth-preference-row{display:flex;gap:6px;align-items:center}.auth-screen{padding-bottom:calc(18px + var(--safe-bottom));background:radial-gradient(circle at 88% -18%,rgba(242,189,99,.22),transparent 34%),linear-gradient(180deg,var(--navy) 0 38%,var(--paper) 38% 100%);overflow-y:auto}
+.auth-hero{padding:calc(28px + var(--safe-top)) 22px 54px;color:#fff;position:relative;text-align:center}.auth-hero-actions{position:absolute;top:calc(15px + var(--safe-top));left:16px}.auth-lang{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.09);color:#fff;border-radius:12px;padding:8px 11px;font-weight:800;font-size:11px}.auth-hero-brand{display:flex;justify-content:center}.auth-logo{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px}.auth-logo img{width:118px;height:74px;object-fit:contain;filter:drop-shadow(0 9px 15px rgba(0,0,0,.2))}.auth-logo span{font-size:0}.auth-logo.fallback-visible span{font-size:30px;font-weight:900;letter-spacing:-1px}.auth-kicker{font-size:9px;letter-spacing:1.5px;font-weight:800;color:var(--gold);margin-top:5px}.auth-hero h1{font-size:24px;margin:5px 0 6px;font-weight:900}.auth-hero p{margin:0 auto;max-width:305px;font-size:11px;line-height:1.7;color:rgba(255,255,255,.8)}
+.auth-panel{margin:-30px 18px 0;background:var(--card);border:1px solid rgba(14,42,92,.08);border-radius:28px;box-shadow:var(--shadow-xl);padding:20px 18px 18px;position:relative;z-index:2}.auth-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.auth-panel-head h2{margin:3px 0 0;font-size:18px;font-weight:900;color:var(--navy)}.section-caption{font-size:8px;letter-spacing:1.4px;font-weight:900;color:var(--gold);text-transform:uppercase}.auth-mini-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,var(--navy),#1268BE);color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:0 8px 18px rgba(14,42,92,.16)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-bottom:12px}.field-full{grid-column:1/-1}.field label{display:block;font-size:10px;color:var(--muted);font-weight:800;margin:0 0 6px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--field-bg);color:var(--slate);outline:none;transition:.2s}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(242,189,99,.15);background:#fff}.checkbox{display:flex;gap:9px;align-items:flex-start;font-size:10px;color:var(--muted);line-height:1.6;margin:4px 0 12px}.checkbox input{margin-top:3px;accent-color:var(--gold)}
+.btn{border:0;border-radius:13px;padding:11px 14px;background:#fff;color:var(--slate);border:1px solid var(--line);font-weight:800;font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:.2s}.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.btn:disabled{opacity:.65;cursor:not-allowed;transform:none}.btn-primary{background:linear-gradient(145deg,var(--navy3),#1268BE);color:#fff;border:0;box-shadow:0 10px 24px rgba(14,42,92,.18)}.btn-secondary{background:#EEF5FD;color:var(--navy2);border-color:#CFE0F3}.btn-accent{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy3);border:0}.btn-outline{background:transparent}.btn-danger{background:var(--red);color:#fff;border:0}.btn-sm{padding:8px 10px;font-size:10px;border-radius:10px}.auth-submit{width:100%;padding:14px;border-radius:14px;font-size:13px;margin-top:4px}.auth-actions{display:grid;gap:9px;margin-top:12px}.auth-link{border:0;background:none;color:var(--navy2);font-size:10px;font-weight:800;text-decoration:underline;padding:4px}.auth-company{margin-top:12px;padding:12px;border-radius:16px;background:var(--paper);border:1px solid var(--line)}.auth-section-title{font-size:10px;font-weight:900;color:var(--navy);margin-bottom:9px}.auth-error{margin-bottom:12px}
+/* App chrome */
+.app-phone{background:var(--paper)}.main{min-width:0;flex:1;padding-bottom:72px;display:flex;flex-direction:column}.app-topbar{position:sticky;top:0;z-index:30;background:linear-gradient(145deg,var(--navy3),var(--navy) 72%);color:#fff;padding:calc(16px + var(--safe-top)) 16px 15px;box-shadow:0 10px 24px rgba(14,42,92,.16)}.topbar-main{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{display:flex;align-items:center;gap:9px;min-width:0}.brand-mark{width:40px;height:40px;border-radius:13px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none;box-shadow:0 7px 16px rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.45)}.brand-mark img{width:100%;height:100%;object-fit:contain}.brand-mark .brand-fallback{display:none;font-weight:900;color:var(--navy);font-size:13px}.brand-mark.fallback-visible .brand-fallback{display:block}.brand-name{font-weight:900;letter-spacing:-.03em}.subtitle{font-size:9px;color:rgba(255,255,255,.68);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}.topbar-actions{display:flex;align-items:center;gap:6px}.icon-btn{width:34px;height:34px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.09);color:#fff;border-radius:11px;display:grid;place-items:center;font-size:11px}.icon-btn svg,.nav-icon svg{width:18px;height:18px}.notification-btn{position:relative}.notification-btn i{position:absolute;top:7px;right:7px;width:5px;height:5px;background:var(--gold);border-radius:50%;box-shadow:0 0 0 3px rgba(242,189,99,.18)}
+.content{padding:0 0 24px;min-height:100%}.page-head{padding:18px 16px 14px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.page-head h1{margin:2px 0 0;font-size:19px;color:var(--navy);font-weight:900}.page-head h3{margin:0;font-size:13px;color:var(--navy);font-weight:900}.page-head .muted,.muted{font-size:10px;color:var(--muted);line-height:1.6}.page-head .actions,.actions{display:flex;gap:7px;flex-wrap:wrap}.eyebrow{font-size:8px;letter-spacing:1.3px;font-weight:900;color:var(--gold);text-transform:uppercase}.home-section-title{padding:14px 14px 8px;display:flex;align-items:center;justify-content:space-between}.home-section-title h2{margin:0;font-size:13px;color:var(--navy);font-weight:900}.home-section-title small{font-size:9px;color:var(--muted)}
+.hero{margin:14px;border-radius:22px;background:radial-gradient(circle at 90% -20%,rgba(242,189,99,.24),transparent 35%),linear-gradient(145deg,var(--navy3),var(--navy) 72%);color:#fff;padding:19px;box-shadow:0 12px 30px rgba(14,42,92,.18);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;inset:auto -40px -55px auto;width:180px;height:180px;border-radius:50%;background:rgba(242,189,99,.08);filter:blur(2px)}.hero h2{margin:4px 0;font-size:21px;font-weight:900}.hero p{margin:0;font-size:10px;color:rgba(255,255,255,.78);line-height:1.7}.hero .eyebrow{color:var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 14px}.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 5px 16px rgba(14,42,92,.05);min-height:74px}.stat .value{font-size:19px;font-weight:900;color:var(--navy)}.stat .label{font-size:9px;color:var(--muted);margin-top:3px;line-height:1.35}.home-quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px}.home-quick-card{border:1px solid var(--line);background:var(--card);border-radius:15px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;min-height:78px;box-shadow:0 5px 16px rgba(14,42,92,.045);color:var(--slate)}.home-quick-card:active{transform:scale(.975)}.qicon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center}.qicon svg{width:19px;height:19px}.qicon.navy{background:#E7EFFA;color:var(--navy)}.qicon.blue{background:#E7F2FF;color:#1A6BC4}.qicon.purple{background:#F0EBFF;color:var(--purple)}.qicon.gold{background:var(--gold-soft);color:#8A6D1B}.qicon.red{background:#FFF0ED;color:var(--red)}.qicon.green{background:#E6F7ED;color:var(--green)}.quick-label{font-size:8.5px;font-weight:900;text-align:center;line-height:1.2}
+.grid{display:grid;gap:10px;padding:0 14px}.grid-2{grid-template-columns:1fr 1fr}.grid-4{grid-template-columns:repeat(2,1fr)}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 5px 16px rgba(14,42,92,.05)}.card h3{margin:0 0 10px;color:var(--navy);font-size:13px}.list{display:grid;gap:1px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:10px}.list-row:last-child{border-bottom:0}.list-title{font-weight:900;color:var(--slate);font-size:11px}.list-sub{color:var(--muted);font-size:9px;margin-top:2px}.table-wrap{margin:0 14px;overflow:auto}.desktop-table{display:block}.data-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:720px}.data-table th,.data-table td{padding:9px 10px;border-bottom:1px solid var(--line);font-size:9px;text-align:right;vertical-align:middle}.data-table th{background:#F7FAFD;color:var(--muted);font-weight:900}.data-table tr:last-child td{border-bottom:0}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#EEF3F8;color:var(--muted);font-size:8px;font-weight:900}.badge.success{background:#E6F7ED;color:var(--green)}.empty{padding:30px 18px;text-align:center;color:var(--muted);font-size:11px}.loading{padding:34px;text-align:center;color:var(--muted);font-size:11px}.error-box{margin:14px;padding:13px;background:#FFF0ED;border:1px solid #F4CCC5;color:#934333;border-radius:14px;font-size:10px}.home-metric-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px}.section-note{padding:8px 14px;color:var(--muted);font-size:9px}
+.mobile-record-card{margin:0 14px 9px;padding:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 16px rgba(14,42,92,.05)}.mobile-record-card .record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:9px}.mobile-record-card .record-name{font-weight:900;color:var(--navy);font-size:12px}.mobile-record-card .record-meta{margin-top:3px;color:var(--muted);font-size:9px;line-height:1.5}.mobile-record-card .record-actions{display:flex;gap:6px;margin-top:10px}.mobile-record-card .record-actions .btn{flex:1}.desktop-table-note,.desktop-table-empty{display:block}
+/* drawer / modal */
+.drawer{position:absolute;inset:0;background:rgba(7,29,64,.58);backdrop-filter:blur(4px);display:none;align-items:flex-end;z-index:80}.drawer.show{display:flex}.drawer-panel{width:100%;max-height:86%;background:var(--paper);border-radius:26px 26px 0 0;padding:10px 14px calc(14px + var(--safe-bottom));box-shadow:0 -18px 50px rgba(0,0,0,.2);display:flex;flex-direction:column}.drawer-handle{width:36px;height:4px;background:#CBD5E1;border-radius:4px;margin:2px auto 10px}.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 10px}.drawer-head .subtitle{color:var(--muted)}.close{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--slate);font-size:16px}.drawer-workspace{display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:10px}.workspace-icon{width:36px;height:36px;border-radius:12px;background:var(--gold-soft);display:grid;place-items:center;color:#8A6D1B;font-weight:900}.drawer-workspace strong{display:block;font-size:11px;color:var(--navy)}.drawer-workspace small{display:block;color:var(--muted);font-size:8px;margin-top:2px}.drawer-scroll{overflow:auto}.drawer-section{padding:11px 4px 6px;font-size:8px;color:var(--gold);font-weight:900;letter-spacing:1px}.drawer-link{width:100%;border:0;background:transparent;display:flex;align-items:center;justify-content:space-between;padding:10px 6px;border-radius:10px;color:var(--slate);font-size:10px}.drawer-link span:first-child{display:flex;align-items:center;gap:9px}.drawer-link svg{width:18px;height:18px}.drawer-link:hover{background:#EEF4FA}.drawer-chevron{color:#A0A9B6}.drawer-footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px}.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:calc(70px + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(255,255,255,.98);border-top:1px solid var(--line);display:flex;z-index:40;backdrop-filter:blur(13px)}.bottom-nav button{flex:1;border:0;background:transparent;color:#9BA8B8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:8px;font-weight:800}.bottom-nav button.active{color:var(--navy)}.bottom-nav button.active:after{content:"";width:5px;height:5px;background:var(--gold);border-radius:50%;margin-top:1px}.bottom-nav .nav-icon svg{width:19px;height:19px}
+/* modal */
+#modal{position:absolute;inset:0;background:rgba(7,29,64,.58);backdrop-filter:blur(4px);display:none;align-items:flex-end;z-index:100}.modal.show{display:flex}.modal-panel{width:100%;max-height:90%;background:var(--paper);border-radius:26px 26px 0 0;padding:18px 16px calc(18px + var(--safe-bottom));overflow:auto}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.modal-head h3{margin:0;font-size:15px;color:var(--navy)}
+.button-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+/* responsive */
+@media(max-width:360px){.home-quick-grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:1fr 1fr}.topbar-actions{gap:4px}.icon-btn{width:32px;height:32px}}
+</style></head><body><div id="toastHost"></div><div id="app"></div><div id="modal" class="modal"><div class="modal-panel"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>window.INSURNEX_CONFIG = { firebase: { apiKey: "AIzaSyCAM6QLAwB5nE_naV7pIRN6N8DnUir14Iw", authDomain: "insurnex-8a9df.firebaseapp.com", projectId: "insurnex-8a9df", storageBucket: "insurnex-8a9df.firebasestorage.app", messagingSenderId: "487585634264", appId: "1:487585634264:web:dc1e8f82a2ca94bf8484ad" }, app: { name:"InsurNex", version:"1.0.0", environment:"production" } };</script>
 <script>(() => {
+  try {
   const firebaseConfig = window.INSURNEX_CONFIG?.firebase;
   if (!firebaseConfig?.projectId) throw new Error("InsurNex Firebase configuration is missing.");
   if (!window.firebase?.apps?.length) firebase.initializeApp(firebaseConfig);
@@ -782,9 +71,9 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
       policies:"الوثائق", renewals:"التجديدات", claims:"المطالبات", tasks:"المهام", calendar:"التقويم",
       documents:"المستندات", insurers:"شركات التأمين", insuranceProducts:"المنتجات التأمينية",
       commissions:"العمولات", communications:"الاتصالات", reports:"التقارير", analytics:"التحليلات",
-      team:"الفريق", notifications:"الإشعارات", settings:"الإعدادات", support:"الدعم",
-      subscriptions:"الاشتراك", account:"الحساب", globalSearch:"بحث شامل",
-      login:"تسجيل الدخول", register:"إنشاء حساب", logout:"تسجيل الخروج", forgotPassword:"نسيت كلمة المرور؟",
+      team:"الفريق", notifications:"الإشعارات", settings:"الإعدادات", support:"الدعم", navMain:"الرئيسية", navCrmSales:"إدارة العملاء والمبيعات", navService:"الوثائق والخدمة", navBusiness:"الأعمال والشركاء", navInsights:"التحليلات والفريق", navAccount:"الحساب",
+      subscriptions:"الاشتراك", account:"الحساب", globalSearch:"بحث شامل", quickAccess:"الوصول السريع", allFeatures:"كل المزايا", portfolioMetrics:"مؤشرات المحفظة", allDailyFunctions:"كل وظائف التشغيل اليومية",
+      login:"تسجيل الدخول", register:"إنشاء حساب", logout:"تسجيل الخروج", forgotPassword:"نسيت كلمة المرور؟", quickAccess:"الوصول السريع",
       email:"البريد الإلكتروني", password:"كلمة المرور", confirmPassword:"تأكيد كلمة المرور", name:"الاسم الكامل",
       mobile:"رقم الهاتف", country:"الدولة", city:"المدينة", accountType:"نوع الحساب", companyName:"اسم الشركة",
       individualBroker:"وسيط تأمين فردي", brokerageCompany:"شركة وساطة", brokerEmployee:"موظف شركة",
@@ -834,8 +123,9 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
       policies:"Policies", renewals:"Renewals", claims:"Claims", tasks:"Tasks", calendar:"Calendar",
       documents:"Documents", insurers:"Insurers", insuranceProducts:"Insurance Products", commissions:"Commissions",
       communications:"Communications", reports:"Reports", analytics:"Analytics", team:"Team", notifications:"Notifications",
-      settings:"Settings", support:"Support", subscriptions:"Subscription", account:"Account", globalSearch:"Global search",
-      login:"Sign in", register:"Create account", logout:"Sign out", forgotPassword:"Forgot password?",
+      settings:"Settings", support:"Support", navMain:"Overview", navCrmSales:"CRM & Sales", navService:"Policies & Service", navBusiness:"Business & Partners", navInsights:"Insights & Team", navAccount:"Account",
+      subscriptions:"Subscription", account:"Account", globalSearch:"Global search", quickAccess:"Quick access", allFeatures:"All features", portfolioMetrics:"Portfolio metrics", allDailyFunctions:"Daily operating functions",
+      login:"Sign in", register:"Create account", logout:"Sign out", forgotPassword:"Forgot password?", quickAccess:"Quick Access",
       email:"Email", password:"Password", confirmPassword:"Confirm password", name:"Full name",
       mobile:"Mobile", country:"Country", city:"City", accountType:"Account type", companyName:"Company name",
       individualBroker:"Individual Broker", brokerageCompany:"Brokerage Company", brokerEmployee:"Broker Employee",
@@ -845,8 +135,9 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
       close:"Close", empty:"No data yet", saved:"Saved successfully.", deleted:"Deleted successfully.",
       noPermission:"You do not have permission to access this data.", network:"Service unavailable. Check your connection and retry.",
       invalidEmail:"Invalid email address.", invalidPassword:"Password must be at least 6 characters.", passwordsMismatch:"Passwords do not match.",
-      accountCreated:"Account created. Complete your workspace setup.", resetSent:"Password reset link sent.",
-      verifyEmail:"Please verify your email before signing in.", brokerLicense:"Broker license number", legalName:"Legal name",
+      accountCreated:"Account created and signed in successfully.", resetSent:"Password reset link sent.",
+      welcomeBack:"Welcome back", getStarted:"Get started with InsurNex", authDescription:"Manage clients, sales, documents, renewals and claims from one workspace.", termsAgreement:"I agree to the Terms of Use and Privacy Policy.", theme:"Appearance", lightMode:"Light mode", darkMode:"Dark mode",
+      verifyEmail:"Email verification is not required.", brokerLicense:"Broker license number", legalName:"Legal name",
       registrationNumber:"Registration number", address:"Address", website:"Website", employees:"Employee count",
       specialization:"Specialization", insuranceLines:"Insurance lines", nationalId:"National ID / Passport",
       dateOfBirth:"Date of birth", gender:"Gender", occupation:"Occupation", category:"Category", industry:"Industry",
@@ -878,6 +169,9 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
   };
 
   let lang=localStorage.getItem("insurnex-language")||"ar";
+  let theme=localStorage.getItem("insurnex-theme")||"light";
+  if(theme!=="dark")theme="light";
+  let registrationInProgress=false;
   const state={
     user:null, profile:null, memberships:[], adminRole:null,
     workspace:{type:"personal",id:null,name:null}, cache:new Map(), online:navigator.onLine
@@ -913,6 +207,16 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     document.documentElement.dir=lang==="ar"?"rtl":"ltr";
     document.dispatchEvent(new CustomEvent("insurnex:language",{detail:lang}));
   }
+  function setTheme(next){
+    theme=next==="dark"?"dark":"light";
+    localStorage.setItem("insurnex-theme",theme);
+    document.documentElement.setAttribute("data-theme",theme);
+    var meta=document.querySelector('meta[name="theme-color"]');
+    if(meta)meta.setAttribute("content",theme==="dark"?"#0A0E1A":"#0E2A5C");
+    document.dispatchEvent(new CustomEvent("insurnex:theme",{detail:theme}));
+  }
+  function toggleTheme(){setTheme(theme==="dark"?"light":"dark");}
+  function currentTheme(){return theme;}
   function t(key){return I18N[lang]?.[key] ?? I18N.en[key] ?? key;}
   function locale(){return lang;}
   function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -933,30 +237,30 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
   function friendlyError(err){
     const code=String(err?.code||"");
     const map={
-      "auth/invalid-credential":t("login")+" — بيانات الاعتماد غير صحيحة.",
-      "auth/user-not-found":"الحساب غير موجود.",
+      "auth/invalid-credential":"تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور ثم حاول مرة أخرى.",
+      "auth/user-not-found":"لا يوجد حساب مسجل بهذا البريد الإلكتروني.",
       "auth/wrong-password":"كلمة المرور غير صحيحة.",
+      "auth/invalid-login-credentials":"تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.",
       "auth/email-already-in-use":"هذا البريد مستخدم بالفعل.",
       "auth/weak-password":t("invalidPassword"),
       "auth/invalid-email":t("invalidEmail"),
-      "auth/email-not-verified":t("verifyEmail"),
       "permission-denied":t("noPermission"),
       "storage/unauthorized":t("noPermission"),
       "storage/canceled":"تم إلغاء رفع الملف.",
       "storage/quota-exceeded":"تم تجاوز سعة التخزين المتاحة.",
-      "auth/network-request-failed":"تعذر الوصول إلى Firebase Authentication. افحص اتصال الإنترنت واسمح باتصالات Firebase ثم أعد المحاولة.",
-      "auth/operation-not-allowed":"تسجيل الدخول بالبريد وكلمة المرور غير مفعّل في Firebase Authentication.",
+      "auth/network-request-failed":"تعذر الاتصال بخدمة تسجيل الدخول. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
+      "auth/operation-not-allowed":"تسجيل الدخول بالبريد الإلكتروني وكلمة المرور غير مفعّل حاليًا.",
       "auth/too-many-requests":"تم تقييد محاولات تسجيل الدخول مؤقتًا. انتظر قليلًا ثم أعد المحاولة.",
-      "auth/internal-error":"حدث خطأ داخلي في Firebase Authentication.",
-      "unavailable":"Firestore غير متاح حاليًا. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
-      "failed-precondition":"Firestore يحتاج إلى إعداد إضافي أو توجد مشكلة في الفهرسة/المشروع.",
+      "auth/internal-error":"حدث خطأ داخلي أثناء تسجيل الدخول. حاول مرة أخرى.",
+      "unavailable":"الخدمة غير متاحة حاليًا. تحقق من اتصال الإنترنت ثم أعد المحاولة.",
+      "failed-precondition":"تعذر تنفيذ العملية حاليًا بسبب إعداد أو فهرسة غير مكتملة.",
       "deadline-exceeded":"انتهت مهلة الاتصال بـ Firestore.",
       "resource-exhausted":"تم تجاوز حصة خدمة Firebase المتاحة حاليًا."
     };
     if(map[code]) return map[code];
     const raw=String(err?.message||"").trim();
-    if(code) return "Firebase: "+code+(raw? " — "+raw:"");
-    if(raw) return "Firebase: "+raw;
+    if(code) return raw || t("network");
+    if(raw) return raw.replace(/^Firebase:\s*/i,"") || t("network");
     return t("network");
   }
 
@@ -988,8 +292,43 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     const u=auth.currentUser;
     state.user=u;
     if(!u){state.profile=null;state.memberships=[];return null;}
-    const snap=await db.collection("users").doc(u.uid).get();
-    state.profile=snap.exists?snap.data():{};
+    const userRef=db.collection("users").doc(u.uid);
+    const snap=await userRef.get();
+    if(!snap.exists){
+      // Safe recovery for an authenticated legacy account with no users/{uid} document.
+      // This creates a real profile only; it never creates placeholder business records.
+      const now=firebase.firestore.FieldValue.serverTimestamp();
+      const fallback={uid:u.uid,email:u.email||"",fullName:u.displayName||"",name:u.displayName||"",phone:"",mobile:"",
+        accountType:"individual_broker",role:"broker_owner",roles:["broker"],organizationId:null,photoURL:u.photoURL||null,
+        country:"",city:"",status:"active",emailVerified:!!u.emailVerified,onboardingCompleted:false,onboardingComplete:false,
+        createdAt:now,updatedAt:now};
+      await userRef.set(fallback,{merge:true});
+      await db.collection("brokerProfiles").doc(u.uid).set({userId:u.uid,createdAt:now,updatedAt:now},{merge:true});
+      state.profile=fallback;
+    }else{
+      const raw=snap.data()||{};
+      const legacyRoles=Array.isArray(raw.roles)?raw.roles:(raw.role?[raw.role]:[]);
+      state.profile={...raw,
+        uid:raw.uid||u.uid,
+        fullName:raw.fullName||raw.name||u.displayName||"",
+        name:raw.name||raw.fullName||u.displayName||"",
+        phone:raw.phone||raw.mobile||"",
+        mobile:raw.mobile||raw.phone||"",
+        role:raw.role||(legacyRoles[0]||"broker_owner"),
+        roles:legacyRoles.length?legacyRoles:["broker"],
+        emailVerified:typeof raw.emailVerified==="boolean"?raw.emailVerified:!!u.emailVerified,
+        onboardingCompleted:typeof raw.onboardingCompleted==="boolean"?raw.onboardingCompleted:!!raw.onboardingComplete,
+        onboardingComplete:typeof raw.onboardingComplete==="boolean"?raw.onboardingComplete:!!raw.onboardingCompleted
+      };
+      // Backfill only self-editable profile aliases. Role and organizationId are intentionally
+      // not changed here because they are authorization-sensitive fields in Firestore Rules.
+      const patch={};
+      if(!raw.fullName&&raw.name)patch.fullName=raw.name;
+      if(!raw.phone&&raw.mobile)patch.phone=raw.mobile;
+      if(typeof raw.onboardingCompleted!=="boolean"&&typeof raw.onboardingComplete==="boolean")patch.onboardingCompleted=raw.onboardingComplete;
+      if(typeof raw.emailVerified!=="boolean")patch.emailVerified=!!u.emailVerified;
+      if(Object.keys(patch).length){patch.updatedAt=firebase.firestore.FieldValue.serverTimestamp();await userRef.update(patch);}
+    }
     const ms=await db.collection("organizationMembers").where("userId","==",u.uid).limit(30).get();
     state.memberships=ms.docs.map(d=>({id:d.id,...d.data()}));
     const saved=localStorage.getItem("insurnex-workspace");
@@ -1160,15 +499,36 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
 
   window.addEventListener("online",()=>{state.online=true;document.dispatchEvent(new CustomEvent("insurnex:network",{detail:true}));});
   window.addEventListener("offline",()=>{state.online=false;document.dispatchEvent(new CustomEvent("insurnex:network",{detail:false}));});
+  setTheme(theme);
   setLanguage(lang);
 
   window.InsurNex={
-    auth,db,storage,state,I18N,Domain,ROLES,ROLE_LABELS,t,setLanguage,locale,esc,fmtDate,fmtMoney,toast,friendlyError,
+    auth,db,storage,state,I18N,Domain,ROLES,ROLE_LABELS,t,setLanguage,setTheme,toggleTheme,currentTheme,locale,esc,fmtDate,fmtMoney,toast,friendlyError,
     roles,hasRole,isPlatformAdmin,can,loadIdentity,setWorkspace,scopedQuery,docPayload,queryDocs,writeAudit,logActivity,isExpiring,firebaseProject,firebaseStatus
   };
+  } catch (bootError) {
+    window.__INSURNEX_BOOT_ERROR = bootError && bootError.message ? bootError.message : String(bootError);
+    console.error("InsurNex Firebase bootstrap failed", bootError);
+  }
 })();</script>
 <script>(function(){
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("insurnex-theme") === "dark" ? "dark" : "light");
   document.body.classList.add("insurnex-user");
+  if (!window.InsurNex || !window.InsurNex.auth) {
+    var app = document.getElementById("app");
+    if (app) {
+      app.innerHTML = '<main class="auth-wrap"><section class="auth-card auth-card-pro">'+
+        '<div class="auth-brand"><div class="auth-logo-mark"><div class="auth-logo-fallback">IN</div></div><div class="auth-brand-copy"><div class="brand-name">InsurNex</div><div class="subtitle">Insurance Broker CRM & Operating System</div></div></div>'+
+        '<div class="auth-divider"></div>'+
+        '<div class="auth-intro"><div class="eyebrow">INSURTECH BROKER OS</div><h1 class="auth-title">تعذر تشغيل واجهة التطبيق</h1>'+
+        '<p class="auth-copy">لم يتم تحميل مكتبات Firebase اللازمة. افتح الملف عبر خادم محلي أو من الموقع المنشور، وتأكد من السماح بالاتصال بـ gstatic.com.</p></div>'+
+        '<div class="error-box auth-error">تعذر تهيئة خدمات التطبيق. أعد المحاولة.</div>'+
+        '<div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn btn-primary" type="button" onclick="location.reload()">إعادة المحاولة</button></div>'+
+
+        '</section></main>';
+    }
+    return;
+  }
   var auth=InsurNex.auth, db=InsurNex.db, storage=InsurNex.storage, state=InsurNex.state, Domain=InsurNex.Domain;
   var t=InsurNex.t, esc=InsurNex.esc, fmtDate=InsurNex.fmtDate, fmtMoney=InsurNex.fmtMoney, toast=InsurNex.toast, friendlyError=InsurNex.friendlyError;
   var view=(location.hash||"#home").slice(1), search="";
@@ -1183,7 +543,7 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
   ];
   var shortNav=[["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["renewals","renewals","🔄"],["account","account","⚙️"]];
 
-  function mark(){return '<div class="brand-mark image-mark" aria-label="InsurNex"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDAgNDQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9Ikluc3VyTmV4Ij4KICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvMndCREFBTUNBZ0lDQWdNQ0FnSURBd01EQkFZRUJBUUVCQWdHQmdVR0NRZ0tDZ2tJQ1FrS0RBOE1DZ3NPQ3drSkRSRU5EZzhRRUJFUUNnd1NFeElRRXc4UUVCRC8yd0JEQVFNREF3UURCQWdFQkFnUUN3a0xFQkFRRUJBUUVCQVFFQkFRRUJBUUVCQVFFQkFRRUJBUUVCQVFFQkFRRUJBUUVCQVFFQkFRRUJBUUVCQVFFQkFRRUJEL3dnQVJDQUhIQWJnREFTSUFBaEVCQXhFQi84UUFIUUFCQVFBQ0F3RUJBUUFBQUFBQUFBQUFBQUVDQXdVSENBWUVDZi9FQUJzQkFRQUNBd0VCQUFBQUFBQUFBQUFBQUFBQ0F3RUZCZ2NFLzlvQURBTUJBQUlRQXhBQUFBSDFRQ0tJQ2tLZ1VBQ1VTZ0FsQUlDeWdncEJaUkxDa0N3cVVsQUNVQUFDVUFKUUJLRW9sQktBQUVzRkFRc3NMS0pRRUZncVVJRlFzc0tBQUFBbW5NZDhyRWdBQ1VpZ2xBRW9KU1ZDeWdDVUNVRUtBQktBQkNnQWxBQUFuemxuei9SL05kWi9NOUR3MzB2eityRGY4VDZUL1J4L0llZmU0aEM0Q1dDZ0VLL04xeDlud2RudWhQemJmUStoTDBSOUw4LzFkcE9HNWpUNzZpRm9oUUVvQUFpbGdKUUJLQUFCT0FzcCtnK2U2dStPNkxpL3Rma3RPWFE4SnNZVzM0OGtSZWpPUTQva1BPZmVVc3IraWdBQW1qOUhXZjEvQjE5d09lUHBuamhGdEt5bCs0K0hmTjlYcExsL0wzYlhIZWdkalhITG5ldEJrQVFXVUpTVUJCUUpRbkJUcjUzZ2Vwdmd1bDVMNy80alJsMDNFNzh0T1Z2dzc5bjU4NDE3c3RWaFh1dUZoSDBieVBIY2o1eDd1Slg5RkFJVUU2WDdvNlkzbk5kZWowRHl3QUFDbHcrMDdwOHg4dnovQUZQcEJ3UFBjUjZTRmQwb0VwS0FBQUU0VDRqbzNwZWI3SjY3MDVkbHhHM1pvenQrSGZub3loWHZ5MDV4aHV6MFp3cjNaYWNvdzM1YU1xNGVsdVI0N2tmTmZja3F2NkFJb0FuVEhjL1RPODVycndlZ2VXQUFLQW1GU242dTdlaXN0YnQvVWw2eTdNNEQxT2o1ZnVTaUtBQUJEenQxeDJQMXQ2bDVwK2pQODJleDFYNk05R3lOZTdQUm5DdmRucHloRGRscHloRGZsb3loWHZ5MDVRajZkNUhqZVQ4eDl0Q3U4Z29BSFRIYzNUTzg1cnJ4WjZCNVlBQllGbEJLQmhld3V2WjgzMmVwTnZRWGVIQWVwZnRHczNRQUFDVWVjT3VPeGV0UFVmT2QrZWpQWTZ6ZnMwWjVxMzU2TThWYjh0V1VJYmN0V1VJYmM5T1VJYnJxeWhIMUp5ZkdjbjViN09GZDRBQUU2WjdtNlkzbk5kZWowRHl3QUFDa3dVQUNDOHp3bGhiNlI1bnpEM2x3dnBmMWcwUFVBQUFlYStzK3lPcy9VZlB0K3o4K2V4MW42TTlHYXJmbm8yWnIzWjZjbGUvTFRsR3ZkbHFzSWJycnlxajZxNVBpK1U4cTlqbEs3d0VvQW5USGMvVEc4NXJyNGVnZVZ3WXlHUUFGaUZTTTJTTTFqTTV6ejBzUzdxN0c4bTluY2gzbmNqSExrdTJCbExEelAxaDJaMWg2aHdlN1BSbnNkYitqUFJubXJmbm96elh2ejBacTkrZWpKWHZ5MDU0cjI1YXJYSDFqeW5GY3I1TjY5QlZmUUFKUk9tZTV1bU41elhYMHM3L3lzcG1ESUJFWnNobTR5WnpaSWxVeHptcGptV1dNTS9jOTZlVWVlNTNxdlRUaWVXNFgwSmpaQ2ZtWHF6dExxbjAvaHQyelJuc3RmdnowWksvMFo2TTgxN3M5R2VhLzBaNk04MWJzOUdTdmZsbzJRajYyNVhpK1U4ajlhU3FyaUFvQW5USGMvVEc4NXJyMWNQUVBMTW41T0xydjU5d25LNXh1bGs2cEdLU1NaelpKbVZrbVpXWXhuS1RITXF4bWMxak15NWp2bnpabnFkMTY4eTY4N0I4ODlIOHg5VCtoL1BIb1BMWjVhcnR0YnZ6MFpvYjg5R2VhOTJlalBOZjZNdEdlYXQrV25MTmUvUDhBUHN4SDE5eXZFOHQ1RDZwS1ZYRUZBQk9sZTZ1bXQ1elhXL3dYNC9uT3M1cWE5bUd0NlNKakNmMWYzblRINmZ0MHZkVTRIbk4zeHpGak9Ga21aSkptVmttWldUSE9jc1pNeVRHSlhMWE01MzlyOVFQaisvMkwwNXdYZS9DZDc0WHc5WCtZZXUwMzRNOWVXMTEyM0xUbWh1ejA1NXIzWmFjczE3dG1qTE1OK3o4MjNFUFl2TGNSeS9rWHAwV1ZYVUFCS1R6OTZDOHY3ZlU5RjY5MlBUNm5UanR4cnMxVFpoWFBDWnlFc2V3dXZWdnk5Mno0SDdyb2VJdU54djhBbllwbVNNY3lzeG1jMlNabGNXT1pKSWxXTXpMTDZMNW0xMyt0ZnkrWis5ZUU3Znp2OHQ3ajh5YmY1K3Vjc1hSYWJkbnB5ekRkbHF5elhzejA1STc4OU9lSWV6T1g0Zm1QSS9TRXNxdW9CQ2dubDMxRjVlMnV2NlJ4Mlk5YnordkhkaENlckRkakNlckhialhacXgyU3VXcjZIZ1dZZHc1ZFhkajlGeHY2Y1pQcitCSk16UmptVmttWkl4em00c2N5dU1tWjNHWTVsY1VTKzU3VTg0elViWHNmcDdsOGZwY1ZkbW0vR3pMV3hqZmRXYUczYitheGo3VjVmaHVaOGs5RnFLN0tCS0JCNWQ5UmVYOXRyK2xabTdIbTlXTzNHdVdxYmNJejFZN2NLN05lRzNHdWVxYk1LN01QMGFNSzVkKzhKNmQ2ZSsvUWRmNHlkSnp5VEhNc3BqTTV5a3h6SzR5Wmt4WTVuY1dPWjNGam1SakVyaXh6SzZ0c3hQOEFCanlHaW03ODJldFhadS9EK3ZoUGt1OTMvUWNCei9sbmNvc0pnU2hLRTh3K252TWUzMXZTMDJUdE9aMTQ3WkNXckRkakNlbkhiakNlbkhialhacXczWTF6MDNPVjJlLytXNGZuZU02THBQcVAyVDFkMTNLZEJZN05YYThpa2tzMlRGbXlZeW5jVVNTWTVrakhNN2lpUWpJRlNqOFA3dnlWVzhSeFd6WHkrKzkvODd3UFBjSDA0a0pnVktKWVBNbnB2ek51Tlowek5tUGI4dGhNNUNXdkhaakdlckhialhQVGp0a0o2Y2R1TUxOV0czQ3F6MzF6M0JjN3cvVHBaQ1h4SG5MMkw4ejBlZzhvVG5PQjlDNG00c2JZMllrMGt6SzRKbVNDVURLREtXWlUvTkROK1h5MWMvdVpiZmkrcjMxenZCYzV3dlMxTENjVUNGQlBOUHBiemh1ZFgwcmp0dzdubE5jMjR4bHFtM0dNdFdHN0NFOVdPM0dFOVdHN0d1ZXJEYmpYWjcxNXpnK2M0THE1U0V4RGpQTmZxajgyNDFmaTJkbGRaK2xjTXhZL1RYWkptUkNWa0ZneUdVdVBEMFcvcDRDWFE3ZkMzS202VzVaeDcxNTNpdVY4L3dDb2hZVEFTd29KMGwzZDhqOXZ5ZU9zTnVIcFBEYTVzeGpMWGp0eGpQWGh1d2hQVmpza0o2c04yRmM5V0c3Q3UzM2h6bkI4NTU5MXdRbUFRVG8zdlNmZDhuaC9EMGY1MDlMNHJValovRVF6U1pEVkhPMzgzRThiclB2L0FFL25OVHNWdHltVEt5TTU3Zys0cUxQVmxQUCtwc29paVVFQk1oNUwrRDllK1IvUXVLL1BObU8xMSt1WnlNdGVPekdFOWVPekdNOVdPM0dFOVdHNlYyZTZlYjRUbS9PdXpKYTVwUUJMS092K3dGc1BEZjVmWVhqSHRPYjVTL0VaN3ZXZlk4Zjh6YXJlVC9Camw4SDFyYVZiWkZsYmJERzU1V1Jucy9vdjFmeTI2eUhON2VWQW9sZ1VDQ2RLOTE0L1Y4M2hOM3IwZDZMeEdtYk1mcG8xNDdjWXoxWTdjWVQxWTdjWXoxNDdjSzUrNWVaNFhtL051NFJhNW9Dd1VBaE9NNVZuSGpIcTcrakhsbmY2em8zTEhidXRkY2x1cVpMYkc1VE8yREpiWVg2cjh2c2ZWZmJ5SEpWdzNTU3hqTlNoQVVKUkxLQVk5Rzk2WS9YOHZoYkgwbDU0OUI0ejhlTzNEN2ZrMTQ3TVl6MTQ3Y0l6MTRiWlhaN2Y1cmh1Wjh5N29LN0VBb0VLQVFZYkIwUDVuL29oMWR1OWQ0Nnk1UGorcTBreXVWMWN6bWRzSDBuSWV1TlQ5MzQvcUxPSTZPeFlTbENMQ29GUVdVQVNpTEMvRC9jTGF2RnZEZTAvTlBjOGo4RGh0eDNtcDFZN2NJejF6WklUOXRjenczTStYZCtsbGRpZ0FTZ0FBaFpSOG41QjkwOFh0UGk4RTNzM3JUdU9jblozMS9valJiTDhYSXB5TzlVeG1MQ3BTTENnaFFRQXNDa0xLR3JiR09ndW1QY25XM1Y4NzVleDVQOEFEMS9NNmNkdUVaZTF1WTRmbVBLL1F3cnNBRUtBUW9FQ3hTVkRYOGw5a3NoS2xjN0tKVUxGRW9Td0FxVVFMRkVVRUtBQktQbnZNdnJ2OHUzMW5pQ2R3ZFFkM3gvczdtK0c1bnpMdjBXcXlXVUlMS0NCWUtsSlpTVUNVQUFoUktDVWdBTEFvSlpTRklVaWlVQUJESHJEdEo5RkhIOGdsTnFrWkNGbGhZcEtoUUFDRmxFc0N5aVVRb1Nrb0FFRklBVkFzQW9sQktFcExBcUZsQWhaWVdLSlJDa3FGSUtBaFlwTEJZRmdGQktJb0FBZ0tDQlFBQUlGQUFBQktBRUJRSUZBQkFXQlFBQVNoQUtBSC8vRUFDc1FBQUFGQXdNREJBSURBUUFBQUFBQUFBQUJBd1FGQWdZUkVEQTFCeUJBRWlFeE5FRlFFeFVsY1AvYUFBZ0JBUUFCQlFML0FLdFFzbW9mN1BJa0o5Z3hFalBTRDhJT0ZXcXJkVCtaSDloa1NFNndqeElYRElQaGtaQmhoOVBjenBuOURJVGpDT0VqY2o1Nk05c2Y5TGFYY0l0azN0NkpVbXJkTXlvQ3VLWklVWGJMcGhwZXRGUVp5ekIrWG1TTTNIeHBTTjFQbmc5V1JudWovcGJMaGROc2pMeTdtVmNkcEdaSEdYVTlaaGhLTTVKUHlKQ2FqNHdwTzdYendlb3pQT3VlMlA4QXBiTjZQRFRiN0NLNnpaU0d1dE53TWtmaXlNMUh4bE1uZVQxMkRycXFxenJrWkdSa1oxai9BS1d6ZXZJN1VMY2JpT05zNlFkbytESXpEQ0xvbGIxZXVnZGRWZFdRV3VlN09rZDlMWU1YcHlPM0hTcnFMV2lwZHRLbzc5NVhDdkdsVXRXclZxUmpJejJaR1JrWkdSSGZSMmIwNUhjYk9GMmkwSmNDTWxUdlg2WCsyUXlNak9tZXpJeU1qSXpwRy9SMmIxNURkS3VxZzRHNkNXUGR2MC85b1pHUVJnajB6cm5USXpyRy9RMmIxNURmZzdtcmFDaFNoV2pidjduTTltUm51eU02WkViOURadlhrUEFoSjV4RlZOWGJkNGp0ZFFPY3pya1o3czY1MGpQb2JONjhoNE1YTE9vdGFNbEdzb2hzOVFEL0FOM0l5TTZaMXpzUnYwTm05ZVE4SnE5Y01WNFNmYnl0R3gxQzU0WkJkbVJrWkdlek9rWjlEWnZYa2ZEb1VVU3JnTG9vZWJIVU0vOEFkR2Rjak9tZE05dVJHY2ZzM3B5UGkyL2RacENtb3FpN2VvblBqSUlFZXVSa1owejJaRVh4MnplbkkrTkFYSXRGbTNjb3VrdXpxSnoyZXpJenBrWjdjNlJmSGJONmNqNHhtSWVjZHc2MGJKdFpSdnIxRzU3WXpwblRPaENMNC9adlhrZkZ6cXdrWE1hdkNYQTFtVXkwNmo4OTI1R2RNakl5TWpPbVJGOGZzM3B5T2l6cHUyQnpzWVFvbW91c0pMSXJsNFdRaXNzM1Z0MjZVcElqTWRSSUp5OVQxeU1qUFprWkdSblFqRVh4MnpldkkxS1VKMFNFNnFxZFJtWmpJcHFxb3FaM0E2UkRWNDNlSitDUmoxNEZ1M2lDd1pYVllxYndLMEtJcVo3TTl1UmtaQkNLNDdadlFzeU14SUc2VzdrSENyWlNObDBuNWVEblMzYnFWaXdpNVJkSTNQYURTZm9mUnp5TWNiT1JrRUlyanRucVc2TnNvWXgza1owbkZ6UkwrRmtHWWhKOTdDclJjcXlsbTA1QXNaNXJQUUQ2QmM1NzhqT2hHSW5qZGcvanF2WG1UMm95Yk5NWkkvQ3lHTWs3akY0UzhtTW1IckJySk43bnN0M0NWYlVSeHV3WTZxY3p0eHNxb3pDYXFhMUhnWjB3SW03SmFMSm5mRU03cHVLMkk1eVowMVVucm5YSXBFVHh1d1k2cDh6dU1ueXpLdHU2UmRwZURrWkdkSzZhYXhVblVYZjZzRkMxZXFLMkRIVlBtdDFCMHMxcmR4RHRrM1B4cXFLYWdkSjA2a2VqeXYwTjRIaDlneDFTNW5kTXZhSlFTY3dGeFd3dEZubng2a3RTTU8xUDVhb1BpTmd4MVI1bmN3UHhCOE5WU1JsY1ZuR21EOXZIcXBwckZTZFJCeXNkQlo5b1BpTmcvanFoek82ZnhCOE5wY3RwVXZnb21vbFg0emh4U2hUVVoxSGdRWEViQi9IVS9tZDAvaUM0WFc0YllielZEMWs1WU9QRVhYcFFwVXJxVnEwZytJMlB4MU81amRQNGd1RjdKdUNaelRlV2lIa081OEpkeFFnU2lsU2xXbjRoT0oyREhVM21OMHk5b1BoKzJRaldrbTN1RzIzY0dyNERoMlNRcU02ajdJUGlOZ3gxT29QK3p4dW44UW5EOXpodWk1U3VhMFZvcmV5UkJkN250d01DTVQvZ1k3UFV4cjYyaDdwL0VIdzNlZEpWRmRGaytrSDdiYXpoTkVLcnFMSDNRalArd2xpMnJwanY3T0RNWTNEK0lQaHRneGRGbXB5Z1dTVmJxOTZpcWFSTFBhNnRqQTZZeGh1Wm92WXRreGQ4TC9VUzU3bVBhRTRmYXVlMUcwOG5JSnVZZDNTdWtwcGd4VlZUU0szcUZJVWZLMWpKbnMwL05tUWY5SkM3ZDB3WlRjYlhSWFJYcGp0eHJnSDhRbkQ3ZHdXOUgzRXl1QzJKSzNIZE5WZElOUlFaMjhEcC9iUnlrZ1c1OGk5N1ZOeHBqYS9FTHhHNUlSck9VYTNmWlRxM1ZOdkF0MkFkWEEvam85dEdOTjB5eUx4czcwbWUwZnhDOFB1ckpKcnAzajA4VllhRVd6Q3hEeWNmUWNHeWdXTytmdUxzc3YxR2ZianRoZUkzaklYaDA4U2ZCVkpSR3Z2ZzRKOVBPNEczMk52dFBCTVhSWktja0ZrRlc2bXhEY1Q0RjNXVTF1R2gvR3ZJdDEyRUxjdGw3Y1RtSWgyVUt6OFM0YlhaenFjcEV2b2h6M2ZpSDRud2JndHlQdUJyTzI5STIrN3hyYWxsdXA2cGt4YlI3ZnhwT0taU3phNGJVZXdkUXdNYTQ5b2JpZkNrSTFuS05icnN4M0FWa1JtZHFkUGFsQlJSU25UNUZhZEN0RnlXSlVrS3FUcDB3TUQ4US9GZUhYUlNwU3l0S0JZU0htWExaN2FZRHhnNllPTWF4SEZmc3BpRFlUVGVldDE5QnJZQi9FUHhYN05kc2c2UnVTeUZXSkdJZml2MmhpNDdLYlNaUjZWYURIL3YzLy9FQURnUkFBRURBZ01EQ1FZSEFBTUFBQUFBQUFFQUFnTUVFUVVTSVNBeWNRWVFFeUl3TVROUjBTTTFRWkdoc1NRMFFHR0I0ZkJDVUdELzJnQUlBUU1CQVQ4Qi93QzBMZ05QMVZSVlEwak9rbWRZTEUrV2YvQ2hiL0o5UFg1S1d0cUttWHBwWGt1Vk80dmlhNCtXMVc0blM0ZUx6dXQ5MDdsaFJBNk5kOVBWUWNxY1BtTmlTM2lQUzZpbWptYm1qTngyMDA4ZE8zUEs2d1dKY3J3M3FVUXYrNTlGVjFjOWEvcEtoMXlySWQ2cGZBWndHemlWWUtDbGZVSDRLZW9rcXBETEtiazg5TFhUMFQ4OERyTENPVkVWWGFLcTZydlA0SDA3T1NWa0xjOGhzRmlIS3BrZlVwQmMrWjdsVjFrOWE3UE82NklSQ0lRR3FwZkFad0d6eXI5M0hpTnJCZVVrbERhR282elBxUDhBZVNnbmpxV0NTSTNCN0RGY2VGRzR3d2k3bFZWazlZN05NNjZJVmtRaUVRc3VxcGZCWndHenlyOTNPNGpid3JHWjhMZjFOVy9FS2d4Q0hFWXVsaFA5YmVMZm5KT0tMVVFpRVFpRlpXMVZONExlQTJlVmZ1NDhSMkZGWHowRXZTd214V0VZMURpck5OSC9BQkgrK0cxaW8vRnljVVFpMUVJaEVJaFcxVk40TGVBMmVWZnU1M0VkakRMSlR2RWtSc1FzRTVRc3J3SVo5SlB2L3ZMWnhNZmluOFVRaUVXb2hFSWhXMVZQNExlR3p5cjkzSGlPeUZ3YmhZSnlrdmFDc1BCM3I2L05kL1BpUS9GUDRvaEVJaEVJdFJDQTFWUDRUZUd6eXI5M0hpT3dzckszTmd1UHZvN1ExR3JQdC9TamtiSzBQWWJnODJJajhTL2lpRVFpRVFpRVFyYXFuOEp2RFo1Vis3anhITkhTenpDOGJDZjRVbFBORjRqU1A0NWdPYXlzckt5c3JMQ2NXbHcxMXU5bmtxV3JpckkrbGlOd3NUakxLaHhQeFZrUWkxRUl0UmFyS244SnZEWjVWZTdqeEN3ekIyTWFKcHhjK1hrZ3JBcXV3U0dvR2FMcXUraW1na3AzOUhJTEZBYzFsWldWbFpXVkRXeTBEODhSVk5WMDJNdzIrUGw4UXF5aGZTbjlsWkVJaEZxTFZsVUhoTjRiT01RaWFBTlBkY2ZSQW9GQXE2cmFLS3VabGY4QU5WZEZMUlB5U2ZOVzVyS3lzZ3JLeWhsZlR2RDR6WWhZZmpFTmN6b3FqUjMwS3JjTU1IWGozVVFpRVFpRlpRZUUzaHM0bDRDQlFLQlFLQlU4TWRTem81QmNLdXc1OUViOTdmUDFWbGJuc2dGWldRVkxpdFZTaktEY2Z1cHF4c3pzMld5MEtzaUZsdW90SXhzNGw0Q3VnVUNnVUNnVmxhOFpYZHl4YkFYVW82ZW4xYjl2NlZsWldWbFpBS3lzZ0ZaQTI3azJTL2VyS2xqelNoTTNSczRwK1hWMWRBb0ZBb0ZBcHVyVmkrQWgzdDZVZng2ZWl5a2FGV1ZrQXJLeXRzeFppY3JWQ3dSaXladWpaeFg4dXJxNkJRS0JRS1lkVXpkSE5pdUROcS9heGFQKzZmRTZKMlI0c2VheXNnTmxyUzgyYXFlbkVJL2RBcG02Tm5GL3l4UUt1cm9GQW9GTk9xWnVqbnhIREk2OXZrN3pWUlN5VXIramtDQVZ0bUtGMHBzMVF3dGhHaXVnZFV6ZEd6WFI5TFR1YnpYVjBDZ1VDbW5WTTNSc1ZkSEhXTXlTS3NvSktKMW5kM25zQUU2QlJVUk9zaUFEUllLL05BenBaQTNieE9rTkxOY2JwVjFkQW9GQXBwMVVlNk5tU05zcmNyeGNLcHdWak9zeEhEamZlVE1PYU40cHNiWTlHaEVxNnVyckRZTGUxTzNWVXpLcVBvM3FxcDMwa25SdlYwQ2dWZE5PcWozQnRFWFZSU1plc3hIUkVxNkpWMVIwWnFIWGR1b0FORmgyRlZTeDFiTWoxV1VjbEUrenU3elFLQlFLYWRWSHVEc0txano5Wm5lbmRVMktKUlZIUk9xRG1kdXByUXdaVzlsTEV5WnVSNDBXSVlVK2w2OGVyZnNnVUNtbFJiZzdHcXBHMUF1TzlTUnZpZGxjRlI0ZVg5ZVh1UUFBc08xeEhCczN0S2Y1ZWlOMkd4VFNvdHdkazVqWEc1SDZDdnd5T3NHYnVkNXFhbWxwWk1rZ1VYaGo5WFBUeDFMTWtnVFJsRnYvQUJYL3hBQTJFUUFCQXdNQkF3b0ZCQUlEQUFBQUFBQUJBQUlEQkFVUklCSWhNQVlRRXpFeU16UlJjWUVpSTBHeDBVQmhvZUVVa1VKUVlQL2FBQWdCQWdFQlB3SC9BTFRCL1ZSUXZtZHN4akpWTFlmK1ZRZlpNZ2lpWnNNYnVVZ3c4alZTMEZSV0g1TGNvY21xbzliaC9QNFUxZ3JJaGtEUG9ueHZpT3k4WVBHamlmTTdaWU1sVW5KOXgrS3BQc29xZU9uYnN4akhNVkwyenBvYWIvTXFHdythaWlaQXdSeGpBSFBVVXNOVTNabGJsWEd3U1UveklQaWIvUERqaWZLN1pZTWxVZkp4N3ZpcVRqOWxCU1JVcmRtSnVFUWlPWXFYdG5UeWU4YVBRNnJuWTJWZnpJZHp2NEtsaWZDOHNrR0NPQmF1VDVyR0NhWTRhZjhBYXA2R0NrYnN3dHdpRVFpRVFzSWhTOTRkUEo3eG85RHJ1RnNpdURmaTNPODFWMGN0RkowY28xMmp3TWZwekVJaEVMQ0lSQ203dzZlVDNqUjc4Q3FwSXF5UG81UXJqYkpiZS9mdmI1NnJSNEtQMDBFSWhZVGdwdThkcDVQZU5Ib2VESkV5WnBZOFpDdXRsZlIvTmkzcysybTBlQ2o5TkpDSVRncHU4ZHA1UGVOSHZ3c1pWMnNHTXowbzl2eCtORm84Rkg2YXNKd1UvZU8wOG52R2owUEV1MWliVjVtZzNQOEF2L2FleDBUaXg0d1J6V253TWZwcktuN3gybms5NDBlaDVuU3NaMmloSXgzWlBCd3JuYUlyaTNQVS93QS95cXFrbG81T2lsR0NySEsyV2lZRy9UZHJLbjcxMm5rLzQwZWhWUlZFL0MxSG1wNjE4VzUrOEtPUnNyZHB2QnJhR0s0UjlIS1A2VTFQV1dDZmFhZDNuOUQ2cTIzU0s0TjNibmVXb3FmdlhldW15dTJLblA3RkVJaEVJaFFUdXAzWmFvS2hsUTNMZUROQXlvWVk1UmtGWEN4MUZ0ZjA5THZhUDloV3ErdHE4UlQ3bi9mU1ZQM3J2WFRadkZEM1JDSVJDSVJDamU2SjIwMVV0VTJvSDc4SENyTEhSMWgyaTNCOHdxV2prZ2JzT2Z0ZXZXaU1jN2pnS2J2RHBzdmlnaUZoRUloRUloRnptYjJxMFh4bFNlZ3FOei92L2ZESXlqSDVjMWRKc1FuSFdwTzBkTms4V1BkRUxDSVJDSVJDYzFQM1BLczNLRForUlZuMFA1L0tHL2Z3NXRocmRweXFaSFN1eXBPMmROaThZUGRFTENJUkNJUkNlTnlrN1o1clBmWFVSRVUrOW4yVVVqSm1oN0RrSGd2ZTFnMm5LcnFUVUhIMFJhcGUyZE5oOFlQZEVMQ3dpRVFpRTRibEoyenoycThTMjEvbXo2aFVsWEZXeDlMQ2NqWE5VTWdibHltcUgxQnk1QUlqY3BPMmROdW02Q3FZOCthd3NJaEVJaFlUaHVVdmJPaWd1RTF1azZTSSszbXJiZElia3phWjEvVWFDNE5HU3A3a0I4TVNMblBPWElCQUtyay94NFhQMTJhdkZaVGhydTAzclJDd2lFUXNKd1V2Yk9tR2FTbmZ0eG5CVkJ5a2ttR3hJTjZiZHhqc3A5MmtkMkJoUGxmTWN2S0FRQ0RVR3EvVm1jVXpmZlhSMWI2S1VTeHFqcTQ2MkxwSTBRc0xDd25CUzk0ZFFKRzhLaXVXMzh1WHJUZDZEVUFnMUFLNlhKdEV6WloyeW5PTHp0TzRGSFd5ME1uU1JxZ3VFVndabG5YOVFpRmhZVGdwdThQQXQ5MDZMNWMzVjVxUER4dEJCcUFWMHVyS0liRE43L3NwSkhTdTIzbko0VU04bE8vcEl6Z3ExM3FPcytYTHVmOEFmbXdpRk4zanVEYjdtK2pPeTdlMVFUeFZET2tqTzVYTzlOaitWVGRmbW5PTGprOFRxVnF2NVo4cXI2dlA4cHBFZzJtOVNjRk4zanZYaE1ta2pCYXc0eitndHQzbG9EczliUEw4S21ySWF5UHBJamxUOTY3MS9WMHRWTFJ2NlNJNEtjN2JPMGYvQUJYL3hBQkhFQUFCQWdJRENna0tCQVVGQVFBQUFBQUJBZ01BQkJFd01RVVNFeUZBUVZGemRMSWdJakpDVW1GeHd0RVFGQ016Y29HUm9iSGhKRkJpd1VOVGNLTHdCaFUwWTRLUy85b0FDQUVCQUFZL0F2NnJGS0hFS0l0b05QNXFVRmVGYzZDSUtML0JOZEJIN21Fdk1yS1ZKTk5NSWQ2YVFyOHlLVnVZUnpvSXRnb1NyQXRkRkg3bmdNYXBIMC9NS0hYYjV6K1duR1lLR2pnR2ptVGFmZndtTlVqNlZaZWZjU2hDYlNZS0pDWExuNjE0aDhJeFRDVy9aUkZQbjYvaEhHVzI1N1NJb25KUXAvVTJhZmxINFdaU285RTRqOE10b2ZlNC93RExUalZCUkwvaDIvMDhvKytLU2VITDZwSDBxbHZ2S29RZ1VreGZyTjYwbmtONlB2d3FRYURBYm12eERYWHloNzR3a3M3VHBTZVVNcC9FdmkrNkNjYW9MY3ArR2E2dVVmZkY4VFNUbnFXTlVqNlZUTWtrK3ROOHJzRlNIV0hDaGFiQ0lFdmRFaHR5d09jMVhoazFNMU1BSzZBeHFQdWd0eUk4MmIwODgrRVh5aVNUYVRWeStxUjlLcGpVOTQxWVltS1haZjVwN0lEOHU0Rm9WbkdSWDA1TUJKekpHTlI5MEZ1NTZmTm0rbHp6NFFWclVWS05wTmJMNnBIMHFtZFIzaldZV1hWaTV5RFlxTDlrMExITFFiVTVBM0l5Uzd4NTBYeWw5RlBWQlc0c3FVYlNUU2ErWDFLUHBWTTZqdkd0Uy9MdUZDMDJFUmdYYUc1Z1pzeXV5dkdwVGtFdHFVYnRVeHFlOGE0S1NhQ0xDSVRKM1NWUXV4THA1M2JYSjFDY2dsdFNqZHFtTlQzamtDWlNmVVZNMkpYblI5b0RpRkJTVll3Um5yRTZoT1FTMnBSdTFUR3A3eHlIQnJwY2x6YWpSMlFtWWwzQXRDczlXblVKeUNXMUtOMnFZMVBlT1JZUmxWS1R5MEd4VVlXWFZqSEtRYlUxU2RRbklKYlVvM2FwalU5NDVHSmlXY0tGaUx3ME56Q2VValQxaXBHb1RrRXRxVWJ0VXpxZThja0RqU3lsU2NZSWhNblBxQ0g3RXJ6TCs5UW5aMDVCTGFsRzZLcG5VZDQ1TW1TdW11bEZpSFR6ZTJBb0drSGhKMmRPUVN1b2IzUlZNNmp2SEp4THpOTGtyb3pvN1BDRXZ5N2dXaFZoSEJUczZmM3lDVjFEZTZLcG5VOTQ1UmZORy9hUExiTmhnVEVxdWtjNUp0U2V2Z0oyZFAxT1FTMnBiM2FwblVkNDVTSmlWY3ZWQzNRUjF4UW4wYjZlVzMrNDZ2S25aMC9VNUJLNmh2ZHFtZFIzajVmVHZvUjJtS01PVDJJTWY4bTk5cEpFVXNPb1dQMG1uSkV2c09GQzBZd1JDWlNjb2Jtc3h6T2ZmeU0zVmxHeTRaZEpRNmtXM2x0T1FTdW9iM1JWTWFqdkdDNDRvSlNtMG1DM0tIQnQ5TG5Id2lrbWsrVytRb3BPa1JlelBwMGFlZEdFbDEzMmtaeGtkSWhNamRkZlVoODk3eGlrZTZGM1F1TWhMY3hhdG14TG5ab01LYWRRVUxRYUZKSXhnMTBycUc5MFZUT283eGpBdEs5QzJjWDZqcDRZZFlXVUtHZU1HcWhENHRUcDdNa0VyT1V1U3ViUzMyZFhWQ1g1ZDFMamF4U0ZKenhoMjZHSjFJNHJtWlhVcUZTazZ3cHAxR1kvVWFhMlYxRGU2S3B1OTVUak40UC9BS05TRkpKQkZoRUNYbkNBNW1YbVY5OGtwYU4reW84ZG8ySHdNZWNTaTZSemtubEpQWEdBbTBVS0hxM1J5a0dNRE5KcFFyMWJxZVN2L05GWkthaHZkRlZKTi84QVJmZjNHckV2T3FwUnpYTkhiRklPUmlaazNTaFkrQjdZU3hORVMwem9KNHF1d3d1VW5XRXV0THRCaFUxSzN6OGwwdWMzN1hqVnltb2IzUlZTbXk5OVZaZ25LVnM2TTZleUE0MHNLU3F3akpBMEhjT3lQNGJ1T2pzTVlPYkNwWlJ0dnhmSStNR2Yvd0JOVGN1NVRqWEtwZEg5bmhCU29FRVpxbVUxRGU2S3FVMlh2cXJiNUdOSjVTRFlZd3JLdTBaeGsyT05QREppVFZwbG10MFZVcHN2ZlZYWVpsVkJIemlYbTNFMHN6TGFYRXJGbU1VMFpQb01ZK0N2U3JFSWtObGEzQlZTdXk5OVZjWWsySDJ3dEM1Um9GSjlnUVpxVnZuSlg1dDl2amxGS2VBUUxFNG9rZGxhM0JWU3V5OTlWY1lrZG1hM0JGQkZJTUtucmtvcFRhdGtadlo4TW94eGl4eGcwOG8vTHlTV3pOYmdxcFhaZStxdU1TR3l0Ymc4cXAyNXFRaVl0VWpNNTk0VTI2Z3BVazBFRzBaUFR6allJS2xHa255U095dGJncXBYWmUrcXVNU0d5dGJnNEdGUlExTkpIRlgwdXBVS2xadG90dUl0QnlXazI1aEYrczQvTEpiTTF1Q3FsZGw3NnE0eEliSzF1RGc0TjhYcTArcmNGcWZ0Qmw1dEhzTEhKV09ySThlTldZUmZMTko0RWxzelc0S3FWMmJ2R3VNU096TmJnNFJsWnhvTFFmaURwRVVtbHlXVWVJNyt4NjhodkVZMS9TTDVScEo0TWxzelc0S3FUYzBzRWYzZmV1TVNPek5ibzRhbVgyMHJiV0tGSlVNUmhVNUloVGtwbnpxYTdlcXVwTmtYak9JZExoeXpQOHRsQ2ZnbXFrNXdEMWJpbXovNkgycmpFanNyVzZLaWdpbW1GVDl4Vyt0Y3VQcW53aWcxZVBHclFJNDFtamh5Y21QNHJ5VSs2bXJtcFpLYVhMM0NJOXBPT3VNU096TmJvcWxUdHprcGJtK2NteEx2Z1lXdysycHR4Qm9VbFF4ZzFGSzFVUlExeFI4NmxkMEZEaVNiZUwyMVloOHFheHdOb29ZbVBTdGZ1SzB4STdNMXVpcndxRjRDY1NPSTlSYjFLMGlGU04xWlpURHlkR05LaHBIVkhFZFNmZjVMSTR5Z1BmR0kzM1pIRTRnK2NVazFUVERpYUgzdlRQZTBjM3VGWXBoSHIyK095ZjFhUGZCYmNTVXFTYUNEbU5ZWWtkbWEzUldHVW5tOFl4dHVKNVRaMGlNQk90MHRxOVUra2NWejc5VWN0WHhqMWl2alcvN25Nby9DeWlxUlR6M013OTFjcTdGem02WFFQVHRqbmpwRHJyREVqc3pXNksxY25QTUpkYVhha3dabVh2bjVCUjRybWR2cVY0MXFaUmppb0dOMXpvSmh1U2xHN3hwb1VBZnZYcnV0Y3ByRnluMlU3eWFzeEk3TTF1aXVVMDZnTFFzVUtTb1VnaUYzVHVFMnB5VzVTMkJqVTMyYVJWcGtaSkZLampVbzJJVHBNSmtwTlBXNHMyclZwT1FydW5jaHJIeW5XQm42MCtGWEpiTTF1aklGM1R1STJHNW0xeGl4THZab01LYWRRcEMwR2hTVkNnZzFBbFpKSHR1SGtvR2t4NXJLSnBKeHVPSGxMT1JxbjdtQkxjMWFwRmlYUEF3cGw1dFNGb05Da3FGQkJxWkxaMjkwWkQ1eXhlc1R5Umljb3hMNmxlTUxrNTloVFR5TFFmcU5JNFY0ejZPWFFmU3ZFWWs5UTBtRXljaTFlb0ZwenFPazVMZkgwVXlrY1I0ZlE2UkJsWjVtOFZtUE5VTklOUkpiTzN1akl2TjV4RkMwK3JkVHlrSC9BRE5IbTg2M3hUNnQxUEpXUDh6Y0JNMU0zek1pT2Z6bk9wUGpDSldUWlMwMDJLRXBHVG1XbldRNGpOcFNkSU1ZVVV2U3A1TG9GblVyUndqRWxzN2U2TWpWS1R6Q1hXbDJnL1VRWmhpK2ZrVFk1UmpSMUs4WW9BcEpoRjBMdk5sS2JVUzJjKzM0UUVKU0FFNGdCbEpiY1NGSlVLQ0NMWVZPM0ZRVkp0Vkw1eDdQaEZCNE1uczdlNk1rS0ZKQkJ4RUdGWFJsYm5wUzhjYWVpajJSbXkxVTFLWHJFM3A1cm5iNHdxVm5HVk5PSXRCNEVuczdlNlB6UEF6amVNY2h3Y3BIWkZENmI5bFI0anlSaVBnZkxKN08zdWo4MFV4TU5KY2JYaVVsUXhHRlRseVVxZVl0VTNhdEhpSU1TZXp0N28vTmx6ZHp3bGlhT01qbU9lQjY0bDJYQlFwdHBDU09zRCt2L3dEL3hBQXFFQUVBQWdBRUJBVUZBUUVBQUFBQUFBQUJBQkVRSVRGUklEQkJZWEdCa2FId1FMSEIwZkhoVVAvYUFBZ0JBUUFCUHlIL0FJenpuNkd2cWN1T3YrM1hCcGhyL3dBdlRndWFGTVJvOUowandQRGVGZjhBR3VVbVFpOTJ2RjBKcWh1clZucU1veXVCaXBGWk50WmVEaFgxOThtdUZqSkZlOWJ1NkV6d2JyWnA2akRDemsrTTI4eTVUZVdieW5SaHl6RytCNDY0bEpaVnovVjI4NTNUWjVYZjlKcXRjMlhmQjhOdDVUQU10YTZDVllEL0FCTlVWeXJZaVBaanhFZUtZNkQrSXNiK29EemZ1SHJMMUtmTkJ2Nkt1RFNHT2tzaWdhZE0wOHVubkxNWDVVc2p2K2tzbEN1cXdnWU12SDRMYnhQQUZCL2JCR1RrTlRrZDNmdWxZMWdIY0dpT1pMQklaWi9TNnZPVkJWMm5pazFqd0dQVG5yVWU5dHpqeTZlYzFZR1ZxeTc5SGxGSmVvVGF3Z1lNSXVYZ3o0YmJ4SEJURHY4QWJqMSswYytJd3p6dUxwSTI1OWg0bTcyaG1Cc2RPLzBGY0NoTm5QZk5QR1p0cmxuc1BIOElpejdvdFlRTUdFRUdBUU1YS1p2aFplTFRCanBMb2RBNER5S2lpNmFydjlidE5QVG4ySFp3MTQzZ09DeVBLbit5RVp1aGwxZVpwRGM1dGRyNXdoUzVjSUdEQmx3WVJjK0syOG5SUFp1U2tNQ2xsdXd1L3dDNXZhMVpuNU8vTE9CMG1UbUhhNlI0bVppYjdZODRPQTRCQkF3WU1NQXhHcCtGZUMrRjBudFhMYncrQVNCdVExU1dmdmYxbGpuek5NTXgrVnNWUWdnZ1lRTUdEQ0NEQUl1ZkU3T0R3NFhTZXk4d0lNWXUrMFVqREN2MFE3TmozZ2p6ZmhIVmx3Z3hBT0FZTUlHRUVETHlueU96a3VuMEFsVHJvSTUrTnY4QVpDRmhiV0RmbDFGWHc4MkVEQmd3Z2dZTUdEQmhCQTRQbTlrZVE2YzBUS1ZoY1M0THVQV3o3LzFtbXpJZEhaMmVIWGdyREo4TE5oQXdZUVFNR0RCbHdnWmNJdWZGN09TNmZSQ1hsTTdwWnJLL0QzbVNKa2F5Ny91SEorUjlXRUVFRENCZ3dnWU11REJsd1o4anNuVGtPazlsK2dibHdaMXBZbWliSjFKa01EVi8wbjJtdkl5Zkh6WU1JVUdEQmhCQkJBd1lNSTZUNC9aeVhTZXg4OXZDNWN1T3M2MnBHZUVGQjIrMzNRYjQvbHZWZ3dnWU1JSUdFRENCbHdaY09OYzB4ZEo3VnpWZUM1Y3VYTDZ4RnJVTFBzM25mcEE1Z3NSc1RFeCtCM1lNSVdBTUdFRUVEQ0JneThHZmtnT2s5cTViZURoY3ZDNWN1WE5kSXJEbnU3bmIvRURqOXZ5ZUM1OGZ2Z0RCZ3dnZ1lRUU1HRExoRnpMeVFIU2UxOHh1WEx3dVhMaXk4THdNMkE1cnpUWjd6cGR6eUdFdkNwa2tnd1lNR0RCZ3dZUU1JR0VERlBodG5KZEo3RnltNWN1TXVYTGw0WEZsNEZoM2k1OG9OZGtPcExTQTgxL3BHYkIxM1lneTRNR0RDQ0JoQkJnRURDUGlObkpkSXp5VVhBcSsxNS9wckgvTjAvaVpKOGsybmd5cGk0c1l5NWVGNFhGbHk1Y1dMTGkxRzBaaFZ2U01RR3BXaDRXM1o2VEpoRVlGdk1vVHJUZHcwbHdZUVFRTUdEQ0NDQ0I1WkFkSjdaRThaWG9BaVl0S0VpY21xdHJpRUVPaTBubkZRZTR5SG4xODVrSWpVeThVamlzdVhMbHk1Y3VMTGx5NWNjQ3p0cE15VU9VK0ViSHc3N3lxUVJ6UTZ3L013Yk1iOVBzdmFLaWhVaGRFd0RCZ3dnWU11RENDQ0Z5Q0ZZT2s4a292dEJLZkIybHhJeGxZYUVVaDluY2hjUU94My9wRmx4WmNaY3VYZ3N1WExpeTVjWEFCZHhSMm42dnpQNGJTeFVoTEJFK1RDbndSNm5mVTlwcXVnMEUzT2p1WURMZ3dZTXVEQmhCRG1mSGpyaldHc2RJeU9ndnRkdnRjTnh3Skt3VEJxS1dpa1owKzNwK0x0OTBTb3hZc3VYTGx5NWNXWEZqTGw0WkpaTlpqRytZZmNnRHBiS2JJVFVtYjZFYm01b3pNejdReU8yenZnRUdEQmd5NFFRUEtKQmdKME1hOUNWRWxSSWtxVkV3eWx6bWdtYjI3anZBZ1JFc1RSSmNaY3VMRml5NHN1WEZ3WmNXWENNc0NqczdEcVFkYVphNzcybmcrOFBzR1QwZWliUGNsMERiTmZZN1A2cVZVdURCZ3k1Y0dEQjVTN1F3MzRXREtpUklrU0pLaVJKVWRQaVEvcEFyTmNGeGl4WmN1WGd5NWVDeFplSmJ3R3h5aFpSNmg5b0tCbEM0N1UvSk92cm92aUwrZE5vck1LVVVqZ01HRVhMaENzbVRBalRpN1RSUGJJSktpUkpVU0pFbFJKV0Y3ZXVIOEh2Q2xvMFRWMllzWmN1WExpeThGbHhpeFpjVytBVk5HQWRidjFtZW1UdENYQmd5N2x6UERrRnp1Vk9UYUo3RENva1NWRWlSSWtxSktqaGtNTE02SFpuVHZ6RW5iczUrY0VjcGN1WExqTGl4WXNXTEZpeTVjdVhGaTRacDVoSHNubmhlQmN5ODVIS2ttaGg5UENveW9rU0pFaVlKS2lTb3ZsTUNWeXRpUUsxYmE2OXJjZjFIQmN1WExpeFpjdU1XTGhjdVhMbDhHVGs2VDlUS1J6bHpvUUdPVWp1OVdDZzI1S2FJYjhGQ3BVU1ZFaVJJa3FKRWlSaXZTY0RqSXdLUkxFaExlYm5UMzdqK0lkREZqaGN1WGlzV1hMbHk1ZkdRRExudjFpblFsaUtEUHNtUmVFell1UEdlMVFxVktpUklrU0pFaktpU3A3Sml3a3FGOXByN3h0OThxYWVlazJTWEZseTVjdkJZeTVjY0hqdVhMRHA4eS93QWxqQVd1OGJENGNoSXk1cVErZ2hVcVZFbFJJeElrU0pFbFQyemcwTUV1TmNtbE9ROXc3NmtSUkhjRzQ5VHZHWExseThMd3VQS3FhbjE1c2UyRjdkc0RSOE9VY2RVUHBJSkV3WlVTSkVpU29rU0pENlRNcDRJeXNMMXJkUFAvQUQyU3ZQZWZtQXZ4cVlYTHd1TGhmTDZySHhlMFIzRENwV2J3NFBoeGFHSDBNMlZLbFJKVVNKS2lSSlVTZWdQQzhjTXkyNTAzUjBZaHlrQWZ4OWpneGNGbDh1NnA5cUZ5TlF2WENzRFI4T1VjMFFWREwwMVF4VVNWRWxSSXhJa3FKRW5zT1IrekhxQ0JNOEJXZjZIZDZ4WmN1WHlXSUZ3R3F4cjJkVHFmRGJHcFdBYmtkY29xdXZvNFMrUzJSanZ3RSsrQ0pFbFNva1NKRWlSSWtTRDBua2xtZ0FLUjZ4TTBHZlRQaitFSzBFVEpIcEx4ZU1XbnNhM250TTlhR2gwTURHc0U2aTczUGFBMU9Dc0s0TWtZMHVlZ0R4cFBPV3VNVkVsU29rU1ZFaVJJa1BvUEtOQVNkU1JlNFB1ZGVzeTBBdWJKaEY0YmxBZloxZktXcGQ3cS9VdFc5WGhxQmd6ZmV0V1grZ1RRVFhrNWpMV1pvQWFOQVgyWDJxQ1ZLbFNwVVNWRWlSSWtmUU9CcDVPdXMwY3JDeHNQL1E2VE1ERGZpYjZ4N2ZjQXVoTzRnVitMeGxxdnQvTXlJSFl6OVVVV0ZkVndDVmdFcVZobUJWcm9UMk0wQmw2QThiNVpBNEM5UHVkdEhwdEdVbU9wRFVZa3FNVkVpUk1DUkl3UFM1Z3Jwbk5mSVpOdlQ3bWpNN3F1Z1g0M1JweGVEaWpOZlBHMnJmamdRSlVDcFVDVktnUXZCRnN3akk4L0ExUGtUS1o4RmNiRWpXOVlPWWV3TmR5YTRLaVNva1NKRWxSSW5vYzFFbHd5TDBYM05rM2lwYUdNNzUxb1k2NEJBZ1FNQ0JnRUlBcHIxOHQ3eGVoQ3Ziam5kYnE1dkM4cGJob0RUY1B1ZWNFcUpLaVJJa3FKRWc5QjVrTFBGWWNMZ0dvbldPa204bVBWNit6cWQ0R0JXQktnUUpVcWUvSUxadmx5OEE2VjMzNERwejlJQ05jUFlQbUw3K2lHbXRwVXFKS3dWR0pFeWZDYUhtRVkzd0RONlR4RDAreTlvckVGUUxvbUZRSlhhQkFsVFJhMGw4V2ZZNndUazJINHQ3YkhTSFBZUTNHRVI5MmZ5Nk04TTg2aEpHSkVpUklrcUprK0hBTzE1bFJCaVJLQnBudDY5dFIzaTVWMlNkRTBUY2xRSlVyQlhCK0FnTzNyTmZMV3ozMzFmbzZqVTZmMERuNFAraDBqb05ROC9WSWxSSW1DUkpXYncraW5WTHVMaVk4TnViNkdLTGp0Ynh3OUhkWmtLU3BVdERiT2xVZXg4WEt2cER5OGU3M3hQcEdEek5hZWtUSGRqZFE3VHE3Nk1UQXdrcVBvUG9sek5aMzVoSWVpYWlia3NUM3FQRGY4UGFFM0lvQXRXYUNSZjVEc1BWdkJOTUFVQnNIMUxDWVc0R3lUVkxPcTd1ODlXMXhSQkVhUk5JbURKSFY0UVpPUFZMd3o1d0Fub0xFMlNQa3pVVk9xbVMrRlRSanpldUR5OG9ka0RlV2syMnY5WE5MU1Q2YmoxTzVHa1pXVDRjeXNmUWE4RmZSNjZ6U1ZYUXQzZmpTYVd1ZVViOWg4cmxtWlg0UnIvd0JSUWwwWmtDRE10NkU5djdIZUZUd1ExOUh0ZkNjYnpOZUNzZXNxYVROQmxBMEtYdjhBQjFtZTlWdEFqamZJcWFZWmZVWllWeFY5WjAraWVmMGh6dE9ScC93VDZUTDZkNGRlSytkZkRmRGZEWEovLzlvQURBTUJBQUlBQXdBQUFCQURUd1F5QUF4Q0FnRHdBd1NoUVRRaUFDQUFBZ0FnQkRDREF3UlNBUlJEQVN3Z3lSUWdUQWdCQUFBakFoQmdpUkFDQWdTQVJBZ1FBQ1NCUS9INFFBeXhBUVN5Q2NoUVFnQUJnQkFDRENBRTFxejhCVEFSeWZjMGtkUDJnQVNnaUFTUnlMM3A2eWNLa1FBUUJYa1JUekErRWlBaWdBU1R0SGFZQW5TZEZBRENCTXpUeUNZcENjakREUVFEbGRFbUJ3OUZvQXdRd3pReVJ4QWdZQzB3Z0FEQzQ3RDFicXJoSUFBQUJ5enp5d2FJSXFGK0RRQUNpOWZtUTJWTXVBQkFRWW43eHp4UWlZM2FyY1JCTDVyQU1ZRCszd0NCaVRmTHloRXAzNmNCdkRSUmVrWUw0RzA4UkF6QUNZVkh6QUwvQUo0dm1wQWQ0NWVxQ2FUUmNxZ01BQWhISFc0QVhEd0cwSXV2V0JHN2J6SGdtejA4RUl3QTBHakl2eTZ5dlJOL3pNMFUxa2hzUy9VQUVvQmRsZENyQVlyaXltM2xZY3hJaWQ4Wlgyc01VVVFyZmxFZnVLRksydkRMOUFRNDFBK3dnOVlBd2diRmRhSjZUb1JBY3dIc1NGZ0VsemZLaE5FOEkwWFZKTWlySU5FazlpWEtxZDc1T1VEM0gvSXcwRXJHa2dReFRaZjRFVnBTQm9mKzBLUitSejRBVVEyM3QwQUpYaUxnQU1OQ1hrazNOMHlpeThZd2djMHpPTmVNaGFZSVVFNFVsZlZ1M1d0eEdBa3dzMG9yei9VQ0VEWTRjOE1jZGdPSG1lRXlTSTRNd1FzWWpnaU9RWTNRY3djQXN3ZzcyclYyWTAwTWtvRVEwVG1HT3ZqVW9BSUFna1FUbFJXZzBJMEE0RThjRVFYb3FXS0lBRUFVQWNZa2prUTBZUVU4SWNZWVVJRVFBTGM0b01RTXNZb3dZd0E0UUk4OGNBbzQ0d3dBRW1OZ0VVWWtBZ0VVc29RNElnUU1NOE1zNFlJSXNrUUVVWTA0a2tnTVlzWWN3SVlBQWNnY0FBQWNBQUFBZ0E4Z2NBQThjQUFBZzhBOC84UUFLeEVCQUFFQkJnWURBQU1BQXdBQUFBQUFBUUFSSUNFeFFWRmhFSEdSb2JId01JSEJRTkhoVUdEeC85b0FDQUVEQVFFL0VQOEFsRmhON2gvS1lDUE5hZE5YWXZsR3Yxdng0TUIrS0FyZVpsTktaVXBTSVRWUXYyV3FCYWNERmNndis4TjVSQ2pXa0NUeDVIV2dmZElDTzJZaWRUNW41RHpXaEsvWHRLNzZ4UDNUa3l0anZPR3dZQnNBUm9tRlBZYUZrMEtwdU5WYUIxU3UwYUFxcXZ2UXdDNlZsWVVhOXNIWk1FNWtVRVBjZXFybmR2bEJHOCtKNkVNVmFFckhNd2ZRdVg3cDl5dFE5OERrWUgwV0ZhRWV3MExLcDdsOWthWVJhb3dSeDVPcDJaYUlGUlZFOTZtSm44RkJpWXJnUExGZnMrNVhRWFk1QmNmWERiRlVoNmpRcytwMXQxbXF1SzNPNW83OWFrQ1ZSbU9LMFQwY20yYTg1YWRWa2w3elFzKzkxK0FsUm1Ka21pWm5qRW95OHVnWHVQTTE3alBLdG1xMjYyeUtTOUpvV2ZjNi9BUndLcWlZajcxbFBEcEhMbzY5R2hZcnZ1dHVLRU8xZUN6NjNXMVNVZ1FJeFFvYjJ3VHg3ZVVFRlRneXR6SHdlNHJ0M2dzKzkxc2hBZ1FnZ2dLWVNxSndSejVkZG1KbHBBN0FxSmduQ3JiaXVwTHQzaXo2M1dGOHBnV29rNmhCYWk3bzhrRGdCQ0NDQ0NDTDJLbUs4bWoyYzhrRDFSMUhSTW4vQU5Mb2RPS3B5amFJaGpuWVBGbTZ2cldWa1RlTERtTTNuaHpqQW9TZ281eGNadFl1WVljejdHTzZJOXFPWnZ3QWhCQkJCRjZCNlRVeVRSUFV5bGFTZ3hXSnFPWnY5SmxLemI4ci9lakdxeUlYR2RvOFdjNU5QMnIrU2p3S2tJb252TUJpUDlhbUR6b3lpUzV3R0NiZnBpZElRRUlJSUVJS3BsaEFudmJPVVZDWE5leG83ZEhTdVgvY2Y1djExc2l1T2RnOFdiaTVsb0VVTlVlMU5IZVU2dmNORzJoM3dld1FRRUNIQUVFQk1JWTJiZVByTTVEU1VBTGNhTjMwVXU2d1JxTWVCS2xDR2hkRHhaZEh6SVdnb1Y0UlZ5T0RLUUhGVEYvdHV4TTlZVVhNSUlJT0FJT0JJUlZnTGwyTlV2b1hGN093TExvdVpDQ3pVYjhnQUhTQ05FNHB6MzlOdElwb1h3ZzRBZ2dnSUhDK0lvVlhLR2MyZk9kb1dYUjh5RUZrQzNDWHVSd0hmeE9iUjM2NmpkUVhJd0lRUlFnUU9JUXFyS3liM2kvaEx5azdZc2hyR3A1NEJKWWdYU2RnY2F0YmpEOE9wM01vbG9rNkpxYW5BSXBEalF4emNpVVJpell3RkVLQTZGbFM4YVZPWmVlSU5HK0VsaERkSjJ4WWJoeWN4Mjl2bE85VmhrZjZkVDhnY1hRS3NwalVOUDdoNGFCR0ZtNlNRdE9SelRiVSt2RklWUXNBYnRPeUxLd2laTWFVUTZoKzk1Z0Z6bC9zdk4zdC9jTG9qZ01Nc3VFOGJqOWZ5Mml6TUhSMWl3T1RrbXA3ZERpRWk2VHREeGFBVVplc1BUU1BBeXBIZ0dNTFF4MzJQM1NHQW9Id096NU9ZNm50OG9qcXNNai9BTHRZQXVVN1U4ZkJUNGVqWC9aV2dYbkJVd1JEdnkvdUh3b0h4TzZwUk5yZDNtMjM2MGxEZzNoT3pQSHc0SU5ldk9PYVpKUkRwa00zbm9kNEtDZ2ZJZ2xHRFdkSFBLL2psaHBTRkIwVEpsOExPM1BIeERoS1lWTVA0RkRMbkRWczYrVHRMb0o3TzQ1bnJPMVBIOHR4VkhjM0hKZ21jaW4vQUVyL3hBQXJFUUVBQVFFSEF3UUNBd0VCQUFBQUFBQUJBQkVnSVRGQlVXR2hFSEd4Z1pIQjhERFJRT0h4VUdELzJnQUlBUUlCQVQ4US93Q29JS0dIOG9NM1FJMTNvbnkvcjNsRVEwVXg3NitzQWpBVzFRU0F4Y0E5VzcweGhsUXVsWVVZVHUrR2o3UnlzTWtvOC9tS1BUSUt5Z1Vob3g5WEQycjNsT2NiZk9iNnhPam50bHdyaFh1Z1h2QTBoZ0JYQjk5OWV0TTRjblp4UFNFdFVNVEoremN2MnppVS9FQ2NtUVZaUzZab3ZmVndQU3ZwS0V3NWU3aSt2VUVoblBiUDFtbHF0VTgvNU5IZjMxaUpNUVA0TWlLQXhHdWdlaXZzeWd3T1h1dDc2MlFCaTZuTmZObjZ6UzFTVWpjTUJpYk9wdDdVanFnY25KTlIrcG5iTlYyeFpWNm85QmRUa3ZtencvRDhEQ3NNbk1kUnlmcmRNOFRBZUhSODVXbjdmcWxlb3NYRTVqNXMvV2FmZ3BDTEpjakdXcnlkMnB2NzZ0amg3Q2RSdUp6bnpaNGZoK0NuUklvbFltQXNVK2ZwdHBFUzU2OFBLdzYwalZMbWNwODJmcE5JV2FkQWdTa3BLRURNTUQ5TjJEbnJIb1hCSEU2UDJmU3NyRHFhazVUNXMvV2FTaVJhZ2p1a3cxZXowcEtTa0NVbEpTRVhVVU1QaHFPVExNVXRFZXlham1mY1l1RjVxTXhOZTVlUmxZUVpYcGhuSWZObS93RFV1ajdkaG5yRGZGYTFpd25rT3orNEVXb3dKVG9FcEFnUU01NmNTWXJVZmpCemhXK01Nam9OZHNURWM1ZXBReFdQYzFOOHM0bEpXSFNzVlNjeDVzdUl4OGhNK3dKa1N6TW43cktnNzh6TWdRSlNCS2RLUUlHWEZEOTV4TXBXc29xSnltWnZoVEUxdUJaRGdkbWp0bmxvU3NHVmp1bk1lYklyMlBDMHFvOTZKS2ViamlmcUY4cENFQ1VsSlNVWnhWV2V5K3BndTlLN3lzMkRCR0RkcmYzb090WWlvOWIyWTZ2dStiSXFXejQ2TFpxbDVWRWxVeFVvT0IrbXpCeTBoZktRSUVDVWdkQTZBS01ZdmlsSVRGZXVQbjJuS2JKcjIvRG9ObXEwQ3NTZzFZcUxsZ3VXMnovV293Z1lFQ1VsSlN6U0pTMERPS25oa2JUbU5rVjdQaDBHeUZieE9ROUd5Y25YdDFOdmJSTnNDb21ES2RBdEkxb0VvOWNjRDVkL0VyRTVMWlJUMjhPZ3cyWUc1cjFvWXZQOURSNGM4a0gxSjdqb21TZjJYU2xta3FZdnlNMlZ5WFpHUjkxbFhvbUtHclpKOVFLSHMzUERMeFVqWWdQVHVXK2JBM3VsZ05FOE9KbEt0YUhFeFAyYVBodWxPbEkyVURlVmk5ZFhEMFAzekdEVlhyTmRjaHAzd09hVzBRd2pkbytweVBRZW9HTG1jOTgyUkR3d1M2QkFKOUYzUDhnYW0vMy9BS2hsQjdyL0FOSEVxd1AzVEE5T2hWNkZhQTA0WDkyUjh2cGJXQzh4TWt6SDdjM3d1M2N6SFIrSFBvTU1NWEU1cjV0S2lVU1hGS1pIWCsrR0hHV2JtdU9vWEdtNzhHYnRFcVZXOWRYOEJGZTVrbWo5dXlsUzlCaVluN05IdzNTaEdHTGljbDgyOEl6THpKbU8rcHlTZ3JVZE9sUmlHbW1XVzUzMFBlN0ZmVkdLL2lKS0RNKzNtemRBeWx4ZG0rM3RYSkt4aXNUa1BuOEpPOGNUTTNQMWc3WXdqVkw3Zm93MWF1ZklkdFhmQTN5VFBWY1YvSUtxa1VHcmdNNThqZkhXdUlGU3F3VENhRTV6eitKR0lGRUZLbSt2OEN2clV4MGI2SGJCNWdDaVhWMUhSTW56bFVuSWVmNVkyalBaMlRNKzR4bHhGci80ci8vRUFDWVFBUUFDQWdJQ0FnTUFBd0VCQUFBQUFBRUFFU0V4UVZFUVlYR0JrYUd4d2ZEeDBlSC8yZ0FJQVFFQUFUOFFMY3pBNWpzcU45UVc1YnFwcDdsOGhNYlp3ekppWFVyOXlqU3hjMFNyY3pYMUM3ekdycURuVXp4ekx5UnE0bFpKYXZVM2xtSm5pTHhVb3VGYUpYdVh4QXhVNHJxRG1ldUpRczJ4TUdvMGxrQ25FTU0xQkpRTTV3NGxPK0lad3NvR3B6dVgrSWhjeTZNZUN0ZFRlNWlPVEV5WmxtbUNNcHVMVXpjRFB6RXAzRXVyWmk1dHVZTWtiTmN6ak1LWUhNRkhjV3MxTHNsMWlPU1BxQ1ZVdkVicXB4N2dlNDRsNXhNN3ZNcHU0Mk92WGdGWllZbHhrMUFidVpHTUIyUnptSFNacXJsVVhMYXpMdWJyRURMY0txQjdnVnpERG1leGkxcVpUY015dlVPWjhrUnhEOXgzYjRETEVxR0RXNWZFdnVFeG9aVk1lOXd6bVVHWUl1cC9JUEJOdVptWTFVenhLeGNhdVhVdXNSejlSYnBKbU9jVkdEWEVkM0NuNWlWZVlka1RtWk5NWGN4VStaVGR4VW1aWEVJUGNvRzVvc2czQjRaVnczT2NSTDNCNHVJOFFMM0RlWTRiSTV5VEhjeFBjNDFMOVJHRnpVRE5rb3V5WmpqaUNtWmE1bk4wd3ZheHZjbzNQY3B1NDJOMU1TczNNcGVwYTA5UzgzRUdOVmRTaHBqbGlBOHpUY2E1aVJxOHo5dWdGa1NuM0JHbmNINm1TQzFEZVdVcXBSVmtPMkdGbWF4Tk1UTGttR1pzeEE1bXRNYkoxVXVweE42Z1l6Tnk2eE1rSTVoZ2g2bWJpWnd3ZUNjek9aYjFFYTlUVzh3clVYaDFPTGx6bVlTbVUxdUZWaVZNS3dxb0dPb2xaSmFyallEdDFFdGN4aHIvQUhkdnFORm5Td3Y5aE5lb042aW9iT0hzZEk3Z08yb0hDT243bFU3aXBpM3FXdTJjM05YVXEzTWJNUzBJWTFMNmx0K3BwcmlOYUp2WEUzOVRNNXlUQWFoWEhNYk9ZWEFFVmhqTU03bk12WWVOTnMrcFZObk1YMUtRbEV5eE9hWnExM05tNWRjUjFMZHh5M0gxS1ZpVzl6M3pDbmJQakVBTCtxSlRRQkJ3dW45bHYxTm90TFIwdjBCUjZpYzdjcjJ6SXU0R3lOVzNiVGRWR2FNVE5aanFWWFBnVWw1dGhuSkxqaG1XWW9RNm41aXVBbEdOR0lYcWF4TjVDWXM3bDV3VFUyWWdYdUk2bUdKV0x2eGhGNW1YNGwxaUl1NXZSTHJaRXZNeHlUbWlCV2VaMmhpR2xnMldjUnBtRnFBd1pUaVUyR2FyczZwajdyOVFmSlEvelI2NG9RZGtPUlhLekJIREJpNG1WTTlLMnozdUplWU5HSWdGd3labnViTVF4aGxpZjlMUUhoNkRMRlhHQXE3MkdSOHA4UnFvWEZhKzBXWGQ2eVQ4Vkh0MnlBdjNWZzNsZEdPOXJGRWlGM04xZ1g2dUZoZVRjNW1ZWFZ4ZE1UR1lWVzQ3bWZCajRsMU9KWGNBN2lON21PSm1wUnl5Z3hLdG1McUt3dTV6UjRhd0pSaDUxQjlkZFZuU01mY1FQT1BLZnFmeFFscWoyaTFlMWR3VTNMWWhpSFNYV0xpNDhSMXR4TTFHZ3M4WVlHQnd5ckpYNWpoVk53T08xMEhLa0pIVnZManNEZjBNRXl5d2VJWjVqbHVEVVNiTnFId0prbEZIbEtSOTNEcTBPcnplVmVuejlsbnVDREVTdEVvVE05VEZXVExjdmlvbko0SThzc0NVT2JtS21lU0V4dVhuTXo4eStIY2FNeWxqZ3pNVktWc3FDMTUzK1A3VW1RMytnbVBYNVJQVVcwanRYTEtlWTdGOEE2ZzROeFVDVGx4Ny9NTGNNb3VvMmFtS3hPMXhhYWdkTWF6Y3RaQlE1YVJ2UzErc1JsSHFIam1VN2k3bFhIalIvd0JHRDA0am1ETm84QjVPOXZVSkRnRkRZSGs3Sm5iSFZUVEt4WlBpWVphNmwyWmhUeEQzR3pFL2thR29vWXFHNTJ1WHpXWXQ4WmxQRTNpWEc5YTM5U0F5Zk5DV0FYYUIrby9zOXhocldaZmF1V0t0eEdEV1p6VDNUbGc1eVFwM0l4VEgrQ1dWYzN4Rzd4cVdmRUtpK3N3VmtpYnhXZHNnOXR2OEllNEwwVExpY1V5Nm4rWlhlWUxjRWpkeGlDbXJSMGJ5M2Z0K3Focnl0V25rTmgwNWxVWGNiR29YTjUxRGExRk9KWmVvM0VrWTZvekdxb2dZZkV2ZFFzdFlCdCtKbG80NzRZWisyaVdIV0xVTi9veG4zTDV6QXY3VmxoY3N0ck1BWldGWlpPMWxkWm52dUIzZE1HcnZNdzVaU3R3WTUrbzVhSm5Wek5VeXIrSXVLSlFjem5VMlZEY1FjUyttVml5T3RTaVBrY3hVMzNNZHlsQzExZWtPSG9aSmp1QlRmK3g0SDZndFdRRjNpT0NEZUkvR1pyY0xTN216UGhjV1lnc2lOMFFHR01RRUwwVXlWMURvNDU0REc0OVNMTW4yc3dGdUNPbUdNREtzd1JMbUN4bCsyY000SVFGWlllME1MdU1ld3M3dDNNU3VZWVpoN1pnNGxEbFk0bHIvQUJNWWc1aGgrWlZFTHFjeTcxTk51b0pNVEhFdEhKVEhSdmFxK1JOSnlPR1VyL3owSnU3bnZjNHNsQ25NcWlWZVllNCtvWXdibVNWaTdsQ1pqVVhGeXI1aUVHeVZDTnpYVkxENWdKdVdUbThGdk02WXFSS2dkekJpR2t5UXhsR1VobkUzdVkyemNVY3k2MVBpT1diUGlVSlMzdUs5Uys1bmR6aTU3aThFMFpsMzhUTXBaMkowUUtjR0FXa1RJKzVYaHA0Vm80K25SNXBsYlNmK3hscDhTcXpBVE10dk0zZ2lyTHhnalN5dW5NY251WFdtQ2pQMmo2ajNsaVltQ2lEQmNUSE9sOEh0bE9IaVdSYnpFdzdlUzZtWWlHWlliSU00dVU3aVU2aHp1ZnBvczV6RWhqY2Fudng4eENYeEZaekxweEJWem1GOHh3b29raDRPWDd2WWhIdWcxTkJOa2ZjM2doZWlmTU13K1pWOHpuV1lXTGM0OEtkY096VEtXZStQZTduVFBaT3VmYkZuTGNYWk9TY2x5MGpoaG5GaWpIdUdEM1BsbER1RFdLbG1pWmNUMXVKRkFaK2tWS21zd3RaVlBjZTVYTTNORlE5VDZpMnh0UGxLNllSWTNNd0RkZ2RzNmU5SDA1aElsdmQ1QTJISTVqaHhIRGlVcDRNSVZmdUl6TGp3cXNUSlIvZEwyUFBkTkFUajNEN2xjd3d3SlJ6Qmh4bkJ1Wi9pYWNWeEQxTHptV0xxV0d5WWxzeU5reVRLVjN3aStwYVpoY2JkeW51ZTBtTno1WnFKTHhtWXJ3Zk1ZSE54RUI2M1dYeXZSb1pQWmlBMWpFVDB4eWREREtWZTVlWllMS081UUV1bW1KenhMczlURUlEcVhVNDhWejRkVnozK1AyVHJad3NJVy9BUmg4S1Vnc3lSdTVyY3YxRm9pNENMUmNkcXVwcGVJQ2ZIZ21ZRS93QVFZRzdtSzhOY014VVUzRW5NYlFDTXNIR1RsYXljaituTUJaQXZnT1Vmc044dUZLRmpLcmN4MU55cm1qT29ZK0paeEVwdkU4MmU2WmR6T1ptZTduVENPWURDOEZQTUhWejJ6Z2c1Ulp1NHJuSkFybURtMmRzcmw1bFcxNFMrSmNYZ3hWNWwxaGllS2g3bWJvbXNlSHNsWjlUWXdzWXFaWTRSZkN4aUZ0d21vMFkzSW1wZW1RWFRPRncvV3VGT0prR2syUlc0cTZqSzlUNGhDQ2g4L2l6eHlab0RENW5KTWM3cGJBdk1lR2N3T2VKa2x6QnE2bnVYbXBpNVNzeHBDMGdwTTB3WE1GcU4xTXBDRE54OVF6aGo0V3VaZGVwd1JYdVhGck1SSGxQbjRxR2pVdHA4dW5FUHY4dmxaa0JOSThocEUyUndZbkdaaGlPUG1YWDNGZnljOE5TekZ4Wmdudml3dVdGQzdqL1BnWEhoUGVhUHhGYjdTVlltQ0E3NDhhenpMdHllRXpobTM0bE04QnlabWRjUzBPNVdiamVwcnhmSE01aTF6RytwYTRZcWkzbVBXZWtYOHh3alNaRVZxSnNxbEl3VlhMN3Q5djBPSE9kOVFPbnBOSTVHR2NWNGYxRzJwaW5jYmJ4NDZsWnVkM2d5K1NmdWNzdjVnWU1MbjFEUjZsTHpVcTl6T3VJVGJWeGFqcUppcm0zMFIxR0w3bDhRR1ZXWjZmSERQbU9Jc1dvMDNFYXVLZFJaMGlLM0ZKbG5KRzVGNWlodVdHR0VVRHJZR2xPdlE5WFpyVEFxZ3FaNGo3MG1SU1VNamR4ZW9YUmx2VktHWGZqV2UvRXJudm1IY3A1aGR5MDNFNVpoblpQYkJ6OGVET3R6V1plYTRqaHdUNGhuTXZpWXZFMjN6QzN4SEV2bGczeVQ1Zkh3eXIxRytZdWNNWVZIaGNSVlJWYmlxd3hYTVFaV1cxdVBDWk54emp3cWRFWmNVVzJUdHM2dm8yYkVjeHdDcmJvY3E3bjdOSjJ1azFVQzJKYUh1R1N5R09vKzdudDhkR3ZCcGhHUEZSdUdXR1lNa1BheTQrbzgwTnp1R1BpSGMyZFFNUzQ0NG1LOGREZVlBanVrdTlUdXpRQS9nNWZpTDhGd3o4b2loa1BWZmxwTUxxdTZ6NUJzKzVoTUc0b25pTnVZd3N1c1hPNDI1Z0h0ajI4VlhPeUxjelp0REhGWEF0NVc5c1A5Tkpoc25iZjdZLzdPZStRVVliTU1TTjNJVWdHUTJMSUk2R2dGaHNlWlN0d1RtWFBnTHZ3OXJPVzVWdDhXQ1VjeS9iQUQ2bkZsTmN4U1ZHek11NWk5UzdibTJ5VnQ4UnBBbEZJZXIydi9BRGJCN1M4TkgzZkQwWjk4UnZ0MnNqMnVXVW1iaXcyeDRsMnI4WVppenNBb0g5YS9FZmNvVnBCTFR4dlBuVHd4TlVYSEhNWE4rRnRIaEVER2Nvdm5pZG1ERzBhWVkxNWo3UlczY0EyeW1hZ1FhUk5JOXgyRlNLNTRMNU9DQW4wQ3lBY2lKc2lzVFpqZVBNdXNlOWxRNzFaaFNqSW5UQzBhWWF2d3NjeTNUUGJDcE9sekUzNHo1WmFQeEhWa3BiaWt1OFNzWm1LeE5ZWmhraFJzbEx3Q1l4c2d3aXdHaDRYMmJCMW5iRmN3SE1FRjRxS05UTjVtQ25hZG5JYVRrY1Mwa2dYWHQzZnZZOWtGcW84THVZTmVDcVBwRVJRNGwrcGJHSGpGUGdZYVJheE05a1pReEYrUk9memJQWncvSi84QU9vUnFKcEhJN2lqMUU0Z1lUUEFIN2lIdmhqWGJ3SEM4WVB2RUNtcHdRTXNtUWZDY2JaWExmQmREcCtJcmZjWlkxdWVrUk9aZkZRMHpPY1RwQzJsUG40YzVDZkIvS0RyeE95UFV1akNlNTBNWUFZekFMU0pwZ0NEcDFJNE9QczE2TWF3bEk1dUlDY1hnYVJoVzR3MmpsTXU0KzA5a3NOeDlvd3NPMktNUmN3SktkNzlIRGVrU0VQQ3FOTDZyMG1IWXNXc0NQQjNLZG5MZzkwaHM5Z3l0MmRac3ljV1psQjNtSzh4L0Q3SUZRcG0vQndlS3V6MTRYTmZVUzVRWm1keWxZNnNqMlRhb3N2aUZSYVU5cHY0eFZURmNUY29NekJpSzVqNE5WTEFqa2VJTUQ2ZFI2T1RwMlBaQWRPZEZHa1RZOXhTN2lPSTlvaUpNazZQREptTGx0em9qM0Y3amJVdU1SWnRnYmdteHdaNUxjTjAvSlRtVmtmeEhjVms5OThEQXNlZmJDMmV4Qk80Q1NRSlRYQm14b0pUd1d4N3dwelBmNGUrSFdFNTVqaVUxMUZ2a09xdVpjRVdtcWwyVDBSY1VUSE11bVBOTkQxQVBGUjhsWjhIWkdrOXM1NXRMUFc2dDI3dDQ3MWVLWmFjQVdFNUhwT1J5UndxS3Vaa2lkeHRsWTVhaWo1aTNGSENQYUxlR0JFQzQ5SXVZbzVxYXl3TjNjQlFZZ0hSWjhaYjZSNmE2elhEUlZIMGtzQVJyR3VWZ2E3UkJ3TG5RVFNJNUU2aFo0Y3QzTEdIYUNKVGk0Q0M4UVVEUk9OYm1CaU5iWXpOckM3dXA4eGdVeVpCSXlhaW9DVHRqU1pjd0xtQzZqR0M0bmNxdFRNeHhZQjdQMGo3c2o1TWRPZEY0ZW5UeEwzRVRIOElpTXFaUkh2RnVVUmhSSmdqRkNvdGFtRDNGZDFFam1EUTV4eVlqSkw3ZjljeEYrZDJQa255eDRJTTlzd1lZVWxhMFd2b2dGNi9Jdi9tVmJpVTZaZkVNNGhZMnpOeTZoVGxoemwyQ1VuVDRXMDVkVERBbVRNYm1vdDJSMmdhaXB6QmE4eDU1cDhqK29VQXU2NThPUndMMHlkUUFZOUpsR0g4WWh4RUR1TUJLR0lzbzhGRTVDS3FJZFI5cFd2QzE3eExvdVhneWNHL2tsV3hPaHBsMlFxN2liZ0k2cW0vY1pmb3VPaW5wV1pqWk9NUWFMOGJpRndpK2FXelI0UVJFRzhRRGNYandaWWtzampHYmpEc1AvS1dnZk5OeC93Q2RrWlF4TzEvOFgvNlN4K0pkYmpUVWZhUENOTVN3dUxFYjVqYm1MdU5MUGlLWEdrYWFpQmp0RzJtTE1WSHZnalRRSzJNc0g3Vy95S0FFVFltU0ZXQXBhWExHa2NmNkI5U3YrQkhaVURNNWdYTVZiTm5VRlBpR2VadGdSUStzdkZpK3BiUDB5emlVRjNtUENWUlBDalA5TjFDVWNTVlh3UElZUkhDUFVBcmNtNVNXK3pZL0NLM1lZbG4xRkY0akN1WmxPY3h4cUk3OENyM0dGZHhFYVJZdytaZnVLNmdYTUdWM0NNSEErNWV2b2JQcU1rWktiWC9ML013cTlaUkNaTnRUM01NOHd0enlUQzNjVEhoQnhBaXpEY3NmU2FROERwbC9oRGlkVUY0alRFQTNFWERXSC9sSGFlV2pWN0loTVlabm8wdFA1NFBkcmxtbUtoNDlMMmpJL3dDNmlwN0k5R1B0R0dwaGkzRVltTnR4eXQxRWNSN2l6UG1PSVl5eGgweTZZQ2FZbURxVjN1MzBpaEZuN1R0bE52YWd3UVg5UTlhbDNobFBFSGdnTnlocVczVXNwTG5pUGkrVTlFZURLT1lPWmY4QU1vaXl6Y0ZqMWh4LzdWQ3FuTW5UTTRnWXNhdW5ISGFJK2o5Q3lVZVNDeHdhejhERDZiSXJhbEJqRFdQSzR0bHNWcUw3akNpOHhXY1ppNGwzS1hiR3Z4TU0rNEs5eTZJZWljdi9BQWRzL0M4NE9BY0JQVER0N1EwZlJSeE5OekMzSGZxWk5FdStZR014MVUvVWpMd0Z2d0p4QlVla1NlbUx6NFc4enpDekJ1Vy82MklPd0pPTmtXTVRTNGF6QVJ3UWwzajNjdkQ2WlEwV0xVbi9BR0wyZHFzWmNOeSs0OFoweFNLZHhRZHh6cU9wZFRqRWJqZ2ltdTVrekF2bVdPaDhibDk5UDZpVFY1ZUE2RGdPcDhjd2Q2anF3Y1VHNnhGNmlYeHhWUUQ4Unk1eE1qNDEwYkhaRjN1TDNIRFVweEZPSlJPU0kzTUU0WStML3BYRUZDY1NkWnFXTUtURURMNHFmRDlBTEd5ZkNmdUFDaXA0WG9qSC93QWpxYTNGakV4UmI1bkRIMnhGWSs1ZUxqVGxqcVh4WGgxT1lGL01WNElYZno5dnFKWmEzV3FVNmh3cUUremFXalB1SjFvbTh3YktsOFFXcGRtWm1zellkeFNLcXZ0Ny9FOVV3ZkJuSzhoSEhFL0xCWGxGbTVuMVBSRCtmL0ptdmN2bmN4MUxwMU1yVTlTM1ZZaUZGR0crRWY3czRpVnExVkF1cVo0emMxMmlITWJXeCtrUnlUN2k4UzM1bHU0dDdnMU80VERjSmlsb29EMnc1SzhhRDY2UGU1YTU3Z1l1SHBBR2lHVXNEdHdlMXhCNWJIWm0wdjVPVnhFUFVLcTROa3NyVUtEY05WTm1lSTVoVS9TRS9ZL3l3VEJNa3d4aHR4T21WRE1jcHhSQml5emlWazNKL3dBcHN3ODFiQ3RSUWxMbFlqeEVRZ2h1SU9JY0lIQ0k0UjZpYUw4azJYc09YNzlJMUFVQ2xHRVJ5SjFHMHpjdkZPNGlXZHl6dUxmaTY1bDEzbVBjV3l2MmNKWkRWZVAvQU96N1k1OXdHWUM4UUlZUXdrQXpEMnJxaGI2QXNFOExrbW0yWWlZbHBkNDRueW5NZDRZUmlTb3kxaWc3QVpIQWp5ZE1UbU1laVA0eHB4T3lWT0RjVHVKMUVuVEVyTS8xcmlZRFdwK1JydVVYRk5FdWpNM2lhS21uTUdzekx2bkc1aHNyaktQdy9EL0pIcXpZR2JCMS9IaUt6VVNxbVdBekloSGRTbW90NmZlL2kybHVENHZrdm5VWENWTXF0cS9NQlNvSGNEOFNsMUJFc3pMTVgyM0haR2g4bndxSVFPa1ZWUnhrM0ZXWGV0c3krdkZtcFV2Z2d5akRVUjhVQTQxZmVCMlhNcnNqWGlNdkdNUHBMVEVaRHdaWXJHeWY3RTBpT0YxTDdtSElSeE05UW05UTk2aUVRRkNPeVBVdmhnZmp2MlcxTVUvQk56Z2U3dmpUVE0xNmtCL0RtYnRmZ3VCYkQ2aU04Y2tTM0grTUg1WWh5N1l2TSsydnFJOTVoYS9iQVhjUzhRd2xYaXB3cEFrRzZnVTZncVVnQUxWZEI3bVZJM0pTRitFby9yTG9xRlhjZHpGUVc3cUdNc1phMHNTNGxIY0ZFYjNTNEFCbHVDTGRObUYwUmFXVUIwaVZCQ01laVBZZ2RUcDNMQ01Vd1dJUy93Q1QvSm8xd3p1T2NRVWg2bGN3d3pjck1GMHhPYmlDaktPTEt4Q3hoWEhiZ3cxaE1hR21LdlR4R3pKeFptRFZWOVAvQURLMEI3Lzk0cXRsMnJmM0J2YkExVE9TQWR6WWhhZWlIZWZuQjV4T0RIdWFrT0FYdkY3dXlCb1N2Yk43ZzFnSTVKVG1BbDFIVXhXb0ZSbDB4ZFExblU2OVJ1R28yVERZWHNiYlhxWjdqVmxQRWVOVHRKd2hLT0oweHJ1Y3RUOHgva3hvbFZtNjNMT0o4ekZSSGQ0aHVZMng5RXdOTXpkOFJscWFEL2pDYWZlOENrL0pNbUtEZERnREIwUHNweEZWR1lXTkI1OEdDQW1ZTlBjQ0F1L0JacVhValc5M1B0cTVuME1GeTRXZVZQYUp5dnhLOVJ2VENocVZXZkFZNTB6TDZsd3dabG5jQmR4b0xtemVmNU1zVDV6N0Y0Mm5ySXhZQWFSSTNpYWk1VVltR1d4Nnl6WktDZjdWeE1aMHIxUGp3M1V2Rk1zMGVCNmpXNE9MbDlJQnZtZjdVTzcwQVpTR0FuRE0zcERiYmh2THNmVE1acE0zek5FS09ZQW1JTEtoMmlhNmk3aHloVGNOZmhDMUhCYURnMnFEY2R5Q0JyNVN2MW9HRGxUR0plWVp5ek81YXk2TG1zczVKbFpXYUpubVVNRE5RcGFsR2tBTVpOUFVjL01Bd3RqYWRvNzMwRWRDS1JFcEUySnd6S1BHZDBiNmoyaVRpQXpqeGZtLzhncmhFRE5RdmJNTzQwYW5kd0xOVEhVY0dvT014OU9JMmVDdDRZdkRDUHN5Smlvbmp0SlZzV1BUeDcyMGZOVVVVdXlJOFF6QjdockR4SEFrUHpoN0t1d09mc2RPVnFOL3BHVXplYUdhY0R0dFZSWEVjOHl6WE1PbWVqVXhFdUNPSnhNME1ybUxmMUFWalJLRE1WNG1HNVIxazB3TC9LcVgraWY1Rk9WRy9WUW0wYVlRMUxXVStEMHoweG44dS9rd09ZOVQ0Z2FTcWxqaVVoSExTUjFYVVc4Vk5RYTVtOHo0aStvZG9CbjRsZnR6b1F3QXNjQjlEQlhjRWUrQVBZREl3dmk1MG1ZY1o2Y1FMaVZycUw0OTBjaG82MmdoU3RTNmZQSmZ3R0FDWUtLaURxR0dZM0t2TEt2VERHS2lMRVVtdm1OOFJnWXhBdmNyaDhYbXFqamk0UllVeDZKbUVxdGY2b3k0U1krM00xalEvY09FR0hjbGVLZzdpT1JKYnhMWXJLY3Y1TTVwblRFYm9qZDFjOVFBaXRRdTdsM3VCYytvWXpNWEx6aUJpMkhjVzJvbHd4R0V3NGpsTzEyZlEwbHlEaUNiNlNmMEJURTJoZGc3MURxdkpXS3lMcmd2Qm1yWW1PcEFRT1U3VGFzcnVXVmlPV1VHVTNjcXN3YjNBeGhpMXFaTXcxTWJsL2p4U1RPcGVNUnZpWjZsNTFMcHRpRE9LY3l6ZUhBREd3ZlpoMGlZaEQwZW10Y0MrQStBamdDMGp5SVhoYlROZS84QVBGeHVabTJPS3FDZGVIK1M4VnpOR0ptcFFzeE1Hb25VdE1RMW1MRlJBVmR3NzY0dUhvUFRJSjhZaGJZQjVGd0FvNkNkbHNRVmdGeVRRQVpWZEJNbDR3SGxwWjBZNWROSlJzbm5sQU1BR2d4SExGemliM0tUYzFNTXQ2bFkzSzRoUTBzVXVpRnVKVmN6WEVXeU43aVZCYXVXM00zSzVsVm51RkxMemd6RHNPUWRLVVlST0dJWVl1ME5xT2ZjdzVhQ3QzSUJSc1IwblU5VWJjUjZJYkVOcitRanJRRmJ6RHFDbUdLbDB4Z3AzS3JVdzczS2VXSTY4TlZkUzVWY3lsamduTnkzY1c0Y1crVW93aWJIRE11VEExOGlWMmFnQnF5N1pscUZ1NXFWbUN6V1pyTXRxWEF2TnhRYzVsbkVONDE0YmxPSVg5U3FMWmR5a3pObTlUNFo5eEtjVHU4UnVJdWM5ektRajBOZ1ErQWw5QnBJL2FhMW9tSDRSSHdEZnhITmUzOGpDVVUxbVVWWkxUTWU2akZ4aUdzeEJNY1REekh1NHZjdk5UV3BUZVpWNmg3WnhLRmxFT3BtcWpWUVhVdXRSdnFFVmhNa050ekMyUnltNDZxUHVHZHlzM0ZyQVFxZXB0cGxGVkxPNWlBVktXRTNLclVvRmxBcU0xTGxkSG1qSTh1MXlhWmY0a3VyNDlmODNJVFFnTzdiK1FUNGxiS21yTnpVTHZNck0wd1kwWmxyTWFoUk4vTXJtOHpEdUNhSWhlWnhPWWh1V2t5NTVqUk1CYzlrdjh3eEhlZFJOSlBaT3FsUGNNYjhiYVk0WXpXdVk2c2hjVStJdlRNVmJBeHVjNGhrYmltcFdOd01UT3VKVHFaMXhIV3ZCZFFqK25aeEJ4V3JmSlBNZnhiMlEyTzM4Z241SkRMcHhISnFGdUp6VEhlSVp6SFBNYU13aVE2NWoxekQzRE9TYzVsaStwWU5jVGtRMWJNamR4N1ppcWdlNW91WDFQbUZkVGVvVzdsT0psMlN1WlgxTHhxYXhLRE11elVjUmJjeTZXWTNNWVJIOFFWeExPcGJiT0liakdITXZwTEs2ejNEUThNVkxkVFk4TVBCMllaMDhhbVdXTkltTVJ5YWxVV3d0eEhFUTViamppSmJpTlZST01ReHFaTTJuOWw3TWNaN24zRGRFUzQveVl1NGk1bGw2bURMQnhpZW1CMU1GUXZtWXZESGRzTWtCM0hHNG5PNVRxNEhFdmhqWmxaeENtNVY1bU55L1ViZVlnYWlKVXpnbU81aUdYUEU1dTRBNW1FeVQxRzVtYzRabHRuOW1ZNHdTdVppbzBHSjhNVG00MXVOR1NmTTl4eHFPdHhMZzY1bDV6TVdWSExVTHFVVmN0T0p4aUxlcFhQTXZzbDJlTTFLZTVqYkxxSzh5c1dFeXkrV2JMaFJFdGpEVUI3aTNrbDV0Z2lWQkFpSnFJWkVwVlRMcVp1SnpMc2xZeGlPREV3U3M1aE1jNzhiWlY2eE1yY3NZK29VNm1ibHh4dUt3ZVVSWlRxRXhjMDVaWWtzTlNuNGw0eHVaZk5MekxkZFRqVWNGa0FtVEVXdFJPbUNtSnJUTXJPY3pKREV0dXBYY1NVR0dXM1ViNGc1aGo3bGJJbHd4eEhXZHpNYldaNWw4eHpHdnVBM2RUZnFhd3dMWStvV0V5NHFKVGJLVUJ1ZTExT1BjTXJjK1lXNFp0cWFhaFhNeGNzTXh6b2wyVVQ1OFlhYm5NY3hRSWdaZzRnamlvQ0dzUzZ6QXVJak1DVmNURmR6V1pmclVOVzh6RGladVlxTFJMeUpHMlZVYnZFdkZ6TnhhS3FMZ3FEZnpLck1MT1k0Zm1PWEUrSTVJMHhCc2pxNFh5K05vbEY5d09KZkVlaU5ETTNVUnVOSm1XM1Z4SzFNdmdDcm4vL1oiIHg9IjAiIHk9IjAiIHdpZHRoPSI0NDAiIGhlaWdodD0iNDQwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ii8+Cjwvc3ZnPgo=" alt="InsurNex" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logo-fallback" hidden>IN</span></div>';}
+  function mark(){return `<div class="brand-mark" aria-label="InsurNex"><img src="assets/logo-mark.svg" alt="" loading="eager" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';this.src='https://raw.githubusercontent.com/eslamshahin1087-lab/InsurNex/main/assets/logo-mark.svg';}else{this.style.display='none';this.parentNode.classList.add('fallback-visible')}"><span class="brand-fallback">IN</span></div>`;}
   function modal(title,html){
     document.getElementById("modalTitle").textContent=title;
     document.getElementById("modalBody").innerHTML=html;
@@ -1203,10 +563,10 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
 
   function authPage(mode,error){
     var login=mode==="login";
-    var logo='<div class="auth-logo-mark"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9Ikluc3VyTmV4Ij4KICA8aW1hZ2UgaHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvMndCREFBTUNBZ01DQWdNREF3TUVBd01FQlFnRkJRUUVCUW9IQndZSURBb01EQXNLQ3dzTkRoSVFEUTRSRGdzTEVCWVFFUk1VRlJVVkRBOFhHQllVR0JJVUZSVC8yd0JEQVFNRUJBVUVCUWtGQlFrVURRc05GQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJUL3dnQVJDQUlBQWdBREFTSUFBaEVCQXhFQi84UUFIUUFCQUFJQ0F3RUJBQUFBQUFBQUFBQUFBQUVJQmdjREJBVUNDZi9FQUJzQkFRQUNBd0VCQUFBQUFBQUFBQUFBQUFBRkJnSURCQUVILzlvQURBTUJBQUlRQXhBQUFBRzFBQUFBQUJCSUFBQUFBQUFBQUFBQUJCS0pBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ0pDSkFBSWtBSWtBQUFBQUFBQUVTQUJCSUFBQUFBQUFBQUNKQUFBQUFFU0FBQUVTRVNBQ0pBRVNBQUFBQUFBQUFBQUJCTVNBQUFBQUVTQUFBQUFBQUFBQUFBQUVTQkJJQUFBQ0pBQUFBQUFBQUFBQUFBSWtBQUFBQkJJQUFBQUNKQUJCSUFBQUFBQUFBQ0pBQUFJa0JBa0FBQUFBRVNJa0FBQ0JJQUFBQUVTQUFBQUFBQUFFU0FBQUFBQUlrRVRCSUFBQUFBQUVTQURwYTQ3SXZaUGFyWllIcGpmVEVWWmdJa0FBQUJCSUFCQWtBQ0pFSkFBQUNKQkJKQWtBSTFKc2l0Tm1wM3YrNWdpMDBpeE9RMVkyclZycnRKRTFtNUE5QU90cVh0NGRyYXgxUngydWtlejhlZnpURk43dGlhMzJRclZ3OVNKVlQ2T0FnSmhJQUFBQWlSRWdBQWlRQWlRUklBaVFBUUpBQjVOYTdLVnJ1bnpzTFJTNVE4WnZ1dXIyUTEyMldJZVo2ZEkra0JqczE5WEt4TmEvb05GOUxuODdzV0NyZWh5OUhsMGMvZXN6VjIwTlZ0ZnJpbi9RSWtFU0ltSkFBQUFBQUFBQUNKQUFBQkJLSklrRVNBUEpyWFpTdGwwK2R3TFJTeEJNZlB5eTlYZTFjZVdLbnJXc0N6MmdmVDliMWtzeFY2OFZmMGV4NTNQWXEzNlBQNTNQN3k5NjFOVHJZVkd6ZXlLVmVTSkNKQUFBQUFBQUFBQ0pBQUFBQUFBQUFQSnJYWlNsVnZvK2Q4dWpPZVppZDEvR001REpRSDE4L0hIdHg1UGo0K01zK1RiMm1mbmtrN0FWUjNqOXdsczBqejlMN3NzTDZQUDUzTm55K2pibW5kdzZuUCsyUlNMbElBQkJJQUFBQUFBQUFBSWtBQUFJbEFsQk1TQ0pQQW9YZkNpdG1nK254ZDNpbHVIcVpyaUhGamh1VDR3bk41K29jWHg4L0hYbyt1T09QTFo5WlJpUEhoMWJmMGozUGprbFBONWZuaTZ0WGR1WFNxNTlTbmNpRkt0SkVnRVNBRVNna0FBQUFBRVNBQUFna0FBQUVTQkVtTzBidkxTQzExL3JjUGQ0cHlLNlhEM2VMbjZQWHVWVHErMWVscWhlWGJPczl0cWZnL0h6OFQ4WFBHNC9kejVSN3NmSDE1dXJiMEx5VUt2dDgvdDJSaXNUUUFBQWdrQUNKQUFBQUFBQUFBQUJFZ0VKQUhoMGl2dlN5MVY3R09QdGNkbmdlbnhkemkwZEhxM3ZvdGVtcDJGNS9vSU9VcXpnZDNLNTMycGF0amltMlFmM0htK1J4ZFhmOEFKK3Z1Smt2aS9GTUwxVnFabEt1UzBKQ0pBQUFBRVNBQUFBQUFBQUNKQUJFaEVoRWlKRFdteTIvVFJMaHMvVzM2SFN2TjR1M3g5V24xTHhVanU1VGJPSXJzMU1TSzcxcS9SM1VzekgxQTVPNzE3WENPZmt0SmhsNk8wSW1pV1VocDJFd1NBQUFpUUFCQ1FBQUFBaVFBQWlSRWdBQ0VpQ1FnVGhXYXR1dWx2aFhiclBlYWppdDFxWVhQaDVNS3pQZ0FZWFdDNmFVNDljN0dPRG9EVnNJa2lZa1JJaVFBQUFBQUFBQUFFRWdBQUFBQWlVQk1CSWlZa2ZIMk5RYmZPbm5FYzNRVEJJRVRCTVRCSUFDSkFBSWxCTVNBQUFBQUFFU0FDSkFDQVNJbEFtSkFJa0lrQUVTQUFBQUFBSVNCQWtBQUVTQkJJSWtBQUFBQUFBT0hGZWhSRHI1LzBROTZrOTJOV3hFdE93QUJFd1NBQUFCRWhFd1NCNXZwVjdrNFhkM3JWVjNqMlIyY3hLQXRmUzZPdHRiMmVsV201c0x6U3YydUpOSFVCRWdJSkFBQVFKQUFBQUFCZ0ZENzRVUGxPSGExdktoMk0wN01KenlpL2E2TlZyc1hyZDlaNDNZMnQrYUZzK1RvMzVyUHhxYkZqUGl2dkoyYzl2ZHRmbTNkSGo2TWQ5bW0rY2RHcS9DRVQzYUkrNnE4OHR3WHcxTDd0TmRPeTlXQ1ZZNis3WGVEQk9weVNjRGpYWTgyYm5Rck41SlZhekh6NzZacWZXV3g5WDI2azJJemZCWnBkODk3QnRRZkZtcCszc3ZycEdXdTJtQStWNmxjdG5VenFyT1hUTUJZbkMxZjQrVDNUbVdoN0Y2OCtZUUZwQVJJQUFBQUF3Q2g5OEtIeXZEdGF4ZGRiRmFzNlBlcjVXNSsvbDNyaDlnK2pEU1A1dlo3Z09WVE1kdFBRVjVhVTZOdS9kNlVCZUx2NTdRNjMvSDBVU3pqQjgzbE9PL0lnSlQ4NE9mcjlpd1JWdEthM0twcHpidld0UGdGc3RHekY5SFdacS9MUXVMNTlyZTJWZ2dhcjVkR0V5TWZ0ZldQeHc1ZVdUMGp0N1FjTExlblpPckU5dkJiZXVXS05XMzByWFUvdEhHeU9zdFoyMHFOMTh2WjV2STNMS1JlemZjUGwzMUVNTmdBQUFDSkFBR0EwUHZoUStWNGRyV0tycllyVm5SN2Qya3QyOXZOY0hwZDNwUVVuK2J1VDR4azFnaXI0K1JvTFFFZDJYVjA1Z1BrNzlXUGI0ME5iYlpqVXowZGlhbjI2LzBWdzZqM3h5ZEUrcjVQcmR2TmJTbWx5NmFjdSt4RnFLcjJvNGVsVm0wMVZaK0Z3NjMxUGJneWZCM0twMit4V0NsNm56OTliNlhSTE5hQjMvNDFKdEdsYkwxWDdFOUMyMnczUm5peGNsYmozdENaN1haM0N0TjhPVjMyb1k1Mzk0MTI4WEk5bXFscVBuOXoreEVTUUFBQUFBQUdQMXd0Zkc3WG9qWitVc2Zhb2JEM1hPekZ3OHpuMjFSOXF5anAwNGxvdTBMWGxTL251UzM2OUhid2x6YnZMcmphSmw1Uy9adGcyekN0dlJ0QTg5d2ZRMXNZeDkxSHR4T3ZKcDdjTHAwMTgzcjNtN1dSTWQyYTkxOVlOTHgyTjVIS003c0IxbllwSng5YXN1M08zYStucHZlRGc3YTlia3lGdDF0TGJwYU50Zk5zWlc2TklSZmVBQUFBQWlRQUFNUjk4eXo2MVhsR1dPV05lKzg5eVJnWHNlTWxZNTVabTdCZldNa2p3KzE1NzZiVzN6bmpzdGpuM2psa0R3ZUI1a3JET0gxbkxHZkROaE1kNHZHVHNPOWs5aUZlc3ZMRE5hK2g0enBpUGU4OTkrZFI1Mzc1a0xFK205emg0SFc4WlF3YjFESldBNXNkZ1k1QUFBQUFDQ1FBQVBJOWM4MUxrZWJ0bU9DL09lUjU3WHZZR3hXV1BIZ3VmTmVlaTh3MkkyWWNYVTlDTldlcitUWnJaamhuaGJQbnhyRG0yVEhyRmRaNzNHcWZWMkJKZ3ZvWlU4OTB2c0RLSTk4YVozUEhudXQvVHphRFducFoxRHpSK1diRlplYXE5L05aODkxdDUrMkJyTGs5MzNNdk5MYm85R2NmUTE1Z0FBQUFDQ1FBQUFBQUlrQUFBQUFBQUFBQUFBQVJJQUFBRVNBQUFBQUFBQUFBQUFBQUFBRVNBSWtBUktDUUFSSUltQ1FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFJa0FFU1JJQUFBQUFBSWtBQUFBQUFBQUFBQ0JJQUFBQUFBQ0NRQUFBQUFBQUFBQUFBRVNBQUFBQUFBQUFBQUFBQ0NRQUFBQUFBUklBUklBQUFBQUFSSUFDQ1FFU0FBQUFDQ1FBQUFBQUFBQUFBQUFBQUFFU0FBSWtBQUFSSUFFU0FBSWtBQUFBQUFBQUFBQUFBQUFBQUFBQUFBZi9FQURRUUFBQUdBUUlFQXdjRUFRVUFBQUFBQUFBQkFnTUVCUVlIRVJBU05UWVZJRkFXRnlFbEpqUkFFeFF4UVpBaUpEQmdjUC9hQUFnQkFRQUJCUUwvQUNVUHkyWW8vbjEyVk1aaE4yR1dyV0huMXlGVm5UdlRiakxuUDF2SDdEZUhtRXhnNnk4aTJoZjhNcVl6Q2JzczBNdzdLY2t1YjhLdnB2cGxvczBWdkZLalFxa3l2Y0VlNWVXVEliaU0ydWRoK2E5TWRKUUpRSlE1aFZkTTlNdHVsK1dqeU5kYUdIMjVMWGt6bm9DVkFsQWxBbEFsRG1GVDB2MHkyNlg1cWk1ZXFYYSt3WnNtT09lZHZrb0VvRW9FWUl4ekNvNlY2WmJkTDgyNGdXTDFjL1QzakZ1MXd6L3QwbEFsQWxBbEFsRGNVL1NmVExicGZtM0c0YWZYSGRvTW5ic2lHb1BiaEtCS0JLQktCS0hNS2JwSHBsdDBzS2ZiU1pIdVEzRzQzRzQzSE5zZVBaaHpubnJTbnNhSXdTZ1NnU2dTZ1NoUzlJOU10dWwyMXV0VGhrR0pUc1ZWYmRKbURjYmpjYmpjYmptMkdPNVl1dkdTNFVpYTNzYURJd1JnbEFsQ2s2UDZaZnIvQUU2UFlHUTI0VmwzdnczRzQzRzQzRzRwTWtrVWE3U0RWWmlpWkRmcnBCR053UmlqNkw2WmtmUU5nWkF5QmtOaFNUblZ5WG1sc09iamNiamNiamNiaHhSdUVwdlliam4yTEhWYzlCNlprWFFOaHNESUdRTWhqaWZxRy94eG02Ym53bnE2VHVOd1pnekJuNUZJSlFsdUdrWTMyOTZaa1BRZGhzRElHUU1oanhmVUF0NmFQY3hybWxrMHNqY2JqZnl5cFg2ZkRITzMvVEx4QnVVeGtOZ1pBeUJrTWVMNS93QUowRm14alpIakQ5RTRaK1F6MktSTTM0YkNpYk5pbDlNVVJLSzhxMVZObVpBeUJrRElZK1h6N2k2MGg5dkxNT1ZWaEswckNsRWtuSnlFaHg5Yng3RFlZN1VxdXJnaTJMMDNNOFo4YmpMYk5DdGdaQXlGQVh6M3k1anB3VG9VUmtvaTRFUVEyYmlzSHhYd0NINmZsbUhKdGllWVhIY01nWkNoTDU3NXN2d05pK0tWQ2ZnU0NJTXNyZmN3M0IwMC9xV1E0dEd2bTdXbmswOGt5RkNYenp6NUppMFhKSThqRGJTUGFZcmhzZkhrZXAyTmJIdFkyUjRqSW8xVVpmTy9YbEpKYVptRHBadHYvYTNua1IydmEra0VHK3JyTjM4aCt4aXhWdDJzTjVmR1ROWWhqeHFBR25VUHQvbTU3MmdOTU84UHlNbVY4OEpld3hxKzhTYTRadXJhYnpERWVpL201NzJnWTB2N3Z1N2RxaXF5MWhoREdzNGg1RzFhNnRWOFZ4R3Nqdk5RYWpWZDI1d3Y5UUtxZ1hJMWpmTTJOWTVCSFZhcVZFNHlsc3FpcTFoZ2ltMVBoWEZud2w2dHdJMHFIcXpCbHk4aXYyY2JyRDFoaENoemlCZDF0anEvRFpYaE9ZS3l4R1VxK2U4d1lrdVJucU81UmN4Qm5SN1RlWVlkMFFXRnhFckNlemxCR2pPZmpYNUpDc0ZDWmw3VUtUN2N4eEFudFdNWVdPVXhxK1Q3Y01DcXNpdEkzNEdlOW9EUy92RFVuczBJbE9vamNkTDhxZHM0K3BlVE9VbFlmeERNZDJTdVJEZmljTU1wM0tqQ2kvakN1N09GaDkvVWRXMVc3VUJTSENZR2paLzZNcitGL3dBdzNGWGFPMVV1QlBhc291ZW4vdnR4aG5Rc215RHdscHg1VHE5L2llNlQzR0s1R2NoZVUwZmlESE1NZHZEcXBtU1hxYXlHYXpNNk9xVmNUR21rc05mZ1o3MmdOTCs3OVNlelJWVnJ0dlkxR25GTldSODMwOGhlR0RCWmlvZVc2d0lWNHlNQXppcXBLcU5rMUxhSm42ZDBkbElzUGhYbC9HRTkyY0ovMzlSMWJWYnRRVmRhL2NUNnZTYXNqTTBlTjErT295MVgxQnVMbWlObXQ1aGpsK3FsbFowNmw2VnpEQ2orbjdPZXF3c0l6SnlwRlpYUXFwbVMxRm1OM3NBcXV5WmZPTzdGZktWRnpDaS9aTzh3Vytwd1JXWEpjaW5xbTZpSCtEbnZhQTB3N3YxSjdOR2s3U1hNb0U0dDRYOVlyM0xuV0tlMUZaTmd5SzJRRCtJcHNwc3FCeWx5Um5LTWJMK01LN3NMK0JQKytxT3JhcmRxRFIrTWh5MzRaZWYxRnpDbWJTNVI1UlFLcEpYTUZ5VnVJNWhpNW43STgzdzVoekRtM0hNT2NZejhhR1lobHlMSU5zbitZYWZwaXFQOExQTzBCcGgzaHFUMmFOSSs1aE4rei9yRnorcExTMGpVMEdQTnBzcml5OU02Q1NNeTA1Wngrc0drNjF1elhHemFYVnpsVmxqVlc4UzVpWmxtRWJIcS9mY1ZIVnRWdTFCbzU5L3d6RS9xUGNVWFJiQ0F6WnhMaXJlcHB1NDNHRUZ6NDVQaktoVElyNVI1RmN4VDIwZndXdkZqWTBGYktacXF4NXRLU2JUbkdSL3FxNWh2c0lGZzdYUzZtMGF1SVA0T2Vkb0dOTU83OVNlelJwSjNLSnYyZjlZeDNKcTNlRzlQUTR0cGNmTjcyTW0weUd4dXVHbE5DNUFyZFJjY1hUWGdTdFNEM0cyd3ArcmFyZHFEUnY3L0FJWm4zR0tIb2d5S2lidllNaU81RWYzR0NkdTVyamFwaGJobVU3R1c1ZHozazdqQVpVNzkxbDJSRlRRelVabmpkR3E5bjVoakNaTUVZdGtLcVNlbFJMVCtCZjFmamRON25wNHhEVHFSanR6azFNZC9TZTU2ZU1Kd0ovR0xJUE4vck5LMGRuYjBtbFVxdXRyM0Y2N0lrV09qcnBLYzB0dlVHeHBSZHZLeC9TeURXT2JiQ3lyWTF2RHQ5SUhrckxTdTlOZVA2VHNRM2I3U3VUWlhFRFNTWkduNWhqeThscHZjOVBHRFlTN2lqbkMvd2grMXRQZHRMRUdOK3loOE1ueFJGNlBkdkxHUDFSMHRZTG5ESVZxcVJwN1lObWpBYlZTcTdUcENGUllqTUZtMHdhd3RKL3UybUNqcFdhT0NMblQ0NWM3M2J6Q0dOMWtxb3IvK3FFWkgrWHY2SmxQN2p3aXZpMUVwNjZ2RHFYaXlXV3A2a3VDdDJaT1J5b3lMVzZUVzFiTStXOUJ4V2ZLblZ2dEcrK1V5N2FqVXRWT2ZzRVdmVHNlbmVINE1yTG4yWTF4Y0ZWczF0aEprT1Z0cDRpOVczUGlGZFEzcjkybVZmVFdsVGJ4cU5SZTFEN1RsdGNKcXlycldRL0prWHJ5cGRWWnQyc1FSZkFqbjRWemZvd3NpZnNMQ1plT0puVk5zbTBSUjNTSzJsc3Jid3lORHVuVG5UOGhmajJ0all2UXlxcmxVK1E1a1Q3MHlsdWl1R2ZhWjUxcU8raVV4K0xhUFNvOFd5WDQ2NWN4M0hMeHFNNzdZME1kNW1ZN0VjbFZseEZlVmk2dmluRkNkWnJHYTF1dGF0NENpdzlvdG03QkpyZ3hZajVhZlhzTjkvQ01oYlNxdXhsTC9BSWd4SWRvYkxHbzhockhjWFpjWng1eU80NG1UQWZWcDlsY1o2UlQzMFo5cXdnV3o5bktmcTBRYlRIWWlZbGVLMll1bWxZeEZrSFpZeEdjamthMzhmdXNlalNGUzZ5cm1Wa2ZJNFRscEdxWWtaKzFqeG5VNWJsQlBITnhpRWJGN0ZPWFFTY1ZRNUlpTTFqY09MV3hrdzRIcmtuRzQ3OHVCQVpyWTMrWXovOFFBTnhFQUFRTUNCQUlJQXdjRkFRQUFBQUFBQWdBQkF3UVJCUkloTVJOQkJoQVVJakpBVVhFak1ETWdZWENSb2RIaEpFSlFnYkhCLzlvQUNBRURBUUUvQWZ4VHJNU3BxRnZqRnI2YzFoV01QaVVwamtzemVYNlFWODFObGhoZTExSGlGWEUrWVpIL0FEV0hkSUJtdEZWYVA2OHY0K3hVMWtOSTE1WFZianM4M2RnN3JmcWpaeWU3cm9zMXBwUGJ5L1NmNjBmdDE0VmpaVXRvYWpVUCtmd2dNWkJZd2U3UDFZMk42aHZaRUNjVjBiYTAwbnQ1ZnBQOWFQMjY3TERjVGxvQ3R1SHAreXA2aU9xRGlSUGRsaTQzbi8waUJFQzZQdGFVL2J5K08weDFWVEdBZWlMQTlPN0pyN0tXQTREeVNOcW1aTUtvNnFXalBQRzZrSWNTSGpRN3R1eUlFUUxBMnRLZnQ1ZXYwTm5URXA0STZvTXBxb3BKS1orOXQ2cG1UTW9qT0VzNFBaMGRWeHRTSFZXWjlsZzQyTTM4dmlUMk1VeElTVUVZVkVSQkkxMlZkaGgwajVoMUZNeVp1b0JJM3NLdzhXQzdlWHhVWDdwcGlURXNQZTRPblppYXpxdHd0NC9pUWJlaXMreUNtTXQ5RUlqRzFoVkEyNWVYbGlHWUhBbFUweDBwV0xaTVN3eDdnWFhQVDV1OENKN0tHRXB5c3lBR2pIS1BtSkl4bEhLYmFLcm9EcCsrR29yQ0h1QmZZbXBRbWU3b0FHTnNvK2JpZ0NGM3lOdi9BSmFTVElnTE8xL21ZclhGUVF0SURYdTlsaG1OOXNrNFV6Wlg1ZFZkanMxTFVGQ0lOWmxTeXZQQUVyODIrZlB1eWplMGQwMDVjMDh4S09YTm82a2x5Nk11SklvNUhMZERLVGxicTR4WHNwWkNGOUU4eGNsajNmb3d2Ni8rT21aeGU3TENzUTdaSGtQeHQrdjNyRmh2V3lLbm5DbG9Ba2syWm1WUmoxVktYd2U2eWh4eXRpTDRqNW1VMVhOVlVuYUtGOVc1S2h4eWJqTU5TL2RmOUZpK0xGU3UwTlA0dWF3ZW9yYXU4czc5ejIzK1RQdXlENlRvV3VWazREYXlIUWxNTHNWME16dG9nTVMyUStMcS91VS9pVVViV3U2eDF2NllXKy85MWh0R0ZYeEl5OUZsbG9aL1FoVlZKMm1aNWJickVpZnN0UEh5c3FDckdpZHk0ZVoxWDE0MXd0ZU96K3E2UHU0bVljbGpOQ0VFdkVEWXVTcEtUdFU3UmsrNmpqR0lXQUcwYjVNKzdJUHBPby9HM1VQaVJTMkt5SXdkdGxDMXlUdGxKY2ZSTnVwL0VvdkF5eHI2RGUvN3JCRytJZnNzUm9XcWd6RDRtVGhiUjFWMHJ6ME1aaHVMS2lxK3lPN0VOMmRUWXFMdGFHTm05MVQxY1QwL2FISEtwU2tycDc4M1ZSU25SU1cvSjFRMVRWVWQzOFRiL0pJR0xkTUxNMWswWXRyMWNJVTRDVzY0SUpoWWRrUU1XNmFJV1hERzkwNENXNlptRnJNcDRJNmdjc2pLQ2tpcG5kNDI2cGFDbm1MT1E2b0FhTVdBZG1VMkhVOHo1aUhWQmhWS0QzdGRUVTBjNHNCdG95aG80YWNzd05xcHFlT29iTEl5aG9vYWNzOGJmS2ZSWDVxN09yc3JyTXl1c3pLL0pYV1psbVpYVjA3MldaWFpNV2l6TXJxN0s5L21aVlpaVlpaT3JLcmEzV1ZaVmxWa3cyVHRkV1ZsazBzc3F5NjNUTTkwdzIvR2IvL0VBRGdSQUFFRUFRTUJCUVlDQ2dNQkFBQUFBQUVBQWdNRUVRVVNJVEVRRXlJeWNSUXdNMEJCVVFZZ0l6UmhjSUdoc2NIUjhDUkNVSEwvMmdBSUFRSUJBVDhCL2VuQlVsc2VRSzVSOWxZMDV5VDh2bzlTT2ZkSklNNFQ2ZGVRWWN3SzdvN292SFg1SDIvSldweld6aUlLdm8wY1hNdmlQOGx0QUdBdFo4amZsOUIrRy8xN2RRMHRzLzZTSGgzOVU1cm1IYTRjOW1oZnFwOWY4SWhGcTF3WVl6MStYMEg0Yi9YOGw3VG83Z3owZDkxUEJKWGYzY2c1V2hmcXA5ZTNYeGlObnI4dm9zZ2poZVQ5MTdienkxTWUyUVpiMllWcW5GYlpza0NxRTZXZlpySFFuaDMwN2Z4QjhObnI4dnBRekc1RnFZOTBMc3RVTTdKdkwxN1pJV1RNTEpCa0t2VGRYOExYNWIrMzZmeFhSZmlBK0JnK1gwWVpqZWkxT2Fyc2o2OHpYeG5CV25hbXk2Tmp1SC83MC9KSTlzYmN1V3NQTW1ISDVmUTNqeHgveFJhaTFhc01QYW11TFR1YXRNMXBzdUlySnc3Ny9kWkhWU1c0MmNONUtjOTBweTVhdTREYXo1ZUdaOWVRU002aFZMY2R4bVc5ZnFFV3JXaGlSdmJVdTdmQkwwVEc1NUNzMlk2ak56dXFtbGRPOHlQNm41aUtWOEx0OFp3VlIxTmxyd1NjTy9xdGRHSkdlbjVLdW9TMVJ0SElVc3I1bmIzbm41dWF4Sk9HaVE1eC93Q3REQ0pSa3FWbmR1eDd5aFVGeVFzY2NjSzlwUnJNN3lNNUgxN0t1a3NuaGJLWEhsVHg5eks2UDdIMzlUeWxUak13Q2RWWVJ3aFdqeDBVMWZZTnpWRFgzamM1ZHhGMHdwb1dzNUNkWGpEU2V6MmVQYW9JV1BibHlGVm1jbGFRME51UEErMytFVzVHQ3RUb0dvL2N6eUZhWVA4QWh4cWVGOWk2K05uWEpVT2l3TUg2VHhGUzZQV2tIZzRVZGFPdlo3aTJPRDlWYjBlUHVpWUI0Z3ROMHdXQjNzM1JhbkJWcllqaUhpOXpVOHBVdngycDd0clNVSlg3czVUK1dsVjNnc3duMW11T1ZMRTltTW5JVC9JZXcrVlZmSXJFcmc3YUZvUGl0T3o5djdoYXBhZFQ3dVJ2M1dJYjhIM2E1VmEvczhJaSt5MDZNRzNZZisxWHFMcmdEZCswS2pwcnFUaitreVBzdGZqSGRzayt1Vm8xcDFtSXh2OEErdjFWeWIyU0Iwb0hSUGU2UnhlN3FmYzFQS1ZMOGRxbStHZXgvbEtqcjdtYnM4cGtjclR5N2hXRGlOTkllM0tGVUIzWGhPNktyNUZZK0lWK0h2MXAzL3ovQUhDL0VYd21lcTByVWZZNU5qL0lmOXloZ2pJVlMyMnZxTTBiK2pqL0FEeXI5QTNBQzEyMGhRYUk4SE04cFBvckZHWVdoVkR0MysvVlF3dzZiV3g5QjFWUzFGcUVKY0I2aGFuUk5HYkE4cDZlNVpLNlB5b3lPYzdjVTZlUnd3ZXcySkR4bE5sZXpvVjdWSW5QYy9seVpJNlB5cDFpUjNDNytUR0V5VjdCZ0p6aTg1S3JXcGFqOThSNVZxL1BjQUV4NmRrR3EyNjdCR3gzQVVranBYbVIvVXF2cTF1dU5yWFpIN1ZKclZ5UVl6ajBWZTdOVmVYeG5rcXpxVm0yM1pLN2hWcmMxTjI2RTRWblVyRnRuZHluajA5MEJrNFJiemdJdElXMHJieGxiU3NjNFd3NTRXMDR5dHBXdzV3Z3dsYlRqSzJrY3ByZHlMRGtyYWNaUllRY0xhVnRPTXJhY1pSYVIxOTV1VzVkNHM4WVJrSjU3Ti9PVnU0d2k1QitEbGIrY3Jkd2kvSXdtdXdpN0szY0l5RW5LTDhyZjRjSXVHRTUrNzk4My8vRUFFa1FBQUlCQWdJRkJna0lDUU1FQXdBQUFBRUNBd0FFRVJJRkVCTWhNU0pCVVdGenNSUWdNa0pRY1lHeXdTTTBRRkowa1pMUkZTUXdNMkp5Z3FIaE5WTmpRM0NRazRQQzhmL2FBQWdCQVFBR1B3TC9BTWxBMjBxeDQ4TXg5UFo1cEJHdlhSVzBYSVA5eCtQM1VYa1l1NTUycTE3TmU3MGMwVmxncUx1MnAzNCtxc2ZDNUsrV0MzQzllNDFoRzJXWC9iYmoreTJrOGl4TDB0UlN5VEFmN3IvbFJlVnpJNTUyT3UxN05lNzBiZE1OeEVUZDNpQmxKVmh3SW9RM3g5VTM1MWlONDhacFpuRWNhN3l4b3BZUi93RHl5RHVGYlNlUnBYNlc4VzE3SmU3MGJkOWszZDR3aW14a3R2N3I2cVdTSnc2TndJOFYrMFh2OGUwN0plNzBiZDlrM2Q0K0tjcUkrVkdlZWhMQzJJNXh6anhIN1JPL3g3VHNsN3ZSdDMyVGQzN0FTd05sUE9PWTF5ZVJNUEtqT3QrMFR2OEFIcyt5WHU5RzNmWk4zZnNWa2pjbzY4R0ZMQlBoSGRmMmYxYW43Uk8veDdMc1Y3dlJ0MzJUZDJyQnBFQjZDMWJqaVBIeHBiYStiZndXYy9IODZuMll6WldWemgwWStQWmRpdmQ2TnUreWJ1cG9JV3lvTnhZYytyTkU1VDFVSTVNRW0vczM3QVFYZU10cndCNGxQOFYra05EWldEY293Sndiclg4cUlPNGptUGkyUFlwM2VqZElNT0lnZnU4VVJYSjlVbjUvc09SOHBBZktpUEQyZEZiZTBtVzAwbHpwSnljL3IvTVUwRnhHMFVxOFFmRXNleFR1OUc2Uit6djd2alEyZUcwMnJCRTZpYWFPUlNqcnVLbm0vWUFNUzJIREU4SzNiOVdOYU9icHQwUDl2UnVrZnM3OTNqYU0rMHgrOVdiOTFjanlaUGdhYUNkTWpqKy83SHJveGoyMW8zN1BIN3ZvM1NQMmQrN3h0Ry9hWS9lMWJLZGQvbXlEaXRiT1lZcWZJa0hCdjJHVlBLN3RXamZzNmU3Nk52bEhFd1AzZU5vMzdSSDcydG9MaEJKRzFaeGpMYUU4bVRvNmo0dUpyTEgrTFhZUnQ1U3dJRCtIMGFRZDROWEZzM0JHNVBXdk40dWp2dEVmdmVJMGNpaDBiY1ZibnBydXpEU1duRmw0bVA4QXhYSllIMVZ2SUZjbmxtdDUzZEd1MnRSNUxOaS9VbzQxaDZPRThBL1hJaHVIMXgwVVF3eWtiaUQ0bWp2dENlOTQwbDlvbE1zbmxQYXI1M1d2NVVRUmd3M0VIeEFxZ3N4M0FDak5PUDEyWWNyK0FmVjlJRzZ0QUV2T2RlYVQvTk5IS2hSMU9CVnVJMTZQKzBKMytPMXpiWllML3A4MlQxL25Ud1hFVFF5cHVLdHFXT05TN3NjQXE4VFMzbDRBOTc1cTgwWCtmU1dKK1N1Z09UTVBqMDFzYm1QS2VadVp2VnEwZjI2ZC93Q3d5eWpaenIrN25YaXY1aWhZK0ROSTdlVEl2a0VkT05iVjhKNzBqZkw5WHFYMG9ZTG1NU0lmdkhxb3lMOHZhYzBnODMrYXJEdDA3L1Q1VmdHVThRYXRieXc1TWF6S3p3SG0zODM1Zjk3R2trY1J4cU1XWmpnQlgrcTJuL3RGR08xdllMaVFESExHNEp3K2s1WmJpT051aG1vS2x6RXpIZ0EzaURiVEpGand6R3ZuY1A0cUR4c0hROEdYNmRwVHN2aU5VSFp5ZDMwbTU5bmNOV3htUDZ5Zy9HT25YYjluOGRVZjh6ZC8wN1NuWmZFYW9Pems3cW52cGd6UnhEZ3ZFODFmNmZjL2lXcnVRSTlvTGJBdVppTU1PbkgyVXlXY0VsN2g1K09SUHpybGFMVEwvRE4vaWxoWXRaM0RjRW40SDFIVzBUU0c1dVJ4aWczNGVzOEJYeUdqWTFIL0FDU2s5d3I1YlJzVEQrQ1VqNFVFdU5wWXYveWpGZnZGZUVJNnlRNWMyZERpQ0szV0Z5UjYxcTNzaGFUeE5NY29aaUNNZGNzUzJWeElFWXJteFVZMUJBYk80ajJyaE0yS25ER212SmtlUlF3VUtuRWsxOHd1ZnhMVjFlSEd6anRqaEp0eU4xRmJPMGt1UVBQYzVCK2RYUmUxRnMwQlhnK2JISC84cTY5bmNOU3l4TmtkVGlEV2NjbVZkMGlkQjFXM1ovSFZIL00zZnErWGx3Ym1RYjJyNUsxSkhTN1lWeTdUZC9DOUJGazJjcDh5VGRxa2hlMmx6SWNPSXI1dEo5NHBaNFR5VDA4UnFNT1ZwV1h5c3ZBVjgyays4VnRsaWFOY2NCbTUvb09sT3krSTFXL1p5ZDFYL3dEUjc0MVN3SzVXS1VndW84N0RoNGo2TnUzenp3TG1qZHVMSi9pa3RyWjhsemRZak9PS3J6blZsaWllVnVoRkpyNWFDU0h0RUs2aUpjZHBPanpsVDV1SzdoOTFDdEZkdU5kejJyOTlXWGJ4KzhLUGJwOGRSZ0RuWWxzNVRteDZkV2xmWEgvOXF1dlozRFdzOFhONVMvV0hSU1hFSnhSdjdkVlczWm52MVIvenQzMElvc1BDWEc3K0VkTk03c1hjOFdQUFhYWEtCSHIxQ3l1V3hmOEE2Ym5uNnE4SWhYOVlqSEFlY05YTFA2dkp1Y2RIWFEyVEEzRW81SFVQclZpVGlhRWZDSmQ4amRBcFkwWEtpakFBZlFkS2RsOFJxdCt6azdxdi93Q2ozeHFnczRCakxNMlVkWFhTckxiTGZUZWRMUHZ4OW5OVTE1bzJId2FlQmM1alR5WFhuM2RPclJyRGc4bXlQcWJkVml4OGsyK0EvRnFGbGRxMXZMbkpNeXBpSDllRlpFdjdhWEh6R2JqN0RVZHdMZllFTm1JdHpsVi9XS3VSL3dBVGQxQ3RGZHVOZHoycjk5V1BieCs4S1BicDhkVU5uYkxtbWxPQS9PaDRiSkxkemMrRFpGOW1GU3JZdzdMYW5Gc1dMWS9mVjMvVDdvMVd1a0xkZmtuaVhhcVBOT0hIVnlzV3RuOHRmalZuSWpCa2FIRUVjKy9WSC9NL2ZVODdlYzI3MWMxUndydVoyeTc2Q1JaTTNQSVNNelVVbkVVaW5tYW5oUnMwUjVTSEhtcEpWT0RvY3dOUlRMd2tVTlhoa0svSVNIbGdlYTJvWm1MWURLTWVZVWtNUzVwSE9BRkxDbTl1THQ5WS9RdEtkbDhScXQrems3cXYvd0NqM3hxWmp4UzNjajd3TlU0UCsyM2RRclJmMm1QdnBSRVF0M0FjMFJQQTlLMDBGMUM4RXErYTR3MWcybHl3UWNZWDNvZlpVMTBnMmNnUmxsaXg4bHNLRmFLN2NhN2p0Vzc2c2Uzajk0VWUzVDQ2cjJZamx4d2dEMm4vQUJydS93Q24zUnFzMVlabE1DZ2c4KzZzeVltMWs4ZzlIVnFSR1lsVThrZEdweU9PRXZqMlhaMUt0eGhzQ3B6NXVHRlNDRWxvc2VTVzQ0YXAySnh2QnpIbVRxK2g2VTdMNGpWYjluSjNWZjhBOUh2alZOOW1iM2wxVC95TjNhdEYvYVkrK3BMdTdmWndweDNZMXlEYjM4ZjFIQUpIc084Vml0czF1ZjhBaGtJcDcrMXUzZU5DQTBVMkdPODRianEwcGEvOU9TMjMrdkhENDBVUGxLY3BxMnUxR0xReUNURHB3cExpMG1XV05oemNSMUVWS2l5cTkrNjRSUktkNFBTZWl0OVdQYngrOEtQYnA4ZFdrdXpUdk91ODlhKzZOVmoyS2QxU1c4NjVrZjhBdDEwMXZMNjFmbVlkT3RBZUJaKytwb0czR05pdFJ5RkJJRmJISTNBMHMwRnJic3ZPTm1NVjZqWHpLMy85WXBJWHRZSFlubDdPTUhKNjZEeDJsczZNTVF5b01EUVZRRlVjQUtPanJkdVN2NzVoem42dXVPNGhiQ1JEOS9WVWR6RndiaXYxVDBmUXRKOWw4UnF0K3prN3F2OEErajN4cW0rek43eTZwLzVHN3RXaXZ0TWZmVUdpMHhDUWphdjFzZUg5dStnNk15T09ES2NEUVZOSno0Zng0TjMwUERieVc0VWJ3ckhrajJhcHIrWmNqM1dHekIrb09mMjFMY3F2NnBkbmFLZWh2T1hWaXJGVDFIQ3QrcXk3ZVAzaFI3ZFBqcTBuMmFkNTEzbnJYM1Jxc093VHUxR004bVpkOGNuUWZ5cDRabEtTSWNDcDFSZnp2MzE0ZmJMbWxVWVNJUE9IVHF6eFNORTNTaHdyTEplenV2UVpEcU1NWUwyWEdUTndROVZiT0kvcmNvNVA4SSt0V09PSm9SN3hBbktsYm9GTFBhUmhaYlpNTWkrY25SN05YTDMyc202UWRIOFZCbE9JTzhFZlFidXh6N0l6SmxENFk0VjgvdHZ3dFMzczEzSEtGUmxDUnFlZXJteFdUWk5LQmd4R1BBNDE4L3Qvd3RVdDFQZFJ6Wm85bUZqVTlQOEFqVTZIemhoUkMzOXZsNXNVYXJTNm12b1dqaGtFaENLY1RoUUY1YmhuRzVaVjNPdnRvbXh2MVpmcTNDNEg3eFc2T0Irc1RWeXpiUURwTW1QY0tXYStrOFBsRzhKbHdqSHM1NjNVOXRkeENhRitLbWkyamJ0WFQvYnVOeEh0RllaTGNENjIycFp0S1RDN0k0UUlNRTl2VFYxZFFYa01jVXo1d2pvY1Y2cXRwcEwrQXh4eUs1eW9jZHh4cHJPT1VRdm5Wd3pERWJxK2YyMzRXcTdrbXVVbWFZS29FWUl3dzF5M2NWekdpeVljbHdkMjZ2bmtQNFRVRnVEbTJTQk1lbkRXc3NUaUM1WGRtSTNNT3V2bmNQNFRVZHN6aVJnU1N3SFRxTXE0MjA1NHZId1ByRmZKU3d6TDZ5cHJmc0VIU1pLRFh0enRQK09JWUQ3NkVVRWF4UmpncTFOY3lYc0pMbmRpcDNEbUZmTzRQd21sZ2o1VGNYZjZ4MVBOYVRwQ2o3ekd3NEhxcjUzQjl4cndhNW5XZktlUmxIQWRIL1pSL0I4L2xEYWJMeXNuUGhVRDZLdlBCcmhHeFpjeHpPT2NFR3JPSkxacmw3bGlxcWpZSEdudFAwVy82UVVadGx0Umt5L1d6VktURTF2UEM1aWxpYmZsYXBiajlGeStBeEU1cEdZQnNPbkxRdmxUYlJuTGdBY054cWFZMkRSU0Q5M0MwZ3hZZkNrZTRRa2MwNWNIUHZQTlVzMXJvK1M0czR5UVpzNEJiRGpsSFBUYVNqRzJpeWh3TWNNYWVTVzBhMWozYlBPd0pZZE9ITlYxMlRkMVcxMFYybXl0cytYSGpVTjdOb3VTUFJ6NGZMYlFZakhueTlGUWtSR2VXZVFSeFJnNFpqNjZraXVySjdTUk4rT09aRzlScTlqMmVUd2FiWTQ0K1YxMU5kYkxKczJkY3VQSExTeStBTmIyckppSldjYjI2QVBqVTdRNkpsbHRvQ1Ewak9FSnc0bFJ6MDJrNDEyMFdRU0FZNFlnMWJ2ZGFOa3RyS2RnaVRGd1NNZUdLODFSS0ltdUxtWnNzVUtjV05OYjNkaTlwTGx6ZzQ1MEk5ZFRRV0ZpMTRZTjByWndnQjZCMG1oUEdHVGVWWkg0cXc0ZzZ0TGZwV1VMTjRXK1RGMkhKOWxYdXpsZVhSMjJ3dFRJY1RsNTZrdDRiQnpGRk1ZcFp6SU1xNGQ5UFoyVm9ieWVNQnBPV0VWT2pmMDFKOG0wRThMWkpZWDRxYVJRalhGMU5jeXJGQXZGdVgzVkV6eEdTZVVoRWdqM2xtNktXMHZiTTJjMGdMUkhQblY4T08vcHByQzJzSHU1aEdKQmc0VWUzb3FGWUxPUzZubDRLdTVWOWJjMVhGclBidGFYY0dCYU10bUJCNEVHcDRiQ3dhOFczT1dXVGFCQm02QjAxUEtJbWdFVWhqd2ZqVDNVR2pwSmRIcmo4dG1BSkE0a0wwVkhORTJhTnhtVTlYMGJhV2tJdUpBUmpHVHZLOCtIWFVFZHJvMjRodVJJckc0bGl5Yk1jKy9uclFqcEd6SkhKSVhZRGN2SjU2bm5NYmJFMmFxSHczWTV1RmFjSmphUGFYUmFNdU56Y25qVnhGYzJPa1o5TVlObWRpMno5WTM0WWRWV3NTUk84ZzJHS0FiOTJHTkVWNEJQYnpReXc0aGl5OGs0azhEVFcxMW8rL251VkpDTmJ1MnprSE56N3FrdFliWmtmWmo1QlRuSTVXT0hYUytxcmdBWXNZMkFBOVZlRG1GeGNlQ0Zka1Y1V1BSaFF0MGlkcHRqRU5tQnl1YW9sbDBlMmtJY3cyaXgrV244UXFmWWk5WFJlekdVWDNIUC9EanZ3clNTdlpYTndMbWJiUk5BbVlIZHc2cXVWbWhlS1pubU96STM3NnNFbFJvNUZpQVpXR0JGWGNkOVphUXU5SmxueUZTMnl3ODNEQTRZVUxZUXllRWVEcU5ubDVXT0k1cXQwaWllUnhQQ1NGR083SGZXajlKUXd0Y2kyTHJKRW5sWlc1eFJDMlVzTnFGL2UzQXlFdDBCYXZqZVdkN1BGTkp0WXBiUm01L05JQnJrMnIyZTBZdVlwSk03ZTNWcFZaZEUzbHh0YnQ1RmFPSEVZVnBLK2EwYlI5dGNaY2x1KzQ0aml4SE5XazlwRzBlZTlrWmN3NGpwcS9tYTFudWJTOEt1SHQxekZHQXd3SXJTR2tMaUUyM2hicmtoYnlncWpEZlg2VXQ3ZHpkTExJSmJaeHZranplYjExWVhjVU1rb2hmTzBHOUpDcEcvMjFDOEdqYjJOWXNXOEl1NUdHVTlBVThhdTVqRzJ4TnFpaDhOMk9OV2UwanVwZEY0TnRWdE1jMmJteHczNFZlekpaM0ZyYXZDbXoyK0pKMzlmZFY5Q2xoSmZRU3pOTkc4Qkc0bnpXNkswc3M0Q1NTWFVnWUx6SEN2QmJuUmwvTmVKeVJzWkgyVW5YampnS2doV1BaS2lBWk0yYkwxWStuWkxpT2E0dEpKZjNuZzhtVVA2NldDQk1xRDd5ZW4vd0F4di8vRUFDMFFBUUFDQVFNQ0JRUUNBd0VCQVFBQUFBRUFFU0V4UVZFUVlTQnhnWkh3VUtHeDBVREJNT0h4a0dCdy85b0FDQUVCQUFFL0lmOEEwb0tZYnFtWEJBSTJQSDExWjNVWmZJM25HTzBYNk5uck5abmpXeHI4ckQ2YnBNbGdzRm4yYkU1Wjh5dmFvRU56VSsrZnFHc0d6ajlQUHAvaWY4a212bHpGZGxxYytuN2UwMStzWEdFM1pQZ3VIMDFFYlFQcW0zVjRBV2lrWmhhT255L2VBU0NaRThRM0R0Y0JMUGpiNDM3UnNrNzErM0hnQU1aOEp3K20vTDh2RSs3Wkd2NlhhQzBhMVlmQzVxbnd3QkdYeE1QcHZ3UEx4MjB2NTJPNDRlODJlY3Vyd25nZE5CZDRhVXdueS9ENmI4cnk4VnhpakM0VFI0U1prcTUyVHVjblYwdmlsVUUvQjhQcHZ5dkx3M0ZqRER4bXR0SkZSMHh0K3gyL3dXVlVZVDVIajlOK1Y1ZE94Z2dNQzRPUWJJc1lZWVlaRUFhVEltMENrK3hIdDh1OGZGclRMREpsSGlqQlg4bkg2YWJINFdqWUYydVh2bmlacjNsMVAzWWZNbmFpdjZPL2FNTU1NTXZRV0tUay93RFgyZTBYQU5hWXZ5LzhjUkJhNmtLUjhQaG44ckg2YTJxSFBmSER2MFdLcHVicGRIL0g3Ull3d3d3d3pVODdhOHUvSkd0Zi9ndkovd0JrVXlORCs1eWR6b2s0NTh0eCttL0g4bytDcXh1U0Z1VVVGOFIwUlV0S2pERERERERKTWpESTlFWFBCQ3NiZXdMWTdHSDdGK20vSzgrbDhGWDVCc2k0SUhDYS9rUHhIeGMvUWNqdVJoOEFCWmZReTlPVXZSZk0vRStXNGZUYy9nNXhsOEJYNUpzNkpxQnpyZmsvVTRtMDhmYnYyakREQytBUXRlOStOWWkzUG0rSDAzTytLZSthTWZCVm8rVmgxMU5JRHFQSTdQZU9NS2hNL2l2ZlI2Q3krZ01nQnFzcHVBMy9BRWxYTkxNTkhtcFQ2YUxkQ2s1Z2RJaS9KbGUzaEJQajJ6d0FScWtzSENUWTVMOVh5OSsyL00wVSs2NWJqTzdNUDZEQlBTRUdrSUlNMVF2NXArMlBXQVFLRGI2Y3czYTJ2MytQOXhJcXFLa2VHUFd0SHljUENsbFI0VmJ3aHk0WDJPMFZzaWdwSGpvQjBHdGlCMnJzQktSYTFmVlA3UGZ5K29Fb0p4ZWJ4M2U4cnNlYWs0ZW8vTmR2aWN3TGhsN2V6My85WEdKRlQwbnpub2s1OFphT3dRaDhsNnY3Ty9iYm42azNNcWk1OGhzL0ViTTF5eVhLMzZOS2ZPditBdlFlQjZUK0NGZGxpL2pZZWVTQzhCbU1mZ0hmViszMVRSa2xlcnl0bVhUSzRXZXdiZWVrcVg1MSt2bmhDaFdKd3l1WnJtQUZWL0hISC83WWs2VlVKcXJFb0ZnY0h2UXIrVGpHTjFCcVBQZWdiWHdCUGlMTGgvcXMxOStpeC9ucEtqTTFsMy9rVmViTmZLY2tESGRVL0E4OWFEM1I1b3Y1OU1OWFIwTWFGTzBVQWVxUzIvQTlZTkl4dVhlZzF1aXduRFdQSlJYdEJaVGd0L2VYNHBWYTNnY1gyYTY0NjJpRStQc0d2YUlPRTNIMklONVJjZmRTem5iL0FLTzlRamk2Qm9RWFltc0d2RVdxejNsQkwvSlN5NmUwdStsUXliQlJxNldaYUljRFZDZzk1VVBSdXd4clBqbjh5a1BxQUxGalpyZkdzd1M4cnY1RlA0UWZBV2tJZVFpZ3UvVEhVMHoyWVZxcEE5dzdQVDFrNldVc3cxUStjazlKV2ZsaUFaam5uTXYzSnNkaG1QazZNSlpJTjRMN3dvak40Y2RhamNlbW5QeVpaeG5lWmFqWkhOeGRHNS9DUWRmQUw2dVdsc0srWE5XOUtsMUZVbUxYbzZlWERQRDJpYU04YUhvY0xZRDV4VzVuY20zZnRQaFVuSk5ZeTQvVk1qQVh1cyt3SS9rYk1OQ00rRTU5UEh5ZlBRSENNRGtTanpBdnYweGZ4cUg2M3JoTExjRWNicWxWbTZicmRkeVZkTzNjMVlsWHJaN3orb25BYlRhdk9EUUFxMkpqa2VCVU03anhLOHZOZC9maVh0ek0xT1B6Tm8xaEFScSt5ZW44UUcwRlcvZzBpcENaVmNyQ3hlSmZZODJIcUswWVA0U0RyNEZmUTNaUjA1THNGdnBLNlF3Y25iU1BseGhkUy9yWkhBR1N1S2dSMGE4eWcvMkptTmM4d1YvazZBU1N3dU9IVUUwMDJpb1hqVEgyTXBJNVFUcldoWGxVcUpqWlBQUHNDZkVjTU5DTWZ4Ti9SVjhQejBZd09MZ04xT3dHWmJaak5EZXpMM1lyT2dxbE5NcnV6RWQ0Q2J4Q080QjdYZnY1ekNXcXdnZTNiM1B2RnJPZnNEcTZCc1dndVljS3hxOEhBOW8zNEVIUVh1elM5OVlISy8xTjZveVAvSlZMaG1HMnozTkpWU0hoSm1hS0ZmVXVXOWJBV0czOG44K2ZUb2ZPemRHZ2RveHlxMHFJOHc3cit2NGVEcjROWFRKdnMydjRTOUJPV0lKNm9aOGlZZkd4anNmTVRhWkhhNk04aEhxOW0rOU9UdVRlYkxuemo3S3REMjYveVV5d1grV3pkOXgxR0svSUlxK1JobWgwb3FOMnYzOU5YeWZQUUF4UzNiWDZxL042QUFjTUZncmhtUmpxKy9uL0FGeVFndnJvMjFiUTllZ21oMFBQTXlIbE1KNkk3MVFCeFBOR3Q3Znl3alg1QU9ZS0h1dFN0aGVuUWNJOTA5V3ZwL0VnZGZGTDZJK0M1UTBlVW8rZGpNYUVXTEZXZ0ExWlVxUm56cnlMRk4zK3p0a0FVdUdDaFJWNWRLNkZWUzhOdEkremdMMG9PRXd5dDlkM2wxNnkxSUNsK2NDY1JkUUxvajJ4cm5XS1ZxM2w2S1BuK2VnK1QxNmpwQitlNHlzSXE3cllkeUdiZFlSMlk2U1R5VXBPMEEvOW5IRDdWQldhWTJKc3hpV04xT0NzTStkLzFLQWpFTWVmME15N1pRTVBhSFFDaFVCeE5aeXlQZ04rK051aGxralVjRGRkbU1UUVV6bmRYOE9qVkQ0YSsrUGd1VU5IbE1XK1ZZOEFYdDM4YmY4QUUxeGFFSHFSTVlhQys2R1VWQndST2FVWDBjUFREcHpWNmpma0VlblpHWWJQdVpPejI2ZHdMTXZ0RnFxdGRWM2l0V0poR1BoK1lxNHNIWGxJTHhGZndNZWxHVjEzdFBkdk9QeTdIb3ZrbHVpcDN5T2c3bjQ4cGhDdkx0WDJqWkF3MUQwMGZHK0FNSzVYYVU2M2crOStuZnlqcEpHMVcxbWw5QSt3ZDM5OFEvNUt1aCtXejFsMUNWbFo5dUhjL0VQd2V3c1RuK0RXRnpSa2FtUFNHN0NLUFlFcUt5c0w3aUdCQVdjWWkwNi9jSXhxRlZmaStnSWtIYWR5b0JpRFNzSnRjeVdCenhZWmd3bnMvU0RiczJUWTc5b2Uvd0RpVTB2aEg1Q0VEZUs2K2tIRnRzV24zZXJIYUFBQ2cySUl5UDZLT3lja1FmV3kvc3FxZlVKZC9MTVB4Y2NKOXBXOXpueTRQT2ExZWdKcmhpb1JBWnNnS0YrVXVlOHpZdEd2T08zS0t0MEVDVzIvUHJhWUEyU0FiZVVMYzB4T3NlRzFncSt0YmxXdWNPbkd6RGZtMVYzWUZxOGRBOHl3QzMyWDBxT2VLTDdBbjl5dEh1QitDSTBKeXJ6V2ZZSnBuakZFK1FKb3BSQzdhamtiRzZVOC93Q2pvaTY3blc5aHQyaHBJZVFQYnNldTczLzhyWVVqWEg4dWwrRWJQNTdPditxZnZWRUVCQVRjUHpmTUZUekNnV2ErZnBNVllieS8yNHF0WTdNSXhCM05TTVdzSzFta3ZOUnNMTXdLbWZ2TTFZc1YyRmRIMjdTandHNk5kaHBXa0FGZW01QmRCS3lybVNGRDAxKzBVQ2JYVG1vZlpHbEd2OXVNL05uZ2EzaTRvRFN0VHdIcXlob3VKWGVWZ0lDc2dVa2VIZnRCR1RkSytBUGsxZ25QUDk4aWExdlV5clFPeVoxQ2EraUc4NFllb1N4K1l5WU03VUh0ckw5Unoxc1c2WXowck5RNWRBM1lUYjBSc3EwNlBaaWZGTUdXN21HQnlEVTVYZEhRWVpLTmZmM3VOVjBlaDF5elY2WEFOcWdCb1ExVHh0SGg3T1JhRmJ1SWY2SXo2czFIWmlCd0h6MnR2WWJzRnF1V3gyUEJ6S04wd2JBcG9PSWgxRXJDdDJkQjk3akVFUmVBV3JZL3REQmtNYUNEVW5tRCsxVitvaStTaTdBVmVOZE8wRlYreDd6bWRVUGdXSGRHUDQxb00xUkFNZnIxb04vcFM3YmtJR29yYUhFWDdsejVjeE00Z29GS0hKY2Voc1lEYm9XMDBCbVVQekpwdHBkb1V6Y1NhTENUZXFxWjZKaTZ5c3AzNGxmSUl0dEZiaG1VK3FRSDJpM3RaQXRzVFh4bUdnOXk1bjh0TnNOeXZTWkY5VmpyUk1xZGtoRHJaYTEvWUpyL0FNYldDejNHOHcreXF5TlZ6TGs2Qmh3a29sV08xN0lBRGFObWFuYWxYZEZmRFhRRGIwbVJPSUtDcWQwNGw1djYyMjh3ZDQ4SkxxY2hWSTdzeUJWQUM5MDdvR09tZWxoODhHWHlpSmhOUlF3bXBtdzFHcjZvZHBtTHFkd2F5dTg3V3lGUVRzdkVPME5mSjVOTnhXc3JRODdTZ0dpSGlGbU9nZE5XTGxDSUZYbERzdm1QQks3K1IyTHlROFQxdEVydFNqNXNFdkFSSDBWc2RITVRRa3RqQVFkNnVaOU9ydzdVVWExeEtVMEgrNEs1L2xWL0lxYWY0cVIwTjltbGpudk11THVXMGFwZFYvOEFZMy8vMmdBTUF3RUFBZ0FEQUFBQUVFQUFBQUZBQ0FBQUFBQUFFQUFBQkNBQUFJQUFBQUFNQkFBQUFBQUJBQUFBQ0NBQUlBSUFBQUFBQUFBRUFCQUFBQUFFQUFBQUNBQUFBQUVBQUFFRUFDQUVBQUFBQUFBQUFDQUJFQUFBQUFFQUFBQUFBQUFBQUFBQUVCQUFBQUNBQUNBQ0FBQUFBQUFBSUFBQUFCQUFBQUFDQUJBQUFBQUFBQUFDQUFBSUJJQUFBQUFFSUFBREFBQUFBRUFBQUFBQUJDRUFBQUFBQUlGQUFBQUFBQUVBR0N3QU1BQUFCQUFCSUFDR0FBQUNCQklBUEp5UVFBRWNGOGtBSEdBQUFBRUlBQUVBRUNBRUFEQUJIUERraXdEUFVnUUlFS0FBQUFBQUJBQUNBQUFCQ0lFQUVQTWVtN0hNNWRnQ0NBQUFBQUFBRUFDQUFBQUFBQUFBQkdKSm44SnJqV3hBQUJBQUFBQUFCQUFBSUFBQUpKRUNEZk5MZ2w0YWNRd0NBSUFKQUFBQUJBSUFBQkFBQUFJQ0pFMmEzS0ZyUHNBQUFBQkFBRUFBQUFBQUVBQUFDQU1BTmora1VXaklzdnNNRUFBQUFJQUFBQUFBQUFFQUNDQ0VFYVNJaEVOVkZxRE5BQUFDQUFHQUFBQUNBQUNFQUFNT0RBSll3QUFJQXdDS0VJQUFBQUFBQUFBQkFBQUFBQUpOTUtBb3hOQUZGQUFDQUFKRUFBQUFBSUVBQ0FETUpLQUlJQUVBQUFBQUFNQklBQUVCQUlBQUFBQUFBTjRrQUFGQUFBQUVGQUZhM0hnNEFJQkFBQURBQUFBQUFQOEF1NnVaakVoZ1NPRTZzeXBvQkh1NFlhOEFCQUFBQUFEM1V3RzdVY2VqeG1RblBKT0lEcGU0aEFJQUFBQUJBQUExK1FOVTZsU1BnNEZFR2JRWHh4VDFrV2NBQUJBQUFBQ1VaZ0NHTkdDRExMWHNJQWpGSk1KS0ZFTUFBQUFBQkFBQUsrUjQ0NVlFQUV3Z2swMDhlOFFrc0VBQUFBQUFRQUFBUEhTYUxNZVB0V0xtQldRWmRPbjZTa0FBQUFBQVFBQUFBQUJBQUFBQUFBQUFBQUFBQ0FBQUFnQUFBQkFnQUFBQUFBQUFBQWdCQUNRQUNCUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUJBQWlBQUFBQUFCQUFBQUFBQUFBQUFTQUFBQUFBQVFBQUFBQUFBQUFBQUFRZ0FBQUFBQUFBQUFBQUFRQUFBQUFBQ0FDQUFCQUFBQ0FBUUFnQUFBQVFBQUFBQUFBQUFBQUFBQUFBZ0FCQUFBREFBZ0FCQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUQveEFBckVRRUFBZ0FGQWdZREFBSURBQUFBQUFBQkFCRWhNVUZSWVhHQkVFQ2hzY0hSTUpId2NPRWdVUEgvMmdBSUFRTUJBVDhRL3dBcDM3Z0RGZHRPclJ6QWZUaVkyNTFqcCtzdWZMaU1zcXBuUmdBNmMxak1VdnlrN2pZL3FOVVh5eUxydTV5NlFieFBIRDVkRE5laDg1Y3k2TG4xZDlPMlBNYVBhNXJuT3kzdjVmMUQzOGJvT1FPYjkrR1pwdER3WWdURWZDN2NQZGxIaDlzUGZ5L3FYdjRWQ05aVFA1YkgwZGRFRzNEOWpzbWpLQjRlNzRoMjI5L0w0YWxOVnlDLzZpWm52S0h1MTZ4ZFVIcnlibmlnZnFqUk9mdk1oaHNLdFU1Tnorenc4Q3lkbVBmeTZOV1Q1OE9rZlIxSGoreGxMTnJMUS9UeC93QytLa1ZCcVF5RE5hWUQxTitSN1JEY0xvdEh2NWZ0RDU4ZHZpRGwvYXpNWTY2bkQ5NVBqb1ZET1pGQjI4dVN2TEUrVDU4YTd4amc3SE1pQ0Y2OVIwM1BVbFRneG1NNFhQMUswUlVmTEx5NEI0UDljekxMSjBmOThlRjNrZTNqaXM3YmVJa2M1a1JOWGFIQ3dQTUpMaWpyOG9kZU9mM080ejIvNEVzSjNOWUJHZzgxbm5FbXExcHBmSC9iS3dDN2oyajhnOVVGSG91blNDNVYwT0R4anJ0djF6am1paGF0dUE2UVVxU2Eyc3Z5R1pCekNPb2lXeGpyVmwzV21GZCtrYlFaUVl0L0FXN0s1UTRVQmdZbEdhc0REVW1Jd2JIQng0YlBubnJMRnlleEd1cnVXQmdjc2FGZExBWHV0bjZJYXExQkFleUI2MzBnR3BpS0JjTXpxWm01MWp5VGhYUVcwY05OL3dCeDZUVXM2TkRhM1BnNjRWYTB3Q2hiZXd5UFY2UDR0N3lFUzFpTUNZUjVpRFF3VVJZUUJwVE12cjRHWHJNaU5yWGNGQWFmYURNQzBSMmJ6KytKbG1JL3VvbjdKa0d3WWRnZldOTHVQVUFQZGpaQzVLMVJ4ZzU2c0NoTnd0YlcyUmhIdm1CN2pYekFOWlk4SFZEWjlIdE1Dd3pMblJ0enRLS2dVSDR0N3llc2psTWpyTXUyUnRXT0lLUm1OU0thaGpNdDU4U0MrbjlvbzZEM2xDTnJrMitvaVFwSU9sZ3czRUw5aGhDT2VITTZmVXZETndQb2ZjUlVCbmhWcHR1TGx6TVBMU2cyTnZ2dXc2bkhCRCswWUoyQWZQUi9EaVppOG1FWEFZbmdDMkV4Z1FKaEZDcGthTDJFWHdNWTVZbW1DQ3JnTjUxaktJUzU0cjRLY1V6cFNCUlFVZENKcUMxTVA5ZWt1UjlUOFlUWmdBTkhwSGxmSmRyN3dyWURFbHhBNVp2NGxSWVliZmNHVVRDWGFWc040SmpNUlpNQVdVdUtNd0xpR2NyZFFLMFMrRzhBZ3VzR2FnTnBnWEtYVUdhSURKK05MS21xMytKbnVCQkx6alpHQUJEcEt3cVVxdUtqZUJSei9tSVFOcGtyaXBtc1lDc2xnUnloV3VJVmJ1QU5pQUtsR0dhWkVMTC9BSm0vLzhRQUt4RUJBQUlBQkFVRUF3QUNBd0FBQUFBQUFRQVJJVEZCVVdGeGdhR3hFRUNSd1REUjhIRGhJRkR4LzlvQUNBRUNBUUUvRVA4QUtiZW51NEh6K3JnTTNDT0dIVDI3MkxBQTVjMDFtRGE0QVB5VXdodTFOUnkzTy9PWmV1TENHYmtITitzK0VyMzRHanByMStJbEJRUTF6M3g3ZnMzajF0UzNUVDlIanJydkhkSVpqNmQ5OFFMNmZVVHg3ZnMzajFxYURPWDBkenVhYktxa08vRTNJdm0rQ0VRWjFpOGUzMk5IaUZORnpseHJJRUk2RERxUEQ3TW1PQXB6ckxyQjJjUDR4Umd6djNqMi9XSjQ5Ty9YTTBZVFN3Wm1wL3JqQWdRc3Faai9BR2ZHV0xORXhQQWJPQ1lieEhBd2QvYjQ5djFFZVBXYWR3Wi8yWndoeWdNelI0L3BtY1RHQlVEMGFaY0szalJzZTNSYm5nUEQ5ZXBkSnZtQjBwTVJNeUFpYUdRNXRuczhJTVVjTjVqcHlNdm45UzcvQU9pT0huaXZnKy9ic0hYOFU4R1c3b2N3L1pzL2ZvZEF2bjFXcmNEdHpoQXhCbVkxWkdyL0FLM1l0Ri94UjdnQ3dOU0hGWGI1T1BENHVkUlBQL0JqUm9EbzhQczhSWGFYOTBQZERXSkxjUTBPdGNYWHovMnpsS3BoMVcveU5VQmJEbUgzTEZDMVpuSERUZmJ4RDVIUVZ1a01Kc1F2ay9uN3I2Z001TmVaUU1MQVViZFdGb09zSzR3MG4vb2Y3aDR1YmxEQWFiK2lWcXhyZVZNeHVFV0lhRU1QQWZtQllMR1VxMmVEcy9YRGxMT1ErV0dYYTh6aThDRjIrcGloMERINVl0cXZSRmV6ZjFNVnJJQ2hqazhuSjJZWk1ZbFd0N21PdTN4R1lPa01yM2VSbHo1VE9VNHVLMGZ0OGN6OFBkZlU4VHpHTnpDRUYwTkxnd3NYRWlvcUxFTUFUdFBUUTRUeXkrTkJHb1Z0NFptQ3dtNVdYNmQ0V0JndjdrajhNeEx2RVh3dFR0Rm5tVk9TcStENGc0WTVnWGJ4eE9oRWdibWlpOTgzR2JkRWRFdjZoUUswT0kwdDNPNTFtTW01QXl0d3g0YngyYlMxL0QzMzZuaWVZZmhobVRSYlNtd0ZEdjJJYkRyQll5U1d4dEdhVHp6eHZFRjh4QTF6M2lOY1l1UEIyZmU1eUloTlk1UkthV1hzRlY4N1RuVWNua2t1bmdnblJqQUJzazYyK0tseGU1WTNROWlHTHd4bGdOSGEzZFhtNUJ5SmhJc1JNYTU4RS9zSXN4TVpmVHhQRlA0VHFVTU5pZlVWTmcrZ2lzM0NHVmhSUXJENGpObHpOa0V4VnlnV0xoTFU0Unpuc2RWa1ZrT0dEcnlsdFVWbUFlRDAyV3hZTmNNU01wYUs4MkE2cGtDKytmZU9nZVZUOHRwMGhUTlpRWGZOdlBYZUViZ2JvQStham02U25BUjZNcHFiWGtNZWRmaXF0MFdtWnh3ZzlzeHdyT1dGczR4TkNzNG9zbDZNVk5Ua0VRelA1bk5PWkFyQ0NiRVFXbFpjY05pNEFEU0lXRXFDWHRmWjVuSUluWVlma0VOTnpUUmdYM2kwU3RBK0lwUnJKdUZGQ0F0RzROTnkrUnJjR09zdEtyYnRFU21jRUNtdHltQk1vMXlBVVM3aTJ3enJ0RzZLeGNMNVFEWEU4YlJFOHFnakJqbldiWDluR3ovNW0vL0VBQ2dRQVFBQ0FnSUNBZ0lDQXdFQkFRQUFBQUVBRVNFeEVFRlJZU0J4Z2FHUnNUREI4Tkh4NGYvYUFBZ0JBUUFCUHhDZm1Ydzd1R1NEWlB1Ym1mUEYxTXp1VkdlcG1Ybm5OUlorWjZtdURkOVRjdTQxUGN1dmZHNTFNMUttcGVmUE41bXpnKzU5VHp3elhxRU9Eak11WEw1NmdUdU9KcWFuNmpnY1R1ZHpVdlVUdmpyM0x6RGN2TWN1dWRrM0xsOFgwUzQvdmlvUjJ3Ynh4dVk0dXJobU91R0grTGMxSDRWQ2FobmduZkpPK0x6Tng0eXkrRGM3ang0SXgzTDR2aEpjdmpxT29zcTRUY3FveXJzbXZoY0ozS2wxeGRUM0ttdmg3bmNUNWE0cUxOSERQM05aaGpjK293WjNpWGlFMjhmbUdwMTVuYzI0aC9jMFZMUHpMcUovek0xRW1nbHduOXlxK0dKM3pYSFVZeGhLdVZQRTN3UG40NWp4L1B4N241blUrdkU3bit1YWk1blUrNXFQMXpYNG5mQjNOY0pqbmNOVndmelArcmk3bnVhNHIxTVQrcFZjN2xUK3BySE9wbVBOejc2aHhjZUw0WVpPUXppYjR2anVWSGg4VGZIUkhUTzUrcmw1anJ4dzhFOHpOVHZFKzRaNXZsaEY2dVhLck1NemZCejN3VGNZSE40ZUhqcmc2anpXWjNQb245ODU0N2wrSjRsNDRyNEhPSmY4YzNyM3pmOEF4SzR2aXVUaG44enFWT3BXUGoxOWNWUDZtcGVKMzhOUU9OZkx2blhGNW0rT3BURGkrTDRPK2E1dmpSTlgzTG5jMVAzQ0hHWi9VN1plUGoxL2dlTDRKMUdhamlkUmxmRDM4UDduNG5jcVhpVm45dzNLeE5mVTdsNG5YRjhmMVBxUDh4aHFhekVtVGl2NTQ2K0gxeVQzWEhVMy9oeC9nM0xqbWRSbjZaczN3OGJuMVBVTThzdmpjN25YRlk0ZHlxNFoxRGk3NGVObkRMbXArWjU1NjRyUHhZYTR2SEhYd2RjZmZEcm5IRzlzZWUvbDN5L0Fsejl3blh5K3BVMXl6VmN2d3Zobjljbkw0MU8rTC9Fcm5xZHgrTnpFYmx3bFQ5eHFWQnY2bjUrSlAreHhYQkw0MUw0KzUyVFhMTnk0dU9YNGs2NTI4ZDg5OE0xTm5GYzFjckhuNU9JbmN1VlA2Z1I5Y2hmMUN3blVDWEx1TTFQMVAzTG00OFZuT0pVZUQ2NDFtUHJqUFA1NFpleGdXUDFlNFpZQWlyRTlmQU9PK091TGZ6TGw4M1hEM3grT080Y09wLzJlWGduVXFFcWZxV0V1cHFWeFhKbXBuMStKb2xuU1Nyek9wdWErQ2VZdkljZEJXT1o4QmxlZ1ladGFnWDNxKzFuMFFMZ05xLzVldlVRbHQzc080L0Q5OFh3L1U3blhCT2ppNVdPR0JQWEhjYzhiM0xlM2o2eE95T1pzOXorNVUvdWQ3aDhXRWFDcmlCUWNGeE1LbUxOS0s3eEsxbmMxL3dDUS9Vd3ppVWF2UjEvS2l0Q3RWRHk5RDcvSUp0eE5YeDFPL2hrZ1U3Z28yOERhOUFzMnFqSnIzclB1Ry9QQVVlRHdlakU5OExuMHgzUEtoTENITE5rNjhTNTQ0TVpoNGl6cVZOelhjZFk1Zk0zOVN2NWxabFhIRXJNMXh1TlpsM1B6UHFHSXVacWFuY3JnYXhFMWpmc1NwblU4RS9FT29JRVRZTFNKa1pjeFFxMFBnQnI2L2s3ZytSRXJFZEk5bkhmSk1PL3BOTCtWUUF5clJEWHJQN24reVhuZXd3ZUJvZWdDQmU1bjNQZEtrZXBrbTQzZVoxN2w4R09lb2U1VlJNeTVlT0Y1OVNwWG1ZakdkZStUY1N4bjc0STRuNzUxTmNmaU12R281bjl3bVVpM3pyN2xyaUpnclEvbDIzNWZ4cnZNc3A0UDlKMk9SM092aFFGcDRlNDBGdVh1NVYzUGRQZk1ibnFPMTU1N3FiNHVkV2ZEcmpYd1ozOFBxZHgxNzVxK082NDF6VSt1TG1wcU9vWWxUZlByb2xWQ0hCTUxFTkI3ajlMZmRrSE12Uy94OC9wMkxLeHptNlRDenhlMlg5ejN6TnoxRk11dmdlZU81ZnhxL2gzTlN1ZE1xUEZFN25xZU9Ldmp2aEtmTURNdWRjVjhWVXFySDQ0WWNxTlJIbmFLM252SDdObE1jVkRObDczejltdXdtc2NaOHFvS0pyektacjRNZVhxTy9iOEt1YWxRbFNyaks0N25VMXd3akxsVHFlL2hjUHh6cmp6THh6NjRyamN1K2M1VXVENjQzTHFNKy9nbzB6UHF2QS8rZEpwN2hRR1VEOXUydlA4QWplanFLbjhSV2R6U1QyeS91ZXlYb3ZxZmxjcFZjWE8vWCtRMUhnNC9NM04vWHk5U3N4NGY1bThUTmNIOFRYQnhyalUyVWI4VC93Q0xyV1c0TVlOR1Q4bUpWMzhJN2U1UjNGZXRFS1VhUjZZUjVxUnBkRDlQalIvbEVvNUZzRnhuUU52b1dLTXpCUGZLcW52bU4rcFkrTXpLejh0ZjRkazE4TytBeEdiam1hSWRmSCtwM0dVY0h4ODJKeVlRNnFHd0FhTGpHNjhRTElGWlZMV0FyWnlmZ2t3bjJUTk00cmo4L1gvdzhTNll1T25tOWxkelUrZ0lIRkJ2emJuOEdxZ2VTaktwZzJ2enZCeWJtQndBMGlPUkhwbVhETU81VjNMOFgxRmE2WUJ2Zkd1T3ViNHY0czY1cWVaMUt6UE1zK3VhOXpxNzQ4UmxNdWJuNStEK3BYUFVTOVJxNmF2Q1Z4MFczVEw1NU5SQ3hHeE5qNWlZeGk3dnd2bi9BTy9Ndjc5L0M2OGxYYy9paTdhUHhPMi9hWWV4aXFOZFlFR3ZYVU12Z21zQmRoc2RKcE5pSW1tZTdpdHBlYWpjbTVMeGVlR2JybStMOVRYY0pkY1Z4NjVlb01EYksxWE41bTY0OHdsWnhCMlRyaXQxOGJ4d0UvcWJzVzR1WHV1TFpLMXhMa2dNTUdXbUxxRk91dkVienRFSnNUajhMOEwrK080WEVFQ21TbzNWbkI2SlpLK0RzaU9FMjBwUEFGekkrY2VMZmo2bjY1cXVDWng4eWZjTUhPbWUrUHp4c25VdmpmRjhYQ09wK1lrL2M2anFmY2Q4Q3c5YzNBK28vaWV1NVhMcnhDRVRWRWFFRWIraG9UK1hmVHNjdXU2eTZtc25TZnB4UGRMKzU3T1F2alpsMnhjdlVmOEFjVkJ4eVA4QW4zTmdLdkZGMUx2aTVoajc0MUZlTlRQSGMvWEJLeE5jSERPcTQrKzU3MHk1dm5xWE5lcGNHYjNIY3VhNFhFcnhPb0VVT2dNVEZQVk0ycDY0cFJGQ3IrNW5VRVFHOW5ZOXJEL0NPNzVWQ3IydWgyOG5zcCtGVmtXUHZnV3E0UEovMS9Fc1NyZHF1Ym1NVjNPcGY4Y1htWDFNWHhyNDBXUSs3NGUrNGExVTduM3lzV0dUTTdtLy93Qm41bjRtNTE1bFN1T3ZQTzJWeFhBNTRCYWxmbGF5TFNyQ0RDeWNDWHhXR3BPNHdkcDlQcGJ3ZERKTzdJeEJjQ1k2RDZGT0pTc3M0TGNPZzFvb0NLaVZ4b1gvQUUrOXpOQk5IUXY2aGhVS2VoYVRVdkVxVk5ROFQrK0hYeTc0UGljYW1PNDZnUnhPcGZHNDc0NjQ4K1l3OHg0N21vUVNLajlCS1QrSWtNSlR4SDlzL0luVXQ2NWJIR3Y5a1dlNXVPb1NSY3dvd2twek5uSmR1RmkrejVpQnI4aU1mcVVLTGFaL2N2QmVoL3N1L3dBVHFVYndqK1A5c1JZc0hPQVREQm40VTlnN2hHakFEb05IK0FsMUw0NzQvdm44WTQ4ZkhIRE55cjVkZTVtWDYvUEhiY003eHhyNjUxTzUzTjFNZHlsZ1M0N0szd2JXOXFlUTA2NklacEJ5SWxJOFhxbG5VTkhVM3VhbmNxRXFyUFVxdGdRVnNHdTEvRU9GTVcwUXpTaHlJNFJ5UzRtZWVxUGtLQXMwQmxWUUEyd3NQK0thOEI3YnltR2hvS09lZGU1cG0vZ1BKOHQ3bS9udWRUdm52NDc1NytHNVUyeWlza3ZtWlJEQmdXcWNEdzRPaUxVWTVLMkRrWmJ3V0x5OVRSeDBkU3d1WlhFTUdhNmh6MVJyT011MTlQaEV5Q3hNaWt3UlE1RFcxQU1xK0ptNVhJWk0wNm93NjJUc3IvRXJqZngzTVh4Y3VkODNqbG4xTXdqOExyM3dBemZCOEwzUEh4L1BCTnpCeDNNN1FnVUd2LzNQUjZhanhkcS9yajFzMGhLOFRFR3BiTjM4UnVXeHJBVk4xZGp0dnNSekZRQVVFYm13cFdXVXNxcnEwODFnTzdCejBML0FSdUo4TWp6cjU5U3FpVHI1RTg0blVNOFh3ZWVLNFd1SGpjemMvY0p1ZHh6elhPUVVpdzZPNlhrL05tSXJYbVF6Z20zUWN2VGlYSmdJUm5Ndmk2NDNOU3ZFQ1Z5aEhpdUtoTTN3OG5PcFdlYjU3bXArb1RybmMvZkZUenlmQkpxREtxYnpMbmMxRnQ0ZjhNa3NVZzRSOE14RTNhV0hkQUxiOG9mRTc0MTl5c1Q4elUrb2FuaURmTlNybXArWis0Nmp3U282K1BmRytMK0cyb0hEM1AxemNxWDFHRTZsVVN2N2dYTGxUM0F1ZlhGM0NhbjQ0SEJPK2FxZTV2alhVNjR1ZDhibXZoL1V2ekw2NHF2anZqdjRFZUt1WEw0cWR3aHl2bm5vbjFQRXJqcVhYd080eDV1ZlhQOEFVSVR2eE9wcVZNUUlTN0k4OVF4eGM2M3p1YStEeGR6cmp1YjR2OHpQM3hxYTQxSzRTWjUrOHMzOERqVTN3a09IanZqMUs1dU04VHpNSHc3NS93Q3VWeFpOL0RYQ2NzM0NWSzQ2bjlUWk5jQjZ1TUt0REFCMnludkovd0I3alh1bkdFR2h1aFRQVm5GOGJtcHZoNC83RU5ROTZtNFlqelU2bWp4OE55b3pCbWEwcGQ1bDcyWEhoQmVYMUhqY0EwdEx6WGRYdW9pcVE4eUVMVmdudW1rOTNOeDQ2OFRSeHFiNTNHRTZuY1oxSGpVdW81enpxZlJQUEZhWlRKcnBCeFRSY3UwNjN5NWk4MUtsUXptZUpxVnhVTWNVSkt4T29HS2p5emZLMGU0Z2JhbEs1QkxFYVJOSks1TFJYVGlucGdIMDl0VDhmaVdUMi83eXdWZ1M2ai9sUUg0VmNaVXp4cnJqTXZNL0U2NHI0RnpmUG1lY3pxWHgrVk5zKzQybWMvY3ZyYklnV0sxb0xZdXdLbUo2MklPdUlCa3VxeDVpcDViUXc3SVB1bzlTeFhMSU5mdWlCdTR3WDZTdXVyRDBNRVhFMUdHVytiS2FKOWtSbE1XU005Z1AzQ0QvQU1FTlVobUsxV3MvUFQyRDNLV0o5SWlVVEFkUmFmTGU3b1V0Vm5VekNSc2tBWFU0V2FzZ0tKcVdEQktQbnE3RmdGR3J6WGlHVmhCZ2JnSUl1czFCckNWZ1FXZ0RDcStQTUdXTjlTVVpHZEtwTW13QnNVRFpHbjRqMjFWUjlpOVN0d0laV2psQ0s4bVNHRDFPKzBBWmJjaC9ZNlIyS1FaYjlYVitpVWZzMmNmYXY3MCswZC9mL3RpdUd3WFJWZklkSHRvOXh3ZE9CSlArRE1aSVgzaFB4Uy96SFVZaFIvaTVUME4rcGxtWmhxakFhQXVrcFBTUk5rZldYKzVZaFJGUTlQcFA5anBtczZJSzhiUjl1c2p1dGEzYy92di9BUFdOMlloS3RMUWNsMmZZenVkLzRLbmNNZkhPRzMvZkk0VjBTaEhUUnhlc21CeGFOV0ZGNnBmY3VHUkkwSVpIWksxZWlVUnU1V20yVWJ5bFYrUjBIZzNhdXFXaklSYmxVdHF0MjlzY0NCYUpubENwSzVHY1dGL0pRenU2TjNGK1pvMFVBTzFFZ2QzNi93QlJ3ai9yRUd2c2lxVjV1NklUVURFd3N4SzFLSEhyanNBWHExYmlKb2hBY3U2R3diZmlYTk10ZmpGSFA4alk5SU03a1l0ZkFla3duNU1KSEoveGFhN2xzLzV2QVgzSUFhNnUxYkE0c1Z3VXFYbTdjMnF5ekdRUUJWK2dqQzE2VzM4SkFDdGpZeTV5N2NBTFZkZ0ZXMEVjaGJXc1NERHkrK1I4c25aQ3dFWTJndHBmUUhudDV0NElqV0ZpREdWNUMvc3AwTWRnclprTnF2YXN4QXo1QXdIMUlmbDZoWnVJb1pRRUhQekk4YW5mRy9oTTh2dmh2RDdJa3pBK0JTOVZMVnpUVDB1NVdFSDcyNXZVQVh5bUpleFFBb2tvUXBRYkl5SlFYdTgzRTEwUWFSUi9LZmdnNmcyT3JzbnV2MHk2WUUvVHp1cHNRbWFLRlBVTHZ0citkTngrcWxYREdERXBSdTdTa2R3QUlBQUtEcGhTL3dENkNaZDBQUzlFMlBzbDByZFFDaFpJYzl6SlRtcVlQU2tVK0R0b2pDQ21yQmswdnRGOEdvU2pUNnloc0lHQVBMUHFoVkFhYlk3Z0dONlVQUDhBZ3IxaGRaM0ZhNXNWNmcveUhUSGlydEtERlVENFJJMjFCNWNJNkIyL3hFMHBrY01wZlJQM0hWeXRUcXJQQVd2MUZIWUlzN0ZpdzhEQkFoTlRSdllyYTlpTUtCV216ZVEyZzI3b2U0OWdxTzFUOWtyMXhiMEZUOFhYNG1oKzg4R2gwLzhBRmpwQmpkMFNrNXVMNUJhRnRFTlduc2w3WG9DMWVnV1cvdlhwQi9BYUhRSGQvd0NUVzNsbGVJUVhEWnI3aGwvM29tQXRVSGtCUHd2elAzTHBqQnBHNkw4Si9VbzkxQ1JvTytBSFZDaDBRNHVVbUdQTDd0aHVrUjZaU2VERlFFUGpLRGpRQmZ0Q2kvU2RNeUd6d2t5R0ZKS0dScHlNL3dDRmFKOS9HZjZFV3dyeWYzR0RBRW1rWjUzUU1vNHRRMXl1VzdzOW9UNldXdStLTGNoU0pjczgrK0VFT3hGSUFIS1FPNWZ5R1Yrd1oyWEVsRzNaNklCczE1WHpHbW1YcVlOOE1ZWlBkUDZpUmx4N2lOcW5yVU0wbDQxQWFzU2kxUk84eFRxNFMvQUIrcWhBSXI2RmkxNm9MdnFyZ3dRODFhb2FVcVp1NGN3QUlaS3Z5M2c5bERUbXFQOEFKcjRiOVE0VzIvY01QbDluQ0VVcHVQN1pScjZYOVJLSmNxMFR3b0laZVJRQTk5REFPUlY0UGlXZmc5TVkzQ2lCOU9mOFRDbFNXcEJoQVdzaTBjVWxiaCt6ZFFQejFHTDdZSGEwUDVHV082aHJCVitxV2ZtRTZFenF1N1hUS1AxRHcvd09JRWR2b1VBWGFpTkQ1ZGkrWGpFVm9pRFdHTU9SS3pxVm54QVZUbnFLL1pJeUVGSmcrVTlKa2Y4QVN4ZjQxQWwvOENkSW5qbWpkZDkybVA2dUwvVmI3TUI2YkQ3ZzE5VXZMU2NJbG41aGxOV1lybklCL0Rzc2xCWWllSVBjR3hIU0c3OGdMYTFZdTFLY2FSS0pCMWlKREZBREFCMFRLNlRYRTJCT2xUOVhaUHRIUmRpbGxsV2VadGVSdVJnSFlXSjcrcHVpSXcxZmVIdnNSN241NWZnUm5jMU91UFUzeUE2WmhUOFhHdTZueSt5Sk03aFJPcG04eXAxeWxmMXY2aGVnSjRhalhJS0E5bHkvS2gybzJxL3BoUHd3V1AwbTE0dHYzQ3E4YmREUThMRjFjUmJlcGhGNWcyRkhKYUhsWGM4N0picURvY2k3dzdVb1JZbUZMZ2VGUXh1Q0xWYXZLOXpVRmVFcUlld2tpdXBHQzRuMktKbUpZeTB6WURBeVhDUWFVaDNGUHFpWnArekFBK25ZUjlwUmNsL1k3RXdpSnVaZmN1cmVEK1VweEJZRE1NMmVFMmdyTkZ2aGc2VVYzOW94NmhQS3dDZUVIUDVsODAxYkFiS2tYRTlGVUU3TFVLdVluRUp0MEllc2x0K2lqS2hXWUxhcjJyM0ZqMGc4dUc4NGg0eWdPWUdyWDBPeXQ3SlRkUytTNGg2T2h0OFFlM0ozWTJFSUwyeUVXQk5pSTM4dXVkVDdobWQ4N3p3Z1hRSUx4R3haWXNHNnVwWWJRLzhBZW9iU1pFNnljQVc0Rld0Um9ISzlPNFJVMWF5WGN6WWZuLzV6RGgxcDlXMmdBZHM0ak52MXVBUko3ekVVd0dDYkFzR3FzRmw0THlySXJVQlFGZEY0ai9LMERYZFp6YTJqSnFQUWl2cmt3SDdyRlJKb1kvaDBjWE5zajdGL3pBU09wMjVGdTB2bjdRWFFnQVVBYUljWHdSS1RTWmRrUVIxSFpBRkU4R2ZhcjdoSzA2Uko5MFA5SWRqMVJMV3BmUnU2WWl2ekZDQW8zQkdxckZZakVLYlhaZ0Z1RnJpNHpFTVlvVWxZSXNta01URysxZjhBNXhvU2pUa21hcldnb0R1OGZxVkNacTJtalRZUm85Ym1Rc3ZEeGJJaXJLT0RxNnVvelFSVXF6UHBDeXZvWGhSeFZibjBUL3hpM1ZGT2xBYzBXRnU0NWljaGZZd1NrOHRqMnN5OXo5bWtFQW1EYUFmaFdQd3ExSG9aUSt4N25YdlZ4N1h0WHRiWHRqc1h0RFVvQVdCUVVQbDdoQmVabHluNmpENGhxaGxtYUFvc3dIbTFjbmlPZSsvcHpaM050akZvWXFxQnRlLy9BRGh3Um5aWU5uSkN3eGdhMVZjRTdmanZpK0x4SFBKNjRKMUt1Rm5BWTV2ak11YjV4RmZ1WHpjcWFsUzVxYmw2bW9ZbFI5UTUweHpManVQcUdKWEZ4L2Z3NzRKVUpVNmx5NWU1aWUrVDdobmN4S3hGQW9xUlhYM3dUVXFkVDFBc3cveE91R2JNNHFDSVV6dUpMdmduVlNwVXp3NG4zenFXV2JsOVFPS2dYQ0o2WnY4QUVyTXF1TlJOY0pYRnpmSFU3bjYrT2ozNWhqcUh2alNlSTU1Y2txR2JsQUx0N1R3K2ZvelZ3SWI5NTZkc05nYXk1NkdoNzZERENrVVdxQUZicW9OMklHNFcxS0RESVZZN29HZXlUUlF4SUlqanVQVjRJN3psalNsb29YSEU3VXh3TmpvdFZaMWlQZEZCa2hHSEliVjFoQ1J0MGdvQ0E0eXp1cFlqSk9KQlZvSE5sMWlPWkxrVU9Lall0WlRsRVdGaTJNUGFkWk41aXZhamxOWm1vK29aeThvMWZsR0lVOWM2QVRhd3FLVTBXRUQwek1HcHBJTHQ5WWdQZDYza0t3SVRMQk53MzZJTHFRVWVDczYzTDgwUldtRUFyNk1YM0xwWVZKZ0FBR3hhaFZpQTBLRUpkREdtbXpERXJDOWNFUVZHeHZoMGtNTUhWMTNtQlYzWWJ6aUpjVzRHTFhBYkthc20wSUY3d0RBVk81Nmk3TkNqWUphQkxNQmRYRXltcXJBZVQrUkdQYkdZa3diMENxdnpSMFpKSkRBS3JqcFIyMW1LaEhZSWlnVVZwMFMxdVVTOGxFMkxiRElEWDVwVFhheXJXZEFNaHZNcU51M05hSVF1VndRZjVVUWxxd01DckFvdXMxRC9BQ0FGaXhBb0lxTmQrUVVGZkpqTFZBcHRVQURjT2JBQ29BaUdhTytrRW1DYUZ3NFJFY0NNeEVkMEFYU3RiZWkvNWdWQ1Q2WVF6TERacTJaZmxtV3hGU2xTMktETktRK2lsZnd4MzhPNDZ4OEt2bmZETDlQSm5pL0c0eWFzUzYyMkZESU9ONzFLU0RrQmFOclNGQXUzVVo0MmVpUVlDNEwyeGVoVWFpUTBvWnJkU3NNQUJDaDZWV2U1MGZpdHdRQVZzRlVWbVV3Tk5YS0RKZzM0cGxJdGtMNVJnc1UxdjBEZldLT1BYbUNVM0ZVa2gzQ0FjTXJiY0diRllVVlc3SEwxNGxncEdIWlFoSDlTdFJBTzFXb1J4VzR2cHdaTE1WM0xXZkY4YlZMc3RaMVRDNFd4d0xDbVd3aUtYZVlFdFVOTzJsd0wzZUxyMU45bUtyRjhHVUxnRnVxc1JxdGRqUUhSV2hOOVJqckpCbHRHUjlUTG9Idm5BeHkwS3BWSzFNRkZYZ2tZTG9DMTZpOEVYRWlCa0FXdlVvTFlFT3BsV1MreVAzTVEvd0FocWxXZ1hiU3ZjUTUrc2dITWhLREltYUNaWW01U2dYVk1HelM1VnVPbnVEd2ozZUNDbDNaeGlrZ1VZMVRSZ1ZuVzIzZFdtR1VFM0daMnF3bUdZdnBKSlZvRnNHUDNURWhhREJHS1cxN0FSNUdVVlZFaXlLOHk3MDBnYnJEVUxSUnlGcFB0Q041SVVieWhSU2czbkVTOVBFV3gxUVVwN2doQUxTVldvQnZDcTd2MlBBcGFiUkdHMjFxTEM0MlpacXRLU2xYMGJsV05uT2RXaVJmZFFJR3MzVTFIU2lqaG5IVVJZa3J4RnR1YmxQS3ZsV1orSlh3MTUrRjE4dC8rVHVVWGJMRE0ydVVhcVBpc1NxMXFhNkpWNW01L1VTOTVtaXVvNUtsRDFxR0gzRUhEcVZSNm10WW1IWlpBbTkxR2txc1NnYjdqQXJGY0lUVUtHREVvOFR1T3FsR3FJNXgxS3pmY2MvYzNFS3F0eHdMVUVSU3FtTkZLWmQyeWlzTHpaR1ZaWHJqclh3T0ttK09wL3dCbVZ5NDY0T1hNM0xyanFkUytOZDhtdDVsWHdzM3pqcmoxTjgxTng5OGVmaGZjM3hxSE5ZaGllSmZ4WDVFWTBQeHJFSlhHK0t1ZDF6MWNlZXA2bmM2NXVHUGovVVpqaTVYeU1TNy9BTUc1M04vZkhmUFU2K1ZjRy9odmpmQmlYL1BIZkx6MXlmcWR4bHc1dFpVMzg5OGQ4M3k0WnI1VktsL1BmRE1Wei9mRytLbDNQeE56UnhYSGZ3M0dITDh0Ung4UHY0WDhOY0d2OEJLbHk3NTduY0hrM05kemZ3M3lWOE4vZkQ4Y1JteWRCeDQ0UGhmRmNYOEdkUStMem43NXZnNXZ1SkhVTVFocms0ZGNkenFHb25IVTN4OVQ4enZuejhQdWZmTmZHNDVtcFU2L3hkL0c4VHY1dXVPL2lWTy9jKytXZCtvUnVYeDVoUGZ3MUhqRmFqR2Zmd09YaGVQZkpLbXVibmZ3dm0vaXpjZDhaZUNYbjRCZlBYdVhtYVBoVUNCemZKbWRlb3lybFg4ZXVhK0crR2YxdzgxSzU3ak9wYzc0cUhMaGd6WEY4ZU9FaDhiM01jVk81KzVlSjFDWW5qZ3Q2NHFFZWFoeitlTzQ4Ym43NXJqcWQ4ZjFQM0dHSnFkYzFVcVkrT3BWTTh2WHk3NFpkZkMrUDc0MXVQRytkOGVQTTc0MUdkLzY0YXJqY3JFY2Q4ZlhQdjRhT1B6SDRQRlE0TXVZY2E0OVZGanZITzNtL2h2NGIwY2R6OThuSHVCTVRVZm4rZWFuVXJuVXZ2bStPNVh4SmZKdzRuWEhjcjNNL0Q5eXVEbTVjNjR2bDE3NTFEbnVXd200SHdKV3VhdjZteWQvUHFYbWJlTWZFNS9VNmxUcjRzdnh4VndKcUUvM092a2VKM0s4eXBYd3JNMU5ROWM2cmpYeTA0UGhYRnZ4cmtZK3VLakhqOC9BbGZDNWpqZlBjcWJqeDFMVWxTNjRyNGZ2bnM4UytNUm5jT0svdzNuNWIrZGMvajRYbmMvLzJRPT0iIHg9IjAiIHk9IjAiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ii8+Cjwvc3ZnPgo=" alt="InsurNex" loading="eager" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="auth-logo-fallback" hidden>IN</span></div>';
+    var logo='<div class="auth-logo"><img src="assets/logo.svg" alt="InsurNex" loading="eager" decoding="async" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'fallback-visible\')"><span>InsurNex</span></div>';
     var companyFields=!login?(
       '<section id="companyFields" class="auth-company" style="display:none">'+
-      '<div class="auth-section-label">'+t("companyInfo")+'</div>'+
+      '<div class="auth-section-title">'+t("companyInfo")+'</div>'+
       '<div class="form-grid">'+
       '<div class="field"><label>'+t("legalName")+'</label><input name="legalName" autocomplete="organization"></div>'+
       '<div class="field"><label>'+t("registrationNumber")+'</label><input name="registrationNumber"></div>'+
@@ -1219,73 +579,64 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     ):'';
 
     document.getElementById("app").innerHTML=
-      '<main class="auth-wrap"><section class="auth-card auth-card-pro">'+
-      '<div class="auth-top">'+
-        '<div class="auth-brand">'+logo+'<div class="auth-brand-copy"><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(t("tagline"))+'</div></div></div>'+
-        '<div class="auth-language"><button id="lang" type="button" class="auth-icon-btn">'+(InsurNex.locale()==="ar"?"EN":"ع")+'</button></div>'+
-      '</div>'+
-      '<div class="auth-divider"></div>'+
-      '<div class="auth-intro">'+
-        '<div class="eyebrow">INSURTECH BROKER OS</div>'+
-        '<h1 class="auth-title">'+(login?t("login"):t("register"))+'</h1>'+
-        '<p class="auth-copy">إدارة العملاء، الوثائق، عروض الأسعار، التجديدات والمطالبات من مساحة عمل واحدة.</p>'+
-      '</div>'+
-      (error?'<div class="error-box auth-error">'+esc(error)+'</div>':'')+
-      '<form id="authForm" class="form-stack auth-form">'+
-      (!login?
-        '<div class="form-grid">'+
-          '<div class="field"><label>'+t("name")+'</label><input name="name" autocomplete="name" required></div>'+
-          '<div class="field"><label>'+t("mobile")+'</label><input name="mobile" type="tel" autocomplete="tel" required></div>'+
-          '<div class="field"><label>'+t("country")+'</label><input name="country" value="Egypt" autocomplete="country-name"></div>'+
-          '<div class="field"><label>'+t("city")+'</label><input name="city" autocomplete="address-level2"></div>'+
-        '</div>':'')+
-      '<div class="field"><label>'+t("email")+'</label><input type="email" name="email" autocomplete="email" inputmode="email" required></div>'+
-      '<div class="field"><label>'+t("password")+'</label><input type="password" name="password" minlength="6" autocomplete="'+(login?"current-password":"new-password")+'" required></div>'+
-      (!login?
-        '<div class="field"><label>'+t("confirmPassword")+'</label><input type="password" name="confirmPassword" minlength="6" autocomplete="new-password" required></div>'+
-        '<div class="field"><label>'+t("accountType")+'</label><select id="accountType" name="accountType">'+accountTypeOptions()+'</select></div>'+
-        companyFields+
-        '<label class="checkbox auth-terms"><input type="checkbox" name="terms" required><span>أوافق على شروط الاستخدام وسياسة الخصوصية.</span></label>':'')+
-      '<button class="btn btn-primary auth-submit" type="submit">'+(login?t("login"):t("register"))+'</button>'+
-      '</form>'+
-      '<div class="auth-actions">'+
-        '<button id="switchAuth" type="button" class="auth-secondary">'+(login?t("register"):t("login"))+'</button>'+
-        (login?'<button id="forgot" type="button" class="auth-link">'+t("forgotPassword")+'</button>':'')+
-      '</div>'+
-      ''+
-      '<div class="auth-security">'+
-        '<span><b>Firebase Auth</b><small>تسجيل الحساب</small></span>'+
-        '<span><b>Firestore</b><small>بيانات مساحة العمل</small></span>'+
-        '<span><b>'+InsurNex.firebaseProject+'</b><small>Firebase Project</small></span>'+
-      '</div>'+
-      '</section></main>';
+      '<div class="phone-shell auth-shell">'+
+        '<main class="screen active auth-screen">'+
+          '<div class="auth-hero">'+
+            '<div class="auth-hero-actions"><div class="auth-preference-row"><button id="themeAuth" type="button" class="auth-lang" aria-label="'+t("theme")+'">'+(InsurNex.currentTheme()==="dark"?"☀":"☾")+'</button><button id="lang" type="button" class="auth-lang">'+(InsurNex.locale()==="ar"?"EN":"عربي")+'</button></div>'+
+            '<div class="auth-hero-brand">'+logo+'</div>'+
+            '<div class="auth-kicker">INSURNEX · BROKER OPERATING SYSTEM</div>'+
+            '<h1>'+ (login?t("login"):t("register")) +'</h1>'+
+            '<p>'+t("authDescription")+'</p>'+
+          '</div>'+
+          '<section class="auth-panel">'+
+            '<div class="auth-panel-head"><div><span class="section-caption">'+(login?t("welcomeBack").toUpperCase():t("getStarted").toUpperCase())+'</span><h2>'+ (login?t("welcomeBack"):t("getStarted")) +'</h2></div><div class="auth-mini-mark">IN</div></div>'+
+            (error?'<div class="error-box auth-error">'+esc(error)+'</div>':'')+
+            '<form id="authForm" class="form-stack auth-form">'+
+            (!login?'<div class="form-grid"><div class="field field-full"><label>'+t("name")+'</label><input name="name" autocomplete="name" required></div><div class="field"><label>'+t("mobile")+'</label><input name="mobile" type="tel" autocomplete="tel" required></div><div class="field"><label>'+t("country")+'</label><input name="country" value="Egypt" autocomplete="country-name"></div><div class="field"><label>'+t("city")+'</label><input name="city" autocomplete="address-level2"></div></div>':'')+
+            '<div class="field"><label>'+t("email")+'</label><input type="email" name="email" autocomplete="email" inputmode="email" required></div>'+
+            '<div class="field"><label>'+t("password")+'</label><input type="password" name="password" minlength="6" autocomplete="'+(login?'current-password':'new-password')+'" required></div>'+
+            (!login?'<div class="field"><label>'+t("confirmPassword")+'</label><input type="password" name="confirmPassword" minlength="6" autocomplete="new-password" required></div><div class="field"><label>'+t("accountType")+'</label><select id="accountType" name="accountType">'+accountTypeOptions()+'</select></div>'+companyFields+'<label class="checkbox auth-terms"><input type="checkbox" name="terms" required><span>'+t("termsAgreement")+'</span></label>':'')+
+            '<button class="btn btn-primary auth-submit" type="submit"><span>'+ (login?t("login"):t("register")) +'</span></button>'+
+            '</form>'+
+            '<div class="auth-actions"><button id="switchAuth" type="button" class="btn btn-secondary">'+(login?t("register"):t("login"))+'</button>'+
+            (login?'<button id="forgot" type="button" class="auth-link">'+t("forgotPassword")+'</button>':'')+'</div>'+
+          '</section>'+
+        '</main>'+
+      '</div>';
 
     document.getElementById("switchAuth").onclick=function(){authPage(login?"register":"login");};
+    document.getElementById("themeAuth").onclick=function(){InsurNex.toggleTheme();authPage(mode);};
     document.getElementById("lang").onclick=function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");authPage(mode);};
-    try{var fs=InsurNex.firebaseStatus(), el=document.getElementById("firebaseStatus"); if(el){var ok=fs.online&&fs.configProject==="insurnex-8a9df"&&fs.appProject==="insurnex-8a9df"; el.className="auth-firebase-status "+(ok?"ok":"warn"); el.innerHTML='<span class="status-dot"></span><span>Firebase · '+esc(fs.appProject||fs.configProject||"غير مهيأ")+' · '+(fs.online?"Online":"Offline")+'</span>';}}catch(_e){}
     if(login)document.getElementById("forgot").onclick=forgot;
     if(!login){
       var type=document.getElementById("accountType"),box=document.getElementById("companyFields");
-      type.onchange=function(){box.style.display=this.value==="brokerage_company"?"block":"none";};
+      if(type)type.onchange=function(){if(box)box.style.display=this.value==="brokerage_company"?"block":"none";};
     }
     document.getElementById("authForm").onsubmit=async function(e){
       e.preventDefault();
-      var form=e.currentTarget;
-      var submit=form.querySelector(".auth-submit");
-      if(submit){submit.disabled=true;submit.textContent=login?"جاري تسجيل الدخول…":"جاري إنشاء الحساب…";}
-      try{
-        var f=new FormData(form);
-        if(login)await doLogin(f);else await doRegister(f);
-      }catch(err){
-        authPage(mode,friendlyError(err));
-      }
+      var form=e.currentTarget, submit=form.querySelector(".auth-submit");
+      if(submit){submit.disabled=true;submit.innerHTML='<span class="button-spinner"></span>'+(login?t("login")+'…':t("register")+'…');}
+      try{var f=new FormData(form); if(login)await doLogin(f);else await doRegister(f);}catch(err){registrationInProgress=false;authPage(mode,friendlyError(err));}
     };
+  }
+
+  async function enter(){
+    // Single post-auth entry point used by login, registration and session restore.
+    // The previous build called enter() but did not define it, which caused
+    // "enter is not defined" after a valid Firebase account was created.
+    await InsurNex.loadIdentity();
+    if(!state.user){authPage("login");return;}
+    state.online=navigator.onLine;
+    view=(location.hash||"#home").slice(1) || "home";
+    if(!view || view==="login" || view==="register") view="home";
+    shell();
+    await render();
+    if(view==="home") document.getElementById("view")?.scrollTo?.(0,0);
   }
 
   async function doLogin(f){
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await auth.signInWithEmailAndPassword(String(f.get("email")).trim(),String(f.get("password")));
-    if(!auth.currentUser.emailVerified){await auth.signOut();var er=new Error("email-not-verified");er.code="auth/email-not-verified";throw er;}
     await InsurNex.loadIdentity();
     await enter();
   }
@@ -1293,17 +644,21 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
   async function doRegister(f){
     var password=String(f.get("password")||""), confirm=String(f.get("confirmPassword")||"");
     if(password!==confirm){var e=new Error("mismatch");e.code="auth/password-mismatch";throw e;}
+    registrationInProgress=true;
     var c=await auth.createUserWithEmailAndPassword(String(f.get("email")).trim(),password);
     var uid=c.user.uid,type=String(f.get("accountType")||"individual_broker"),batch=db.batch();
     var roles=type==="brokerage_company"?["organizationOwner","broker"]:
       type==="manager"?["manager"]:
       type==="customer"?["customer"]:["broker"];
+    var fullName=String(f.get("name")||""),phone=String(f.get("mobile")||"");
     var userData={
-      uid:uid,email:c.user.email,name:String(f.get("name")||""),mobile:String(f.get("mobile")||""),
-      country:String(f.get("country")||""),city:String(f.get("city")||""),accountType:type,roles:roles,
-      onboardingComplete:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      uid:uid,email:c.user.email,fullName:fullName,name:fullName,phone:phone,mobile:phone,
+      country:String(f.get("country")||""),city:String(f.get("city")||""),accountType:type,
+      role:type==="brokerage_company"?"broker_owner":type==="manager"?"manager":type==="customer"?"customer":"broker_owner",
+      roles:roles,organizationId:null,photoURL:c.user.photoURL||null,status:"active",emailVerified:!!c.user.emailVerified,
+      onboardingCompleted:false,onboardingComplete:false,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     };
-    batch.set(db.collection("users").doc(uid),userData);
     batch.set(db.collection("brokerProfiles").doc(uid),{
       userId:uid,licenseNumber:String(f.get("companyLicense")||""),specialization:String(f.get("specialization")||""),
       companyName:String(f.get("companyName")||""),createdAt:firebase.firestore.FieldValue.serverTimestamp(),
@@ -1313,10 +668,11 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     if(type==="brokerage_company"){
       var org=db.collection("organizations").doc(),name=String(f.get("name")||f.get("legalName")||"InsurNex Brokerage");
       batch.set(org,{
-        name:name,legalName:String(f.get("legalName")||name),ownerId:uid,licenseNumber:String(f.get("companyLicense")||""),
+        name:name,legalName:String(f.get("legalName")||name),type:"brokerage_company",ownerId:uid,licenseNumber:String(f.get("companyLicense")||""),
         registrationNumber:String(f.get("registrationNumber")||""),country:String(f.get("country")||""),
-        city:String(f.get("city")||""),address:String(f.get("companyAddress")||""),website:String(f.get("website")||""),
-        employeeCount:Number(f.get("employees")||0),primaryContact:String(f.get("name")||""),status:"active",
+        city:String(f.get("city")||""),phone:phone,email:String(f.get("email")||c.user.email||""),subscriptionId:null,
+        address:String(f.get("companyAddress")||""),website:String(f.get("website")||""),
+        employeeCount:Number(f.get("employees")||0),primaryContact:fullName,status:"active",
         createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()
       });
       batch.set(db.collection("organizationMembers").doc(org.id+"_"+uid),{
@@ -1324,13 +680,15 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
         createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()
       });
       createdWorkspace={type:"organization",id:org.id,name:name};
+      userData.organizationId=org.id;
     }
+    batch.set(db.collection("users").doc(uid),userData);
     await batch.commit();
     if(createdWorkspace)InsurNex.setWorkspace(createdWorkspace);
-    try{await c.user.sendEmailVerification();}catch(e){}
     await InsurNex.loadIdentity();
     toast(t("accountCreated"));
     await enter();
+    registrationInProgress=false;
   }
 
   async function forgot(){
@@ -1345,96 +703,105 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     return nav.filter(function(n){return ["home","crm","policies","claims","documents","communications","notifications","account"].includes(n[0]);});
   }
 
+    function navIcon(id){
+    var paths={
+      home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',
+      crm:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
+      leads:'<path d="M4 18 18 4"/><path d="M7 4h11v11"/><path d="M4 4h.01"/>',
+      opportunities:'<path d="M5 20V8"/><path d="M12 20V4"/><path d="M19 20v-9"/><path d="M3 20h18"/>',
+      quotations:'<path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h4"/>',
+      policies:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m8 12 2.5 2.5L16 9"/>',
+      renewals:'<path d="M20 11a8 8 0 0 0-14-5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14 5l2-2"/><path d="M20 20v-4h-4"/>',
+      claims:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h5"/>',
+      tasks:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 2 2 5-5"/>',
+      payments:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+      calendarEvents:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
+      documents:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+      insurers:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+      insuranceProducts:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>',
+      commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1.5 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>',
+      communications:'<path d="M4 5h16v11H7l-3 3z"/><path d="M8 9h8M8 13h5"/>',
+      reports:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',
+      analytics:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-3M12 16V7M16 16v-5"/>',
+      team:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
+      notifications:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
+      subscriptions:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/>',
+      supportTickets:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.7 2.7 0 0 1 5.2 1c0 2-2.7 2.2-2.7 4"/><path d="M12 17h.01"/>',
+      account:'<circle cx="12" cy="8" r="3"/><path d="M5 20c1-4 3-6 7-6s6 2 7 6"/>'
+    };
+    var d=paths[id]||paths.account;
+    return '<span class="app-icon"><svg viewBox="0 0 24 24">'+d+'</svg></span>';
+  }
+
+  function navGroups(){
+    var allowed=allowedNav().reduce(function(acc,n){acc[n[0]]=n;return acc;},{});
+    var groups=[
+      ["navMain",["home","notifications"]],
+      ["navCrmSales",["crm","leads","opportunities","quotations","tasks"]],
+      ["navService",["policies","renewals","claims","payments","calendarEvents","documents"]],
+      ["navBusiness",["insurers","insuranceProducts","commissions","communications","subscriptions"]],
+      ["navInsights",["analytics","reports","team","supportTickets"]],
+      ["navAccount",["account"]]
+    ];
+    return groups.map(function(g){
+      return {title:t(g[0]),items:g[1].map(function(id){return allowed[id]||nav.find(function(n){return n[0]===id;});}).filter(Boolean)};
+    }).filter(function(g){return g.items.length;});
+  }
+
   function shell(){
-    var links=allowedNav().map(function(n){return '<a class="drawer-link" href="#'+n[0]+'" data-nav="'+n[0]+'"><span>'+n[2]+' '+t(n[1])+'</span><span>›</span></a>';}).join("");
-    var bottom=shortNav.filter(function(n){return allowedNav().some(function(a){return a[0]===n[0];});}).map(function(n){
-      return '<button data-nav="'+n[0]+'" class="'+(view===n[0]?"active":"")+'"><span class="icon">'+n[2]+'</span><span>'+t(n[1])+'</span></button>';
-    }).join("")+'<button id="openMenu"><span class="icon">☰</span><span>Menu</span></button>';
-
-    document.getElementById("app").innerHTML='<div class="app-shell"><aside class="desktop-drawer"><div class="drawer-head">'+mark()+
-      ' <strong>InsurNex</strong></div><div class="section-note" style="margin:8px 10px 14px">'+esc(state.workspace.name||t("personalWorkspace"))+
-      '</div>'+links+'</aside><main class="main"><header class="topbar"><div class="brand">'+mark()+
-      '<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(state.workspace.name||t("personalWorkspace"))+
-      '</div></div></div><div class="actions"><span class="badge '+(state.online?"success":"danger")+'">'+
-      (state.online?t("online"):t("offline"))+'</span><button class="btn" id="globalSearch" aria-label="'+t("globalSearch")+'">⌕</button>'+
-      '<button class="btn" id="lang">'+(InsurNex.locale()==="ar"?"EN":"AR")+'</button><button class="btn" id="menu">☰</button>'+
-      '<button class="btn" id="logout">⇥</button></div></header><section id="view" class="content"></section></main><nav class="bottom-nav">'+bottom+
-      '</nav><div class="drawer" id="drawer"><div class="drawer-panel"><div class="drawer-head"><strong>InsurNex</strong>'+
-      '<button class="close" id="closeDrawer">×</button></div>'+links+
-      '<div class="workspace-card" style="margin-top:12px"><div>'+(state.workspace.type==="organization"?"🏢":"👤")+
-      '</div><div><div class="list-title">'+esc(state.workspace.name||t("personalWorkspace"))+
-      '</div><div class="list-sub">'+esc((state.profile&&state.profile.roles||["broker"]).join(" · "))+
-      '</div></div></div><button class="btn" id="switchWorkspace" style="margin-top:10px">'+t("switchWorkspace")+
-      '</button><button class="btn btn-danger" id="logoutDrawer" style="margin-top:10px">'+t("logout")+
-      '</button></div></div></div>';
-
+    var groups=navGroups();
+    var links=groups.map(function(g){
+      return '<div class="drawer-section">'+esc(g.title)+'</div>'+g.items.map(function(n){return '<button class="drawer-link" data-nav="'+n[0]+'"><span>'+navIcon(n[0])+'<span>'+t(n[1])+'</span></span><span class="drawer-chevron">›</span></button>';}).join("");
+    }).join("");
+    var allowed=allowedNav(), bottomIds=["home","crm","policies","renewals"], bottom=bottomIds.map(function(id){var n=allowed.find(function(x){return x[0]===id;})||nav.find(function(x){return x[0]===id;});return n?'<button data-nav="'+n[0]+'" class="'+(view===n[0]?"active":"")+'"><span class="nav-icon">'+navIcon(n[0])+'</span><span>'+t(n[1])+'</span></button>':"";}).join("");
+    bottom+='<button id="openMenu"><span class="nav-icon">'+navIcon("account")+'</span><span>'+t("settings")+'</span></button>';
+    document.getElementById("app").innerHTML=
+      '<div class="phone-shell app-phone"><main class="main">'+
+        '<header class="topbar app-topbar">'+
+          '<div class="topbar-main"><div class="brand">'+mark()+'<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(state.workspace.name||t("personalWorkspace"))+'</div></div></div>'+
+          '<div class="topbar-actions"><button class="icon-btn" id="globalSearch" aria-label="'+t("globalSearch")+'">'+navIcon("reports")+'</button><button class="icon-btn notification-btn" id="topNotifications" aria-label="'+t("notifications")+'">'+navIcon("notifications")+'<i></i></button><button class="icon-btn" id="themeTop" aria-label="'+t("theme")+'">'+(InsurNex.currentTheme()==="dark"?"☀":"☾")+'</button><button class="icon-btn" id="lang">'+(InsurNex.locale()==="ar"?"EN":"AR")+'</button><button class="icon-btn" id="menu" aria-label="Menu">☰</button></div></div>'+
+        '</header><section id="view" class="content"></section></main>'+
+        '<nav class="bottom-nav">'+bottom+'</nav>'+
+        '<div class="drawer" id="drawer"><div class="drawer-panel"><div class="drawer-handle"></div><div class="drawer-head"><div class="brand">'+mark()+'<div><div class="brand-name">InsurNex</div><div class="subtitle">'+esc(state.workspace.name||t("personalWorkspace"))+'</div></div></div><button class="close" id="closeDrawer">×</button></div>'+
+        '<div class="drawer-workspace"><span class="workspace-icon">'+(state.workspace.type==="organization"?'⌂':'◉')+'</span><div><strong>'+esc(state.workspace.name||t("personalWorkspace"))+'</strong><small>'+esc((state.profile&&state.profile.roles||["broker"]).join(" · "))+'</small></div></div>'+
+        '<div class="drawer-scroll">'+links+'</div><div class="drawer-footer"><button class="btn btn-outline" id="switchWorkspace">'+t("switchWorkspace")+'</button><button class="btn btn-danger" id="logoutDrawer">'+t("logout")+'</button></div>'+
+        '</div></div></div>';
     document.querySelectorAll("[data-nav]").forEach(function(b){b.onclick=function(e){e.preventDefault();navigate(b.dataset.nav);var d=document.getElementById("drawer");if(d)d.classList.remove("show");};});
     document.getElementById("menu").onclick=function(){document.getElementById("drawer").classList.add("show");};
     document.getElementById("openMenu").onclick=function(){document.getElementById("drawer").classList.add("show");};
     document.getElementById("closeDrawer").onclick=function(){document.getElementById("drawer").classList.remove("show");};
     document.getElementById("drawer").onclick=function(e){if(e.target.id==="drawer")e.currentTarget.classList.remove("show");};
-    document.getElementById("logout").onclick=logout;
-    document.getElementById("logoutDrawer").onclick=logout;
+    document.getElementById("themeTop").onclick=function(){InsurNex.toggleTheme();shell();render();};
     document.getElementById("lang").onclick=function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");shell();render();};
     document.getElementById("switchWorkspace").onclick=switchWorkspace;
     document.getElementById("globalSearch").onclick=globalSearch;
+    document.getElementById("topNotifications").onclick=function(){navigate("notifications");};
+    document.getElementById("logoutDrawer").onclick=logout;
   }
-
-  async function switchWorkspace(){
-    var opts=[{type:"personal",id:null,name:t("personalWorkspace")}].concat(state.memberships.map(function(m){
-      return {type:"organization",id:m.organizationId,name:m.organizationName||t("organizationWorkspace")};
-    }));
-    if(opts.length===1){toast(t("personalWorkspace"));return;}
-    var n=prompt(opts.map(function(o,i){return(i+1)+". "+o.name;}).join("\n")),i=parseInt(n,10)-1;
-    if(opts[i]){InsurNex.setWorkspace(opts[i]);shell();render();}
-  }
-
-  async function enter(){
-    shell();
-    if(!(state.profile&&state.profile.onboardingComplete)){onboarding();}else{await render();}
-  }
-
-  function onboarding(){
-    var p=state.profile||{}, company=state.profile?.accountType==="brokerage_company";
-    modal(t("onboarding"),'<form id="onboard" class="form-stack"><div class="hero"><div class="eyebrow">InsurNex</div>'+
-      '<h2>'+t("workspaceSetup")+'</h2><p>'+esc(t("tagline"))+'</p></div>'+
-      '<div class="form-grid"><div class="field"><label>'+t("brokerLicense")+'</label><input name="license" value="'+esc(p.licenseNumber||"")+'"></div>'+
-      '<div class="field"><label>'+t("specialization")+'</label><input name="specialization" value="'+esc(p.specialization||"")+'"></div>'+
-      '<div class="field"><label>'+t("country")+'</label><input name="country" value="'+esc(p.country||"Egypt")+'"></div>'+
-      '<div class="field"><label>'+t("city")+'</label><input name="city" value="'+esc(p.city||"")+'"></div>'+
-      (company?'<div class="field"><label>'+t("legalName")+'</label><input name="legalName"></div><div class="field"><label>'+t("registrationNumber")+
-      '</label><input name="registrationNumber"></div>':'')+'</div>'+
-      '<div class="field"><label>'+t("insuranceLines")+'</label><textarea name="insuranceLines" placeholder="Motor, Medical, Life..."></textarea></div>'+
-      '<div class="form-actions"><button class="btn btn-primary">'+t("complete")+'</button></div></form>');
-    document.getElementById("onboard").onsubmit=async function(e){
-      e.preventDefault();var f=new FormData(e.currentTarget);
-      try{
-        await db.collection("users").doc(state.user.uid).update({
-          country:f.get("country"),city:f.get("city"),onboardingComplete:true,
-          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-        });
-        await db.collection("brokerProfiles").doc(state.user.uid).set({
-          licenseNumber:f.get("license"),specialization:f.get("specialization"),insuranceLines:String(f.get("insuranceLines")||"").split(",").map(function(x){return x.trim();}).filter(Boolean),
-          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-        },{merge:true});
-        if(state.workspace.type==="organization"&&state.workspace.id){
-          var patch={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-          if(f.get("legalName"))patch.legalName=f.get("legalName");
-          if(f.get("registrationNumber"))patch.registrationNumber=f.get("registrationNumber");
-          if(Object.keys(patch).length>1)await db.collection("organizations").doc(state.workspace.id).update(patch);
-        }
-        closeModal();await InsurNex.loadIdentity();shell();await render();toast(t("saved"));
-      }catch(err){toast(friendlyError(err),"error");}
-    };
-  }
-
   function closeRecordModal(){closeModal();}
+
+  function injectQuickAccess(){
+    var root=document.getElementById("view");
+    if(!root || root.querySelector(".quick-access-grid")) return;
+    var items=[
+      ["crm","👥",t("crm")], ["leads","🎯",t("leads")], ["opportunities","💼",t("opportunities")], ["quotations","📑",t("quotations")],
+      ["policies","🛡️",t("policies")], ["renewals","🔄",t("renewals")], ["claims","🧾",t("claims")], ["tasks","✅",t("tasks")]
+    ];
+    var box=document.createElement("section");
+    box.className="quick-access-grid";
+    box.setAttribute("aria-label",t("quickAccess"));
+    box.innerHTML=items.map(function(x){return '<button type="button" class="quick-card" data-quick-route="'+esc(x[0])+'"><span class="qicon">'+x[1]+'</span><span class="quick-label">'+esc(x[2])+'</span></button>';}).join("");
+    var cards=root.querySelectorAll(".card");
+    if(cards.length) cards[0].insertAdjacentElement("afterend",box); else root.prepend(box);
+    box.querySelectorAll("[data-quick-route]").forEach(function(b){b.onclick=function(){navigate(b.dataset.quickRoute);};});
+  }
 
   async function render(){
     var root=document.getElementById("view"); if(!root)return;
     root.innerHTML='<div class="loading">'+t("loading")+'</div>';
     try{
       if(view==="home")root.innerHTML=await home();
+      if(view==="home")injectQuickAccess();
       else if(view==="crm")root.innerHTML=await customers();
       else if(view==="analytics")root.innerHTML=await analytics();
       else if(view==="reports")root.innerHTML=await reports();
@@ -1496,10 +863,8 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     var expected=comm.reduce(function(n,c){return n+Number(c.commissionAmount||c.amount||0);},0);
     var paid=comm.filter(function(c){return c.status==="Paid";}).reduce(function(n,c){return n+Number(c.paidCommission||c.commissionAmount||0);},0);
     var openClaims=claims.filter(function(c){return !["Settled","Closed","Rejected"].includes(c.status);}).length;
-    var renewEligible=renewals.length?renewals.filter(function(r){return ["Renewed","Lost"].indexOf(r.status)<0;}).length:0;
     var renewed=renewals.filter(function(r){return r.status==="Renewed";}).length;
     var renewalRate=renewals.length?Math.round(renewed/renewals.length*100):0;
-    var hot=leads.filter(function(l){return l.priority==="hot";}).length;
     var paidByPolicy={};
     payments.forEach(function(p){
       var key=String(p.policyNumber||"");
@@ -1507,38 +872,55 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
       paidByPolicy[key]=(paidByPolicy[key]||0)+Number(p.amount||0);
     });
     var outstanding=policies.reduce(function(total,p){
-      var premium=Number(p.premium||0),status=String(p.paymentStatus||"").toLowerCase(),policyNo=String(p.policyNumber||"");
-      if(!premium||status==="paid")return total;
-      if(status==="partial")return total+Math.max(0,premium-(paidByPolicy[policyNo]||0));
-      return total+premium;
+      var prem=Number(p.premium||0),status=String(p.paymentStatus||"").toLowerCase(),no=String(p.policyNumber||"");
+      if(!prem||status==="paid")return total;
+      if(status==="partial")return total+Math.max(0,prem-(paidByPolicy[no]||0));
+      return total+prem;
     },0);
     var cross=await crossSellSuggestions(customersRows,policies);
-    return '<div class="page-head"><div><div class="eyebrow">InsurNex</div><h1>'+t("dashboard")+'</h1>'+
-      '<div class="muted">'+esc(state.profile&&state.profile.name||state.user.email)+' · '+esc(state.workspace.name||t("personalWorkspace"))+
+
+    var quick=[
+      ["crm","navy"],["leads","blue"],["opportunities","purple"],["quotations","gold"],
+      ["policies","navy"],["renewals","gold"],["claims","red"],["tasks","green"],
+      ["payments","gold"],["documents","purple"],["commissions","green"],["calendarEvents","blue"]
+    ];
+    var quickHtml=quick.filter(function(q){return nav.some(function(n){return n[0]===q[0];}) && allowedNav().some(function(n){return n[0]===q[0];});}).map(function(q){
+      var labelKey=(nav.find(function(n){return n[0]===q[0];})||[,q[0]])[1];
+      return '<button type="button" class="home-quick-card" data-route="'+q[0]+'">'+
+        '<span class="qicon '+q[1]+'">'+navIcon(q[0])+'</span>'+
+        '<span class="quick-label">'+esc(t(labelKey))+'</span></button>';
+    }).join("");
+
+    return '<div class="page-head"><div><div class="eyebrow">INSURNEX</div><h1>'+t("dashboard")+'</h1>'+
+      '<div class="muted">'+esc(state.profile&&((state.profile.fullName||state.profile.name))||state.user.email)+' · '+esc(state.workspace.name||t("personalWorkspace"))+
       '</div></div><div class="actions"><button class="btn btn-accent" data-add="customers">'+t("add")+" "+t("customers")+
-      '</button><button class="btn" data-route="global-search">⌕ '+t("globalSearch")+'</button></div></div>'+
-      '<div class="hero" style="margin-bottom:14px"><div class="eyebrow">'+(state.workspace.type==="organization"?t("organizationWorkspace"):t("personalWorkspace"))+
+      '</button></div></div>'+
+      '<div class="hero"><div class="eyebrow" style="color:#F2BD63">'+(state.workspace.type==="organization"?t("organizationWorkspace"):t("personalWorkspace"))+
       '</div><h2>'+esc(state.workspace.name||t("personalWorkspace"))+'</h2><p>'+esc(t("tagline"))+'</p></div>'+
+      '<div class="home-section-title"><h2>'+esc(t("portfolioMetrics"))+'</h2><small>'+esc(t("performance"))+'</small></div>'+
       '<div class="stats"><div class="stat"><div class="value">'+customersRows.length+'</div><div class="label">'+t("totalCustomers")+
       '</div></div><div class="stat"><div class="value">'+leads.length+'</div><div class="label">'+t("newLeads")+'</div></div>'+
-      '<div class="stat"><div class="value">'+opps.filter(function(x){return !["Won","Lost"].includes(x.status);}).length+'</div><div class="label">'+t("openOpportunities")+
-      '</div></div><div class="stat"><div class="value">'+activePolicies+'</div><div class="label">'+t("activePolicies")+'</div></div>'+
-      '<div class="stat"><div class="value">'+exp+'</div><div class="label">'+t("expiringSoon")+'</div></div><div class="stat"><div class="value">'+renewalRate+'%</div><div class="label">'+t("renewalRate")+
-      '</div></div><div class="stat"><div class="value">'+openClaims+'</div><div class="label">'+t("pendingClaims")+'</div></div>'+
-      '<div class="stat"><div class="value">'+fmtMoney(expected)+'</div><div class="label">'+t("expectedCommission")+'</div></div></div>'+
-      '<div class="grid grid-2" style="margin-top:14px"><div class="card"><div class="page-head"><h3>'+t("pipeline")+
+      '<div class="stat"><div class="value">'+activePolicies+'</div><div class="label">'+t("activePolicies")+'</div></div>'+
+      '<div class="stat"><div class="value">'+exp+'</div><div class="label">'+t("expiringSoon")+'</div></div>'+
+      '<div class="stat"><div class="value">'+renewalRate+'%</div><div class="label">'+t("renewalRate")+'</div></div>'+
+      '<div class="stat"><div class="value">'+openClaims+'</div><div class="label">'+t("pendingClaims")+'</div></div></div>'+
+      '<div class="home-section-title"><h2>'+esc(t("quickAccess"))+'</h2><small>'+esc(t("allDailyFunctions"))+'</small></div>'+
+      '<div class="home-quick-grid">'+quickHtml+
+      '<button type="button" class="home-quick-card" id="homeAllFeatures"><span class="qicon navy">'+navIcon("account")+'</span><span class="quick-label">'+esc(t("allFeatures"))+'</span></button></div>'+
+      '<div class="home-metric-actions"><button class="btn btn-primary" data-route="analytics">'+t("analytics")+'</button><button class="btn btn-accent" data-route="reports">'+t("reports")+'</button></div>'+
+      '<div class="grid grid-2" style="margin-top:10px"><div class="card"><div class="page-head"><h3>'+t("pipeline")+
       '</h3><button class="btn btn-sm" data-route="opportunities">'+t("openOpportunities")+'</button></div>'+pipelineSummary(leads,opps)+'</div>'+
       '<div class="card"><div class="page-head"><h3>'+t("performance")+'</h3></div><div class="list">'+
       '<div class="list-row"><span>'+t("premium")+'</span><strong>'+fmtMoney(premium)+'</strong></div>'+
       '<div class="list-row"><span>'+t("expectedCommission")+'</span><strong>'+fmtMoney(expected)+'</strong></div>'+
       '<div class="list-row"><span>'+t("paidCommission")+'</span><strong>'+fmtMoney(paid)+'</strong></div>'+
       '<div class="list-row"><span>'+t("outstandingPayments")+'</span><strong>'+fmtMoney(outstanding)+'</strong></div></div></div></div>'+
-      '<div class="grid grid-2" style="margin-top:14px"><div class="card"><div class="page-head"><h3>'+t("renewalRisk")+'</h3></div>'+
-      renewalRiskList(policies,renewals)+'</div><div class="card"><div class="page-head"><h3>'+t("crossSell")+'</h3></div>'+
+      '<div class="grid grid-2" style="margin-top:10px"><div class="card"><div class="page-head"><h3>'+t("renewalRisk")+'</h3><button class="btn btn-sm" data-route="renewals">'+t("renewals")+'</button></div>'+
+      renewalRiskList(policies,renewals)+'</div><div class="card"><div class="page-head"><h3>'+t("crossSell")+'</h3><button class="btn btn-sm" data-route="customers">'+t("customers")+'</button></div>'+
       (cross.length?'<div class="list">'+cross.slice(0,5).map(function(x){return '<div class="list-row"><div><div class="list-title">'+esc(x.customer)+'</div><div class="list-sub">'+esc(x.suggestion)+'</div></div><span class="badge warn">'+t("crossSell")+'</span></div>';}).join("")+
       '</div>':'<div class="empty">'+t("empty")+'</div>')+'</div></div>'+
-      '<div class="card" style="margin-top:14px"><div class="page-head"><h3>'+t("tasks")+'</h3><button class="btn btn-sm" data-route="tasks">'+t("tasks")+'</button></div>'+taskList(tasks)+'</div>'+
-      '<div class="section-note" style="margin-top:12px">'+t("legalDisclaimer")+': InsurNex is a broker CRM/operating platform and does not itself provide insurance advice or act as an insurer.</div>';
+      '<div class="card" style="margin-top:10px"><div class="page-head"><h3>'+t("tasks")+'</h3><button class="btn btn-sm" data-route="tasks">'+t("tasks")+'</button></div>'+taskList(tasks)+'</div>'+
+      '<div class="section-note" style="margin-top:10px">'+t("legalDisclaimer")+': InsurNex is a broker CRM/operating platform and does not itself provide insurance advice or act as an insurer.</div>';
   }
 
   function pipelineSummary(leads,opps){
@@ -1863,8 +1245,9 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
         return '<div class="list-row"><div class="list-title">'+esc(w.name)+'</div><button class="btn" data-workspace="'+esc(JSON.stringify(w))+'">'+
         (state.workspace.type===w.type&&state.workspace.id===w.id?"✓":t("switchWorkspace"))+'</button></div>';
       }).join("")+'</div></div></div>'+
-      '<div class="card" style="margin-top:14px"><h3>'+t("settings")+'</h3><div class="list"><div class="list-row"><span>'+t("language")+'</span><button class="btn" id="langPage">AR / EN</button></div>'+
-      '<div class="list-row"><span>'+t("security")+'</span><span class="badge success">Firebase Auth + RBAC</span></div>'+
+      '<div class="card" style="margin-top:14px"><h3>'+t("settings")+'</h3><div class="list"><div class="list-row"><span>'+t("language")+'</span><button class="btn" id="langPage">'+(InsurNex.locale()==="ar"?"EN":"عربي")+'</button></div>'+
+      '<div class="list-row"><span>'+t("theme")+'</span><button class="btn" id="themePage">'+(InsurNex.currentTheme()==="dark"?t("lightMode"):t("darkMode"))+'</button></div>'+
+      '<div class="list-row"><span>'+t("security")+'</span><span class="badge success">RBAC</span></div>'+
       '<div class="list-row"><span>'+t("legalDisclaimer")+'</span><span class="muted">Configurable by Admin</span></div></div></div>';
   }
 
@@ -1875,6 +1258,7 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
       '</label><input name="country" value="'+esc(p.country||"")+'"></div><div class="field"><label>'+t("city")+'</label><input name="city" value="'+esc(p.city||"")+
       '"></div></div><button class="btn btn-primary">'+t("save")+'</button></form>');
     document.getElementById("profileForm").onsubmit=async function(e){e.preventDefault();try{var d=Object.fromEntries(new FormData(e.currentTarget));
+      d.fullName=d.name||"";d.phone=d.mobile||"";
       await db.collection("users").doc(state.user.uid).update(Object.assign({},d,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));
       await InsurNex.loadIdentity();closeModal();shell();render();toast(t("saved"));
     }catch(err){toast(friendlyError(err),"error");}};
@@ -1900,21 +1284,25 @@ body.insurnex-user #app{width:100%;min-height:100dvh}
     document.getElementById("upload")?.addEventListener("click",upload);
     document.getElementById("profileEdit")?.addEventListener("click",profileEdit);
     document.getElementById("langPage")?.addEventListener("click",function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");shell();render();});
+    document.getElementById("themePage")?.addEventListener("click",function(){InsurNex.toggleTheme();shell();render();});
     document.getElementById("exportReport")?.addEventListener("click",async function(){var rows=await InsurNex.queryDocs("policies");csvExport(rows,"insurnex-report.csv");});
+    document.getElementById("homeAllFeatures")?.addEventListener("click",function(){document.getElementById("menu")?.click();});
   }
 
   async function globalSearch(){location.hash="global-search";view="global-search";await render();}
   async function logout(){await auth.signOut();location.hash="";authPage("login");}
 
   document.addEventListener("click",function(e){if(e.target.matches("[data-close-modal]")||e.target.id==="modal")closeRecordModal();});
-  if(location.protocol!=="file:" && "serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(function(e){console.warn("InsurNex service worker unavailable",e);});}
+  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(function(e){console.warn("InsurNex service worker unavailable",e);});}
+  authPage("login");
   auth.onAuthStateChanged(async function(user){
+    if(registrationInProgress)return;
     try{if(!user){authPage("login");return;}await InsurNex.loadIdentity();await enter();}
     catch(e){console.error(e);authPage("login",friendlyError(e));}
   });
   window.addEventListener("hashchange",function(){view=(location.hash||"#home").slice(1);if(state.user){shell();render();}});
-  document.addEventListener("insurnex:language",function(){if(state.user){shell();render();}});
+  document.addEventListener("insurnex:language",function(){if(state.user){shell();render();}else{var activeMode=document.querySelector("#authForm")?(document.querySelector("#accountType")?"register":"login"):"login";authPage(activeMode);}});
+  document.addEventListener("insurnex:theme",function(){if(state.user){shell();render();}else{var activeMode=document.querySelector("#authForm")?(document.querySelector("#accountType")?"register":"login"):"login";authPage(activeMode);}});
   document.addEventListener("insurnex:workspace",function(){if(state.user){shell();render();}});
 })();</script>
-</body>
-</html>
+</body></html>
