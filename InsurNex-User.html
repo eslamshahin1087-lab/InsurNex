@@ -1,5 +1,5 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E2A5C"><meta name="description" content="InsurNex — Professional Insurance Broker CRM & Operating System"><meta name="color-scheme" content="light dark"><link rel="manifest" href="manifest.json"><title>InsurNex</title>
-<!-- Visual identity synchronized with Wathiqati reference UI; application logic intentionally preserved. --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>:root{
+<!-- InsurNex visual identity; application logic intentionally preserved. --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>:root{
   --navy:#0E2A5C;--navy2:#16407A;--navy3:#071D40;--gold:#F2BD63;--gold2:#FFD98F;--gold-soft:#FFF2D7;
   --paper:#F5F8FC;--card:#FFFFFF;--line:#E2E9F2;--slate:#25324A;--muted:#718096;--green:#16805B;--red:#C9543E;--purple:#7255B7;
   --shadow:0 8px 24px rgba(14,42,92,.07);--shadow-lg:0 18px 45px rgba(14,42,92,.14);--shadow-xl:0 26px 70px rgba(14,42,92,.18);
@@ -47,9 +47,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 .button-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 /* responsive */
 @media(max-width:360px){.home-quick-grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:1fr 1fr}.topbar-actions{gap:4px}.icon-btn{width:32px;height:32px}}
-</style><style id="wathiqati-visual-identity">
+</style><style id="insurnex-visual-identity">
 /* ============================================================
-   InsurNex — Wathiqati Visual Identity Layer
+   InsurNex Visual Identity Layer
    Visual-only layer. Does not alter Firebase, data, routing,
    roles, permissions, or button event handlers.
    ============================================================ */
@@ -298,7 +298,7 @@ html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
 .badge.blue{background:#E3F0FF;color:#1A6BC4}
 .badge.purple{background:var(--purple-light);color:var(--purple)}
 
-/* Keep InsurNex functional UI free from Wathiqati's animated icon loops */
+/* Keep InsurNex functional UI free from legacy animated icon loops */
 .app-icon.animated,.app-icon.bounce,.app-icon.float,.app-icon.spin{
   animation:none!important;
   transform-origin:50% 50%;
