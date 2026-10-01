@@ -1,4 +1,5 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E2A5C"><meta name="description" content="InsurNex — Professional Insurance Broker CRM & Operating System"><meta name="color-scheme" content="light dark"><link rel="manifest" href="manifest.json"><title>InsurNex</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>:root{
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0E2A5C"><meta name="description" content="InsurNex — Professional Insurance Broker CRM & Operating System"><meta name="color-scheme" content="light dark"><link rel="manifest" href="manifest.json"><title>InsurNex</title>
+<!-- InsurNex visual identity; application logic intentionally preserved. --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>:root{
   --navy:#0E2A5C;--navy2:#16407A;--navy3:#071D40;--gold:#F2BD63;--gold2:#FFD98F;--gold-soft:#FFF2D7;
   --paper:#F5F8FC;--card:#FFFFFF;--line:#E2E9F2;--slate:#25324A;--muted:#718096;--green:#16805B;--red:#C9543E;--purple:#7255B7;
   --shadow:0 8px 24px rgba(14,42,92,.07);--shadow-lg:0 18px 45px rgba(14,42,92,.14);--shadow-xl:0 26px 70px rgba(14,42,92,.18);
@@ -46,10 +47,276 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 .button-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 /* responsive */
 @media(max-width:360px){.home-quick-grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:1fr 1fr}.topbar-actions{gap:4px}.icon-btn{width:32px;height:32px}}
-</style></head><body><div id="toastHost"></div><div id="app"></div><div id="modal" class="modal"><div class="modal-panel"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+</style><style id="insurnex-visual-identity">
+/* ============================================================
+   InsurNex Visual Identity Layer
+   Visual-only layer. Does not alter Firebase, data, routing,
+   roles, permissions, or button event handlers.
+   ============================================================ */
+:root{
+  --navy:#0E2A5C;
+  --navy-2:#163E7A;
+  --navy2:#163E7A;
+  --navy-3:#071D40;
+  --navy3:#071D40;
+  --gold:#F2BD63;
+  --gold-2:#FFD98F;
+  --gold2:#FFD98F;
+  --gold-soft:#FFF2D7;
+  --paper:#F5F8FC;
+  --card:#FFFFFF;
+  --line:#E2E9F2;
+  --green:#16805B;
+  --green-light:#E6F7ED;
+  --red:#C9543E;
+  --red-light:#FFF0ED;
+  --purple:#7255B7;
+  --purple-light:#F0EBFF;
+  --muted:#718096;
+  --slate:#25324A;
+  --shadow:0 8px 24px rgba(14,42,92,.07);
+  --shadow-lg:0 18px 45px rgba(14,42,92,.15);
+  --shadow-xl:0 25px 60px rgba(14,42,92,.20);
+  --gradient-gold:linear-gradient(135deg,var(--gold),var(--gold-2));
+  --gradient-navy:linear-gradient(145deg,var(--navy-3),var(--navy) 70%);
+  --gradient-card:linear-gradient(145deg,#FFFFFF,#F8FAFD);
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:24px;
+  --radius-xl:30px;
+  --transition:.3s cubic-bezier(.4,0,.2,1);
+  --font-ui:"Plus Jakarta Sans","Tajawal",system-ui,sans-serif;
+  --font-ar:"Tajawal","Plus Jakarta Sans",system-ui,sans-serif;
+  --safe-area-top:env(safe-area-inset-top,0px);
+  --safe-area-bottom:env(safe-area-inset-bottom,0px);
+}
+html[data-theme="dark"]{
+  --paper:#0A0E1A;
+  --card:#141A28;
+  --line:#2A3344;
+  --slate:#E8EDF5;
+  --muted:#8899B0;
+  --shadow:0 8px 24px rgba(0,0,0,.4);
+  --shadow-lg:0 18px 45px rgba(0,0,0,.6);
+  --shadow-xl:0 25px 60px rgba(0,0,0,.7);
+  --gradient-card:linear-gradient(145deg,#141A28,#0A0E1A);
+  --gold-soft:#2A2518;
+  --green-light:#0F2A1E;
+  --red-light:#2A1410;
+  --purple-light:#1E1430;
+  --gradient-navy:linear-gradient(145deg,#050A18,#0A1A3A 70%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:#EAF0F7;
+  padding:24px 8px;
+  user-select:none;
+}
+html[data-theme="dark"] body{background:#060A14}
+html[dir="rtl"] body,
+html[dir="rtl"] .phone-shell,
+html[dir="rtl"] .app-phone{font-family:var(--font-ar)}
+.phone-shell{
+  width:390px;max-width:100%;height:820px;max-height:100vh;
+  background:var(--paper);border-radius:38px;border:8px solid var(--navy-3);
+  box-shadow:0 30px 75px rgba(7,29,64,.28);
+}
+html[data-theme="dark"] .phone-shell{
+  border-color:#1A2540;
+  box-shadow:0 30px 75px rgba(0,0,0,.6);
+}
+@media(max-width:480px){
+  body{padding:0;background:var(--paper)}
+  .phone-shell{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none}
+}
+.screen{
+  background:linear-gradient(180deg,#F8FAFD 0%,var(--paper) 100%);
+  animation:insurnexFadeIn .4s ease;
+}
+html[data-theme="dark"] .screen{
+  background:linear-gradient(180deg,#101624 0%,var(--paper) 100%);
+}
+@keyframes insurnexFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Top bar */
+.app-topbar{
+  background:var(--gradient-navy);
+  padding:calc(16px + var(--safe-area-top)) 16px 15px;
+  box-shadow:0 10px 24px rgba(14,42,92,.16);
+}
+.brand-mark{
+  width:40px;height:40px;border-radius:13px;background:#fff;
+  box-shadow:0 7px 16px rgba(0,0,0,.12);
+  border:1px solid rgba(255,255,255,.45);
+}
+.icon-btn{
+  width:34px;height:34px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.09);
+}
+.notification-btn i{
+  background:var(--gold);
+  box-shadow:0 0 0 3px rgba(242,189,99,.18);
+}
+
+/* Page headers */
+.page-head{
+  padding:18px 16px 14px;
+  background:var(--card);
+  border-bottom:1px solid var(--line);
+}
+.page-head h1,.page-head h3{color:var(--navy)}
+.eyebrow,.section-caption{color:var(--gold)}
+
+/* Cards / dashboard */
+.card,.stat,.home-quick-card,.mobile-record-card{
+  background:var(--gradient-card);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+.card{border-radius:18px;padding:14px}
+.stat{border-radius:16px}
+.home-quick-card{border-radius:18px}
+.home-quick-card:hover,.card:hover{
+  box-shadow:var(--shadow-lg);
+}
+.hero{
+  background:radial-gradient(circle at 90% -20%,rgba(242,189,99,.24),transparent 35%),var(--gradient-navy);
+  border-radius:22px;
+  box-shadow:0 12px 30px rgba(14,42,92,.18);
+}
+.qicon.navy{background:#E7EFFA;color:var(--navy)}
+.qicon.blue{background:#E3F0FF;color:#1A6BC4}
+.qicon.purple{background:var(--purple-light);color:var(--purple)}
+.qicon.gold{background:var(--gold-soft);color:#8A6D1B}
+.qicon.red{background:var(--red-light);color:var(--red)}
+.qicon.green{background:var(--green-light);color:var(--green)}
+
+/* Buttons */
+.btn{
+  border-radius:var(--radius-md);
+  transition:all var(--transition);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.btn:active{transform:scale(.97)}
+.btn-primary{
+  background:var(--gradient-navy);
+  box-shadow:0 8px 18px rgba(14,42,92,.18);
+}
+.btn-secondary,.btn-accent{
+  background:var(--gradient-gold);
+  color:var(--navy);
+  box-shadow:0 8px 18px rgba(242,189,99,.25);
+}
+.btn-outline{
+  background:var(--card);
+  border:1.5px solid var(--line);
+}
+.btn-outline:hover{border-color:var(--gold)}
+.btn-danger{background:var(--red)}
+
+/* Forms */
+.field input,.field select,.field textarea{
+  border-radius:var(--radius-sm);
+  background:#F9FBFE;
+  transition:all var(--transition);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(242,189,99,.15);
+  background:var(--card);
+}
+html[data-theme="dark"] .field input,
+html[data-theme="dark"] .field select,
+html[data-theme="dark"] .field textarea{
+  background:#1A2236;color:var(--slate);border-color:var(--line);
+}
+
+/* Auth */
+.auth-screen{
+  background:radial-gradient(circle at 88% -18%,rgba(242,189,99,.22),transparent 34%),
+             linear-gradient(180deg,var(--navy) 0 38%,var(--paper) 38% 100%);
+}
+.auth-hero{color:#fff}
+.auth-kicker,.section-caption{color:var(--gold)}
+.auth-panel{
+  background:var(--card);
+  border:1px solid rgba(14,42,92,.08);
+  border-radius:28px;
+  box-shadow:var(--shadow-xl);
+}
+.auth-mini-mark{
+  background:var(--gradient-navy);
+  box-shadow:0 8px 18px rgba(14,42,92,.16);
+}
+.auth-company{
+  background:var(--paper);
+  border-color:var(--line);
+}
+
+/* Bottom navigation */
+.bottom-nav{
+  background:rgba(255,255,255,.98);
+  border-top:1px solid var(--line);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+html[data-theme="dark"] .bottom-nav{background:rgba(10,14,26,.98)}
+.bottom-nav button{color:#9BA8B8}
+.bottom-nav button.active{color:var(--navy)}
+.bottom-nav button.active:after{
+  background:var(--gold);
+  box-shadow:0 0 10px rgba(242,189,99,.4);
+}
+
+/* Drawer / modal */
+.drawer,.modal{
+  background:rgba(7,29,64,.6);
+  backdrop-filter:blur(4px);
+}
+.drawer-panel,.modal-panel{
+  background:var(--paper);
+  border-radius:26px 26px 0 0;
+  box-shadow:0 -18px 50px rgba(0,0,0,.2);
+}
+.drawer-workspace{
+  background:var(--card);border-color:var(--line);border-radius:16px;
+}
+.workspace-icon{
+  background:var(--gold-soft);color:#8A6D1B;
+}
+.drawer-link:hover{background:#EEF4FA}
+.close{
+  background:var(--card);border-color:var(--line);color:var(--slate);
+}
+.modal-head h3{color:var(--navy)}
+
+/* Badges / states */
+.badge.success,.badge.ok{background:var(--green-light);color:var(--green)}
+.badge.warn{background:var(--red-light);color:var(--red)}
+.badge.gold{background:var(--gold-soft);color:#8A6D1B}
+.badge.blue{background:#E3F0FF;color:#1A6BC4}
+.badge.purple{background:var(--purple-light);color:var(--purple)}
+
+/* Keep InsurNex functional UI free from legacy animated icon loops */
+.app-icon.animated,.app-icon.bounce,.app-icon.float,.app-icon.spin{
+  animation:none!important;
+  transform-origin:50% 50%;
+}
+</style>
+</head><body><div id="toastHost"></div><div id="app"></div><div id="modal" class="modal"><div class="modal-panel"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.js"></script>
+<script>if(!(window.firebase))document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"><\/script>');</script>
+<script>if(!(window.firebase))document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>');</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.js"></script>
+<script>if(!(window.firebase&&firebase.auth))document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"><\/script>');</script>
+<script>if(!(window.firebase&&firebase.auth))document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"><\/script>');</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.js"></script>
+<script>if(!(window.firebase&&firebase.firestore))document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js"><\/script>');</script>
+<script>if(!(window.firebase&&firebase.firestore))document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"><\/script>');</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-functions-compat.js"></script>
+<script>if(!(window.firebase&&firebase.storage))document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-storage-compat.js"><\/script>');</script>
+<script>if(!(window.firebase&&firebase.storage))document.write('<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"><\/script>');</script>
 <script>window.INSURNEX_CONFIG = { firebase: { apiKey: "AIzaSyCAM6QLAwB5nE_naV7pIRN6N8DnUir14Iw", authDomain: "insurnex-8a9df.firebaseapp.com", projectId: "insurnex-8a9df", storageBucket: "insurnex-8a9df.firebasestorage.app", messagingSenderId: "487585634264", appId: "1:487585634264:web:dc1e8f82a2ca94bf8484ad" }, app: { name:"InsurNex", version:"1.0.0", environment:"production" } };</script>
 <script>(() => {
   try {
@@ -78,13 +345,13 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       mobile:"رقم الهاتف", country:"الدولة", city:"المدينة", accountType:"نوع الحساب", companyName:"اسم الشركة",
       individualBroker:"وسيط تأمين فردي", brokerageCompany:"شركة وساطة", brokerEmployee:"موظف شركة",
       manager:"مدير", customer:"عميل", admin:"مدير المنصة",
-      personalWorkspace:"المساحة الشخصية", organizationWorkspace:"مساحة المؤسسة", switchWorkspace:"تبديل المساحة",
+      personalWorkspace:"المساحة الشخصية", organizationWorkspace:"مساحة المؤسسة", switchWorkspace:"تبديل المساحة", createCompany:"إنشاء شركة وساطة", companyWizardIntro:"أنشئ شركتك وانقل بياناتك الشخصية إليها بأمان. لن يُحذف أي شيء، ويمكن الرجوع للأصل.", moveData:"نقل بياناتي الحالية (عملاء، عملاء محتملون، وثائق، عروض، مطالبات، مهام) إلى الشركة", companyCreated:"تم إنشاء الشركة وربط بياناتك", companyName2:"اسم الشركة", licenseNo:"رقم الترخيص", alreadyCompany:"لديك شركة بالفعل", moving:"جارٍ ربط البيانات…",
       save:"حفظ", cancel:"إلغاء", add:"إضافة", edit:"تعديل", delete:"حذف", search:"بحث", loading:"جاري التحميل...",
       retry:"إعادة المحاولة", close:"إغلاق", empty:"لا توجد بيانات بعد", saved:"تم الحفظ بنجاح.", deleted:"تم الحذف بنجاح.",
       noPermission:"ليس لديك صلاحية للوصول إلى هذه البيانات.", network:"تعذر الاتصال بالخدمة. تحقق من الاتصال وحاول مرة أخرى.",
       invalidEmail:"البريد الإلكتروني غير صالح.", invalidPassword:"كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
       passwordsMismatch:"كلمتا المرور غير متطابقتين.", accountCreated:"تم إنشاء الحساب. أكمل إعداد مساحة العمل.",
-      resetSent:"تم إرسال رابط استعادة كلمة المرور.", verifyEmail:"يرجى توثيق بريدك الإلكتروني أولًا ثم تسجيل الدخول مرة أخرى.",
+      resetSent:"تم إرسال رابط استعادة كلمة المرور.", verifyEmail:"يمكنك تسجيل الدخول مباشرة بعد إنشاء الحساب.",
       brokerLicense:"رقم ترخيص الوسيط", legalName:"الاسم القانوني", registrationNumber:"رقم التسجيل",
       address:"العنوان", website:"الموقع الإلكتروني", employees:"عدد الموظفين", specialization:"التخصص",
       insuranceLines:"أنواع التأمين", nationalId:"الرقم القومي/جواز السفر", dateOfBirth:"تاريخ الميلاد", gender:"الجنس",
@@ -130,7 +397,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       mobile:"Mobile", country:"Country", city:"City", accountType:"Account type", companyName:"Company name",
       individualBroker:"Individual Broker", brokerageCompany:"Brokerage Company", brokerEmployee:"Broker Employee",
       manager:"Manager", customer:"Customer", admin:"Platform Admin", personalWorkspace:"Personal Workspace",
-      organizationWorkspace:"Organization Workspace", switchWorkspace:"Switch workspace", save:"Save", cancel:"Cancel",
+      organizationWorkspace:"Organization Workspace", switchWorkspace:"Switch workspace", createCompany:"Create brokerage company", companyWizardIntro:"Create your company and safely move your personal data into it. Nothing is deleted and the original workspace is recorded.", moveData:"Move my existing data (clients, leads, policies, quotes, claims, tasks, documents) to the company", companyCreated:"Company created and data linked", companyName2:"Company name", licenseNo:"License number", alreadyCompany:"You already own a company", moving:"Linking data…", save:"Save", cancel:"Cancel",
       add:"Add", edit:"Edit", delete:"Delete", search:"Search", loading:"Loading...", retry:"Retry",
       close:"Close", empty:"No data yet", saved:"Saved successfully.", deleted:"Deleted successfully.",
       noPermission:"You do not have permission to access this data.", network:"Service unavailable. Check your connection and retry.",
@@ -292,6 +559,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     const u=auth.currentUser;
     state.user=u;
     if(!u){state.profile=null;state.memberships=[];return null;}
+    state.adminRole=null;
+    for(const col of ["admins","admin"]){try{const a=await db.collection(col).doc(u.uid).get();
+      if(a.exists&&a.data().status!=="disabled"&&a.data().active!==false){state.adminRole=a.data().role||"platformAdmin";break;}}catch(_){}}
     const userRef=db.collection("users").doc(u.uid);
     const snap=await userRef.get();
     if(!snap.exists){
@@ -424,7 +694,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     leads:{title:"leads",icon:"🎯",collection:"leads",fields:[
       ["fullName","name","text"],["phone","mobile","tel"],["email","email","email"],["source","source","select","Website,Facebook,Instagram,WhatsApp,Referral,Phone,Email,Advertisement,Existing Customer,Other"],
       ["insuranceType","type","text"],["estimatedPremium","expectedPremium","number"],["priority","priority","select","hot,warm,cold"],
-      ["stage","stage","select","New,Contacted,Qualified,Quotation,Negotiation,Won,Lost"],["expectedCloseDate","closingDate","date"]
+      ["stage","stage","select","New,Contacted,Qualified,Proposal,Quotation,Negotiation,Won,Lost"],["expectedCloseDate","closingDate","date"]
     ]},
     opportunities:{title:"opportunities",icon:"💼",collection:"opportunities",fields:[
       ["customerName","customers","text"],["insuranceType","type","text"],["product","product","text"],["insurer","insurer","text"],
@@ -434,7 +704,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     quotations:{title:"quotations",icon:"📑",collection:"quotations",fields:[
       ["customerName","customers","text"],["product","product","text"],["insurer","insurer","text"],["coverage","coverage","textarea"],
       ["sumInsured","sumInsured","number"],["premium","premium","number"],["deductible","deductible","number"],["commissionAmount","commission","number"],
-      ["validUntil","validity","date"],["status","status","select","Draft,Sent,Viewed,Accepted,Rejected,Expired"]
+      ["validUntil","validity","date"],["status","status","select","Draft,Requested,Received,Sent,Sent to Client,Viewed,Accepted,Rejected,Expired"]
     ]},
     policies:{title:"policies",icon:"🛡️",collection:"policies",fields:[
       ["policyNumber","policyNumber","text"],["customerName","customers","text"],["insurer","insurer","text"],["product","product","text"],
@@ -444,13 +714,13 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     ]},
     renewals:{title:"renewals",icon:"🔄",collection:"renewals",fields:[
       ["policyNumber","policyNumber","text"],["customerName","customers","text"],["expiryDate","expiryDate","date"],
-      ["stage","stage","select","90 Days,60 Days,45 Days,30 Days,15 Days,7 Days,Expired"],["status","status","select","Open,In Progress,Renewed,Lost,Expired"],
+      ["stage","stage","select","90 Days,60 Days,45 Days,30 Days,15 Days,7 Days,1 Day,Expired"],["status","status","select","Open,In Progress,Renewed,Lost,Expired"],
       ["assignedBrokerName","assignedBroker","text"],["notes","notes","textarea"]
     ]},
     claims:{title:"claims",icon:"🧾",collection:"claims",fields:[
       ["claimNumber","claimNumber","text"],["customerName","customers","text"],["policyNumber","policyNumber","text"],["insurer","insurer","text"],
       ["claimType","claimType","text"],["dateOfLoss","lossDate","date"],["amount","claimAmount","number"],
-      ["status","status","select","Reported,Under Review,Documents Required,Submitted,Under Assessment,Approved,Rejected,Settled,Closed"],["description","description","textarea"]
+      ["status","status","select","New,Reported,Under Review,Documents Required,Submitted,Under Assessment,Approved,Rejected,Settled,Closed"],["description","description","textarea"]
     ]},
     tasks:{title:"tasks",icon:"✅",collection:"tasks",fields:[
       ["title","title","text"],["description","description","textarea"],["dueDate","dueDate","date"],["priority","priority","select","low,medium,high,urgent"],
@@ -512,6 +782,14 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   }
 })();</script>
 <script>(function(){
+  if(!window.__INSURNEX_BOOT_ERROR&&window.InsurNexBootOK!==false&&window.firebase)return;
+  var ar=(localStorage.getItem("insurnex-locale")||navigator.language||"ar").indexOf("ar")===0;
+  var msg=window.__INSURNEX_BOOT_ERROR||"firebase is not defined";
+  document.getElementById("app").innerHTML='<div style="max-width:420px;margin:12vh auto;padding:24px;font-family:Tajawal,system-ui,sans-serif;text-align:center;direction:'+(ar?'rtl':'ltr')+'"><h2>'+(ar?"تعذّر الاتصال بخدمات InsurNex":"Can't reach InsurNex services")+'</h2><p style="color:#718096;line-height:1.7">'+(ar?"تعذّر تحميل مكتبات Firebase. تأكد من اتصال الإنترنت وأن الصفحة تعمل عبر رابط https أو localhost (وليس داخل معاينة محجوبة)، ثم أعد المحاولة.":"Firebase libraries failed to load. Check your connection and open the app over https or localhost (not inside a restricted preview), then retry.")+'</p><button onclick="location.reload()" style="padding:12px 22px;border:0;border-radius:12px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer">'+(ar?"إعادة المحاولة":"Retry")+'</button><p dir="ltr" style="font-size:11px;color:#a0aec0;margin-top:16px">'+String(msg).replace(/</g,"&lt;")+'</p></div>';
+  window.__INSURNEX_HALT=true;
+})();</script>
+<script>(function(){
+  if(window.__INSURNEX_HALT)return;
   document.documentElement.setAttribute("data-theme", localStorage.getItem("insurnex-theme") === "dark" ? "dark" : "light");
   document.body.classList.add("insurnex-user");
   if (!window.InsurNex || !window.InsurNex.auth) {
@@ -555,10 +833,8 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 
   function accountTypeOptions(){
     return '<option value="individual_broker">'+t("individualBroker")+'</option>'+
-      '<option value="brokerage_company">'+t("brokerageCompany")+'</option>'+
-      '<option value="broker_employee">'+t("brokerEmployee")+'</option>'+
-      '<option value="manager">'+t("manager")+'</option>'+
-      '<option value="customer">'+t("customer")+'</option>';
+      '<option value="brokerage_office">'+t("brokerageOffice")+'</option>'+
+      '<option value="brokerage_company">'+t("brokerageCompany")+'</option>';
   }
 
   function authPage(mode,error){
@@ -647,7 +923,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     registrationInProgress=true;
     var c=await auth.createUserWithEmailAndPassword(String(f.get("email")).trim(),password);
     var uid=c.user.uid,type=String(f.get("accountType")||"individual_broker"),batch=db.batch();
-    var roles=type==="brokerage_company"?["organizationOwner","broker"]:
+    var roles=(type==="brokerage_company"||type==="brokerage_office")?["organizationOwner","broker"]:
       type==="manager"?["manager"]:
       type==="customer"?["customer"]:["broker"];
     var fullName=String(f.get("name")||""),phone=String(f.get("mobile")||"");
@@ -665,10 +941,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     var createdWorkspace=null;
-    if(type==="brokerage_company"){
+    if(type==="brokerage_company"||type==="brokerage_office"){
       var org=db.collection("organizations").doc(),name=String(f.get("name")||f.get("legalName")||"InsurNex Brokerage");
       batch.set(org,{
-        name:name,legalName:String(f.get("legalName")||name),type:"brokerage_company",ownerId:uid,licenseNumber:String(f.get("companyLicense")||""),
+        name:name,legalName:String(f.get("legalName")||name),type:type,ownerId:uid,licenseNumber:String(f.get("companyLicense")||""),
         registrationNumber:String(f.get("registrationNumber")||""),country:String(f.get("country")||""),
         city:String(f.get("city")||""),phone:phone,email:String(f.get("email")||c.user.email||""),subscriptionId:null,
         address:String(f.get("companyAddress")||""),website:String(f.get("website")||""),
@@ -721,8 +997,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       insuranceProducts:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>',
       commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1.5 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>',
       communications:'<path d="M4 5h16v11H7l-3 3z"/><path d="M8 9h8M8 13h5"/>',
-      reports:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',
-      analytics:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-3M12 16V7M16 16v-5"/>',
+      reports:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',      analytics:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-3M12 16V7M16 16v-5"/>',
       team:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
       notifications:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
       subscriptions:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/>',
@@ -1065,9 +1340,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       var key=f[0],lab=f[1],type=f[2],opts=f[3],value=row[key]??"";
       if(type==="textarea")return '<div class="field" style="grid-column:1/-1"><label>'+localLabel(lab)+'</label><textarea name="'+key+'">'+esc(value)+'</textarea></div>';
       if(type==="select")return '<div class="field"><label>'+localLabel(lab)+'</label><select name="'+key+'">'+String(opts).split(",").map(function(o){return '<option value="'+esc(o.trim())+'" '+(String(value)===o.trim()?"selected":"")+'>'+esc(o.trim())+'</option>';}).join("")+'</select></div>';
-      return '<div class="field"><label>'+localLabel(lab)+'</label><input type="'+type+'" name="'+key+'" value="'+esc(value)+'"></div>';
+      return '<div class="field"><label>'+localLabel(lab)+'</label><input type="'+type+'" name="'+key+'" value="'+esc(value)+'"'+(c==="customers"&&key==="fullName"?' required minlength="2" autocomplete="name"':'')+'></div>';
     }).join("")+'</div><div class="form-actions"><button type="button" class="btn" data-close-modal>'+t("cancel")+
-      '</button><button class="btn btn-primary">'+t("save")+'</button></div></form>';
+      '</button><button type="submit" class="btn btn-primary">'+t("save")+'</button></div></form>';
   }
 
   async function edit(viewName,id){
@@ -1075,9 +1350,17 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
     if(!id&&!InsurNex.can(viewName,"write")){toast(t("noPermission"),"error");return;}
     var cached=state.cache.get(def.collection)||[],row=id?(cached.find(function(x){return x.id===id;})||{}):{};
     modal(id?t("edit"):t("add"),formHtml(viewName,row));
-    document.getElementById("recordForm").onsubmit=async function(e){
-      e.preventDefault();var f=new FormData(e.currentTarget),d={};
-      def.fields.forEach(function(x){var v=f.get(x[0]);d[x[0]]=x[2]==="number"&&v!==""?Number(v):v;});
+    var recordForm=document.getElementById("recordForm");if(!recordForm)return;
+    recordForm.onsubmit=async function(e){
+      e.preventDefault();if(recordForm.dataset.saving==="1")return;
+      var submit=recordForm.querySelector('button[type="submit"]');
+      recordForm.dataset.saving="1";if(submit){submit.disabled=true;submit.setAttribute("aria-busy","true");}
+      var f=new FormData(recordForm),d={};
+      def.fields.forEach(function(x){var v=f.get(x[0]);if(typeof v==="string")v=v.trim();d[x[0]]=x[2]==="number"&&v!==""?Number(v):v;});
+      if(def.collection==="customers"&&(!d.fullName||d.fullName.length<2)){
+        toast(InsurNex.locale()==="ar"?"يرجى إدخال اسم العميل (حرفان على الأقل).":"Enter the customer name (at least 2 characters).","error");
+        recordForm.dataset.saving="0";if(submit){submit.disabled=false;submit.removeAttribute("aria-busy");}return;
+      }
       try{
         if(id){
           var existing=row;await db.collection(def.collection).doc(id).update(Object.assign({},d,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));
@@ -1095,8 +1378,12 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
             }));
           }
         }
-        state.cache.clear();closeModal();toast(t("saved"));render();
-      }catch(err){toast(friendlyError(err),"error");}
+        state.cache.clear();closeModal();toast(t("saved"));await render();
+      }catch(err){
+        console.error("InsurNex record save failed",{collection:def.collection,code:err&&err.code,error:err});
+        toast(friendlyError(err),"error");
+        recordForm.dataset.saving="0";if(submit){submit.disabled=false;submit.removeAttribute("aria-busy");}
+      }
     };
   }
 
@@ -1233,7 +1520,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   function account(){
     var p=state.profile||{};
     return '<div class="page-head"><div><div class="eyebrow">⚙️ '+t("account")+'</div><h1>'+t("profile")+'</h1></div>'+
-      '<div class="actions"><button class="btn btn-primary" id="profileEdit">'+t("edit")+'</button></div></div>'+
+      '<div class="actions"><button class="btn" id="createCompany">'+t("createCompany")+'</button> <button class="btn btn-primary" id="profileEdit">'+t("edit")+'</button></div></div>'+
       '<div class="grid grid-2"><div class="card"><h3>'+esc(p.name||"")+'</h3><div class="muted">'+esc(state.user.email||"")+'</div>'+
       '<div class="list" style="margin-top:12px"><div class="list-row"><span>'+t("mobile")+'</span><strong>'+esc(p.mobile||"—")+'</strong></div>'+
       '<div class="list-row"><span>'+t("accountType")+'</span><strong>'+esc(p.accountType||"—")+'</strong></div>'+
@@ -1250,6 +1537,51 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
       '<div class="list-row"><span>'+t("security")+'</span><span class="badge success">RBAC</span></div>'+
       '<div class="list-row"><span>'+t("legalDisclaimer")+'</span><span class="muted">Configurable by Admin</span></div></div></div>';
   }
+
+
+  // ---- Individual Broker -> Brokerage Company (non-destructive, reversible) ----
+  var MIGRATE_COLLECTIONS=["customers","leads","opportunities","quotations","policies","renewals","claims","tasks","calendarEvents","documents","commissions","communications","payments","activities"];
+  function companyWizard(){
+    var p=state.profile||{},owned=(state.memberships||[]).some(function(m){return m.role==="organizationOwner";});
+    if(owned){toast(t("alreadyCompany"),"error");return;}
+    modal(t("createCompany"),'<form id="companyForm" class="form-stack"><p class="muted">'+t("companyWizardIntro")+'</p>'+
+      '<div class="form-grid"><div class="field"><label>'+t("companyName2")+'</label><input name="name" required minlength="2"></div>'+
+      '<div class="field"><label>'+t("licenseNo")+'</label><input name="licenseNumber"></div>'+
+      '<div class="field"><label>'+t("country")+'</label><input name="country" value="'+esc(p.country||"")+'"></div>'+
+      '<div class="field"><label>'+t("city")+'</label><input name="city" value="'+esc(p.city||"")+'"></div></div>'+
+      '<label class="list-row"><input type="checkbox" name="move" checked> <span>'+t("moveData")+'</span></label>'+
+      '<button class="btn btn-primary" id="companySubmit">'+t("save")+'</button></form>');
+    document.getElementById("companyForm").onsubmit=async function(e){
+      e.preventDefault();var btn=document.getElementById("companySubmit");btn.disabled=true;btn.textContent=t("moving");
+      try{
+        var f=new FormData(e.currentTarget),uid=auth.currentUser.uid,TS=firebase.firestore.FieldValue.serverTimestamp(),name=String(f.get("name")).trim();
+        var org=db.collection("organizations").doc(),b=db.batch();
+        b.set(org,{name:name,legalName:name,type:"brokerage_company",ownerId:uid,licenseNumber:String(f.get("licenseNumber")||""),country:String(f.get("country")||""),city:String(f.get("city")||""),phone:p.phone||p.mobile||"",email:state.user.email||"",subscriptionId:null,status:"active",createdAt:TS,updatedAt:TS});
+        b.set(db.collection("organizationMembers").doc(org.id+"_"+uid),{organizationId:org.id,organizationName:name,userId:uid,role:"organizationOwner",status:"active",createdAt:TS,updatedAt:TS});
+        // additive user update: previous values are preserved
+        b.update(db.collection("users").doc(uid),{organizationId:org.id,previousAccountType:p.accountType||"individual_broker",accountType:"brokerage_company",updatedAt:TS});
+        await b.commit();
+        var moved=0;
+        if(f.get("move")){
+          for(var i=0;i<MIGRATE_COLLECTIONS.length;i++){
+            var c=MIGRATE_COLLECTIONS[i],snap;
+            try{snap=await db.collection(c).where("ownerId","==",uid).where("workspaceType","==","personal").limit(450).get();}catch(_){continue;}
+            if(snap.empty)continue;var mb=db.batch();
+            snap.forEach(function(d){mb.update(d.ref,{organizationId:org.id,workspaceType:"organization",migratedFrom:{workspaceType:"personal",at:new Date().toISOString(),organizationId:org.id},updatedAt:TS});moved++;});
+            await mb.commit();
+          }
+        }
+        await InsurNex.writeAudit("create_company","organization",org.id,{movedDocuments:moved,moveRequested:!!f.get("move")});
+        await InsurNex.logActivity("company_created",name,{organizationId:org.id,moved:moved});
+        InsurNex.setWorkspace({type:"organization",id:org.id,name:name});
+        await InsurNex.loadIdentity();closeModal();toast(t("companyCreated")+" ("+moved+")");shell();render();
+      }catch(err){btn.disabled=false;btn.textContent=t("save");toast(friendlyError(err),"error");}
+    };
+  }
+  function friendlyError(e){var c=(e&&e.code)||"";
+    if(c.indexOf("permission-denied")>-1)return InsurNex.locale()==="ar"?"ليس لديك صلاحية لتنفيذ هذا الإجراء.":"You don't have permission to perform this action.";
+    if(c.indexOf("unavailable")>-1||!navigator.onLine)return InsurNex.locale()==="ar"?"لا يوجد اتصال بالإنترنت.":"You appear to be offline.";
+    return InsurNex.locale()==="ar"?"حدث خطأ غير متوقع، حاول مرة أخرى.":"Something went wrong. Please try again.";}
 
   function profileEdit(){
     var p=state.profile||{};
@@ -1275,14 +1607,16 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   function wire(){
     var s=document.getElementById("search");
     if(s)s.oninput=function(){search=this.value;render();};
-    document.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){edit(b.dataset.add,null);};});
+    document.querySelectorAll("[data-add]").forEach(function(b){b.type="button";b.onclick=null;});
     document.querySelectorAll("[data-edit]").forEach(function(b){var p=b.dataset.edit.split(":");b.onclick=function(){edit(p[0],p[1]);};});
     document.querySelectorAll("[data-del]").forEach(function(b){var p=b.dataset.del.split(":");b.onclick=function(){del(p[0],p[1]);};});
     document.querySelectorAll("[data-customer]").forEach(function(b){b.onclick=function(){customer360(b.dataset.customer);};});
     document.querySelectorAll("[data-workspace]").forEach(function(b){b.onclick=function(){try{InsurNex.setWorkspace(JSON.parse(b.dataset.workspace));shell();render();}catch(e){}};});
     document.querySelectorAll("[data-route]").forEach(function(b){b.onclick=function(){navigate(b.dataset.route);};});
+    document.querySelectorAll("[data-csv]").forEach(function(b){if(b.dataset.csvWired)return;b.dataset.csvWired="1";b.onclick=async function(){try{var rows=await InsurNex.queryDocs(Domain[b.dataset.csv]?Domain[b.dataset.csv].collection:b.dataset.csv);csvExport(rows,"insurnex-"+b.dataset.csv+".csv");}catch(err){toast(friendlyError(err),"error");}};});
     document.getElementById("upload")?.addEventListener("click",upload);
     document.getElementById("profileEdit")?.addEventListener("click",profileEdit);
+    document.getElementById("createCompany")?.addEventListener("click",companyWizard);
     document.getElementById("langPage")?.addEventListener("click",function(){InsurNex.setLanguage(InsurNex.locale()==="ar"?"en":"ar");shell();render();});
     document.getElementById("themePage")?.addEventListener("click",function(){InsurNex.toggleTheme();shell();render();});
     document.getElementById("exportReport")?.addEventListener("click",async function(){var rows=await InsurNex.queryDocs("policies");csvExport(rows,"insurnex-report.csv");});
@@ -1292,11 +1626,20 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   async function globalSearch(){location.hash="global-search";view="global-search";await render();}
   async function logout(){await auth.signOut();location.hash="";authPage("login");}
 
-  document.addEventListener("click",function(e){if(e.target.matches("[data-close-modal]")||e.target.id==="modal")closeRecordModal();});
-  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(function(e){console.warn("InsurNex service worker unavailable",e);});}
+  document.addEventListener("click",function(e){
+    var addButton=e.target.closest&&e.target.closest("[data-add]");
+    if(addButton){
+      e.preventDefault();
+      var target=addButton.dataset.add;
+      Promise.resolve(edit(target,null)).catch(function(err){console.error("InsurNex open-add-form failed",err);toast(friendlyError(err),"error");});
+      return;
+    }
+    if((e.target.closest&&e.target.closest("[data-close-modal]"))||e.target.id==="modal")closeRecordModal();
+  });
+  if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("./sw.js").catch(function(e){console.warn("InsurNex service worker unavailable",e);});}
   authPage("login");
   auth.onAuthStateChanged(async function(user){
-    if(registrationInProgress)return;
+    if(registrationInProgress||window.__INSURNEX_REGISTERING)return;
     try{if(!user){authPage("login");return;}await InsurNex.loadIdentity();await enter();}
     catch(e){console.error(e);authPage("login",friendlyError(e));}
   });
@@ -1305,4 +1648,714 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   document.addEventListener("insurnex:theme",function(){if(state.user){shell();render();}else{var activeMode=document.querySelector("#authForm")?(document.querySelector("#accountType")?"register":"login"):"login";authPage(activeMode);}});
   document.addEventListener("insurnex:workspace",function(){if(state.user){shell();render();}});
 })();</script>
+
+<style id="insurnex-master-enhancements">
+  .master-tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .master-tool{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:13px;text-align:start;cursor:pointer;min-height:92px;box-shadow:0 8px 22px rgba(14,42,92,.05)}
+  .master-tool:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(14,42,92,.08)}
+  .master-tool .tool-icon{font-size:22px;margin-bottom:6px}.master-tool strong{display:block;color:var(--navy);font-size:12px}.master-tool small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:4px}
+  .master-insight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}.master-metric{border:1px solid var(--line);border-radius:16px;padding:11px;background:var(--card)}.master-metric .k{font-size:8px;color:var(--muted)}.master-metric .v{font-size:20px;font-weight:900;color:var(--navy);margin-top:4px}.master-note{font-size:9px;color:var(--muted);line-height:1.65}
+  .master-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#EEF4FA;color:var(--navy);font-size:8px;font-weight:900}.master-pill.warn{background:#FFF3E1;color:#8A5B12}.master-pill.danger{background:#FBE9E6;color:#963D30}.master-pill.success{background:#E8F6F0;color:#146949}
+  .master-score{font-size:25px;font-weight:900;color:var(--navy)}.master-score-label{font-size:8px;color:var(--muted)}
+  .master-table{width:100%;border-collapse:collapse;font-size:9px}.master-table th,.master-table td{padding:8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}.master-table th{color:var(--muted);font-weight:800}
+  .onboarding-shell{min-height:100%;padding:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--paper),#fff)}.onboarding-panel{width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 24px 70px rgba(7,29,64,.14)}.onboarding-step{font-size:8px;color:var(--gold);font-weight:900;letter-spacing:1px}.onboarding-panel h1{margin:5px 0 6px;color:var(--navy);font-size:21px}.onboarding-panel p{color:var(--muted);font-size:10px;line-height:1.7;margin:0 0 14px}.auth-type-note{margin-top:6px;font-size:8px;color:var(--muted);line-height:1.5}.auth-company{margin-top:10px;padding:11px;border:1px solid var(--line);border-radius:16px;background:rgba(245,248,252,.6)}
+  .operation-panel{display:grid;grid-template-columns:1fr;gap:12px}.operation-history .list-row{align-items:flex-start}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;flex:0 0 auto;margin-top:4px}
+  .file-drop{border:1px dashed #B8C6D8;border-radius:16px;padding:15px;text-align:center;background:#F8FAFD}.file-drop input{width:100%}
+  .report-block{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:12px}.report-block h4{margin:0 0 8px;color:var(--navy);font-size:11px}.report-block p,.report-block li{font-size:9px;line-height:1.65;color:var(--slate)}
+  .disabled-note{background:#F7F9FC;border:1px dashed var(--line);border-radius:14px;padding:10px;font-size:8px;color:var(--muted);line-height:1.6}
+  @media(max-width:420px){.master-tool-grid{grid-template-columns:1fr 1fr}.master-insight-grid{grid-template-columns:1fr 1fr}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script id="insurnex-master-enhancements-script">
+(function(){
+  "use strict";
+  if(!window.InsurNex)return;
+  const IN=window.InsurNex, db=IN.db, auth=IN.auth, storage=IN.storage, state=IN.state;
+  const enhancement={onboardingVisible:false,lastHomeStamp:0};
+  window.__INSURNEX_REGISTERING=false;
+  window.INSURNEX_AI=window.INSURNEX_AI||{enabled:false,analysisFunction:"insurnexAI",emailFunction:"sendBrokerEmail"};
+
+  const ADD_I18N={
+    ar:{
+      brokerageOffice:"مكتب وساطة تأمينية",chooseAccountType:"اختر نوع الحساب المناسب لنشاطك",officeInfo:"بيانات المكتب",dynamicSetup:"سيتم تخصيص الإعدادات حسب نوع الحساب.",
+      smartInsights:"الرؤى الذكية",operatingCenter:"مركز العمليات",aiTools:"أدوات الذكاء الاصطناعي",medicalAnalysis:"تحليل الاستهلاكات الطبية",aiAssistant:"المساعد التأميني الذكي",emailSettings:"إعدادات البريد",sendEmail:"إرسال بريد إلكتروني",emailHistory:"سجل البريد",
+      createTask:"إنشاء مهمة",uploadDocument:"رفع مستند",customerBehavior:"تحليل سلوك العميل",attentionRequired:"يحتاج متابعة",renewalIndicator:"مؤشر التجديد",engagementScore:"مؤشر التفاعل",activityScore:"مؤشر النشاط",retentionIndicator:"مؤشر الاحتفاظ",customerValue:"مؤشر قيمة العميل",crossSellIndicator:"فرصة البيع الإضافي",
+      dataDerived:"مؤشر مشتق من بيانات InsurNex وليس ضمانًا أو قرارًا مستقبليًا.",noBackend:"الخدمة الآمنة غير مفعلة بعد. يلزم Backend/Cloud Function قبل التنفيذ الفعلي.",brokerEmail:"بريد الوسيط",displayName:"اسم العرض",provider:"مزود البريد",verification:"حالة التحقق",notConfigured:"غير مُهيأ",verified:"تم التحقق",unverified:"غير متحقق",saveSettings:"حفظ إعدادات البريد",secureBackend:"الإرسال الآمن عبر Backend",draftEmail:"حفظ كمسودة",from:"من",to:"إلى",cc:"نسخة",bcc:"نسخة مخفية",subject:"الموضوع",message:"الرسالة",attachments:"المرفقات",confirmSend:"تأكيد الإرسال",sendNow:"إرسال الآن",reviewFirst:"مراجعة قبل الإرسال",
+      selectInsurer:"اختر شركة التأمين",selectContact:"اختر جهة الاتصال",directory:"دليل جهات الاتصال",department:"القسم",phone:"الهاتف",prepareDraft:"إعداد مسودة",emailRequired:"أضف بريد الوسيط أولًا.",emailVerifyRequired:"يجب أن يكون البريد موثقًا قبل الإرسال من خلال الخدمة الآمنة.",recipientRequired:"أضف مستلمًا صحيحًا.",subjectRequired:"أضف عنوان الرسالة.",backendRequired:"الإرسال الفعلي غير متاح لأن دالة Backend غير مفعلة.",draftSaved:"تم حفظ المسودة.",emailSent:"تم إرسال البريد وتسجيل العملية.",analysisReady:"تم إنشاء التحليل.",analysisSaved:"تم حفظ نتيجة التحليل.",uploadAndAnalyze:"رفع وتحليل",fileRequired:"اختر ملفًا.",fileTooLarge:"حجم الملف يتجاوز الحد المسموح.",tabularOnly:"التحليل الإحصائي المحلي يدعم CSV/Excel. PDF/صور تحتاج Backend/OCR آمن.",medicalDisclaimer:"هذا التحليل إحصائي/معلوماتي للبيانات المرفوعة فقط، وليس تشخيصًا أو قرارًا طبيًا أو علاجًا.",medicalReport:"تقرير الاستهلاكات الطبية",executiveSummary:"الملخص التنفيذي",spendingAnalysis:"تحليل المصروفات",utilizationAnalysis:"تحليل الاستخدام",trendAnalysis:"تحليل الاتجاهات",highFrequency:"الخدمات الأعلى تكرارًا",significantChanges:"التغيرات المهمة",anomalies:"الأنماط غير المعتادة",recommendations:"نقاط للمراجعة",selectCustomer:"اختر العميل",analysisStatus:"حالة التحليل",requested:"مطلوب Backend",localAnalysis:"تحليل جدولي محلي",smartAction:"إجراء ذكي",reviewLine1:"راجع الخدمات الأعلى تكرارًا والقيم المرتفعة قبل اتخاذ أي إجراء.",reviewLine2:"قارن الفترات الزمنية قبل اتخاذ قرارات الاكتتاب أو الخدمة.",reviewLine3:"استخدم النتيجة كأداة مراجعة للبيانات فقط.",summarizeCustomer:"تلخيص العميل",summarizePolicy:"تلخيص الوثيقة",summarizeClaim:"تلخيص المطالبة",createFollowup:"إنشاء Follow-up",draftFollowup:"صياغة متابعة",reviewAI:"مراجعة النتيجة قبل التنفيذ",noCustomerData:"لا توجد بيانات كافية لهذا العميل.",setupComplete:"إتمام إعداد الحساب",professionalDetails:"البيانات المهنية",specialties:"التخصصات",insuranceLines2:"فروع التأمين",licenseNumber2:"رقم الترخيص",organizationDetails:"بيانات المؤسسة",companyName3:"اسم المؤسسة",employeeCount:"عدد الموظفين",registrationNumber2:"رقم التسجيل",saveAndContinue:"حفظ ومتابعة",onboardingIntro:"أكمل البيانات الأساسية ليتم تجهيز مساحة العمل المناسبة لك.",workEmail:"بريد العمل",
+      operationsTitle:"مركز العمليات",operationsDesc:"تنفيذ ومتابعة العمليات اليومية للوسيط.",medicalDesc:"رفع وتحليل البيانات الطبية وفق البنية المتاحة مع ضوابط البيانات الحساسة.",aiDesc:"تلخيص وتحويل البيانات إلى إجراءات قابلة للمراجعة، دون تنفيذ حساس تلقائيًا.",emailDesc:"دليل جهات الاتصال، إعدادات البريد، ومسار الإرسال الآمن.",
+      noRecords:"لا توجد سجلات مرتبطة.",recordsFound:"سجلات",open:"فتح",close:"إغلاق"
+    },
+    en:{
+      brokerageOffice:"Insurance Brokerage Office",chooseAccountType:"Choose the account type that matches your business",officeInfo:"Office details",dynamicSetup:"Workspace setup will adapt to the selected account type.",
+      smartInsights:"Smart Insights",operatingCenter:"Operations Center",aiTools:"AI Tools",medicalAnalysis:"Medical Consumption Analysis",aiAssistant:"Insurance AI Assistant",emailSettings:"Email Settings",sendEmail:"Send Email",emailHistory:"Email History",
+      createTask:"Create Task",uploadDocument:"Upload Document",customerBehavior:"Customer Behavior Analytics",attentionRequired:"Attention Required",renewalIndicator:"Renewal Indicator",engagementScore:"Engagement Score",activityScore:"Activity Score",retentionIndicator:"Retention Indicator",customerValue:"Customer Value Indicator",crossSellIndicator:"Cross-sell Opportunity",
+      dataDerived:"Derived from InsurNex data; not a guarantee or a final future decision.",noBackend:"Secure service is not enabled yet. A Backend/Cloud Function is required before actual execution.",brokerEmail:"Broker Email",displayName:"Display Name",provider:"Email Provider",verification:"Verification Status",notConfigured:"Not configured",verified:"Verified",unverified:"Unverified",saveSettings:"Save Email Settings",secureBackend:"Secure Backend Delivery",draftEmail:"Save Draft",from:"From",to:"To",cc:"CC",bcc:"BCC",subject:"Subject",message:"Message",attachments:"Attachments",confirmSend:"Confirm Send",sendNow:"Send Now",reviewFirst:"Review Before Sending",
+      selectInsurer:"Select Insurance Company",selectContact:"Select Contact",directory:"Contact Directory",department:"Department",phone:"Phone",prepareDraft:"Prepare Draft",emailRequired:"Add the broker email first.",emailVerifyRequired:"The sender email must be verified before secure sending.",recipientRequired:"Add a valid recipient.",subjectRequired:"Add a subject.",backendRequired:"Actual sending is unavailable because the secure backend function is not enabled.",draftSaved:"Draft saved.",emailSent:"Email sent and logged.",analysisReady:"Analysis generated.",analysisSaved:"Analysis result saved.",uploadAndAnalyze:"Upload & Analyze",fileRequired:"Choose a file.",fileTooLarge:"File size exceeds the allowed limit.",tabularOnly:"Local statistical analysis supports CSV/Excel. PDF/images require secure Backend/OCR.",medicalDisclaimer:"This is statistical/informational analysis of the uploaded data only. It is not a diagnosis, medical decision, or treatment.",medicalReport:"Medical Consumption Report",executiveSummary:"Executive Summary",spendingAnalysis:"Spending Analysis",utilizationAnalysis:"Utilization Analysis",trendAnalysis:"Trend Analysis",highFrequency:"High-Frequency Services",significantChanges:"Significant Changes",anomalies:"Unusual Patterns",recommendations:"Items for Review",selectCustomer:"Select Customer",analysisStatus:"Analysis Status",requested:"Backend Required",localAnalysis:"Local Tabular Analysis",smartAction:"Smart Action",reviewLine1:"Review the highest-frequency services and high-value items before acting.",reviewLine2:"Compare time periods before making underwriting or service decisions.",reviewLine3:"Use the result as a data-review aid only.",summarizeCustomer:"Summarize Customer",summarizePolicy:"Summarize Policy",summarizeClaim:"Summarize Claim",createFollowup:"Create Follow-up",draftFollowup:"Draft Follow-up",reviewAI:"Review result before execution",noCustomerData:"There is not enough data for this customer.",setupComplete:"Complete account setup",professionalDetails:"Professional details",specialties:"Specialties",insuranceLines2:"Insurance lines",licenseNumber2:"License number",organizationDetails:"Organization details",companyName3:"Organization name",employeeCount:"Employee count",registrationNumber2:"Registration number",saveAndContinue:"Save & Continue",onboardingIntro:"Complete the core information so the workspace can be prepared for your account.",workEmail:"Work Email",
+      operationsTitle:"Operations Center",operationsDesc:"Execute and track the broker's daily work.",medicalDesc:"Upload and analyze medical data with controls for sensitive information.",aiDesc:"Summarize data into reviewable actions without automatic sensitive execution.",emailDesc:"Contact directory, email settings, and secure sending workflow.",
+      noRecords:"No linked records.",recordsFound:"records",open:"Open",close:"Close"
+    }
+  };
+  Object.keys(ADD_I18N).forEach(l=>Object.assign(IN.I18N[l],ADD_I18N[l]));
+  const tr=k=>IN.I18N[IN.locale()]?.[k]||IN.I18N.en[k]||k;
+  const esc=IN.esc, fmtDate=IN.fmtDate, fmtMoney=IN.fmtMoney;
+  const nowMs=()=>Date.now();
+  const toMs=v=>{try{if(!v)return 0;if(v.toMillis)return v.toMillis();if(v.toDate)return v.toDate().getTime();const x=new Date(v).getTime();return Number.isFinite(x)?x:0;}catch{return 0;}};
+  const norm=s=>String(s||"").trim().toLowerCase();
+  const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,Math.round(n)));
+
+  function setApp(html){const app=document.getElementById('app');if(app)app.innerHTML=html;}
+  function openModal(title,body){const m=document.getElementById('modal');if(!m)return;document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;m.classList.add('show');}
+  function closeModalSafe(){document.getElementById('modal')?.classList.remove('show');}
+  function go(route){location.hash='#'+route;}
+  function btn(label,route,icon){return `<button type="button" class="master-tool" data-master-route="${esc(route)}"><div class="tool-icon">${icon}</div><strong>${esc(label)}</strong><small>${esc(({operations:'',medical_ai:'',ai_assistant:'',email_settings:''}[route])||tr('smartAction'))}</small></button>`;}
+
+  function injectCustomNav(){
+    const sc=document.querySelector('.drawer-scroll');
+    if(!sc||sc.querySelector('[data-master-route="operations"]'))return;
+    sc.insertAdjacentHTML('beforeend',`<div class="drawer-section">${esc(tr('operatingCenter'))}</div>
+      <button class="drawer-link" data-master-route="operations"><span><span class="app-icon">⚙️</span><span>${esc(tr('operations'))}</span></span><span class="drawer-chevron">›</span></button>
+      <button class="drawer-link" data-master-route="medical-ai"><span><span class="app-icon">🩺</span><span>${esc(tr('medicalAnalysis'))}</span></span><span class="drawer-chevron">›</span></button>
+      <button class="drawer-link" data-master-route="ai-assistant"><span><span class="app-icon">🤖</span><span>${esc(tr('aiAssistant'))}</span></span><span class="drawer-chevron">›</span></button>`);
+  }
+
+  function authTypeEnhance(){
+    const sel=document.getElementById('accountType');
+    if(!sel)return;
+    if(!sel.dataset.masterEnhanced){
+      sel.innerHTML=`<option value="individual_broker">${esc(tr('individualBroker'))}</option><option value="brokerage_office">${esc(tr('brokerageOffice'))}</option><option value="brokerage_company">${esc(tr('brokerageCompany'))}</option>`;
+      const hint=document.createElement('div');hint.className='auth-type-note';hint.id='authTypeHint';sel.parentElement?.appendChild(hint);
+      sel.dataset.masterEnhanced='1';
+      sel.onchange=()=>updateAuthAccountType(sel.value);
+    }
+    updateAuthAccountType(sel.value);
+  }
+  function updateAuthAccountType(type){
+    const box=document.getElementById('companyFields');
+    const hint=document.getElementById('authTypeHint');
+    const office=(type==='brokerage_office'), company=(type==='brokerage_company');
+    if(box){box.style.display=(office||company)?'block':'none';const title=box.querySelector('.auth-section-title'),label=office?tr('officeInfo'):tr('companyInfo');if(title&&title.textContent!==label)title.textContent=label;}
+    if(hint && hint.textContent!==tr('dynamicSetup'))hint.textContent=tr('dynamicSetup');
+    const legal=document.querySelector('#companyFields input[name="legalName"]');
+    if(legal)legal.placeholder=office?tr('officeInfo'):tr('legalName');
+  }
+
+  function onboardingFields(type,p){
+    const org=type==='brokerage_office'||type==='brokerage_company';
+    return `<div class="form-grid">
+      <div class="field field-full"><label>${esc(tr('name'))}</label><input name="fullName" value="${esc(p.fullName||p.name||'')}" required></div>
+      <div class="field"><label>${esc(tr('mobile'))}</label><input name="mobile" value="${esc(p.mobile||p.phone||'')}" required></div>
+      <div class="field"><label>${esc(tr('country'))}</label><input name="country" value="${esc(p.country||'Egypt')}"></div>
+      <div class="field"><label>${esc(tr('city'))}</label><input name="city" value="${esc(p.city||'')}"></div>
+      <div class="field"><label>${esc(tr('licenseNumber2'))}</label><input name="licenseNumber" value="${esc(p.licenseNumber||'')}"></div>
+      <div class="field"><label>${esc(tr('specialties'))}</label><input name="specialization" value="${esc(p.specialization||'')}"></div>
+      <div class="field field-full"><label>${esc(tr('insuranceLines2'))}</label><input name="insuranceLines" value="${esc(Array.isArray(p.insuranceLines)?p.insuranceLines.join(', '):(p.insuranceLines||''))}"></div>
+      ${org?`<div class="field field-full"><label>${esc(tr('companyName3'))}</label><input name="organizationName" value="${esc(p.organizationName||p.companyName||'')}" required></div>
+      <div class="field"><label>${esc(tr('registrationNumber2'))}</label><input name="registrationNumber" value="${esc(p.registrationNumber||'')}"></div>
+      <div class="field"><label>${esc(tr('employeeCount'))}</label><input name="employeeCount" type="number" min="0" value="${esc(p.employeeCount||'')}"></div>`:''}
+      <div class="field"><label>${esc(tr('address'))}</label><input name="address" value="${esc(p.address||'')}"></div>
+      <div class="field"><label>${esc(tr('website'))}</label><input name="website" type="url" value="${esc(p.website||'')}"></div>
+    </div>`;
+  }
+
+  function showOnboarding(){
+    if(!state.user||!state.profile||state.profile.onboardingCompleted||enhancement.onboardingVisible)return;
+    enhancement.onboardingVisible=true;
+    const p=state.profile,type=p.accountType||'individual_broker';
+    setApp(`<div class="phone-shell auth-shell"><main class="screen active"><div class="onboarding-shell"><div class="onboarding-panel">
+      <div class="onboarding-step">INSURNEX · ${esc(tr('setupComplete').toUpperCase())}</div><h1>${esc(tr('onboarding'))}</h1><p>${esc(tr('onboardingIntro'))}</p>
+      <form id="masterOnboarding" class="form-stack">${onboardingFields(type,p)}
+      <div class="form-actions"><button class="btn btn-primary" id="onboardingSave">${esc(tr('saveAndContinue'))}</button></div></form>
+      </div></div></main></div>`);
+    document.getElementById('masterOnboarding').addEventListener('submit',async e=>{
+      e.preventDefault();const f=new FormData(e.currentTarget),uid=state.user.uid,button=document.getElementById('onboardingSave');button.disabled=true;button.innerHTML='<span class="button-spinner"></span>';
+      try{
+        const common={fullName:String(f.get('fullName')||'').trim(),name:String(f.get('fullName')||'').trim(),mobile:String(f.get('mobile')||'').trim(),phone:String(f.get('mobile')||'').trim(),country:String(f.get('country')||'').trim(),city:String(f.get('city')||'').trim(),address:String(f.get('address')||'').trim(),website:String(f.get('website')||'').trim(),licenseNumber:String(f.get('licenseNumber')||'').trim(),specialization:String(f.get('specialization')||'').trim(),insuranceLines:String(f.get('insuranceLines')||'').split(',').map(x=>x.trim()).filter(Boolean),onboardingCompleted:true,onboardingComplete:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+        await db.collection('users').doc(uid).update(common);
+        await db.collection('brokerProfiles').doc(uid).set({licenseNumber:common.licenseNumber,specialization:common.specialization,insuranceLines:common.insuranceLines,address:common.address,website:common.website,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        if(type==='brokerage_office'||type==='brokerage_company'){
+          const orgId=p.organizationId||state.memberships?.[0]?.organizationId;
+          if(orgId)await db.collection('organizations').doc(orgId).set({name:String(f.get('organizationName')||'').trim(),legalName:String(f.get('organizationName')||'').trim(),registrationNumber:String(f.get('registrationNumber')||'').trim(),employeeCount:Number(f.get('employeeCount')||0),licenseNumber:common.licenseNumber,country:common.country,city:common.city,address:common.address,website:common.website,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+        }
+        await IN.writeAudit('onboarding_completed','users',uid,{accountType:type});await IN.logActivity('onboarding_completed',uid,{accountType:type});
+        enhancement.onboardingVisible=false;await IN.loadIdentity();location.hash='#home';location.reload();
+      }catch(err){button.disabled=false;button.textContent=tr('saveAndContinue');IN.toast(err?.code?.includes('permission')?tr('noPermission'):(err?.message||tr('network')),'error');}
+    });
+  }
+
+  async function enhancedRegister(form){
+    // Keep the base auth listener from racing registration after Firebase creates the Auth user.
+    registrationInProgress=true;
+    window.__INSURNEX_REGISTERING=true;
+    const f=new FormData(form);
+    const password=String(f.get('password')||''),confirm=String(f.get('confirmPassword')||'');
+    const email=String(f.get('email')||'').trim().toLowerCase();
+    const type=String(f.get('accountType')||'individual_broker');
+    const submit=form.querySelector('.auth-submit');
+    try{
+      if(!email){const e=new Error('Email is required');e.code='auth/invalid-email';throw e;}
+      if(password.length<6){const e=new Error('Password must be at least 6 characters.');e.code='auth/weak-password';throw e;}
+      if(password!==confirm){const e=new Error('Passwords do not match.');e.code='auth/password-mismatch';throw e;}
+      const terms=form.querySelector('input[name="terms"]');
+      if(terms&&!terms.checked){const e=new Error('Terms agreement is required.');e.code='terms-required';throw e;}
+      if(submit){submit.disabled=true;submit.innerHTML='<span class="button-spinner"></span>' + tr('register')+'…';}
+
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      const c=await auth.createUserWithEmailAndPassword(email,password);
+      const uid=c.user.uid,TS=firebase.firestore.FieldValue.serverTimestamp();
+      const isOrg=type==='brokerage_office'||type==='brokerage_company';
+      const roles=isOrg?['organizationOwner','broker']:['broker'];
+      const role=isOrg?'broker_owner':'broker_owner';
+      const fullName=String(f.get('name')||'').trim();
+      const phone=String(f.get('mobile')||'').trim();
+      const userData={
+        uid,email:c.user.email,fullName,name:fullName,phone,mobile:phone,
+        country:String(f.get('country')||'').trim(),city:String(f.get('city')||'').trim(),accountType:type,
+        role,roles,organizationId:null,photoURL:c.user.photoURL||null,status:'active',emailVerified:!!c.user.emailVerified,
+        onboardingCompleted:false,onboardingComplete:false,createdAt:TS,updatedAt:TS
+      };
+      const batch=db.batch();
+      batch.set(db.collection('users').doc(uid),userData,{merge:true});
+      batch.set(db.collection('brokerProfiles').doc(uid),{
+        userId:uid,licenseNumber:String(f.get('companyLicense')||'').trim(),
+        specialization:String(f.get('specialization')||'').trim(),
+        companyName:String(f.get('legalName')||'').trim(),
+        createdAt:TS,updatedAt:TS
+      },{merge:true});
+      let createdWorkspace=null;
+      if(isOrg){
+        const org=db.collection('organizations').doc();
+        const orgName=String(f.get('legalName')||f.get('name')||tr('appName')).trim();
+        batch.set(org,{
+          name:orgName,legalName:orgName,type,ownerId:uid,
+          licenseNumber:String(f.get('companyLicense')||'').trim(),
+          registrationNumber:String(f.get('registrationNumber')||'').trim(),
+          country:String(f.get('country')||'').trim(),city:String(f.get('city')||'').trim(),
+          phone,email:c.user.email||'',status:'active',
+          address:String(f.get('companyAddress')||'').trim(),website:String(f.get('website')||'').trim(),
+          employeeCount:Number(f.get('employees')||0),primaryContact:fullName,
+          subscriptionId:null,createdAt:TS,updatedAt:TS
+        });
+        batch.set(db.collection('organizationMembers').doc(org.id+'_'+uid),{
+          organizationId:org.id,organizationName:orgName,userId:uid,role:'organizationOwner',status:'active',
+          createdAt:TS,updatedAt:TS
+        });
+        userData.organizationId=org.id;
+        batch.set(db.collection('users').doc(uid),{organizationId:org.id},{merge:true});
+        createdWorkspace={type:'organization',id:org.id,name:orgName};
+      }
+      await batch.commit();
+      if(createdWorkspace)IN.setWorkspace(createdWorkspace);
+      await IN.loadIdentity();
+      await IN.writeAudit('register','users',uid,{accountType:type});
+      await IN.logActivity('register','InsurNex account',{accountType:type});
+      IN.toast(tr('accountCreated'));
+      await enter();
+      registrationInProgress=false;
+      window.__INSURNEX_REGISTERING=false;
+    }catch(err){
+      registrationInProgress=false;
+      window.__INSURNEX_REGISTERING=false;
+      if(submit){submit.disabled=false;submit.innerHTML='<span>'+tr('register')+'</span>';}
+      const msg=(err&&err.code==='terms-required')?tr('termsAgreement'):(typeof friendlyError==='function'?friendlyError(err):(err?.message||tr('network')));
+      IN.toast(msg,'error');
+    }
+  }
+
+  function parseCSV(text){
+    const rows=[];let row=[],cell='',quote=false;
+    for(let i=0;i<text.length;i++){const ch=text[i],next=text[i+1];if(ch==='"'){if(quote&&next==='"'){cell+='"';i++;}else quote=!quote;}else if(ch===','&&!quote){row.push(cell);cell='';}else if((ch==='\n'||ch==='\r')&&!quote){if(ch==='\r'&&next==='\n')i++;row.push(cell);cell='';if(row.some(x=>String(x).trim()))rows.push(row);row=[];}else cell+=ch;}
+    row.push(cell);if(row.some(x=>String(x).trim()))rows.push(row);if(!rows.length)return [];
+    const headers=rows[0].map(x=>String(x).trim());return rows.slice(1).map(r=>Object.fromEntries(headers.map((h,i)=>[h,String(r[i]??'').trim()])));
+  }
+  function detectColumns(rows){
+    const headers=rows[0]?Object.keys(rows[0]):[];const choose=(rx)=>headers.find(h=>rx.test(norm(h)));
+    return {amount:choose(/amount|cost|expense|spend|value|total|paid|claim/),date:choose(/date|month|period|service.?date/),service:choose(/service|procedure|category|type|diagnosis|provider/)};
+  }
+  function numeric(v){const n=Number(String(v||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0;}
+  function buildMedicalReport(rows,customer){
+    const c=detectColumns(rows),amounts=rows.map(r=>numeric(r[c.amount])).filter(n=>n>0),total=amounts.reduce((a,b)=>a+b,0),mean=amounts.length?total/amounts.length:0;
+    const freq={};rows.forEach(r=>{const k=c.service?String(r[c.service]||'Unknown').trim():'Unknown';freq[k]=(freq[k]||0)+1;});
+    const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    const spendByService={};if(c.service&&c.amount){rows.forEach(r=>{const k=String(r[c.service]||'Unknown').trim();spendByService[k]=(spendByService[k]||0)+numeric(r[c.amount]);});}
+    const topSpend=Object.entries(spendByService).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const anomalies=[];if(amounts.length>=5){const sorted=[...amounts].sort((a,b)=>a-b),q1=sorted[Math.floor((sorted.length-1)*.25)],q3=sorted[Math.floor((sorted.length-1)*.75)],iqr=q3-q1,upper=q3+1.5*iqr;rows.forEach((r,i)=>{const n=numeric(r[c.amount]);if(n>upper&&n>0)anomalies.push({index:i+1,amount:n});});}
+    let periodText=tr('noRecords');if(c.date){const periods={};rows.forEach(r=>{const d=new Date(r[c.date]);if(!Number.isNaN(d.getTime())){const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');periods[k]=(periods[k]||0)+numeric(r[c.amount]);}});const keys=Object.keys(periods).sort();if(keys.length>=2){const a=periods[keys[keys.length-2]],b=periods[keys[keys.length-1]];const change=a?((b-a)/a*100):0;periodText=`${esc(keys[keys.length-2])} → ${esc(keys[keys.length-1])}: ${change>=0?'+':''}${change.toFixed(1)}%`;} }
+    return {customerId:customer?.id||null,customerName:customer?.fullName||customer?.name||'',rows:rows.length,totalSpend:total,averageSpend:mean,uniqueServices:Object.keys(freq).length,topFrequency:top,topSpend,periodText,anomalies:anomalies.slice(0,20),columns:c,generatedAt:new Date().toISOString()};
+  }
+  function medicalReportHTML(r, local){
+    return `<div class="report-block"><h4>${esc(tr('executiveSummary'))}</h4><p>${esc(r.customerName||tr('noCustomerData'))}: ${r.rows} records. ${r.totalSpend?esc(tr('spendingAnalysis'))+': '+esc(fmtMoney(r.totalSpend)):''}</p></div>
+    <div class="report-block"><h4>${esc(tr('spendingAnalysis'))}</h4><p>Total: <strong>${esc(fmtMoney(r.totalSpend||0))}</strong> · Average record: <strong>${esc(fmtMoney(r.averageSpend||0))}</strong></p></div>
+    <div class="report-block"><h4>${esc(tr('utilizationAnalysis'))}</h4><p>${esc(tr('recordsFound'))}: ${r.rows} · ${esc(tr('highFrequency'))}: ${r.topFrequency.map(x=>esc(x[0])+' ('+x[1]+')').join(' · ')||'—'}</p></div>
+    <div class="report-block"><h4>${esc(tr('trendAnalysis'))}</h4><p>${r.periodText}</p></div>
+    <div class="report-block"><h4>${esc(tr('significantChanges'))}</h4><p>${r.topSpend.map(x=>esc(x[0])+' · '+esc(fmtMoney(x[1]))).join('<br>')||'—'}</p></div>
+    <div class="report-block"><h4>${esc(tr('anomalies'))}</h4><p>${r.anomalies.length?esc(String(r.anomalies.length))+' potential high-value outliers were flagged for review.':'No statistical outliers were detected with the current rule.'}</p></div>
+    <div class="report-block"><h4>${esc(tr('recommendations'))}</h4><ul><li>${esc(tr('reviewLine1'))}</li><li>${esc(tr('reviewLine2'))}</li><li>${esc(tr('reviewLine3'))}</li></ul></div>
+    <div class="disabled-note">${esc(tr('medicalDisclaimer'))} ${local?esc(tr('localAnalysis')):esc(tr('requested'))}</div>`;
+  }
+  async function analyzeMedicalFile(customerId,file){
+    const customers=await IN.queryDocs('customers');const customer=customers.find(c=>c.id===customerId)||null;
+    const max=15*1024*1024;if(!file)return; if(file.size>max){IN.toast(tr('fileTooLarge'),'error');return;}
+    let report=null,kind=file.name.toLowerCase().endsWith('.csv')?'csv':(/\.xlsx?$/.test(file.name.toLowerCase())?'excel':'binary');
+    if(kind==='csv'){
+      report=buildMedicalReport(parseCSV(await file.text()),customer);
+    }else if(kind==='excel'&&window.XLSX){
+      const wb=window.XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=window.XLSX.utils.sheet_to_json(ws,{defval:''});report=buildMedicalReport(rows,customer);
+    }
+    const workspaceId=state.workspace.id||state.user.uid;let fileMeta=null;
+    try{const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path='medical/'+workspaceId+'/'+Date.now()+'_'+safe,ref=storage.ref(path);await ref.put(file);fileMeta={fileName:file.name,mimeType:file.type,size:file.size,storagePath:path};}catch(e){console.warn('medical upload',e);}
+    if(report){
+      try{const ref=await db.collection('medicalAnalyses').add(IN.docPayload({customerId,customerName:customer?.fullName||'',sourceFile:fileMeta,analysisType:'statistical-tabular',status:'completed',report}));await IN.writeAudit('medical_analysis','medicalAnalyses',ref.id,{customerId,analysisType:'statistical-tabular'});await IN.logActivity('medical_analysis','Medical consumption analysis',{customerId});IN.toast(tr('analysisSaved'));return {report,local:true,id:ref.id};}
+      catch(e){IN.toast(tr('analysisReady')+' '+tr('noPermission'),'error');return {report,local:true};}
+    }
+    try{const ref=await db.collection('medicalAnalyses').add(IN.docPayload({customerId,customerName:customer?.fullName||'',sourceFile:fileMeta,analysisType:'backend-ai-ocr',status:'requires_backend_ai',report:null}));await IN.writeAudit('medical_analysis_requested','medicalAnalyses',ref.id,{customerId});await IN.logActivity('medical_analysis_requested','Medical AI/OCR',{customerId});}catch(e){console.warn('medical request',e);}
+    return {report:null,local:false};
+  }
+
+  async function customerContext(id){
+    const customers=await IN.queryDocs('customers');const customer=customers.find(c=>c.id===id);if(!customer)return null;
+    const [policies,renewals,claims,quotes,comms,tasks]=await Promise.all(['policies','renewals','claims','quotations','communications','tasks'].map(c=>IN.queryDocs(c)));
+    const match=r=>r.customerId===id||norm(r.customerName)===norm(customer.fullName||customer.name);
+    const ps=policies.filter(match),rs=renewals.filter(match),cs=claims.filter(match),qs=quotes.filter(match),ms=comms.filter(match),ts=tasks.filter(match);
+    const recentSince=nowMs()-30*86400000,recentInteractions=ms.filter(x=>toMs(x.createdAt)>=recentSince).length+ts.filter(x=>toMs(x.createdAt)>=recentSince).length;
+    const expiring=ps.filter(p=>IN.isExpiring(p.expiryDate,45)).length,renewed=rs.filter(x=>['Renewed','renewed'].includes(x.status)).length,renewalBase=rs.length;
+    const openClaims=cs.filter(x=>!['Settled','Closed','Rejected'].includes(x.status||'')).length,overdueTasks=ts.filter(x=>norm(x.status)==='overdue'||(toMs(x.dueDate)&&toMs(x.dueDate)<nowMs()&&!['Completed','Closed'].includes(x.status||''))).length;
+    const activePolicies=ps.filter(x=>['Active','active','Renewed','renewed'].includes(x.status)).length,premium=ps.reduce((n,x)=>n+Number(x.premium||0),0);
+    const engagement=clamp((recentInteractions*12)+(ms.length*2)+(activePolicies*8),0,100);const activity=clamp(recentInteractions*18+ps.length*5+cs.length*4,0,100);
+    let renewal=50+(customer.status==='inactive'||customer.status==='lost'?-20:15)+(expiring?15:0)+(renewalBase?Math.min(15,Math.round(renewed/Math.max(1,renewalBase)*15)):0)-(openClaims*5);renewal=clamp(renewal,0,100);
+    const allCust=customers.map(c=>({id:c.id,p:policies.filter(p=>p.customerId===c.id||norm(p.customerName)===norm(c.fullName||c.name)).reduce((n,p)=>n+Number(p.premium||0),0)})).sort((a,b)=>a.p-b.p);const pos=allCust.findIndex(x=>x.id===id),valuePct=allCust.length?Math.round((Math.max(0,pos)/(Math.max(1,allCust.length-1)))*100):0;
+    const types=new Set(ps.map(p=>String(p.insuranceType||'').toLowerCase())),lines=['Motor','Medical','Life','Property','Travel','Marine','Engineering','Liability'],missing=lines.filter(x=>!types.has(x.toLowerCase())).slice(0,3);
+    const attention=[];if(expiring)attention.push(`${expiring} ${tr('expiringSoon')}`);if(openClaims)attention.push(`${openClaims} ${tr('open')}`);if(overdueTasks)attention.push(`${overdueTasks} ${tr('overdue')}`);if(customer.status==='inactive'||customer.status==='lost')attention.push(tr('attentionRequired'));
+    return {customer,policies:ps,renewals:rs,claims:cs,quotes:qs,communications:ms,tasks:ts,engagement,activity,renewal,valuePct,missing,attention,premium};
+  }
+
+  async function openCustomerSmart(id){
+    const c=await customerContext(id);if(!c){IN.toast(tr('noCustomerData'),'error');return;}
+    openModal(tr('customer360'),`<div class="grid grid-2">
+      <div class="card"><h3>${esc(c.customer.fullName||c.customer.name||'')}</h3><div class="muted">${esc(c.customer.email||'')} · ${esc(c.customer.mobile||'')}</div>
+      <div style="margin-top:10px"><span class="master-pill ${c.attention.length?'warn':'success'}">${c.attention.length?esc(tr('attentionRequired')):'OK'}</span></div></div>
+      <div class="card"><div class="eyebrow">${esc(tr('customerBehavior'))}</div><div class="master-insight-grid"><div><div class="master-score">${c.engagement}</div><div class="master-score-label">${esc(tr('engagementScore'))}</div></div><div><div class="master-score">${c.activity}</div><div class="master-score-label">${esc(tr('activityScore'))}</div></div><div><div class="master-score">${c.renewal}</div><div class="master-score-label">${esc(tr('renewalIndicator'))}</div></div><div><div class="master-score">${c.valuePct}</div><div class="master-score-label">${esc(tr('customerValue'))}</div></div></div><div class="master-note">${esc(tr('dataDerived'))}</div></div>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="eyebrow">${esc(tr('attentionRequired'))}</div><p class="master-note">${c.attention.length?c.attention.map(x=>`<span class="master-pill warn" style="margin:2px">${esc(x)}</span>`).join(' '):esc(tr('noRecords'))}</p></div>
+    <div class="grid grid-2" style="margin-top:12px"><div class="card"><h3>${esc(tr('portfolio'))}</h3><div class="stats"><div class="stat"><div class="value">${c.policies.length}</div><div class="label">${esc(tr('policies'))}</div></div><div class="stat"><div class="value">${c.renewals.length}</div><div class="label">${esc(tr('renewals'))}</div></div><div class="stat"><div class="value">${c.claims.length}</div><div class="label">${esc(tr('claims'))}</div></div><div class="stat"><div class="value">${esc(fmtMoney(c.premium))}</div><div class="label">${esc(tr('premium'))}</div></div></div></div>
+      <div class="card"><h3>${esc(tr('crossSellIndicator'))}</h3><p class="master-note">${c.missing.length?c.missing.map(x=>`<span class="master-pill">${esc(x)}</span>`).join(' '):esc(tr('noRecords'))}</p></div></div>
+      <div class="master-tool-grid"><button class="master-tool" id="customerMedicalBtn"><div class="tool-icon">🩺</div><strong>${esc(tr('medicalAnalysis'))}</strong><small>${esc(tr('medicalDesc'))}</small></button><button class="master-tool" id="customerAIBtn"><div class="tool-icon">🤖</div><strong>${esc(tr('aiAssistant'))}</strong><small>${esc(tr('reviewAI'))}</small></button></div>`);
+    document.getElementById('customerMedicalBtn').onclick=()=>{closeModalSafe();go('medical-ai');setTimeout(()=>{const sel=document.getElementById('medicalCustomer');if(sel)sel.value=id;},100);};
+    document.getElementById('customerAIBtn').onclick=()=>{closeModalSafe();go('ai-assistant');setTimeout(()=>{const sel=document.getElementById('aiCustomer');if(sel)sel.value=id;},100);};
+  }
+
+  async function customCustomersBehaviorCard(){
+    if((location.hash||'#home')!=='#home')return;const root=document.getElementById('view');if(!root||root.querySelector('#masterSmartPanel'))return;
+    const [customers,policies,claims,tasks,comm]=await Promise.all(['customers','policies','claims','tasks','communications'].map(c=>IN.queryDocs(c)));
+    const expiring=policies.filter(p=>IN.isExpiring(p.expiryDate,30)).length,openClaims=claims.filter(x=>!['Settled','Closed','Rejected'].includes(x.status||'')).length,overdue=tasks.filter(x=>norm(x.status)==='overdue'||(toMs(x.dueDate)&&toMs(x.dueDate)<nowMs()&&!['Completed','Closed'].includes(x.status||''))).length,recentComms=comm.filter(x=>toMs(x.createdAt)>=nowMs()-30*86400000).length;
+    const block=document.createElement('section');block.id='masterSmartPanel';block.className='card';block.style.marginTop='12px';block.innerHTML=`<div class="page-head" style="margin-bottom:0"><div><div class="eyebrow">✨ ${esc(tr('smartInsights'))}</div><h3 style="margin:4px 0">${esc(tr('customerBehavior'))}</h3></div></div><div class="master-insight-grid"><div class="master-metric"><div class="k">${esc(tr('totalCustomers'))}</div><div class="v">${customers.length}</div></div><div class="master-metric"><div class="k">${esc(tr('expiringSoon'))}</div><div class="v">${expiring}</div></div><div class="master-metric"><div class="k">${esc(tr('pendingClaims'))}</div><div class="v">${openClaims}</div></div><div class="master-metric"><div class="k">${esc(tr('overdue'))}</div><div class="v">${overdue}</div></div></div><div class="master-note" style="margin-top:8px">${esc(tr('dataDerived'))} · ${recentComms} communications in the last 30 days.</div><div class="master-tool-grid"><button class="master-tool" id="homeOperations"><div class="tool-icon">⚙️</div><strong>${esc(tr('operatingCenter'))}</strong><small>${esc(tr('operationsDesc'))}</small></button><button class="master-tool" id="homeMedical"><div class="tool-icon">🩺</div><strong>${esc(tr('medicalAnalysis'))}</strong><small>${esc(tr('medicalDesc'))}</small></button><button class="master-tool" id="homeAI"><div class="tool-icon">🤖</div><strong>${esc(tr('aiAssistant'))}</strong><small>${esc(tr('aiDesc'))}</small></button><button class="master-tool" id="homeEmail"><div class="tool-icon">✉️</div><strong>${esc(tr('emailSettings'))}</strong><small>${esc(tr('emailDesc'))}</small></button></div>`;
+    const head=root.querySelector('.page-head');if(head)head.insertAdjacentElement('afterend',block);else root.prepend(block);
+    document.getElementById('homeOperations').onclick=()=>go('operations');document.getElementById('homeMedical').onclick=()=>go('medical-ai');document.getElementById('homeAI').onclick=()=>go('ai-assistant');document.getElementById('homeEmail').onclick=()=>go('email-settings');
+  }
+
+  async function operations(){
+    const insurers=await IN.queryDocs('insurers'),comms=await IN.queryDocs('communications'),customers=await IN.queryDocs('customers');const emailRows=comms.filter(x=>norm(x.channel)==='email').slice(0,20);
+    const settings=state.profile?.emailSettings||{};
+    return `<div class="page-head"><div><div class="eyebrow">⚙️ ${esc(tr('operatingCenter'))}</div><h1>${esc(tr('operationsTitle'))}</h1><div class="muted">${esc(tr('operationsDesc'))}</div></div><div class="actions"><button class="btn" id="operationEmailSettings">${esc(tr('emailSettings'))}</button></div></div>
+      <div class="master-tool-grid"><button class="master-tool" id="opAddTask"><div class="tool-icon">✅</div><strong>${esc(tr('createTask'))}</strong><small>${esc(tr('createTask'))} · Firestore</small></button><button class="master-tool" id="opUpload"><div class="tool-icon">📎</div><strong>${esc(tr('uploadDocument'))}</strong><small>${esc(tr('uploadDocument'))} · Storage</small></button><button class="master-tool" id="opSendEmail"><div class="tool-icon">✉️</div><strong>${esc(tr('sendEmail'))}</strong><small>${esc(tr('reviewFirst'))}</small></button><button class="master-tool" id="opAI"><div class="tool-icon">🤖</div><strong>${esc(tr('aiAssistant'))}</strong><small>${esc(tr('aiDesc'))}</small></button></div>
+      <div class="grid grid-2" style="margin-top:12px"><div class="card"><h3>${esc(tr('directory'))}</h3>${insurers.length?`<div class="list">${insurers.slice(0,12).map(i=>`<div class="list-row"><div><div class="list-title">${esc(i.name||'Insurance Company')}</div><div class="list-sub">${esc(i.contactName||'')} · ${esc(i.email||'')} · ${esc(i.phone||'')}</div></div><span class="master-pill success">${esc(i.status||'active')}</span></div>`).join('')}</div>`:`<div class="empty">${esc(tr('noRecords'))}</div>`}</div>
+      <div class="card"><h3>${esc(tr('emailHistory'))}</h3>${emailRows.length?`<div class="list">${emailRows.map(r=>`<div class="list-row"><div><div class="list-title">${esc(r.subject||'Email')}</div><div class="list-sub">${esc(r.to||r.recipient||'')} · ${esc(fmtDate(r.createdAt))}</div></div><span class="master-pill ${r.status==='sent'?'success':r.status==='failed'?'danger':'warn'}">${esc(r.status||'draft')}</span></div>`).join('')}</div>`:`<div class="empty">${esc(tr('noRecords'))}</div>`}</div></div>`;
+  }
+
+  async function emailSettings(){
+    const s=state.profile?.emailSettings||{};
+    return `<div class="page-head"><div><div class="eyebrow">✉️ ${esc(tr('emailSettings'))}</div><h1>${esc(tr('emailSettings'))}</h1><div class="muted">${esc(tr('secureBackend'))}</div></div></div>
+      <div class="card"><form id="emailSettingsForm" class="form-stack"><div class="form-grid"><div class="field"><label>${esc(tr('brokerEmail'))}</label><input type="email" name="brokerEmail" value="${esc(s.brokerEmail||'')}" required></div><div class="field"><label>${esc(tr('displayName'))}</label><input name="displayName" value="${esc(s.displayName||state.profile?.name||'')}"></div><div class="field"><label>${esc(tr('provider'))}</label><select name="provider"><option>Backend API</option><option>SMTP via Backend</option><option>Gmail API via Backend</option><option>Microsoft Graph via Backend</option></select></div><div class="field"><label>${esc(tr('verification'))}</label><input value="${esc(s.verified?tr('verified'):tr('unverified'))}" disabled></div></div><div class="disabled-note">${esc(tr('secureBackend'))}: ${esc(tr('noBackend'))}</div><div class="form-actions"><button class="btn btn-primary">${esc(tr('saveSettings'))}</button></div></form></div>`;
+  }
+  async function saveEmailSettings(e){e.preventDefault();const f=new FormData(e.currentTarget),uid=state.user.uid,current=state.profile?.emailSettings||{},d={brokerEmail:String(f.get('brokerEmail')||'').trim(),displayName:String(f.get('displayName')||'').trim(),provider:String(f.get('provider')||''),verified:!!current.verified,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};try{await db.collection('users').doc(uid).set({emailSettings:d},{merge:true});await IN.loadIdentity();await IN.writeAudit('update_email_settings','users',uid,{provider:d.provider});IN.toast(tr('saved'));go('operations');}catch(err){IN.toast(err?.message||tr('network'),'error');}}
+
+  async function sendEmailComposer(){
+    const insurers=await IN.queryDocs('insurers'),customers=await IN.queryDocs('customers'),policies=await IN.queryDocs('policies'),s=state.profile?.emailSettings||{};
+    openModal(tr('sendEmail'),`<form id="masterEmailForm" class="form-stack"><div class="form-grid">
+      <div class="field"><label>${esc(tr('from'))}</label><input name="from" value="${esc(s.brokerEmail||'')}" readonly></div><div class="field"><label>${esc(tr('selectInsurer'))}</label><select id="emailInsurer"><option value="">—</option>${insurers.map(i=>`<option value="${esc(i.id)}">${esc(i.name||'')}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(tr('to'))}</label><input id="emailTo" name="to" type="email"></div><div class="field"><label>${esc(tr('selectCustomer'))}</label><select id="emailCustomer"><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div>
+      <div class="field field-full"><label>${esc(tr('subject'))}</label><input name="subject" required></div><div class="field field-full"><label>${esc(tr('message'))}</label><textarea name="message" rows="7" required></textarea></div>
+      <div class="field field-full"><label>${esc(tr('attachments'))}</label><input type="file" name="attachments" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></div>
+    </div><div class="disabled-note">${esc(tr('reviewFirst'))}. ${esc(tr('noBackend'))}</div><div class="form-actions"><button type="button" class="btn" id="saveEmailDraft">${esc(tr('draftEmail'))}</button><button class="btn btn-primary" id="sendEmailConfirm">${esc(tr('sendNow'))}</button></div></form>`);
+    const ins=document.getElementById('emailInsurer');ins.onchange=()=>{const x=insurers.find(i=>i.id===ins.value);if(x)document.getElementById('emailTo').value=x.email||'';};
+    document.getElementById('emailCustomer').onchange=()=>{const id=document.getElementById('emailCustomer').value,ct=customers.find(c=>c.id===id);if(ct&&!document.querySelector('#masterEmailForm textarea').value)document.querySelector('#masterEmailForm textarea').value=`${tr('customer')}: ${ct.fullName||ct.name||''}\n${tr('policies')}: ${policies.filter(p=>p.customerId===id||norm(p.customerName)===norm(ct.fullName||ct.name)).length}`;};
+    document.getElementById('saveEmailDraft').onclick=()=>saveEmailDraft(false);document.getElementById('masterEmailForm').onsubmit=e=>{e.preventDefault();saveEmailDraft(true);};
+  }
+  async function saveEmailDraft(send){
+    const form=document.getElementById('masterEmailForm'),f=new FormData(form),from=String(f.get('from')||'').trim(),to=String(f.get('to')||'').trim(),subject=String(f.get('subject')||'').trim(),message=String(f.get('message')||'');
+    if(!from){IN.toast(tr('emailRequired'),'error');return;}if(!to){IN.toast(tr('recipientRequired'),'error');return;}if(!subject){IN.toast(tr('subjectRequired'),'error');return;}
+    const files=Array.from(form.querySelector('input[type=file]').files||[]).map(x=>({name:x.name,size:x.size,type:x.type}));
+    try{
+      if(send){
+        const verified=!!state.profile?.emailSettings?.verified;if(!verified){IN.toast(tr('emailVerifyRequired'),'error');return;}
+        if(!window.INSURNEX_AI.emailFunction){IN.toast(tr('backendRequired'),'error');return;}
+        if(!(window.firebase&&firebase.functions)){IN.toast(tr('backendRequired'),'error');return;}
+        const fn=firebase.functions().httpsCallable(window.INSURNEX_AI.emailFunction);await fn({from,to,subject,message,attachments:files,organizationId:state.workspace.id||null});
+        await db.collection('communications').add(IN.docPayload({customerId:document.getElementById('emailCustomer')?.value||null,channel:'Email',subject,to,status:'sent',relatedType:'operations',attachmentMetadata:files,messageStored:false}));await IN.writeAudit('send_email','communications',to,{subject,attachmentCount:files.length});await IN.logActivity('send_email',subject,{recipient:to});closeModalSafe();IN.toast(tr('emailSent'));go('operations');return;
+      }
+      await db.collection('communications').add(IN.docPayload({customerId:document.getElementById('emailCustomer')?.value||null,channel:'Email',subject,to,status:'draft',attachmentMetadata:files,messageStored:false}));await IN.writeAudit('email_draft','communications',subject,{recipient:to,attachmentCount:files.length});IN.toast(tr('draftSaved'));closeModalSafe();go('operations');
+    }catch(err){IN.toast(err?.message||tr('network'),'error');}
+  }
+
+  async function customMedicalPage(){
+    const customers=await IN.queryDocs('customers');
+    return `<div class="page-head"><div><div class="eyebrow">🩺 ${esc(tr('medicalAnalysis'))}</div><h1>${esc(tr('medicalReport'))}</h1><div class="muted">${esc(tr('medicalDesc'))}</div></div></div>
+      <div class="card"><form id="medicalForm" class="form-stack"><div class="form-grid"><div class="field field-full"><label>${esc(tr('selectCustomer'))}</label><select id="medicalCustomer" name="customerId" required><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div></div><div class="file-drop"><div style="font-size:22px">📎</div><div class="master-note">${esc(tr('tabularOnly'))}</div><input id="medicalFile" type="file" accept=".csv,.xlsx,.xls,.pdf,.jpg,.jpeg,.png" required></div><div class="form-actions"><button class="btn btn-primary">${esc(tr('uploadAndAnalyze'))}</button></div></form></div><div id="medicalResult" style="margin-top:12px"></div>`;
+  }
+  async function runMedicalForm(e){e.preventDefault();const id=document.getElementById('medicalCustomer')?.value,file=document.getElementById('medicalFile')?.files?.[0],box=document.getElementById('medicalResult');if(!id){IN.toast(tr('selectCustomer'),'error');return;}if(!file){IN.toast(tr('fileRequired'),'error');return;}box.innerHTML='<div class="card">'+tr('loading')+'</div>';try{const res=await analyzeMedicalFile(id,file);box.innerHTML=`<div class="card"><div class="page-head"><div><div class="eyebrow">${esc(tr('medicalReport'))}</div><h3>${esc(res.report?.customerName||'')}</h3></div><span class="master-pill ${res.local?'success':'warn'}">${esc(res.local?tr('localAnalysis'):tr('requested'))}</span></div>${res.report?medicalReportHTML(res.report,true):`<div class="disabled-note">${esc(tr('tabularOnly'))}</div>`}</div>`;}catch(err){box.innerHTML='<div class="error-box">'+esc(err?.message||tr('network'))+'</div>';}}
+
+  async function aiAssistantPage(){
+    const customers=await IN.queryDocs('customers');return `<div class="page-head"><div><div class="eyebrow">🤖 ${esc(tr('aiAssistant'))}</div><h1>${esc(tr('aiAssistant'))}</h1><div class="muted">${esc(tr('aiDesc'))}</div></div></div><div class="card"><div class="form-grid"><div class="field"><label>${esc(tr('selectCustomer'))}</label><select id="aiCustomer"><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div></div><div class="master-tool-grid"><button class="master-tool" data-ai-action="summary"><div class="tool-icon">🧠</div><strong>${esc(tr('summarizeCustomer'))}</strong><small>${esc(tr('reviewAI'))}</small></button><button class="master-tool" data-ai-action="renewal"><div class="tool-icon">🔄</div><strong>${esc(tr('renewalIndicator'))}</strong><small>${esc(tr('dataDerived'))}</small></button><button class="master-tool" data-ai-action="followup"><div class="tool-icon">✅</div><strong>${esc(tr('createFollowup'))}</strong><small>${esc(tr('reviewAI'))}</small></button><button class="master-tool" data-ai-action="draft"><div class="tool-icon">✉️</div><strong>${esc(tr('draftFollowup'))}</strong><small>${esc(tr('reviewAI'))}</small></button></div></div><div id="aiResult" style="margin-top:12px"></div>`;
+  }
+  async function aiAction(action){const id=document.getElementById('aiCustomer')?.value;if(!id){IN.toast(tr('selectCustomer'),'error');return;}const c=await customerContext(id),box=document.getElementById('aiResult');if(!c){box.innerHTML='<div class="card empty">'+esc(tr('noCustomerData'))+'</div>';return;}if(action==='summary'){box.innerHTML=`<div class="card"><h3>${esc(tr('summarizeCustomer'))}</h3><p class="master-note">${esc(c.customer.fullName||'')} · ${c.policies.length} ${esc(tr('policies'))} · ${c.claims.length} ${esc(tr('claims'))} · ${esc(fmtMoney(c.premium))} ${esc(tr('premium'))}. ${c.attention.length?c.attention.map(esc).join(' · '):esc(tr('noRecords'))}</p><div class="disabled-note">${esc(tr('dataDerived'))}</div></div>`;}else if(action==='renewal'){box.innerHTML=`<div class="card"><h3>${esc(tr('renewalIndicator'))}</h3><div class="master-score">${c.renewal}/100</div><p class="master-note">${esc(tr('dataDerived'))}</p></div>`;}else if(action==='followup'){if(!IN.can('tasks','write')){IN.toast(tr('noPermission'),'error');return;}try{const ref=await db.collection('tasks').add(IN.docPayload({title:tr('createFollowup')+' · '+(c.customer.fullName||''),description:c.attention.join(' · ')||tr('reviewAI'),dueDate:new Date().toISOString().slice(0,10),priority:c.attention.length?'high':'medium',status:'To Do',linkedEntityType:'customer',linkedEntityId:id,customerId:id,customerName:c.customer.fullName||''}));await IN.writeAudit('create','tasks',ref.id,{source:'ai-assistant',customerId:id});await IN.logActivity('create_followup','Task',{customerId:id});IN.toast(tr('saved'));}catch(e){IN.toast(e?.message||tr('network'),'error');}}else{const body=`${tr('customer')}: ${c.customer.fullName||''}\n${tr('policies')}: ${c.policies.length}\n${tr('renewals')}: ${c.renewals.length}\n${tr('claims')}: ${c.claims.length}\n${tr('attentionRequired')}: ${c.attention.join(', ')||'—'}`;openModal(tr('draftFollowup'),`<div class="field"><label>${esc(tr('message'))}</label><textarea rows="9" id="aiDraftText">${esc(body)}</textarea></div><div class="form-actions"><button class="btn btn-primary" id="aiDraftSave">${esc(tr('draftEmail'))}</button></div>`);document.getElementById('aiDraftSave').onclick=()=>{document.getElementById('emailTo')?.focus();closeModalSafe();go('operations');setTimeout(sendEmailComposer,120);};}}
+
+  function wireCustomRoot(){
+    document.querySelectorAll('[data-master-route]').forEach(b=>{if(b.dataset.masterWired)return;b.dataset.masterWired='1';b.addEventListener('click',e=>{e.preventDefault();const route=b.dataset.masterRoute;document.getElementById('drawer')?.classList.remove('show');go(route);});});
+    document.getElementById('operationEmailSettings')?.addEventListener('click',()=>go('email-settings'));
+    document.getElementById('opAddTask')?.addEventListener('click',()=>{location.hash='#tasks';setTimeout(()=>document.querySelector('[data-add="tasks"]')?.click(),50);});
+    document.getElementById('opUpload')?.addEventListener('click',()=>{location.hash='#documents';setTimeout(()=>document.getElementById('upload')?.click(),50);});
+    document.getElementById('opSendEmail')?.addEventListener('click',sendEmailComposer);document.getElementById('opAI')?.addEventListener('click',()=>go('ai-assistant'));
+    document.getElementById('emailSettingsForm')?.addEventListener('submit',saveEmailSettings);
+    document.getElementById('medicalForm')?.addEventListener('submit',runMedicalForm);
+    document.querySelectorAll('[data-ai-action]').forEach(b=>b.addEventListener('click',()=>aiAction(b.dataset.aiAction)));  }
+
+  async function renderCustomRoute(){
+    injectCustomNav();const route=(location.hash||'#home').slice(1),root=document.getElementById('view');if(!root)return false;
+    let html=null;if(route==='operations')html=await operations();else if(route==='email-settings')html=await emailSettings();else if(route==='medical-ai')html=await customMedicalPage();else if(route==='ai-assistant')html=await aiAssistantPage();else return false;
+    root.innerHTML=html;wireCustomRoot();return true;
+  }
+
+  async function decorateHome(){try{await customCustomersBehaviorCard();}catch(e){console.warn('home enhancement',e);}}
+
+  async function onHash(){
+    setTimeout(async()=>{injectCustomNav();if(await renderCustomRoute())return;await decorateHome();wireCustomRoot();},60);
+  }
+
+  document.addEventListener('click',function(e){
+    const customerBtn=e.target.closest?.('[data-customer]');if(customerBtn){e.preventDefault();e.stopImmediatePropagation();openCustomerSmart(customerBtn.dataset.customer);return;}
+  },true);
+  document.addEventListener('submit',function(e){
+    const form=e.target;if(form?.id==='authForm'&&document.getElementById('accountType')){e.preventDefault();e.stopImmediatePropagation();enhancedRegister(form);}
+  },true);
+  window.addEventListener('hashchange',onHash);
+  IN.auth.onAuthStateChanged(async user=>{
+    if(!user||registrationInProgress||window.__INSURNEX_REGISTERING)return;
+    try{await IN.loadIdentity();if(state.profile&&!state.profile.onboardingCompleted)showOnboarding();else{enhancement.onboardingVisible=false;setTimeout(onHash,120);}}catch(e){console.warn('master auth',e);}
+  });
+  const observer=new MutationObserver(()=>{if(!document.getElementById('authForm'))injectCustomNav();if(document.getElementById('accountType'))authTypeEnhance();});
+  observer.observe(document.body,{childList:true,subtree:true});
+  setTimeout(()=>{authTypeEnhance();injectCustomNav();if(state.user&&!state.profile?.onboardingCompleted)showOnboarding();else onHash();},100);
+})();
+</script>
+
+
+<style id="insurnex-crm-workflow-css">
+  #recordForm [aria-busy="true"]{opacity:.75;cursor:wait}
+  #recordForm button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none}
+  #recordForm input:focus-visible,#recordForm select:focus-visible,#recordForm textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  .crm-workflow-btn{font-weight:900} .record-card-actions .btn,.actions .btn{white-space:nowrap}
+  .crm-workflow-banner{margin:0 14px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);font-size:9px;color:var(--muted)}
+</style>
+<script id="insurnex-crm-workflows">
+(function(){
+  'use strict';
+  if(!window.InsurNex) return;
+  const IN=window.InsurNex, db=IN.db, auth=IN.auth, storage=IN.storage, state=IN.state;
+  const FieldValue=()=>firebase.firestore.FieldValue;
+  const L=(ar,en)=>IN.locale()==='ar'?ar:en;
+  const t=IN.t, esc=IN.esc, fmtDate=IN.fmtDate, fmtMoney=IN.fmtMoney;
+  const safe=(v)=>String(v??'').trim();
+  const norm=(v)=>safe(v).toLowerCase();
+
+  const WF={
+    leadToOpp:{ar:'تحويل إلى فرصة',en:'Convert to opportunity'},
+    oppToQuote:{ar:'إنشاء عرض سعر',en:'Create quotation'},
+    quoteToPolicy:{ar:'إصدار وثيقة',en:'Issue policy'},
+    policyRenew:{ar:'بدء التجديد',en:'Start renewal'},
+    renewalTask:{ar:'متابعة التجديد',en:'Create follow-up'},
+    claimTask:{ar:'متابعة المطالبة',en:'Create follow-up'},
+    insurerContacts:{ar:'جهات اتصال الشركة',en:'Company contacts'},
+    commissionCalc:{ar:'حاسبة العمولات',en:'Commission calculator'},
+    markAllRead:{ar:'تعيين الكل كمقروء',en:'Mark all as read'},
+    newOperation:{ar:'عملية جديدة',en:'New operation'},
+    emailTemplates:{ar:'قوالب البريد',en:'Email templates'},
+    newTemplate:{ar:'قالب جديد',en:'New template'},
+    saveTemplate:{ar:'حفظ القالب',en:'Save template'},
+    useTemplate:{ar:'استخدام',en:'Use'},
+    duplicate:{ar:'تكرار',en:'Duplicate'},
+    delete:{ar:'حذف',en:'Delete'}
+  };
+  const w=tup=>WF[tup]?L(WF[tup].ar,WF[tup].en):t(tup);
+
+  function modal(title,body){
+    const el=document.getElementById('modal'); if(!el)return;
+    document.getElementById('modalTitle').textContent=title;
+    document.getElementById('modalBody').innerHTML=body;
+    el.classList.add('show');
+  }
+  function close(){document.getElementById('modal')?.classList.remove('show');}
+  function canWrite(module){if(!IN.can(module,'write')){IN.toast(t('noPermission'),'error');return false;}return true;}
+  function stamp(data){return IN.docPayload({...data,updatedAt:FieldValue().serverTimestamp()});}
+  async function readDoc(collection,id){const s=await db.collection(collection).doc(id).get();return s.exists?{id:s.id,...s.data()}:null;}
+  async function audit(action,collection,id,metadata){await IN.writeAudit(action,collection,id,metadata||{});await IN.logActivity(action,collection,{id,...(metadata||{})});}
+  async function addDoc(collection,data){const ref=await db.collection(collection).add(stamp(data));await audit('create',collection,ref.id,{});return ref;}
+  function refresh(){state.cache.clear();window.dispatchEvent(new HashChangeEvent('hashchange'));}
+  function actionButton(action,label,kind='btn'){
+    return `<button type="button" class="${kind} btn-sm" data-crm-action="${esc(action)}">${esc(label)}</button>`;
+  }
+  function addHeaderAction(action,label){
+    const root=document.getElementById('view'); const actions=root?.querySelector('.page-head .actions');
+    if(!actions||root.querySelector('[data-crm-header-action="'+action+'"]'))return;
+    const b=document.createElement('button');b.type='button';b.className='btn btn-primary';b.textContent=label;b.dataset.crmAction=action;b.dataset.crmHeaderAction=action;actions.prepend(b);
+  }
+
+  async function convertLead(id){
+    if(!canWrite('opportunities'))return;
+    const lead=await readDoc('leads',id); if(!lead){IN.toast(t('noRecords'),'error');return;}
+    try{
+      const ref=await addDoc('opportunities',{
+        sourceLeadId:id,customerName:lead.fullName||'',customerId:lead.customerId||null,
+        phone:lead.phone||'',email:lead.email||'',insuranceType:lead.insuranceType||'',
+        estimatedPremium:Number(lead.estimatedPremium||0),expectedCommission:Number(lead.expectedCommission||0),
+        priority:lead.priority||'warm',closingDate:lead.expectedCloseDate||null,
+        assignedBrokerName:state.profile?.fullName||state.profile?.name||'',status:'New'
+      });
+      await db.collection('leads').doc(id).update({stage:'Qualified',convertedOpportunityId:ref.id,updatedAt:FieldValue().serverTimestamp()});
+      await audit('convert','leads',id,{to:'opportunities',opportunityId:ref.id});
+      IN.toast(L('تم تحويل الـLead إلى فرصة.','Lead converted to an opportunity.')); refresh();
+    }catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+
+  async function createQuoteFromOpportunity(id){
+    if(!canWrite('quotations'))return;
+    const opp=await readDoc('opportunities',id); if(!opp){IN.toast(t('noRecords'),'error');return;}
+    try{
+      const ref=await addDoc('quotations',{
+        opportunityId:id,customerId:opp.customerId||null,customerName:opp.customerName||'',
+        product:opp.product||'',insurer:opp.insurer||'',coverage:opp.coverage||'',
+        sumInsured:Number(opp.sumInsured||0),premium:Number(opp.estimatedPremium||0),
+        commissionAmount:Number(opp.expectedCommission||0),validUntil:'',status:'Draft'
+      });
+      await db.collection('opportunities').doc(id).update({status:'Quotation',quotationId:ref.id,updatedAt:FieldValue().serverTimestamp()});
+      await audit('convert','opportunities',id,{to:'quotations',quotationId:ref.id});
+      IN.toast(L('تم إنشاء عرض السعر.','Quotation created.')); refresh();
+    }catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+
+  async function issuePolicyFromQuote(id){
+    if(!canWrite('policies'))return;
+    const q=await readDoc('quotations',id);if(!q){IN.toast(t('noRecords'),'error');return;}
+    const today=new Date(); const start=today.toISOString().slice(0,10); const expiry=new Date(today.getTime()+365*86400000).toISOString().slice(0,10);
+    modal(L('إصدار وثيقة من العرض','Issue policy from quotation'),`<form id="wfPolicyForm" class="form-stack"><div class="form-grid">
+      <div class="field"><label>${esc(t('policyNumber'))}</label><input name="policyNumber" required></div>
+      <div class="field"><label>${esc(t('insurer'))}</label><input name="insurer" value="${esc(q.insurer||'')}"></div>
+      <div class="field"><label>${esc(t('product'))}</label><input name="product" value="${esc(q.product||'')}"></div>
+      <div class="field"><label>${esc(t('premium'))}</label><input type="number" name="premium" value="${Number(q.premium||0)}"></div>
+      <div class="field"><label>${esc(t('startDate'))}</label><input type="date" name="startDate" value="${start}"></div>
+      <div class="field"><label>${esc(t('expiryDate'))}</label><input type="date" name="expiryDate" value="${expiry}"></div>
+      <div class="field"><label>${esc(t('commission'))}</label><input type="number" step="0.01" name="commissionAmount" value="${Number(q.commissionAmount||0)}"></div>
+      <div class="field"><label>${esc(t('paymentStatus'))}</label><select name="paymentStatus"><option>pending</option><option>partial</option><option>paid</option><option>overdue</option></select></div>
+    </div><div class="form-actions"><button class="btn" type="button" data-crm-cancel>${esc(t('cancel'))}</button><button class="btn btn-primary">${esc(t('save'))}</button></div></form>`);
+    document.getElementById('wfPolicyForm').onsubmit=async e=>{
+      e.preventDefault(); const f=new FormData(e.currentTarget),d=Object.fromEntries(f.entries());
+      try{
+        const ref=await addDoc('policies',{quotationId:id,customerId:q.customerId||null,customerName:q.customerName||'',policyNumber:safe(d.policyNumber),insurer:safe(d.insurer),product:safe(d.product),insuranceType:q.insuranceType||'',coverage:q.coverage||'',sumInsured:Number(q.sumInsured||0),premium:Number(d.premium||0),startDate:d.startDate,expiryDate:d.expiryDate,commissionRate:0,commissionAmount:Number(d.commissionAmount||0),paymentStatus:d.paymentStatus,status:'Active'});
+        if(Number(d.commissionAmount||0)>0){await addDoc('commissions',{policyId:ref.id,quotationId:id,policyNumber:d.policyNumber,customerId:q.customerId||null,customerName:q.customerName||'',insurer:d.insurer||q.insurer||'',brokerName:state.profile?.name||'',premium:Number(d.premium||0),commissionRate:0,commissionAmount:Number(d.commissionAmount||0),paidCommission:0,commissionDate:d.startDate,status:'Expected'});}
+        await db.collection('quotations').doc(id).update({status:'Accepted',policyId:ref.id,updatedAt:FieldValue().serverTimestamp()});
+        await audit('convert','quotations',id,{to:'policies',policyId:ref.id});close();IN.toast(L('تم إصدار الوثيقة وتسجيل العمولة.','Policy issued and commission recorded.'));refresh();
+      }catch(err){IN.toast(IN.friendlyError(err),'error');}
+    };
+    document.querySelector('[data-crm-cancel]')?.addEventListener('click',close,{once:true});
+  }
+
+  function renewalStage(expiry){
+    const d=new Date(expiry); if(Number.isNaN(d.getTime()))return '30 Days';
+    const days=Math.ceil((d.getTime()-Date.now())/86400000);
+    if(days<=0)return 'Expired'; if(days<=7)return '7 Days'; if(days<=15)return '15 Days'; if(days<=30)return '30 Days'; if(days<=45)return '45 Days'; if(days<=60)return '60 Days'; return '90 Days';
+  }
+  async function startRenewal(id){
+    if(!canWrite('renewals'))return; const p=await readDoc('policies',id);if(!p){IN.toast(t('noRecords'),'error');return;}
+    try{const ref=await addDoc('renewals',{policyId:id,policyNumber:p.policyNumber||'',customerId:p.customerId||null,customerName:p.customerName||'',insurer:p.insurer||'',expiryDate:p.expiryDate,stage:renewalStage(p.expiryDate),status:'Open',assignedBrokerName:state.profile?.name||'',notes:''});
+      await audit('renewal_started','policies',id,{renewalId:ref.id});IN.toast(L('تم بدء رحلة التجديد.','Renewal workflow started.'));refresh();
+    }catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+  async function renewalFollowUp(id,source='renewals'){
+    if(!canWrite('tasks'))return; const r=await readDoc('renewals',id);if(!r){IN.toast(t('noRecords'),'error');return;}
+    try{const ref=await addDoc('tasks',{title:L('متابعة تجديد','Renewal follow-up')+' · '+(r.policyNumber||''),description:r.notes||L('متابعة العميل قبل انتهاء الوثيقة.','Follow up with the customer before policy expiry.'),dueDate:new Date().toISOString().slice(0,10),priority:'high',assignedToName:state.profile?.name||'',status:'To Do',linkedEntityType:'renewal',linkedEntityId:id,customerId:r.customerId||null,customerName:r.customerName||''});
+      await audit('create_followup','renewals',id,{taskId:ref.id,source});IN.toast(t('saved')); }
+    catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+  async function claimFollowUp(id){
+    if(!canWrite('tasks'))return; const c=await readDoc('claims',id);if(!c){IN.toast(t('noRecords'),'error');return;}
+    try{await addDoc('tasks',{title:L('متابعة مطالبة','Claim follow-up')+' · '+(c.claimNumber||''),description:c.description||'',dueDate:new Date().toISOString().slice(0,10),priority:'high',assignedToName:state.profile?.name||'',status:'To Do',linkedEntityType:'claim',linkedEntityId:id,customerId:c.customerId||null,customerName:c.customerName||''});await audit('create_followup','claims',id,{});IN.toast(t('saved'));}
+    catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+
+  async function openCommissionCalculator(){
+    if(!canWrite('commissions'))return;
+    const customers=await IN.queryDocs('customers'),policies=await IN.queryDocs('policies'),insurers=await IN.queryDocs('insurers');
+    modal(w('commissionCalc'),`<form id="wfCommission" class="form-stack"><div class="form-grid">
+      <div class="field"><label>${esc(t('customers'))}</label><select name="customerId"><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('policies'))}</label><select name="policyId"><option value="">—</option>${policies.map(p=>`<option value="${esc(p.id)}">${esc(p.policyNumber||'')} · ${esc(p.customerName||'')}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('insurer'))}</label><select name="insurer"><option value="">—</option>${insurers.map(i=>`<option value="${esc(i.name||'')}">${esc(i.name||'')}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('premium'))}</label><input type="number" name="premium" min="0" step="0.01" value="0"></div>
+      <div class="field"><label>${esc(t('commission'))} %</label><input type="number" name="rate" min="0" step="0.01" value="0"></div>
+      <div class="field"><label>${esc(t('status'))}</label><select name="status"><option>Expected</option><option>Pending</option><option>Approved</option></select></div>
+    </div><div class="card" style="margin-top:10px"><div class="eyebrow">${esc(w('commissionCalc'))}</div><div id="wfCommissionAmount" class="master-score">${esc(fmtMoney(0))}</div><div class="master-note">${esc(L('العمولة = القسط × نسبة العمولة','Commission = Premium × Commission Rate'))}</div></div><div class="form-actions"><button class="btn" type="button" data-crm-cancel>${esc(t('cancel'))}</button><button class="btn btn-primary">${esc(t('save'))}</button></div></form>`);
+    const form=document.getElementById('wfCommission'),out=document.getElementById('wfCommissionAmount');
+    const recalc=()=>{const premium=Number(form.premium.value||0),rate=Number(form.rate.value||0);out.textContent=fmtMoney(premium*rate/100);};
+    form.premium.addEventListener('input',recalc);form.rate.addEventListener('input',recalc);recalc();
+    form.onsubmit=async e=>{e.preventDefault();const premium=Number(form.premium.value||0),rate=Number(form.rate.value||0),amount=premium*rate/100;
+      try{const cId=form.customerId.value,pId=form.policyId.value,customer=customers.find(x=>x.id===cId),policy=policies.find(x=>x.id===pId);await addDoc('commissions',{customerId:cId||null,customerName:customer?.fullName||customer?.name||policy?.customerName||'',policyId:pId||null,policyNumber:policy?.policyNumber||'',insurer:form.insurer.value||policy?.insurer||'',brokerName:state.profile?.name||'',premium,commissionRate:rate,commissionAmount:amount,paidCommission:0,commissionDate:new Date().toISOString().slice(0,10),status:form.status.value});close();IN.toast(t('saved'));refresh();}
+      catch(err){IN.toast(IN.friendlyError(err),'error');}
+    };
+    document.querySelector('[data-crm-cancel]')?.addEventListener('click',close,{once:true});
+  }
+
+  async function insurerContacts(id){
+    if(!canWrite('insurers'))return; const insurer=await readDoc('insurers',id);if(!insurer)return;
+    const contacts=Array.isArray(insurer.emailContacts)?insurer.emailContacts:[];
+    const text=contacts.map(x=>`${safe(x.department)||''}|${safe(x.email)||''}|${safe(x.contactName)||''}|${safe(x.phone)||''}`).join('\n');
+    modal(L('جهات اتصال '+(insurer.name||''),'Contacts for '+(insurer.name||'')),`<form id="wfContacts" class="form-stack"><p class="muted">${esc(L('سطر لكل جهة: القسم|البريد|الاسم|الهاتف','One line per contact: department|email|name|phone'))}</p><textarea name="contacts" rows="10" placeholder="underwriting|underwriting@example.com|Underwriting|010...">${esc(text)}</textarea><div class="form-actions"><button class="btn" type="button" data-crm-cancel>${esc(t('cancel'))}</button><button class="btn btn-primary">${esc(t('save'))}</button></div></form>`);
+    document.getElementById('wfContacts').onsubmit=async e=>{e.preventDefault();const rows=safe(new FormData(e.currentTarget).get('contacts')).split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>{const [department,email,contactName,phone]=line.split('|').map(safe);return {department,email,contactName,phone};}).filter(x=>x.email);
+      try{await db.collection('insurers').doc(id).set({emailContacts:rows,updatedAt:FieldValue().serverTimestamp()},{merge:true});await audit('update','insurers',id,{emailContacts:rows.length});close();IN.toast(t('saved'));state.cache.clear();refresh();}catch(err){IN.toast(IN.friendlyError(err),'error');}
+    };
+    document.querySelector('[data-crm-cancel]')?.addEventListener('click',close,{once:true});
+  }
+
+  function defaultTemplates(){return [
+    {id:'renewal-default',name:L('طلب تجديد وثيقة','Policy renewal request'),subject:L('طلب تجديد الوثيقة {{policy_number}}','Renewal request {{policy_number}}'),body:L('مرحبًا {{insurance_company}}،\nنرجو تزويدنا بعرض التجديد للعميل {{customer_name}} للوثيقة {{policy_number}} قبل {{renewal_date}}.','Hello {{insurance_company}},\nPlease provide a renewal quotation for {{customer_name}} / {{policy_number}} before {{renewal_date}}.')},
+    {id:'quote-default',name:L('طلب عرض سعر','Quote request'),subject:L('طلب عرض سعر للعميل {{customer_name}}','Quote request for {{customer_name}}'),body:L('نرجو تزويدنا بعرض مناسب للعميل {{customer_name}} للمنتج {{product}}.','Please provide a suitable quotation for {{customer_name}} for {{product}}.')},
+    {id:'claim-default',name:L('إشعار مطالبة','Claim notification'),subject:L('إشعار مطالبة {{claim_number}}','Claim notification {{claim_number}}'),body:L('نرجو فتح ومتابعة المطالبة {{claim_number}} الخاصة بالعميل {{customer_name}}.','Please register and review claim {{claim_number}} for {{customer_name}}.')}
+  ];}
+  function profileTemplates(){return Array.isArray(state.profile?.emailTemplates)?state.profile.emailTemplates:[];}
+  async function saveTemplates(arr){await db.collection('users').doc(state.user.uid).set({emailTemplates:arr,updatedAt:FieldValue().serverTimestamp()},{merge:true});await IN.loadIdentity();}
+  function applyVars(text,ctx){return safe(text).replace(/\{\{customer_name\}\}/g,ctx.customerName||'').replace(/\{\{policy_number\}\}/g,ctx.policyNumber||'').replace(/\{\{insurance_company\}\}/g,ctx.insurer||'').replace(/\{\{renewal_date\}\}/g,ctx.renewalDate||'').replace(/\{\{product\}\}/g,ctx.product||'').replace(/\{\{claim_number\}\}/g,ctx.claimNumber||'');}
+  async function templateManager(){
+    const root=document.getElementById('view');if(!root)return;
+    const customs=profileTemplates(),defaults=defaultTemplates(),all=[...defaults,...customs];
+    root.innerHTML=`<div class="page-head"><div><div class="eyebrow">✉️ ${esc(w('emailTemplates'))}</div><h1>${esc(w('emailTemplates'))}</h1></div><div class="actions"><button class="btn btn-primary" data-crm-action="new-template">${esc(w('newTemplate'))}</button></div></div><div class="grid grid-2">${all.map(x=>`<div class="card"><div class="list-title">${esc(x.name||x.subject||'')}</div><div class="list-sub">${esc(x.subject||'')}</div><div class="actions" style="margin-top:10px">${x.id.startsWith('renewal-')||x.id.startsWith('quote-')||x.id.startsWith('claim-')?'':actionButton('edit-template:'+x.id,L('تعديل','Edit'))}${x.id.startsWith('renewal-')||x.id.startsWith('quote-')||x.id.startsWith('claim-')?'':actionButton('duplicate-template:'+x.id,w('duplicate'))}${x.id.startsWith('renewal-')||x.id.startsWith('quote-')||x.id.startsWith('claim-')?'':actionButton('delete-template:'+x.id,w('delete'),'btn btn-danger')}${actionButton('use-template:'+x.id,w('useTemplate'))}</div></div>`).join('')}</div>`;
+  }
+  async function editTemplate(id,seed={}){
+    const existing=profileTemplates().find(x=>x.id===id)||seed||{name:'',subject:'',body:''};
+    modal(id?w('emailTemplates'):w('newTemplate'),`<form id="wfTemplate"><div class="field"><label>${esc(t('title'))}</label><input name="name" value="${esc(existing.name||'')}"></div><div class="field"><label>${esc(t('subject'))}</label><input name="subject" value="${esc(existing.subject||'')}"></div><div class="field"><label>${esc(t('message'))}</label><textarea name="body" rows="10">${esc(existing.body||'')}</textarea></div><div class="master-note">{{customer_name}} · {{policy_number}} · {{insurance_company}} · {{renewal_date}} · {{product}} · {{claim_number}}</div><div class="form-actions"><button class="btn" type="button" data-crm-cancel>${esc(t('cancel'))}</button><button class="btn btn-primary">${esc(w('saveTemplate'))}</button></div></form>`);
+    document.getElementById('wfTemplate').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),arr=profileTemplates().filter(x=>x.id!==id);arr.push({id:id||'tpl-'+Date.now(),name:safe(f.get('name')),subject:safe(f.get('subject')),body:safe(f.get('body')),updatedAt:new Date().toISOString()});try{await saveTemplates(arr);close();templateManager();}catch(err){IN.toast(IN.friendlyError(err),'error');}};
+    document.querySelector('[data-crm-cancel]')?.addEventListener('click',close,{once:true});
+  }
+  async function deleteTemplate(id){if(!confirm(t('delete')+'?'))return;try{await saveTemplates(profileTemplates().filter(x=>x.id!==id));await templateManager();}catch(err){IN.toast(IN.friendlyError(err),'error');}}
+  function duplicateTemplate(id){const x=profileTemplates().find(t=>t.id===id);if(!x)return;editTemplate(undefined,Object.assign({},x,{name:(x.name||'Template')+' Copy',id:undefined}));}
+  async function openEmailComposer(prefill={}){
+    const insurers=await IN.queryDocs('insurers'),customers=await IN.queryDocs('customers'),policies=await IN.queryDocs('policies');
+    const defaults=defaultTemplates(),customs=profileTemplates(),all=[...defaults,...customs];
+    const s=state.profile?.emailSettings||{};
+    modal(w('sendEmail'),`<form id="wfEmail" class="form-stack"><div class="form-grid"><div class="field"><label>${esc(w('from'))}</label><input name="from" value="${esc(s.brokerEmail||'')}" readonly></div><div class="field"><label>${esc(w('provider'))}</label><input value="${esc(s.provider||L('غير مُهيأ','Not configured'))}" disabled></div><div class="field"><label>${esc(t('insurers'))}</label><select name="insurerId"><option value="">—</option>${insurers.map(i=>`<option value="${esc(i.id)}">${esc(i.name||'')}</option>`).join('')}</select></div><div class="field"><label>${esc(t('customers'))}</label><select name="customerId"><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div><div class="field"><label>${esc(t('title'))}</label><select name="templateId"><option value="">—</option>${all.map(x=>`<option value="${esc(x.id)}">${esc(x.name||x.subject||'')}</option>`).join('')}</select></div><div class="field field-full"><label>${esc(w('to'))}</label><input name="to" type="email" value="${esc(prefill.to||'')}" required></div><div class="field field-full"><label>${esc(w('subject'))}</label><input name="subject" required></div><div class="field field-full"><label>${esc(w('message'))}</label><textarea name="message" rows="9" required>${esc(prefill.message||'')}</textarea></div><div class="field"><label>${esc(w('cc'))}</label><input name="cc"></div><div class="field"><label>${esc(w('bcc'))}</label><input name="bcc"></div><div class="field field-full"><label>${esc(w('attachments'))}</label><input type="file" name="attachments" multiple></div></div><div class="disabled-note">${esc(L('الإرسال الفعلي يحتاج بريدًا موثقًا وBackend آمنًا. المسودة تعمل محليًا على Firestore.','Actual sending requires a verified sender and secure backend. Drafting is available through Firestore.'))}</div><div class="form-actions"><button class="btn" type="button" data-crm-action="save-email-draft">${esc(L('حفظ مسودة','Save draft'))}</button><button class="btn btn-primary" type="submit">${esc(w('sendNow'))}</button></div></form>`);
+    const form=document.getElementById('wfEmail'),tpl=form.templateId,ins=form.insurerId,cust=form.customerId;
+    tpl.onchange=()=>{const x=all.find(a=>a.id===tpl.value);if(x){form.subject.value=applyVars(x.subject||'',{});form.message.value=applyVars(x.body||'',{});}};
+    ins.onchange=()=>{const x=insurers.find(i=>i.id===ins.value);if(x){const first=Array.isArray(x.emailContacts)&&x.emailContacts[0]?.email;form.to.value=first||x.email||'';}};
+    cust.onchange=()=>{const c=customers.find(x=>x.id===cust.value);if(c&&(!form.message.value||form.message.value.length<10))form.message.value=applyVars(form.message.value,{customerName:c.fullName||c.name});};
+    form.dataset.prefill=JSON.stringify(prefill||{});
+    if(prefill.templateId){tpl.value=prefill.templateId;tpl.dispatchEvent(new Event('change'));}
+    form.onsubmit=e=>{e.preventDefault();sendEmailWorkflow(false);};
+    document.querySelector('[data-crm-action="save-email-draft"]')?.addEventListener('click',()=>sendEmailWorkflow(true),{once:true});
+  }
+  async function sendEmailWorkflow(draft){
+    const form=document.getElementById('wfEmail'); if(!form)return;
+    const f=new FormData(form),from=safe(f.get('from')),to=safe(f.get('to')),subject=safe(f.get('subject')),message=safe(f.get('message'));
+    if(!from){IN.toast(L('أضف بريد الوسيط أولًا.','Add the broker email first.'),'error');return;}if(!to){IN.toast(L('أضف المستلم.','Add a recipient.'),'error');return;}if(!subject){IN.toast(L('أضف عنوانًا للرسالة.','Add a subject.'),'error');return;}
+    const files=Array.from(form.querySelector('input[type="file"]')?.files||[]).map(x=>({name:x.name,size:x.size,type:x.type}));
+    try{
+      const custId=safe(f.get('customerId')),insurerId=safe(f.get('insurerId'));
+      if(!draft){
+        const verified=!!state.profile?.emailSettings?.verified;
+        if(!verified){IN.toast(L('يجب توثيق البريد المرتبط من الخدمة الآمنة قبل الإرسال.','The connected sender must be verified by the secure email service before sending.'),'error');return;}
+        if(!window.INSURNEX_AI?.emailFunction||!firebase.functions){IN.toast(L('الإرسال الفعلي يحتاج Backend/Cloud Function.','Actual sending requires a Backend/Cloud Function.'),'error');return;}
+        const fn=firebase.functions().httpsCallable(window.INSURNEX_AI.emailFunction);
+        await fn({from,to,cc:safe(f.get('cc')),bcc:safe(f.get('bcc')),subject,message,attachments:files,organizationId:state.workspace.id||null,customerId:custId||null,insurerId:insurerId||null});
+      }
+      await addDoc('communications',{customerId:custId||null,insurerId:insurerId||null,channel:'Email',from,to,cc:safe(f.get('cc')),bcc:safe(f.get('bcc')),subject,message,attachmentMetadata:files,status:draft?'draft':'sent',relatedType:'operations',templateId:safe(f.get('templateId'))});
+      close();IN.toast(draft?t('saved'):L('تم الإرسال وتسجيل العملية.','Email sent and logged.'));
+      if(location.hash==='#operations')refresh();
+    }catch(e){IN.toast(IN.friendlyError(e),'error');}
+  }
+
+  async function operationComposer(){
+    const insurers=await IN.queryDocs('insurers'),customers=await IN.queryDocs('customers');
+    const types=['New Quote Request','Policy Request','Renewal Request','Endorsement','Cancellation','Claims Request','Medical Approval','Pre-Approval','Document Request','Commission Inquiry','Payment Follow-up','General Request'];
+    modal(w('newOperation'),`<form id="wfOperation" class="form-stack"><div class="form-grid"><div class="field"><label>${esc(t('type'))}</label><select name="operationType">${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>${esc(t('customers'))}</label><select name="customerId"><option value="">—</option>${customers.map(c=>`<option value="${esc(c.id)}">${esc(c.fullName||c.name||'')}</option>`).join('')}</select></div><div class="field"><label>${esc(t('insurer'))}</label><select name="insurerId"><option value="">—</option>${insurers.map(i=>`<option value="${esc(i.id)}">${esc(i.name||'')}</option>`).join('')}</select></div><div class="field"><label>${esc(t('to'))}</label><input name="recipientEmail" type="email"></div><div class="field field-full"><label>${esc(t('subject'))}</label><input name="subject" required></div><div class="field field-full"><label>${esc(t('message'))}</label><textarea name="message" rows="8" required></textarea></div><div class="field"><label>${esc(t('dueDate'))}</label><input type="date" name="dueDate"></div><label class="checkbox"><input type="checkbox" name="createTask" checked><span>${esc(L('إنشاء مهمة متابعة تلقائيًا','Create a follow-up task automatically'))}</span></label></div><div class="form-actions"><button class="btn" type="button" data-crm-cancel>${esc(t('cancel'))}</button><button class="btn btn-primary">${esc(t('save'))}</button></div></form>`);
+    const form=document.getElementById('wfOperation');form.insurerId.onchange=()=>{const x=insurers.find(i=>i.id===form.insurerId.value);if(x){const email=Array.isArray(x.emailContacts)&&x.emailContacts[0]?.email;x&&(form.recipientEmail.value=email||x.email||'');}};
+    form.onsubmit=async e=>{e.preventDefault();const f=new FormData(form),cId=safe(f.get('customerId')),iId=safe(f.get('insurerId')),ct=customers.find(x=>x.id===cId),ins=insurers.find(x=>x.id===iId);try{
+      const ref=await addDoc('communications',{channel:'Operations',operationType:safe(f.get('operationType')),customerId:cId||null,customerName:ct?.fullName||ct?.name||'',insurerId:iId||null,insurerName:ins?.name||'',recipientEmail:safe(f.get('recipientEmail')),subject:safe(f.get('subject')),message:safe(f.get('message')),status:'Open',dueDate:safe(f.get('dueDate')),relatedType:'operation'});
+      if(f.get('createTask'))await addDoc('tasks',{title:safe(f.get('subject')),description:safe(f.get('message')),dueDate:safe(f.get('dueDate'))||new Date().toISOString().slice(0,10),priority:'medium',status:'To Do',linkedEntityType:'operation',linkedEntityId:ref.id,customerId:cId||null,customerName:ct?.fullName||ct?.name||'',assignedToName:state.profile?.name||''});
+      close();IN.toast(t('saved'));refresh();
+    }catch(err){IN.toast(IN.friendlyError(err),'error');}};
+    document.querySelector('[data-crm-cancel]')?.addEventListener('click',close,{once:true});
+  }
+
+  async function markAllNotificationsRead(){
+    const s=await db.collection('notifications').where('recipientId','==',state.user.uid).limit(100).get();const batch=db.batch();let n=0;s.docs.forEach(d=>{if(d.data().read!==true){batch.update(d.ref,{read:true,readAt:FieldValue().serverTimestamp()});n++;}});if(n)await batch.commit();IN.toast(L('تم تحديث الإشعارات.','Notifications updated.'));refresh();
+  }
+
+  async function decorate(){
+    const root=document.getElementById('view');if(!root)return;const route=(location.hash||'#home').slice(1);
+    if(route==='email-templates'){await templateManager();return;}
+    const headerMap={commissions:['commission-calculator',w('commissionCalc')],operations:['new-operation',w('newOperation')],notifications:['mark-notifications-read',w('markAllRead')],['email-settings']:['email-templates',w('emailTemplates')]};
+    if(headerMap[route]) addHeaderAction(headerMap[route][0],headerMap[route][1]);
+    root.querySelectorAll('[data-edit]').forEach(b=>{
+      if(b.dataset.crmDecorated)return;b.dataset.crmDecorated='1';const [module,id]=String(b.dataset.edit).split(':');const holder=b.parentElement;if(!holder||!id)return;
+      if(module==='leads')holder.insertAdjacentHTML('beforeend',actionButton('convert-lead:'+id,w('leadToOpp'),'btn btn-secondary'));
+      if(module==='opportunities')holder.insertAdjacentHTML('beforeend',actionButton('convert-opportunity:'+id,w('oppToQuote'),'btn btn-secondary'));
+      if(module==='quotations')holder.insertAdjacentHTML('beforeend',actionButton('issue-quote:'+id,w('quoteToPolicy'),'btn btn-secondary'));
+      if(module==='policies')holder.insertAdjacentHTML('beforeend',actionButton('renew-policy:'+id,w('policyRenew'),'btn btn-secondary'));
+      if(module==='renewals')holder.insertAdjacentHTML('beforeend',actionButton('renewal-task:'+id,w('renewalTask'),'btn btn-secondary'));
+      if(module==='claims')holder.insertAdjacentHTML('beforeend',actionButton('claim-task:'+id,w('claimTask'),'btn btn-secondary'));
+      if(module==='insurers'){holder.insertAdjacentHTML('beforeend',actionButton('insurer-contacts:'+id,w('insurerContacts'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('insurer-email:'+id,t('email'),'btn btn-secondary'));}
+    });
+    root.querySelectorAll('[data-crm-action="issue-quote"]')?.forEach(()=>{});
+    root.querySelectorAll('a[href]').forEach(a=>{const card=a.closest('.card');if(!card||card.querySelector('[data-crm-doc-delete]'))return;if(route!=='documents')return;const rowButton=document.createElement('button');rowButton.type='button';rowButton.className='btn btn-danger btn-sm';rowButton.textContent=t('delete');rowButton.dataset.crmDocDelete='1';card.querySelector('.actions')?.appendChild(rowButton);});
+  }
+
+  async function handleAction(action){
+    if(action==='commission-calculator'){return openCommissionCalculator();}
+    if(action==='new-operation'){return operationComposer();}
+    if(action==='mark-notifications-read'){return markAllNotificationsRead();}
+    if(action==='email-templates'){location.hash='#email-templates';return;}
+    if(action==='new-template'){return editTemplate(null);}
+    if(action.startsWith('edit-template:')){return editTemplate(action.split(':')[1]);}
+    if(action.startsWith('delete-template:')){return deleteTemplate(action.split(':')[1]);}
+    if(action.startsWith('duplicate-template:')){const x=profileTemplates().find(v=>v.id===action.split(':')[1]);if(!x)return;return editTemplate(null,{...x,id:null,name:(x.name||'Template')+' Copy'});}
+    if(action.startsWith('use-template:')){return openEmailComposer({templateId:action.split(':')[1]});}
+    if(action.startsWith('convert-lead:'))return convertLead(action.split(':')[1]);
+    if(action.startsWith('convert-opportunity:'))return createQuoteFromOpportunity(action.split(':')[1]);
+    if(action.startsWith('issue-quote:'))return issuePolicyFromQuote(action.split(':')[1]);
+    if(action.startsWith('renew-policy:'))return startRenewal(action.split(':')[1]);
+    if(action.startsWith('renewal-task:'))return renewalFollowUp(action.split(':')[1]);
+    if(action.startsWith('claim-task:'))return claimFollowUp(action.split(':')[1]);
+    if(action.startsWith('insurer-contacts:'))return insurerContacts(action.split(':')[1]);
+    if(action.startsWith('insurer-email:')){const id=action.split(':')[1],ins=await readDoc('insurers',id),to=Array.isArray(ins?.emailContacts)&&ins.emailContacts[0]?.email||ins?.email||'';return openEmailComposer({to});}
+    if(action==='save-email-draft')return sendEmailWorkflow(true);
+  }
+
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('[data-crm-action]');if(!b)return;
+    const action=b.dataset.crmAction; if(action==='save-email-draft')return;
+    e.preventDefault();e.stopImmediatePropagation();handleAction(action).catch(err=>IN.toast(IN.friendlyError(err),'error'));
+  },true);
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('[data-crm-cancel]');if(b){e.preventDefault();close();}
+  },true);
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest?.('[data-crm-doc-delete]');if(!b)return;
+    const card=b.closest('.card');try{const rows=await IN.queryDocs('documents'),a=card?.querySelector('a[href]'),row=rows.find(x=>x.url===a?.href||x.url===a?.getAttribute('href'));if(!row)return;if(!confirm(t('delete')+'?'))return;if(row.storagePath){try{await storage.ref(row.storagePath).delete();}catch(_){} }await db.collection('documents').doc(row.id).delete();await audit('delete','documents',row.id,{});state.cache.clear();IN.toast(t('deleted'));refresh();}catch(err){IN.toast(IN.friendlyError(err),'error');}
+  },true);
+  document.addEventListener('click',e=>{
+    const a=e.target.closest?.('[data-master-route="operations"]'); if(a) setTimeout(()=>{},0);
+  },true);
+  window.addEventListener('hashchange',()=>setTimeout(()=>decorate().catch(()=>{}),100));
+  const mo=new MutationObserver(()=>{if(document.getElementById('view'))setTimeout(()=>decorate().catch(()=>{}),20);});
+  mo.observe(document.body,{childList:true,subtree:true});
+  setTimeout(()=>decorate().catch(()=>{}),200);
+})();
+
+</script>
 </body></html>
