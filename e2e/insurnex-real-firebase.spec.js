@@ -102,6 +102,24 @@ async function registerOrLogin(page, testInfo, pageErrors) {
     await page.locator('#authForm button[type="submit"]').click();
   }
 
+  await expect.poll(async () => {
+    const home = await page.locator('#home').count();
+    const onboarding = await page.locator('#masterOnboarding').count();
+    return home + onboarding;
+  }, { timeout: 45000 }).toBeGreaterThan(0);
+
+  const onboarding = page.locator('#masterOnboarding');
+  if (await onboarding.count()) {
+    await onboarding.locator('input[name="fullName"]').fill(`InsurNex E2E ${testInfo.project.name}`);
+    await onboarding.locator('input[name="mobile"]').fill('01000000000');
+    await onboarding.locator('input[name="country"]').fill('Egypt');
+    await onboarding.locator('input[name="city"]').fill('Cairo');
+    await onboarding.locator('input[name="licenseNumber"]').fill('E2E-LICENSE');
+    await onboarding.locator('input[name="specialization"]').fill('General Insurance');
+    await onboarding.locator('input[name="insuranceLines"]').fill('Motor, Medical');
+    await onboarding.locator('#onboardingSave').click();
+  }
+
   await page.locator('#home').waitFor({ state: 'visible', timeout: 45000 });
   const state = await firebaseState(page);
   expect(state.projectId).toBe(PROJECT_ID);
