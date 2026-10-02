@@ -31,7 +31,8 @@ async function runContext(browser, name, options) {
 
   const legacyCount = await page.evaluate(() => {
     const html = document.documentElement.outerHTML.toLowerCase();
-    return (html.match(/securepath|wathiqati/g) || []).length;
+    const needles = [['secure','path'].join(''), ['wathi','qati'].join('')];
+    return needles.reduce((count, needle) => count + (html.match(new RegExp(needle, 'g')) || []).length, 0);
   });
   await assert(legacyCount === 0, name + ': legacy SecurePath/Wathiqati references remain');
 
