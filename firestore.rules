@@ -169,7 +169,7 @@ service cloud.firestore {
     function canWriteNewUser() {
       return signedIn()
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.accountType in ['individual_broker', 'brokerage_company', 'broker_employee', 'manager', 'customer']
+        && request.resource.data.accountType in ['individual_broker', 'brokerage_company', 'brokerage_office', 'broker_employee', 'manager', 'customer']
         && request.resource.data.roles is list
         && request.resource.data.roles.hasOnly(['organizationOwner', 'broker', 'manager', 'customer'])
         && !request.resource.data.keys().hasAny(['platformRole']);
