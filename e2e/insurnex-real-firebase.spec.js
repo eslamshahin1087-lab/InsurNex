@@ -18,54 +18,66 @@ async function firebaseState(page) {
 }
 
 async function cleanupWorkspace(page, uid, deleteAuth) {
-  await page.evaluate(async ({ uid, deleteAuth }) => {
-    const IN = window.InsurNex;
-    if (!IN?.db || !IN?.auth?.currentUser) return;
+  const cleanupPage = await page.context().newPage();
+  try {
+    await cleanupPage.goto(`${process.env.E2E_BASE_URL || 'http://localhost:4173'}${BASE_PATH}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    }).catch(() => {});
 
-    const collections = [
-      'customers',
-      'leads',
-      'opportunities',
-      'quotations',
-      'policies',
-      'renewals',
-      'claims',
-      'tasks',
-      'documents',
-      'documentExtractions',
-      'insuranceAssessments',
-      'insuranceFileAnalyses',
-      'aiInsights',
-      'aiActions',
-      'commissions',
-      'payments',
-      'financialTransactions',
-      'expenses',
-      'insuranceComparisons',
-      'communications',
-      'notifications',
-      'calendarEvents',
-      'activities',
-      'auditLogs',
-    ];
+    await cleanupPage.waitForTimeout(500);
 
-    for (const collection of collections) {
-      try {
-        const snap = await IN.db.collection(collection).where('ownerId', '==', uid).limit(200).get();
-        for (const doc of snap.docs) {
-          try { await doc.ref.delete(); } catch (_) {}
-        }
-      } catch (_) {}
-    }
+    await cleanupPage.evaluate(async ({ uid, deleteAuth }) => {
+      const IN = window.InsurNex;
+      if (!IN?.db || !IN?.auth?.currentUser) return;
 
-    try {
-      await IN.db.collection('brokerProfiles').doc(uid).delete();
-    } catch (_) {}
+      const collections = [
+        'customers',
+        'leads',
+        'opportunities',
+        'quotations',
+        'policies',
+        'renewals',
+        'claims',
+        'tasks',
+        'documents',
+        'documentExtractions',
+        'insuranceAssessments',
+        'insuranceFileAnalyses',
+        'aiInsights',
+        'aiActions',
+        'commissions',
+        'payments',
+        'financialTransactions',
+        'expenses',
+        'insuranceComparisons',
+        'communications',
+        'notifications',
+        'calendarEvents',
+        'activities',
+      ];
 
-    if (deleteAuth && IN.auth.currentUser) {
-      try { await IN.auth.currentUser.delete(); } catch (_) {}
-    }
-  }, { uid, deleteAuth });
+      for (const collection of collections) {
+        try {
+          const snap = await IN.db.collection(collection).where('ownerId', '==', uid).limit(200).get();
+          for (const doc of snap.docs) {
+            try { await doc.ref.delete(); } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      try { await IN.db.collection('brokerProfiles').doc(uid).delete(); } catch (_) {}
+      try { await IN.db.collection('users').doc(uid).delete(); } catch (_) {}
+
+      if (deleteAuth && IN.auth.currentUser) {
+        try { await IN.auth.currentUser.delete(); } catch (_) {}
+      }
+    }, { uid, deleteAuth });
+  } catch (_) {
+    // Cleanup must never turn a completed product-flow test into a false failure.
+  } finally {
+    await cleanupPage.close().catch(() => {});
+  }
 }
 
 async function registerOrLogin(page, testInfo, pageErrors) {
