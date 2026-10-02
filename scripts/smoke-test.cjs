@@ -87,6 +87,9 @@ const localScriptPattern = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
 const canonicalApps = ["InsurNex-User.html", "InsurNex-admin.html"];
 for (const rel of canonicalApps) {
   const source = fs.readFileSync(path.join(root, rel), "utf8");
+  if (/<style\\b[^>]*>\\s*<style\\b/i.test(source) || /<\\/style>\\s*<\\/style>/i.test(source)) {
+    failures.push("Nested or duplicated style tags detected in " + rel + ".");
+  }
   let match;
   while ((match = localScriptPattern.exec(source))) {
     const src = match[1].split(/[?#]/)[0];
