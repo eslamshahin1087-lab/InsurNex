@@ -80,6 +80,21 @@ async function main() {
       workspaceType: "personal", organizationId: null, ownerId: "broker-1"
     }));
 
+    // Brokerage office registration uses the same organization-owner authorization boundary.
+    const officeRegistrationDb = testEnv.authenticatedContext("office-owner").firestore();
+    const officeBatch = writeBatch(officeRegistrationDb);
+    officeBatch.set(doc(officeRegistrationDb, "users/office-owner"), {
+      uid: "office-owner", accountType: "brokerage_office", roles: ["organizationOwner", "broker"],
+      email: "office-owner@example.invalid", onboardingComplete: false
+    });
+    officeBatch.set(doc(officeRegistrationDb, "organizations/org-office"), {
+      ownerId: "office-owner", name: "Office Brokerage"
+    });
+    officeBatch.set(doc(officeRegistrationDb, "organizationMembers/org-office_office-owner"), {
+      organizationId: "org-office", userId: "office-owner", role: "organizationOwner", status: "active"
+    });
+    await assertSucceeds(officeBatch.commit());
+
     // New organization + owner membership must still work atomically during company registration.
     const ownerRegistrationDb = testEnv.authenticatedContext("new-owner").firestore();
     const batch = writeBatch(ownerRegistrationDb);
