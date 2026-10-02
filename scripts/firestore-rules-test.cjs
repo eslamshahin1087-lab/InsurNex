@@ -81,6 +81,10 @@ async function main() {
       workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "Wrong owner"
     }));
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
+    await assertSucceeds(getDoc(doc(brokerDb, "insuranceAssessments/org-assessment")));
+    await assertFails(getDoc(doc(outsiderDb, "insuranceAssessments/org-assessment")));
+    await assertFails(getDoc(doc(outsiderDb, "financialTransactions/org-ledger")));
+    await assertSucceeds(getDoc(doc(brokerDb, "financialTransactions/org-ledger")));
     await assertFails(updateDoc(doc(brokerDb, "leads/org-lead"), {
       organizationId: "org-other", workspaceType: "organization"
     }));
