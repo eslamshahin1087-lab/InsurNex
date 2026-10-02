@@ -37,7 +37,9 @@ const RULE_COLLECTIONS = Object.freeze([
   "quotes", "renewals", "claims", "payments", "tasks", "appointments",
   "activities", "notes", "messages", "conversations", "organizationRequests",
   "customers", "opportunities", "quotations", "calendarEvents", "communications",
-  "commissions", "teams", "plans"
+  "commissions", "teams", "plans", "insuranceAssessments", "documentExtractions",
+  "insuranceFileAnalyses", "aiInsights", "aiActions", "financialTransactions", "expenses",
+  "insuranceComparisons", "insurerContacts", "clientServiceRequests"
 ]);
 
 // Bootstrap is intentionally limited to platform/reference data. Operational
