@@ -497,3 +497,34 @@ The production User App now includes Customers, Customer 360, Leads, Opportuniti
 ## Safe legacy migration
 
 Use `scripts/migrate-legacy-data.cjs` through `npm run migrate-data` from a trusted environment to copy compatible legacy records without deleting source data.
+
+
+## Insurance Intelligence & workflow layer
+
+The User App keeps the existing InsurNex visual system and wires its primary actions into the insurance lifecycle described in the product specification:
+
+- Customer 360 and Insurance Portfolio Assessment
+- Lead Needs Analysis and conversion to Opportunity
+- Opportunity to Quotation to Policy
+- Policy renewal, follow-up and payment recording
+- Claims follow-up and Claim Assistant
+- Document extraction/analysis requests
+- Insurer/Product comparison
+- Commission calculation and broker expenses
+- AI action/audit records without pretending that an unavailable AI/OCR backend has run
+
+AI/OCR workflows use explicit statuses such as `backend_required` until a secure backend service is connected. The application does not fabricate extracted document or medical results.
+
+## Firebase collection blueprint
+
+`firestore.collections.json` is the canonical repository blueprint for the collections used by InsurNex. It includes CRM, insurance operations, document intelligence, medical analysis, AI action logs, finance, communications, and platform administration collections.
+
+The repository also includes matching Firestore rules for the workspace-scoped intelligence and finance collections. Firestore collections are created naturally when the first real document is written; the bootstrap utility remains create-only for approved reference/configuration data and never writes placeholder documents.
+
+Run the read-only audit with the existing bootstrap utility:
+
+```bash
+node scripts/firestore-bootstrap.cjs
+```
+
+Operational data must continue to be created through the application workflows. Never seed placeholder business records into production.
