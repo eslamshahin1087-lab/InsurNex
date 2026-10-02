@@ -7037,7 +7037,6 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   async function enhancedRegister(form){
     // Keep the base auth listener from racing registration after Firebase creates the Auth user.
-    registrationInProgress=true;
     window.__INSURNEX_REGISTERING=true;
     const f=new FormData(form);
     const password=String(f.get('password')||''),confirm=String(f.get('confirmPassword')||'');
@@ -7103,10 +7102,8 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       await IN.logActivity('register','InsurNex account',{accountType:type});
       IN.toast(tr('accountCreated'));
       await enter();
-      registrationInProgress=false;
       window.__INSURNEX_REGISTERING=false;
     }catch(err){
-      registrationInProgress=false;
       window.__INSURNEX_REGISTERING=false;
       if(submit){submit.disabled=false;submit.innerHTML='<span>'+tr('register')+'</span>';}
       const msg=(err&&err.code==='terms-required')?tr('termsAgreement'):(typeof friendlyError==='function'?friendlyError(err):(err?.message||tr('network')));
@@ -7291,7 +7288,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   },true);
   window.addEventListener('hashchange',onHash);
   IN.auth.onAuthStateChanged(async user=>{
-    if(!user||registrationInProgress||window.__INSURNEX_REGISTERING)return;
+    if(!user||window.__INSURNEX_REGISTERING)return;
     try{await IN.loadIdentity();if(state.profile&&!state.profile.onboardingCompleted)showOnboarding();else{enhancement.onboardingVisible=false;setTimeout(onHash,120);}}catch(e){console.warn('master auth',e);}
   });
   const observer=new MutationObserver(()=>{if(!document.getElementById('authForm'))injectCustomNav();if(document.getElementById('accountType'))authTypeEnhance();});
