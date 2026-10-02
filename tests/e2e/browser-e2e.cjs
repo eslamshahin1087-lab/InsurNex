@@ -7,6 +7,60 @@ async function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function runAuthenticatedFirebaseProbe(page, name) {
+  return page.evaluate(async (contextName) => {
+    const auth = window.firebase.auth();
+    const db = window.firebase.firestore();
+    const user = auth.currentUser;
+    if (!user) throw new Error(contextName + ': Firebase authenticated user missing');
+
+    // Uses a unique temporary field on the signed-in user's own profile. It never
+    // creates, edits, or deletes customer/business records.
+    const profileRef = db.collection('users').doc(user.uid);
+    const profileSnapshot = await profileRef.get();
+    if (!profileSnapshot.exists) {
+      throw new Error(contextName + ': users/' + user.uid + ' does not exist; account provisioning is incomplete');
+    }
+
+    const probeField = '__insurnexE2eProbe_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    const marker = 'probe-' + contextName + '-' + user.uid;
+    let writeConfirmed = false;
+    let readConfirmed = false;
+    let cleanupConfirmed = false;
+
+    try {
+      await profileRef.update({ [probeField]: marker });
+      writeConfirmed = true;
+
+      const afterWrite = await profileRef.get();
+      readConfirmed = afterWrite.exists && afterWrite.get(probeField) === marker;
+      if (!readConfirmed) throw new Error(contextName + ': Firestore read-after-write verification failed');
+
+      await profileRef.update({ [probeField]: window.firebase.firestore.FieldValue.delete() });
+      const afterCleanup = await profileRef.get();
+      cleanupConfirmed = afterCleanup.exists && !Object.prototype.hasOwnProperty.call(afterCleanup.data() || {}, probeField);
+      if (!cleanupConfirmed) throw new Error(contextName + ': temporary Firebase probe field cleanup could not be verified');
+
+      return {
+        ok: true,
+        uid: user.uid,
+        collection: 'users',
+        documentId: user.uid,
+        read: true,
+        write: writeConfirmed,
+        readAfterWrite: readConfirmed,
+        cleanup: cleanupConfirmed
+      };
+    } catch (error) {
+      // Best-effort cleanup only targets the uniquely named field created above.
+      try {
+        await profileRef.update({ [probeField]: window.firebase.firestore.FieldValue.delete() });
+      } catch (_) {}
+      throw new Error(contextName + ': authenticated Firebase probe failed (' + (error.code || 'unknown') + '): ' + (error.message || String(error)));
+    }
+  }, name);
+}
+
 async function runContext(browser, name, options) {
   const context = await browser.newContext(options);
   const page = await context.newPage();
@@ -62,29 +116,36 @@ async function runContext(browser, name, options) {
     }
   });
 
-  const unexpectedPageErrors = pageErrors.filter(Boolean);
-  await assert(unexpectedPageErrors.length === 0, name + ': unexpected browser page errors: ' + JSON.stringify(unexpectedPageErrors));
-
+  let firebaseCrudProbe = null;
+  let authenticatedRouteChecks = [];
   if (hasCreds) {
     await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
     await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
     await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
     await page.locator('.auth-submit').click();
-    await page.waitForTimeout(2500);
+
+    await page.waitForFunction(() => Boolean(window.firebase?.auth?.().currentUser), null, { timeout: 30000 });
+    await page.waitForTimeout(1500);
     await assert(await page.locator('#view, #app .shell, .app-shell').count() > 0, name + ': authenticated shell did not load');
+
+    firebaseCrudProbe = await runAuthenticatedFirebaseProbe(page, name);
 
     for (const route of ['crm', 'leads', 'opportunities', 'quotations', 'policies', 'renewals', 'claims', 'documents', 'insurers', 'expenses', 'notifications']) {
       await page.evaluate(routeName => { location.hash = '#' + routeName; }, route);
       await page.waitForTimeout(500);
       await assert(await page.locator('#view').count() > 0, name + ': route container missing for ' + route);
+      authenticatedRouteChecks.push({ route, rendered: true });
     }
   }
+
+  const unexpectedPageErrors = pageErrors.filter(Boolean);
+  await assert(unexpectedPageErrors.length === 0, name + ': unexpected browser page errors: ' + JSON.stringify(unexpectedPageErrors));
 
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2);
   if (name === 'mobile') await assert(mobileOverflow, 'mobile: horizontal overflow detected');
 
   await context.close();
-  return { name, firebaseState, anonymous, consoleErrors, pageErrors, authenticatedSuite: hasCreds };
+  return { name, firebaseState, anonymous, firebaseCrudProbe, authenticatedRouteChecks, consoleErrors, pageErrors, authenticatedSuite: hasCreds };
 }
 
 (async () => {
@@ -97,10 +158,11 @@ async function runContext(browser, name, options) {
       ok: true,
       baseUrl: BASE_URL,
       authenticatedSuite: hasCreds,
+      firebaseCrudProbe: hasCreds ? 'read + write + read-after-write + cleanup on the signed-in user profile' : 'not run; configure INSURNEX_E2E_EMAIL and INSURNEX_E2E_PASSWORD',
       desktop,
       mobile,
       note: hasCreds
-        ? 'Authenticated E2E executed using the supplied dedicated test account.'
+        ? 'Authenticated browser E2E and Firebase read/write verification executed using the supplied dedicated test account.'
         : 'Authenticated suite was not executed because no E2E_EMAIL/E2E_PASSWORD secrets were supplied.'
     };
     console.log(JSON.stringify(result, null, 2));
