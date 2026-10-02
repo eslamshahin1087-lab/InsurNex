@@ -5726,7 +5726,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   let lang=localStorage.getItem("insurnex-language")||"ar";
   let theme=localStorage.getItem("insurnex-theme")||"light";
   if(theme!=="dark")theme="light";
-  let registrationInProgress=false;
+  window.__INSURNEX_REGISTRATION_IN_PROGRESS=false;
   const state={
     user:null, profile:null, memberships:[], adminRole:null,
     workspace:{type:"personal",id:null,name:null}, cache:new Map(), online:navigator.onLine
@@ -6188,7 +6188,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       e.preventDefault();
       var form=e.currentTarget, submit=form.querySelector(".auth-submit");
       if(submit){submit.disabled=true;submit.innerHTML='<span class="button-spinner"></span>'+(login?t("login")+'…':t("register")+'…');}
-      try{var f=new FormData(form); if(login)await doLogin(f);else await doRegister(f);}catch(err){registrationInProgress=false;authPage(mode,friendlyError(err));}
+      try{var f=new FormData(form); if(login)await doLogin(f);else await doRegister(f);}catch(err){window.__INSURNEX_REGISTRATION_IN_PROGRESS=false;authPage(mode,friendlyError(err));}
     };
   }
 
@@ -6216,7 +6216,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   async function doRegister(f){
     var password=String(f.get("password")||""), confirm=String(f.get("confirmPassword")||"");
     if(password!==confirm){var e=new Error("mismatch");e.code="auth/password-mismatch";throw e;}
-    registrationInProgress=true;
+    window.__INSURNEX_REGISTRATION_IN_PROGRESS=true;
     var c=await auth.createUserWithEmailAndPassword(String(f.get("email")).trim(),password);
     var uid=c.user.uid,type=String(f.get("accountType")||"individual_broker"),batch=db.batch();
     var roles=(type==="brokerage_company"||type==="brokerage_office")?["organizationOwner","broker"]:
@@ -6261,7 +6261,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     await InsurNex.loadIdentity();
     toast(t("accountCreated"));
     await enter();
-    registrationInProgress=false;
+    window.__INSURNEX_REGISTRATION_IN_PROGRESS=false;
   }
 
   async function forgot(){
@@ -6911,7 +6911,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("./sw.js").catch(function(e){console.warn("InsurNex service worker unavailable",e);});}
   authPage("login");
   auth.onAuthStateChanged(async function(user){
-    if(registrationInProgress||window.__INSURNEX_REGISTERING)return;
+    if(window.__INSURNEX_REGISTRATION_IN_PROGRESS||window.__INSURNEX_REGISTERING)return;
     try{if(!user){authPage("login");return;}await InsurNex.loadIdentity();await enter();}
     catch(e){console.error(e);authPage("login",friendlyError(e));}
   });
@@ -7037,7 +7037,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   async function enhancedRegister(form){
     // Keep the base auth listener from racing registration after Firebase creates the Auth user.
-    registrationInProgress=true;
+    window.__INSURNEX_REGISTRATION_IN_PROGRESS=true;
     window.__INSURNEX_REGISTERING=true;
     const f=new FormData(form);
     const password=String(f.get('password')||''),confirm=String(f.get('confirmPassword')||'');
@@ -7103,10 +7103,10 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       await IN.logActivity('register','InsurNex account',{accountType:type});
       IN.toast(tr('accountCreated'));
       await enter();
-      registrationInProgress=false;
+      window.__INSURNEX_REGISTRATION_IN_PROGRESS=false;
       window.__INSURNEX_REGISTERING=false;
     }catch(err){
-      registrationInProgress=false;
+      window.__INSURNEX_REGISTRATION_IN_PROGRESS=false;
       window.__INSURNEX_REGISTERING=false;
       if(submit){submit.disabled=false;submit.innerHTML='<span>'+tr('register')+'</span>';}
       const msg=(err&&err.code==='terms-required')?tr('termsAgreement'):(typeof friendlyError==='function'?friendlyError(err):(err?.message||tr('network')));
@@ -7291,7 +7291,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   },true);
   window.addEventListener('hashchange',onHash);
   IN.auth.onAuthStateChanged(async user=>{
-    if(!user||registrationInProgress||window.__INSURNEX_REGISTERING)return;
+    if(!user||window.__INSURNEX_REGISTRATION_IN_PROGRESS||window.__INSURNEX_REGISTERING)return;
     try{await IN.loadIdentity();if(state.profile&&!state.profile.onboardingCompleted)showOnboarding();else{enhancement.onboardingVisible=false;setTimeout(onHash,120);}}catch(e){console.warn('master auth',e);}
   });
   const observer=new MutationObserver(()=>{if(!document.getElementById('authForm'))injectCustomNav();if(document.getElementById('accountType'))authTypeEnhance();});
