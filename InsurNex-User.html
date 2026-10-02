@@ -5625,7 +5625,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       leads:"الفرص", opportunities:"الفرص البيعية", quotations:"عروض الأسعار", quotes:"عروض الأسعار",
       policies:"الوثائق", renewals:"التجديدات", claims:"المطالبات", tasks:"المهام", calendar:"التقويم",
       documents:"المستندات", insurers:"شركات التأمين", insuranceProducts:"المنتجات التأمينية",
-      commissions:"العمولات", communications:"الاتصالات", reports:"التقارير", analytics:"التحليلات",
+      commissions:"العمولات", expenses:"المصروفات", communications:"الاتصالات", reports:"التقارير", analytics:"التحليلات",
       team:"الفريق", notifications:"الإشعارات", settings:"الإعدادات", support:"الدعم", navMain:"الرئيسية", navCrmSales:"إدارة العملاء والمبيعات", navService:"الوثائق والخدمة", navBusiness:"الأعمال والشركاء", navInsights:"التحليلات والفريق", navAccount:"الحساب",
       subscriptions:"الاشتراك", account:"الحساب", globalSearch:"بحث شامل", quickAccess:"الوصول السريع", allFeatures:"كل المزايا", portfolioMetrics:"مؤشرات المحفظة", allDailyFunctions:"كل وظائف التشغيل اليومية",
       login:"تسجيل الدخول", register:"إنشاء حساب", logout:"تسجيل الخروج", forgotPassword:"نسيت كلمة المرور؟", quickAccess:"الوصول السريع",
@@ -5676,7 +5676,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       home:"Home", dashboard:"Dashboard", crm:"CRM", customers:"Customers", clients:"Customers",
       leads:"Leads", opportunities:"Opportunities", quotations:"Quotations", quotes:"Quotations",
       policies:"Policies", renewals:"Renewals", claims:"Claims", tasks:"Tasks", calendar:"Calendar",
-      documents:"Documents", insurers:"Insurers", insuranceProducts:"Insurance Products", commissions:"Commissions",
+      documents:"Documents", insurers:"Insurers", insuranceProducts:"Insurance Products", commissions:"Commissions", expenses:"Expenses",
       communications:"Communications", reports:"Reports", analytics:"Analytics", team:"Team", notifications:"Notifications",
       settings:"Settings", support:"Support", navMain:"Overview", navCrmSales:"CRM & Sales", navService:"Policies & Service", navBusiness:"Business & Partners", navInsights:"Insights & Team", navAccount:"Account",
       subscriptions:"Subscription", account:"Account", globalSearch:"Global search", quickAccess:"Quick access", allFeatures:"All features", portfolioMetrics:"Portfolio metrics", allDailyFunctions:"Daily operating functions",
@@ -6052,6 +6052,11 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       ["renewalDate","renewalDate","date"],["customerLimit","total","number"],["userLimit","employees","number"]
     ]},
     payments:{title:"payments",icon:"💳",collection:"payments",fields:[["policyNumber","policyNumber","text"],["customerName","customers","text"],["amount","amount","number"],["date","date","date"],["method","method","select","Cash,Bank transfer,Card,Online"],["status","status","select","pending,partial,paid,refunded"]]},
+    expenses:{title:"expenses",icon:"🧾",collection:"expenses",fields:[
+      ["category","category","select","Operational,Marketing,Staff,Technology,Travel,Other"],["description","description","textarea"],
+      ["amount","amount","number"],["date","date","date"],["paymentMethod","paymentMethod","select","Cash,Bank transfer,Card,Online"],
+      ["status","status","select","Draft,Approved,Paid,Cancelled"],["reference","reference","text"]
+    ]},
     teams:{title:"team",icon:"👨‍👩‍👧‍👦",collection:"teams",fields:[
       ["name","name","text"],["managerName","assignedBroker","text"],["description","description","textarea"],["status","status","select","active,inactive"]
     ]}
@@ -6103,7 +6108,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     ["home","home","⌂"],["crm","crm","👥"],["leads","leads","🎯"],["opportunities","opportunities","💼"],
     ["quotations","quotations","📑"],["policies","policies","🛡️"],["renewals","renewals","🔄"],["claims","claims","🧾"],
     ["tasks","tasks","✅"],["payments","payments","💳"],["calendarEvents","calendar","📅"],["documents","documents","📎"],["insurers","insurers","🏢"],
-    ["insuranceProducts","insuranceProducts","📦"],["commissions","commissions","💰"],["communications","communications","💬"],
+    ["insuranceProducts","insuranceProducts","📦"],["commissions","commissions","💰"],["expenses","expenses","🧾"],["communications","communications","💬"],
     ["reports","reports","📈"],["analytics","analytics","📊"],["team","team","👨‍👩‍👧‍👦"],["notifications","notifications","🔔"],
     ["subscriptions","subscriptions","💳"],["supportTickets","support","🎧"],["account","account","⚙️"]
   ];
@@ -6291,7 +6296,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       documents:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
       insurers:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
       insuranceProducts:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>',
-      commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1.5 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>',
+      commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>', expenses:'<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
       communications:'<path d="M4 5h16v11H7l-3 3z"/><path d="M8 9h8M8 13h5"/>',
       reports:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',      analytics:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-3M12 16V7M16 16v-5"/>',
       team:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
@@ -6310,7 +6315,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       ["navMain",["home","notifications"]],
       ["navCrmSales",["crm","leads","opportunities","quotations","tasks"]],
       ["navService",["policies","renewals","claims","payments","calendarEvents","documents"]],
-      ["navBusiness",["insurers","insuranceProducts","commissions","communications","subscriptions"]],
+      ["navBusiness",["insurers","insuranceProducts","commissions","expenses","communications","subscriptions"]],
       ["navInsights",["analytics","reports","team","supportTickets"]],
       ["navAccount",["account"]]
     ];
@@ -6405,48 +6410,84 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     state.cache.clear();
   }
 
+
+  function pipelineSummary(leads,opps){
+    const stages=['New','Contacted','Qualified','Quotation','Proposal','Negotiation','Won','Lost'];
+    return '<div class="grid grid-4">'+stages.map(function(stage){
+      const leadCount=(leads||[]).filter(function(x){return x.stage===stage;}).length;
+      const oppCount=(opps||[]).filter(function(x){return x.status===stage;}).length;
+      return '<div class="card"><div class="eyebrow">'+esc(stage)+'</div><div class="value">'+(leadCount+oppCount)+'</div><div class="muted">'+leadCount+' Leads · '+oppCount+' Opps</div></div>';
+    }).join('')+'</div>';
+  }
+
+  function renewalRiskList(policies,renewals){
+    const items=(policies||[]).map(function(p){
+      const d=p.expiryDate?p.expiryDate?.toDate?p.expiryDate.toDate():new Date(p.expiryDate):null;
+      if(!d||Number.isNaN(d.getTime()))return null;
+      const days=Math.ceil((d.getTime()-Date.now())/86400000);
+      return {policy:p,days};
+    }).filter(Boolean).filter(function(x){return x.days<=90;}).sort(function(a,b){return a.days-b.days;}).slice(0,6);
+    if(!items.length)return '<div class="empty">🔄<br>'+esc(t('empty'))+'</div>';
+    return '<div class="list">'+items.map(function(x){
+      const level=x.days<=7?'danger':x.days<=30?'warn':'success';
+      return '<div class="list-row"><div><div class="list-title">'+esc(x.policy.customerName||x.policy.policyNumber||'Policy')+'</div><div class="list-sub">'+esc(x.policy.policyNumber||'')+' · '+esc(fmtDate(x.policy.expiryDate))+'</div></div><span class="badge '+level+'">'+esc(x.days<=0?'Expired':x.days+'d')+'</span></div>';
+    }).join('')+'</div>';
+  }
+
+  function taskList(tasks){
+    const rows=(tasks||[]).slice().sort(function(a,b){
+      const da=a.dueDate?new Date(a.dueDate).getTime():Infinity,db=b.dueDate?new Date(b.dueDate).getTime():Infinity;
+      return da-db;
+    }).slice(0,7);
+    if(!rows.length)return '<div class="empty">✅<br>'+esc(t('empty'))+'</div>';
+    return '<div class="list">'+rows.map(function(r){
+      const urgent=String(r.priority||'').toLowerCase()==='urgent'||r.status==='Overdue';
+      return '<div class="list-row"><div><div class="list-title">'+esc(r.title||'Task')+'</div><div class="list-sub">'+esc(r.dueDate||'')+' · '+esc(r.assignedToName||'')+'</div></div><span class="badge '+(urgent?'danger':'')+'">'+esc(r.status||r.priority||'To Do')+'</span></div>';
+    }).join('')+'</div>';
+  }
+
   async function home(){
-    var names=["customers","leads","opportunities","policies","renewals","claims","tasks","commissions"];
+    var names=['customers','leads','opportunities','policies','renewals','claims','tasks','commissions'];
     var all=await Promise.all(names.map(function(c){return InsurNex.queryDocs(Domain[c]?Domain[c].collection:c);}));
     var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7];
-    var payments=await InsurNex.queryDocs("payments");
+    var payments=await InsurNex.queryDocs('payments');
     await syncRenewalAutomation(policies,renewals);
     var exp=policies.filter(function(p){return InsurNex.isExpiring(p.expiryDate,30);}).length;
-    var activePolicies=policies.filter(function(p){return ["Active","active","Renewed"].includes(p.status);}).length;
+    var activePolicies=policies.filter(function(p){return ['Active','active','Renewed'].includes(p.status);}).length;
     var premium=policies.reduce(function(n,p){return n+Number(p.premium||0);},0);
     var expected=comm.reduce(function(n,c){return n+Number(c.commissionAmount||c.amount||0);},0);
-    var paid=comm.filter(function(c){return c.status==="Paid";}).reduce(function(n,c){return n+Number(c.paidCommission||c.commissionAmount||0);},0);
-    var openClaims=claims.filter(function(c){return !["Settled","Closed","Rejected"].includes(c.status);}).length;
-    var renewed=renewals.filter(function(r){return r.status==="Renewed";}).length;
+    var paid=comm.filter(function(c){return c.status==='Paid';}).reduce(function(n,c){return n+Number(c.paidCommission||c.commissionAmount||0);},0);
+    var openClaims=claims.filter(function(c){return !['Settled','Closed','Rejected'].includes(c.status);}).length;
+    var renewed=renewals.filter(function(r){return r.status==='Renewed';}).length;
     var renewalRate=renewals.length?Math.round(renewed/renewals.length*100):0;
     var paidByPolicy={};
     payments.forEach(function(p){
-      var key=String(p.policyNumber||"");
-      if(!key||!["paid","partial"].includes(String(p.status||"").toLowerCase()))return;
-      paidByasync function home(){
-    var names=["customers","leads","opportunities","policies","renewals","claims","tasks","commissions"];
-    var all=await Promise.all(names.map(function(c){return InsurNex.queryDocs(Domain[c]?Domain[c].collection:c);}));
-    var customersRows=all[0],leads=all[1],opps=all[2],policies=all[3],renewals=all[4],claims=all[5],tasks=all[6],comm=all[7];
-    var payments=await InsurNex.queryDocs("payments");
-    await syncRenewalAutomation(policies,renewals);
-    var exp=policies.filter(function(p){return InsurNex.isExpiring(p.expiryDate,30);}).length;
-    var activePolicies=policies.filter(function(p){return ["Active","active","Renewed"].includes(p.status);}).length;
-    var premium=policies.reduce(function(n,p){return n+Number(p.premium||0);},0);
-    var expected=comm.reduce(function(n,c){return n+Number(c.commissionAmount||c.amount||0);},0);
-    var paid=comm.filter(function(c){return c.status==="Paid";}).reduce(function(n,c){return n+Number(c.paidCommission||c.commissionAmount||0);},0);
-    var paidByPolicy={};
-    payments.forEach(function(p){var key=String(p.policyNumber||"");if(!key||!["paid","partial"].includes(String(p.status||"").toLowerCase()))return;paidByPolicy[key]=(paidByPolicy[key]||0)+Number(p.amount||0);});
-    var outstanding=policies.reduce(function(total,p){var prem=Number(p.premium||0),status=String(p.paymentStatus||"").toLowerCase(),no=String(p.policyNumber||"");if(!prem||status==="paid")return total;if(status==="partial")return total+Math.max(0,prem-(paidByPolicy[no]||0));return total+prem;},0);
-    var quick=[["crm","navy"],["leads","blue"],["opportunities","purple"],["quotations","gold"],["policies","navy"],["renewals","gold"],["claims","red"],["tasks","green"],["payments","gold"],["documents","purple"],["commissions","green"],["calendarEvents","blue"]];
-    var quickHtml=quick.filter(function(q){return allowedNav().some(function(n){return n[0]===q[0];});}).map(function(q){var labelKey=(nav.find(function(n){return n[0]===q[0];})||[,q[0]])[1];return '<button type="button" class="quick-card" data-route="'+esc(q[0])+'"><span class="qicon '+q[1]+'">'+navIcon(q[0])+'</span><span class="quick-label">'+esc(t(labelKey))+'</span></button>';}).join("");
-    var userName=state.profile&&((state.profile.fullName||state.profile.name))||state.user.email||"InsurNex";
-    var greeting=t("welcomeBack")||"مرحباً بعودتك";
-    var badge=state.workspace.type==="organization"?t("organizationWorkspace"):t("personalWorkspace");
-    return '<div id="home" class="insurnex-home"><div class="pro-topbar home-hero"><div class="topbar-row"><div class="topbar-left"><p class="hi">'+esc(greeting)+'</p><h1 class="name">'+esc(userName)+'</h1></div><div class="topbar-right"><button id="languageToggle" class="lang-toggle" type="button">'+(InsurNex.locale()==="ar"?"EN":"AR")+'</button><button id="themeToggle" class="theme-toggle" type="button" aria-label="'+t("theme")+'">'+(InsurNex.currentTheme()==="dark"?"☀":"◐")+'</button><button id="globalSearch" class="bell" type="button" aria-label="'+t("globalSearch")+'"><span class="bell-symbol icon-gold">'+navIcon("search")+'</span></button><button id="homeNotifications" class="bell" type="button" aria-label="'+t("notifications")+'"><span class="bell-symbol icon-gold">'+navIcon("notifications")+'<div class="dot" id="notifDot"></div></span></button></div></div><div class="protection-card" id="portfolioSummary"><div class="protection-left"><span>'+esc(badge)+'</span><strong>'+esc(t("dashboard"))+'</strong><small>'+esc(t("tagline"))+'</small></div><div class="protection-score"><b>'+activePolicies+'</b><span>'+t("activePolicies")+'</span></div></div><div class="stats"><div class="stat"><b>'+customersRows.length+'</b><span>'+t("totalCustomers")+'</span></div><div class="stat"><b>'+leads.length+'</b><span>'+t("newLeads")+'</span></div><div class="stat"><b>'+exp+'</b><span>'+t("expiringSoon")+'</span></div></div></div><section class="quick-section"><div class="section-head"><h2>'+esc(t("quickAccess"))+'</h2><button type="button" class="btn-outline quick-all" id="homeAllFeatures">'+esc(t("allFeatures"))+'</button></div><div class="quick-grid">'+quickHtml+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t("performance"))+'</h2><small class="muted">'+esc(t("portfolioMetrics"))+'</small></div><div class="insurnex-summary-grid"><div class="summary-card"><span>'+t("premium")+'</span><strong>'+fmtMoney(premium)+'</strong></div><div class="summary-card"><span>'+t("expectedCommission")+'</span><strong>'+fmtMoney(expected)+'</strong></div><div class="summary-card"><span>'+t("paidCommission")+'</span><strong>'+fmtMoney(paid)+'</strong></div><div class="summary-card"><span>'+t("outstandingPayments")+'</span><strong>'+fmtMoney(outstanding)+'</strong></div></div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t("pipeline"))+'</h2><button type="button" class="btn-gold-small" data-route="opportunities">'+esc(t("openOpportunities"))+'</button></div><div class="card crm-panel">'+pipelineSummary(leads,opps)+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t("renewalRisk"))+'</h2><button type="button" class="btn-outline" data-route="renewals">'+esc(t("renewals"))+'</button></div><div class="card crm-panel">'+renewalRiskList(policies,renewals)+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t("tasks"))+'</h2><button type="button" class="btn-outline" data-route="tasks">'+esc(t("tasks"))+'</button></div><div class="card crm-panel">'+taskList(tasks)+'</div></section><section class="quick-section"><div class="legal-note">'+esc(t("legalDisclaimer"))+': InsurNex is a broker CRM/operating platform and does not itself provide insurance advice or act as an insurer.</div></section></div>';
-  }
-
-  priority==="urgent"||r.status==="Overdue"?"danger":"")+'">'+esc(r.priority||"medium")+'</span></div>';
-    }).join("")+'</div>';
+      var key=String(p.policyNumber||'');
+      if(!key||!['paid','partial'].includes(String(p.status||'').toLowerCase()))return;
+      paidByPolicy[key]=(paidByPolicy[key]||0)+Number(p.amount||0);
+    });
+    var outstanding=policies.reduce(function(total,p){
+      var prem=Number(p.premium||0),status=String(p.paymentStatus||'').toLowerCase(),no=String(p.policyNumber||'');
+      if(!prem||status==='paid')return total;
+      if(status==='partial')return total+Math.max(0,prem-(paidByPolicy[no]||0));
+      return total+prem;
+    },0);
+    var highRenewal=renewals.filter(function(r){return ['7 Days','15 Days','30 Days'].includes(r.stage)&&!['Renewed','Closed','Lost'].includes(r.status);}).length;
+    var aiInsight=exp>0
+      ? L('لديك '+exp+' وثيقة ستنتهي خلال 30 يومًا'+(highRenewal?'، و'+highRenewal+' تجديدات تحتاج متابعة قريبة.':' .'),'You have '+exp+' policies expiring within 30 days'+(highRenewal?', with '+highRenewal+' renewals requiring near-term follow-up.':'.'))
+      : L('لا توجد وثائق تنتهي خلال 30 يومًا وفق البيانات الحالية.','No policies are expiring within 30 days based on current data.');
+    var topClients={};
+    policies.forEach(function(p){
+      var name=p.customerName||p.customerId||'—';
+      topClients[name]=(topClients[name]||0)+Number(p.premium||0);
+    });
+    var topClientRows=Object.keys(topClients).sort(function(a,b){return topClients[b]-topClients[a];}).slice(0,5);
+    var quick=[['crm','navy'],['leads','blue'],['opportunities','purple'],['quotations','gold'],['policies','navy'],['renewals','gold'],['claims','red'],['tasks','green'],['payments','gold'],['documents','purple'],['commissions','green'],['expenses','gold'],['calendarEvents','blue']];
+    var quickHtml=quick.filter(function(q){return allowedNav().some(function(n){return n[0]===q[0];});}).map(function(q){var labelKey=(nav.find(function(n){return n[0]===q[0];})||[,q[0]])[1];return '<button type="button" class="quick-card" data-route="'+esc(q[0])+'"><span class="qicon '+q[1]+'">'+navIcon(q[0])+'</span><span class="quick-label">'+esc(t(labelKey))+'</span></button>';}).join('');
+    var userName=state.profile&&((state.profile.fullName||state.profile.name))||state.user.email||'InsurNex';
+    var greeting=t('welcomeBack')||'مرحباً بعودتك';
+    var badge=state.workspace.type==='organization'?t('organizationWorkspace'):t('personalWorkspace');
+    return '<div id="home" class="insurnex-home"><div class="pro-topbar home-hero"><div class="topbar-row"><div class="topbar-left"><p class="hi">'+esc(greeting)+'</p><h1 class="name">'+esc(userName)+'</h1></div><div class="topbar-right"><button id="languageToggle" class="lang-toggle" type="button">'+(InsurNex.locale()==='ar'?'EN':'AR')+'</button><button id="themeToggle" class="theme-toggle" type="button" aria-label="'+t('theme')+'">'+(InsurNex.currentTheme()==='dark'?'☀':'◐')+'</button><button id="globalSearch" class="bell" type="button" aria-label="'+t('globalSearch')+'"><span class="bell-symbol icon-gold">'+navIcon('search')+'</span></button><button id="homeNotifications" class="bell" type="button" aria-label="'+t('notifications')+'"><span class="bell-symbol icon-gold">'+navIcon('notifications')+'<div class="dot" id="notifDot"></div></span></button></div></div><div class="protection-card" id="portfolioSummary"><div class="protection-left"><span>'+esc(badge)+'</span><strong>'+esc(t('dashboard'))+'</strong><small>'+esc(t('tagline'))+'</small></div><div class="protection-score"><b>'+activePolicies+'</b><span>'+t('activePolicies')+'</span></div></div><div class="stats"><div class="stat"><b>'+customersRows.length+'</b><span>'+t('totalCustomers')+'</span></div><div class="stat"><b>'+leads.length+'</b><span>'+t('newLeads')+'</span></div><div class="stat"><b>'+exp+'</b><span>'+t('expiringSoon')+'</span></div><div class="stat"><b>'+openClaims+'</b><span>'+t('pendingClaims')+'</span></div></div></div><section class="quick-section"><div class="section-head"><h2>'+esc(t('quickAccess'))+'</h2><button type="button" class="btn-outline quick-all" id="homeAllFeatures">'+esc(t('allFeatures'))+'</button></div><div class="quick-grid">'+quickHtml+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t('performance'))+'</h2><small class="muted">'+esc(t('portfolioMetrics'))+'</small></div><div class="insurnex-summary-grid"><div class="summary-card"><span>'+t('premium')+'</span><strong>'+fmtMoney(premium)+'</strong></div><div class="summary-card"><span>'+t('expectedCommission')+'</span><strong>'+fmtMoney(expected)+'</strong></div><div class="summary-card"><span>'+t('paidCommission')+'</span><strong>'+fmtMoney(paid)+'</strong></div><div class="summary-card"><span>'+t('outstandingPayments')+'</span><strong>'+fmtMoney(outstanding)+'</strong></div><div class="summary-card"><span>'+t('renewalRate')+'</span><strong>'+renewalRate+'%</strong></div></div></section><section class="quick-section"><div class="section-head"><h2>'+esc(L('InsurNex AI Insights','InsurNex AI Insights'))+'</h2></div><div class="card crm-panel"><div class="list-row"><div><div class="list-title">'+esc(aiInsight)+'</div><div class="list-sub">'+esc(L('مؤشر تشغيلي مشتق من بيانات المحفظة الحالية.','Operational insight derived from current portfolio data.'))+'</div></div><span class="badge">'+esc(String(highRenewal))+'</span></div></div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t('pipeline'))+'</h2><button type="button" class="btn-gold-small" data-route="opportunities">'+esc(t('openOpportunities'))+'</button></div><div class="card crm-panel">'+pipelineSummary(leads,opps)+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t('renewalRisk'))+'</h2><button type="button" class="btn-outline" data-route="renewals">'+esc(t('renewals'))+'</button></div><div class="card crm-panel">'+renewalRiskList(policies,renewals)+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t('customers'))+' · '+esc(L('الأعلى قيمة','Top value'))+'</h2></div><div class="card crm-panel">'+(topClientRows.length?'<div class="list">'+topClientRows.map(function(name){return '<div class="list-row"><span class="list-title">'+esc(name)+'</span><strong>'+fmtMoney(topClients[name])+'</strong></div>';}).join('')+'</div>':'<div class="empty">'+t('empty')+'</div>')+'</div></section><section class="quick-section"><div class="section-head"><h2>'+esc(t('tasks'))+'</h2><button type="button" class="btn-outline" data-route="tasks">'+esc(t('tasks'))+'</button></div><div class="card crm-panel">'+taskList(tasks)+'</div></section><section class="quick-section"><div class="legal-note">'+esc(t('legalDisclaimer'))+': InsurNex is a broker CRM/operating platform and does not itself provide insurance advice or act as an insurer.</div></section></div>';
   }
 
   async function customers(){
@@ -6631,7 +6672,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       '</h1><div class="muted">Secure workspace document management</div></div><button class="btn btn-primary" id="upload">'+t("add")+
       '</button></div>'+(rows.length?'<div class="grid grid-2">'+rows.map(function(r){return '<div class="card"><div class="list-title">'+esc(r.name||r.fileName||"Document")+
       '</div><div class="list-sub">'+esc(r.category||r.entityType||"")+' · '+esc(r.fileName||"")+'</div><div class="actions" style="margin-top:10px"><a class="btn" href="'+
-      esc(r.url||"#")+'" target="_blank" rel="noopener">'+t("open")+'</a></div></div>';}).join("")+
+      esc(r.url||"#")+'" target="_blank" rel="noopener">'+t("open")+'</a><button class="btn" type="button" data-crm-action="document-extract:'+r.id+'">'+L('استخراج','Extract')+'</button><button class="btn" type="button" data-crm-action="document-analyze:'+r.id+'">'+L('تحليل الملف','Analyze')+'</button></div></div>';}).join("")+
       '</div>':'<div class="card empty">📎<br>'+t("empty")+'</div>');
   }
 
@@ -7501,18 +7542,221 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(route==='email-templates'){await templateManager();return;}
     const headerMap={commissions:['commission-calculator',w('commissionCalc')],operations:['new-operation',w('newOperation')],notifications:['mark-notifications-read',w('markAllRead')],['email-settings']:['email-templates',w('emailTemplates')]};
     if(headerMap[route]) addHeaderAction(headerMap[route][0],headerMap[route][1]);
+    addHeaderFinanceAction();
     root.querySelectorAll('[data-edit]').forEach(b=>{
       if(b.dataset.crmDecorated)return;b.dataset.crmDecorated='1';const [module,id]=String(b.dataset.edit).split(':');const holder=b.parentElement;if(!holder||!id)return;
-      if(module==='leads')holder.insertAdjacentHTML('beforeend',actionButton('convert-lead:'+id,w('leadToOpp'),'btn btn-secondary'));
+      if(module==='customers'){holder.insertAdjacentHTML('beforeend',actionButton('customer-assessment:'+id,L('تقييم الملف','Assess profile'),'btn btn-secondary'));}
+      if(module==='leads'){holder.insertAdjacentHTML('beforeend',actionButton('lead-needs-analysis:'+id,L('تحليل الاحتياج','Needs analysis'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('convert-lead:'+id,w('leadToOpp'),'btn btn-secondary'));}
       if(module==='opportunities')holder.insertAdjacentHTML('beforeend',actionButton('convert-opportunity:'+id,w('oppToQuote'),'btn btn-secondary'));
-      if(module==='quotations')holder.insertAdjacentHTML('beforeend',actionButton('issue-quote:'+id,w('quoteToPolicy'),'btn btn-secondary'));
-      if(module==='policies')holder.insertAdjacentHTML('beforeend',actionButton('renew-policy:'+id,w('policyRenew'),'btn btn-secondary'));
-      if(module==='renewals')holder.insertAdjacentHTML('beforeend',actionButton('renewal-task:'+id,w('renewalTask'),'btn btn-secondary'));
-      if(module==='claims')holder.insertAdjacentHTML('beforeend',actionButton('claim-task:'+id,w('claimTask'),'btn btn-secondary'));
+      if(module==='quotations'){holder.insertAdjacentHTML('beforeend',actionButton('issue-quote:'+id,w('quoteToPolicy'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('quote-followup:'+id,L('متابعة العرض','Quote follow-up'),'btn btn-secondary'));}
+      if(module==='policies'){holder.insertAdjacentHTML('beforeend',actionButton('renew-policy:'+id,w('policyRenew'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('policy-payment:'+id,L('تسجيل دفعة','Record payment'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('policy-file-ai:'+id,L('تحليل الملف','Analyze file'),'btn btn-secondary'));}
+      if(module==='renewals'){holder.insertAdjacentHTML('beforeend',actionButton('renewal-task:'+id,w('renewalTask'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('renewal-whatsapp:'+id,'WhatsApp','btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('renewal-email:'+id,t('email'),'btn btn-secondary'));}
+      if(module==='claims'){holder.insertAdjacentHTML('beforeend',actionButton('claim-task:'+id,w('claimTask'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('claim-ai:'+id,L('مساعد المطالبة','Claim AI'),'btn btn-secondary'));}
+      if(module==='documents')holder.insertAdjacentHTML('beforeend',actionButton('document-extract:'+id,L('استخراج','Extract'),'btn btn-secondary'));
       if(module==='insurers'){holder.insertAdjacentHTML('beforeend',actionButton('insurer-contacts:'+id,w('insurerContacts'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('insurer-email:'+id,t('email'),'btn btn-secondary'));}
     });
     root.querySelectorAll('[data-crm-action="issue-quote"]')?.forEach(()=>{});
     root.querySelectorAll('a[href]').forEach(a=>{const card=a.closest('.card');if(!card||card.querySelector('[data-crm-doc-delete]'))return;if(route!=='documents')return;const rowButton=document.createElement('button');rowButton.type='button';rowButton.className='btn btn-danger btn-sm';rowButton.textContent=t('delete');rowButton.dataset.crmDocDelete='1';card.querySelector('.actions')?.appendChild(rowButton);});
+  }
+
+
+  async function saveAIAction(type,targetCollection,targetId,result,status){
+    try{
+      await addDoc('aiActions',{actionType:type,targetCollection,targetId,result,status:status||'completed',engine:'rules-based',disclaimer:L('النتيجة مبنية على البيانات المدخلة وقواعد تشغيلية، وليست قرارًا آليًا نهائيًا.','The result is data-driven/rules-based and is not a final automated decision.')});
+    }catch(e){console.warn('ai action log',e);}
+  }
+
+
+  async function openLeadNeedsAnalysis(id){
+    const lead=await readDoc('leads',id);if(!lead)return;
+    const known=[];
+    if(lead.insuranceType)known.push(L('نوع التأمين: ','Insurance type: ')+lead.insuranceType);
+    if(lead.estimatedPremium)known.push(L('القسط المتوقع: ','Estimated premium: ')+fmtMoney(lead.estimatedPremium));
+    if(lead.priority)known.push(L('الأولوية: ','Priority: ')+lead.priority);
+    const questions=[
+      L('ما الممتلكات أو الأشخاص المراد حمايتهم؟','What assets or people need protection?'),
+      L('ما حدود التغطية المطلوبة والميزانية المستهدفة؟','What coverage limits and target budget apply?'),
+      L('هل توجد وثائق حالية أو مطالبات سابقة أو استثناءات مهمة؟','Are there current policies, previous claims or important exclusions?'),
+      L('ما تاريخ التجديد أو تاريخ بدء التغطية المطلوب؟','What renewal/start date is required?')
+    ];
+    await saveAIAction('sales_needs_analysis','leads',id,{known,questions},'completed');
+    modal(L('تحليل احتياج العميل','Lead Needs Analysis'),
+      '<div class="card"><div class="eyebrow">'+esc(L('البيانات المتاحة','Known data'))+'</div><p>'+esc(known.join(' · ')||'—')+'</p></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('أسئلة مقترحة للوسيط','Suggested questions'))+'</h3><div class="list">'+questions.map(q=>'<div class="list-row"><span>•</span><strong>'+esc(q)+'</strong></div>').join('')+'</div></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('هذه الأسئلة تساعد الوسيط على استكمال التحليل؛ لا تنتج توصية منتج تلقائية.','These questions support broker-led needs analysis and do not automatically recommend a product.'))+'</div>'+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function quoteFollowUp(id){
+    const q=await readDoc('quotations',id);if(!q)return;
+    if(!canWrite('tasks'))return;
+    const task=await addDoc('tasks',{
+      title:L('متابعة عرض السعر','Quotation follow-up')+' · '+(q.customerName||''),
+      description:L('راجع حالة العرض والتواصل مع العميل قبل انتهاء الصلاحية.','Review quotation status and follow up before expiry.'),
+      dueDate:new Date().toISOString().slice(0,10),priority:'medium',assignedToName:state.profile?.name||'',
+      status:'To Do',linkedEntityType:'quotation',linkedEntityId:id,customerId:q.customerId||null,customerName:q.customerName||''
+    });
+    await addDoc('communications',{
+      customerId:q.customerId||null,customerName:q.customerName||'',
+      channel:'WhatsApp',subject:L('متابعة عرض السعر','Quotation follow-up'),
+      message:L('مرحبًا '+(q.customerName||'')+'، نتابع معك عرض السعر الخاص بك.','Hello '+(q.customerName||'')+', we are following up on your quotation.'),
+      relatedType:'quotation',relatedId:id,status:'draft'
+    });
+    await audit('quote_followup','quotations',id,{taskId:task.id});
+    IN.toast(L('تم إنشاء المتابعة وحفظ مسودة التواصل.','Follow-up task and communication draft created.'));
+  }
+
+  async function openPolicyIntelligence(id){
+    const p=await readDoc('policies',id);if(!p)return;
+    const docs=(await IN.queryDocs('documents')).filter(x=>x.entityId===id||x.entityId===p.policyNumber);
+    const findings=[
+      L('حد التغطية: ','Coverage limit: ')+(p.sumInsured||'—'),
+      L('التحمل: ','Deductible: ')+(p.deductible||'—'),
+      L('القسط: ','Premium: ')+(p.premium||'—'),
+      L('تاريخ الانتهاء: ','Expiry: ')+(p.expiryDate||'—')
+    ];
+    const missing=docs.length?[]:[L('المستند المرتبط بالوثيقة','Policy-linked document')];
+    const ref=await addDoc('insuranceFileAnalyses',{policyId:id,policyNumber:p.policyNumber||'',status:'backend_required',findings,missing,sourceDocuments:docs.map(x=>x.id)});
+    await saveAIAction('policy_file_analysis_request','policies',id,{analysisId:ref.id,findings,missing},'requested');
+    modal(L('تحليل ملف الوثيقة','Policy File Analyzer'),
+      '<div class="card"><h3>'+esc(p.policyNumber||'Policy')+'</h3><div class="list">'+findings.map(x=>'<div class="list-row"><span>'+esc(x.split(':')[0])+'</span><strong>'+esc(x.split(':').slice(1).join(':').trim()||'—')+'</strong></div>').join('')+'</div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('مراجعات مطلوبة','Review items'))+'</h3><p>'+esc(missing.join(' · ')||L('لا توجد فجوات مستندية واضحة من السجل الحالي.','No obvious document gaps in the current record.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('الاستخراج الكامل من PDF/Endorsements يحتاج Backend/OCR؛ البيانات الظاهرة هنا مأخوذة من سجل الوثيقة نفسه.','Full PDF/endorsement extraction requires Backend/OCR; the values shown are taken from the policy record itself.'))+'</div>'+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function openInsuranceAssessment(id){
+    if(!canWrite('insuranceAssessments'))return;
+    const c=await readDoc('customers',id);if(!c){IN.toast(t('noRecords'),'error');return;}
+    const [policies,claims,renewals,docs]=await Promise.all(['policies','claims','renewals','documents'].map(async col=>{
+      const rows=await IN.queryDocs(col);return rows.filter(x=>x.customerId===id||x.customerName===(c.fullName||c.name||''));
+    }));
+    const lines=['Medical','Motor','Life','Property','Personal Accident','Travel','Marine','Engineering','Liability'];
+    const types=policies.map(x=>safe(x.insuranceType||x.product||'').toLowerCase());
+    const covered=lines.filter(x=>types.some(t=>t.indexOf(x.toLowerCase())>=0));
+    const gaps=lines.filter(x=>!covered.includes(x)).slice(0,5);
+    const expiring=policies.filter(x=>IN.isExpiring(x.expiryDate,45)).length;
+    const openClaims=claims.filter(x=>!['Settled','Closed','Rejected'].includes(x.status)).length;
+    const score=Math.max(0,Math.min(100,100-(gaps.length*10)-(expiring*4)-(openClaims*3)));
+    const renewalRisk=expiring>=2?'Elevated':expiring===1?'Moderate':'Low';
+    const assessment={
+      customerId:id,customerName:c.fullName||c.name||'',score,coveredLines:covered,gaps,
+      renewalRisk,activePolicies:policies.filter(x=>['Active','active','Renewed'].includes(x.status)).length,
+      expiringPolicies:expiring,openClaims,documentCount:docs.length,
+      status:'completed',method:'rules-based',createdBy:auth.currentUser.uid
+    };
+    const ref=await addDoc('insuranceAssessments',assessment);
+    await audit('insurance_assessment','customers',id,{assessmentId:ref.id,score,gaps:gaps.length});
+    await saveAIAction('insurance_portfolio_assessment','customers',id,{score,gaps,renewalRisk},'completed');
+    modal(L('تقييم الملف التأميني','Insurance Portfolio Assessment'),
+      '<div class="grid grid-2">'+
+      '<div class="card"><div class="eyebrow">Insurance Profile Score</div><div class="master-score">'+score+'/100</div><div class="master-note">'+esc(L('مؤشر مشتق من الوثائق والمطالبات والتجديدات الحالية.','Derived from current policies, claims and renewals.'))+'</div></div>'+
+      '<div class="card"><div class="eyebrow">'+esc(t('renewalRisk'))+'</div><div class="list-title">'+esc(renewalRisk)+'</div><div class="list-sub">'+esc(L(String(expiring)+' وثيقة تحتاج متابعة قريبة.',''+expiring+' policy/policies need near-term review.'))+'</div></div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('التغطيات الحالية','Current coverage'))+'</h3><p>'+esc(covered.join(' · ')||'—')+'</p><h3>'+esc(L('فجوات محتملة للمراجعة','Potential gaps for review'))+'</h3><p>'+esc(gaps.join(' · ')||L('لا توجد فجوات واضحة وفق البيانات الحالية.','No clear gaps from the current data.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('هذه النتيجة للمراجعة التشغيلية فقط ولا تعني أن منتجًا معينًا مناسب للعميل.','This is an operational review aid and does not mean any particular product is suitable.'))+'</div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-primary" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function openPaymentDialog(id){
+    if(!canWrite('payments'))return;
+    const p=await readDoc('policies',id);if(!p){IN.toast(t('noRecords'),'error');return;}
+    const payments=(await IN.queryDocs('payments')).filter(x=>x.policyId===id||x.policyNumber===p.policyNumber);
+    const paid=payments.filter(x=>['paid','partial'].includes(String(x.status||'').toLowerCase())).reduce((n,x)=>n+Number(x.amount||0),0);
+    modal(L('تسجيل دفعة','Record Payment'),
+      '<form id="wfPayment" class="form-stack"><div class="form-grid">'+
+      '<div class="field"><label>'+esc(t('policyNumber'))+'</label><input value="'+esc(p.policyNumber||'')+'" disabled></div>'+
+      '<div class="field"><label>'+esc(t('amount'))+'</label><input name="amount" type="number" min="0" step="0.01" required></div>'+
+      '<div class="field"><label>'+esc(t('method'))+'</label><select name="method"><option>Bank transfer</option><option>Card</option><option>Online</option><option>Cash</option></select></div>'+
+      '<div class="field"><label>'+esc(t('status'))+'</label><select name="status"><option>paid</option><option>partial</option><option>pending</option><option>refunded</option></select></div>'+
+      '<div class="field"><label>'+esc(t('date'))+'</label><input name="date" type="date" value="'+new Date().toISOString().slice(0,10)+'" required></div>'+
+      '</div><div class="card"><div class="list-row"><span>Premium</span><strong>'+esc(fmtMoney(p.premium||0))+'</strong></div><div class="list-row"><span>Paid to date</span><strong>'+esc(fmtMoney(paid))+'</strong></div></div>'+
+      '<div class="form-actions"><button type="button" class="btn" data-crm-cancel>'+esc(t('cancel'))+'</button><button class="btn btn-primary">'+esc(t('save'))+'</button></div></form>');
+    document.getElementById('wfPayment').onsubmit=async e=>{
+      e.preventDefault();const f=new FormData(e.currentTarget),amount=Number(f.get('amount')||0);
+      if(amount<=0){IN.toast(t('amount'),'error');return;}
+      try{
+        const ref=await addDoc('payments',{policyId:id,policyNumber:p.policyNumber||'',customerId:p.customerId||null,customerName:p.customerName||'',amount,date:f.get('date'),method:f.get('method'),status:f.get('status')});
+        await addDoc('financialTransactions',{type:'payment',direction:'in',source:'policy_payment',paymentId:ref.id,policyId:id,policyNumber:p.policyNumber||'',amount,date:f.get('date'),status:f.get('status')});
+        const totalPaid=paid+amount,premium=Number(p.premium||0);
+        const paymentStatus=totalPaid>=premium&&premium>0?'paid':totalPaid>0?'partial':'pending';
+        await db.collection('policies').doc(id).update({paymentStatus,updatedAt:FieldValue().serverTimestamp()});
+        await audit('payment_recorded','policies',id,{paymentId:ref.id,amount,paymentStatus});
+        close();IN.toast(t('saved'));refresh();
+      }catch(err){IN.toast(IN.friendlyError(err),'error');}
+    };
+  }
+
+  async function renewalCommunication(id,channel){
+    const r=await readDoc('renewals',id);if(!r)return;
+    const ctx={customerName:r.customerName||'',policyNumber:r.policyNumber||'',insurer:r.insurer||'',renewalDate:r.expiryDate||''};
+    if(channel==='Email'){
+      if(typeof openEmailComposer==='function')return openEmailComposer(ctx);
+    }
+    if(!canWrite('communications'))return;
+    const subject=L('متابعة تجديد الوثيقة '+ctx.policyNumber,'Renewal follow-up '+ctx.policyNumber);
+    const message=L('مرحبًا '+ctx.customerName+'، هذه مسودة متابعة لتجديد الوثيقة '+ctx.policyNumber+' قبل '+ctx.renewalDate+'.','Hello '+ctx.customerName+', this is a renewal follow-up draft for policy '+ctx.policyNumber+' before '+ctx.renewalDate+'.');
+    await addDoc('communications',{customerId:r.customerId||null,customerName:ctx.customerName,channel,subject,message,relatedType:'renewal',relatedId:id,status:'draft'});
+    await audit('communication_draft','renewals',id,{channel});
+    IN.toast(L('تم حفظ مسودة الرسالة.','Communication draft saved.'));
+  }
+
+  async function claimAssistant(id){
+    const c=await readDoc('claims',id);if(!c)return;
+    const docs=(await IN.queryDocs('documents')).filter(x=>x.entityId===id||x.entityId===c.claimNumber);
+    const missing=[];
+    if(!c.policyNumber)missing.push(L('رقم الوثيقة','Policy number'));
+    if(!c.dateOfLoss)missing.push(L('تاريخ الخسارة','Date of loss'));
+    if(!c.amount)missing.push(L('مبلغ المطالبة','Claim amount'));
+    if(!docs.length)missing.push(L('مستندات المطالبة','Claim documents'));
+    const summary={claimNumber:c.claimNumber||'',status:c.status||'',customerName:c.customerName||'',policyNumber:c.policyNumber||'',amount:Number(c.amount||0),missing};
+    await saveAIAction('claim_assistant','claims',id,summary,'completed');
+    modal(L('مساعد المطالبة','Claim Assistant'),
+      '<div class="grid grid-2"><div class="card"><div class="eyebrow">Claim Summary</div><div class="list"><div class="list-row"><span>Claim</span><strong>'+esc(summary.claimNumber||'—')+'</strong></div><div class="list-row"><span>Status</span><strong>'+esc(summary.status||'—')+'</strong></div><div class="list-row"><span>Customer</span><strong>'+esc(summary.customerName||'—')+'</strong></div></div></div>'+
+      '<div class="card"><div class="eyebrow">'+esc(L('الإجراء التالي','Next required action'))+'</div><div class="list-title">'+esc(missing.length?missing[0]:L('مراجعة المطالبة والمستندات ثم متابعة الحالة.','Review the claim and documents, then follow the current status.'))+'</div><div class="list-sub">'+esc(L('عناصر يجب مراجعتها','Items to review'))+'</div></div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('المستندات/البيانات الناقصة','Missing information'))+'</h3><p>'+esc(missing.join(' · ')||L('لا توجد عناصر ناقصة واضحة من البيانات الحالية.','No obvious missing items from the current data.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('المساعد يلخص البيانات المتاحة ولا يتخذ قرار قبول أو رفض المطالبة.','The assistant summarizes available data and does not decide claim approval or rejection.'))+'</div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-primary" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function requestInsuranceFileAnalysis(id){
+    if(!canWrite('insuranceFileAnalyses'))return;
+    const d=await readDoc('documents',id);if(!d)return;
+    const ref=await addDoc('insuranceFileAnalyses',{documentId:id,entityType:d.entityType||'',entityId:d.entityId||null,fileName:d.fileName||d.name||'',mimeType:d.mimeType||'',status:'backend_required',requestedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await saveAIAction('insurance_file_analysis_request','documents',id,{analysisId:ref.id,status:'backend_required'},'requested');
+    modal(L('تحليل ملف التأمين','Insurance File Analyzer'),
+      '<div class="card"><div class="eyebrow">'+esc(d.fileName||d.name||'Document')+'</div><h3>'+esc(L('تم إنشاء طلب التحليل','Analysis request created'))+'</h3><p>'+esc(L('الملف محفوظ وآمن، والنتيجة الذكية الكاملة تحتاج Backend/OCR متصلًا. لم يتم اختلاق أي استخراج أو قراءة غير متاحة.','The file is stored securely. Full AI/OCR extraction requires a connected backend. No unavailable extraction was fabricated.'))+'</p><div class="list"><div class="list-row"><span>Status</span><strong>backend_required</strong></div><div class="list-row"><span>Request ID</span><strong>'+esc(ref.id)+'</strong></div></div></div><div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function requestDocumentExtraction(id){
+    if(!canWrite('documentExtractions'))return;
+    const d=await readDoc('documents',id);if(!d)return;
+    const ref=await addDoc('documentExtractions',{documentId:id,fileName:d.fileName||d.name||'',mimeType:d.mimeType||'',status:'backend_required',requestedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    modal(L('استخراج بيانات المستند','Document Extraction'),
+      '<div class="card"><h3>'+esc(L('طلب الاستخراج محفوظ','Extraction request saved'))+'</h3><p>'+esc(L('القراءة الآلية الكاملة للـPDF/الصور تحتاج خدمة Backend/OCR.','Full PDF/image extraction requires a Backend/OCR service.'))+'</p><div class="list-row"><span>Status</span><strong>backend_required</strong></div><div class="list-row"><span>Request ID</span><strong>'+esc(ref.id)+'</strong></div></div><div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function compareInsurerOptions(){
+    const products=await IN.queryDocs('insuranceProducts');
+    const insurers=await IN.queryDocs('insurers');
+    const names=insurers.map(x=>x.name).filter(Boolean);
+    const rows=products.filter(x=>!names.length||names.includes(x.insurer)).slice(0,30);
+    const grouped={};
+    rows.forEach(x=>{const k=x.insuranceType||'Other';(grouped[k]||(grouped[k]=[])).push(x);});
+    const html=Object.keys(grouped).map(type=>{
+      const items=grouped[type];
+      return '<div class="card" style="margin-top:10px"><h3>'+esc(type)+'</h3><div class="list">'+items.map(x=>'<div class="list-row"><div><div class="list-title">'+esc(x.name||'—')+'</div><div class="list-sub">'+esc(x.insurer||'—')+' · '+esc(x.premiumRange||'')+'</div></div><span class="badge">'+esc(String(x.commission??'—'))+'</span></div>').join('')+'</div></div>';
+    }).join('');
+    await addDoc('insuranceComparisons',{criteria:'available insurer products',productCount:rows.length,status:'completed',method:'data-comparison'});
+    modal(L('مقارنة شركات ومنتجات التأمين','Insurer & Product Comparison'),
+      '<div class="section-note">'+esc(L('المقارنة تعرض البيانات المتاحة فقط ولا تختار شركة أو منتجًا بدلًا من الوسيط.','The comparison presents available data only and does not choose an insurer or product for the broker.'))+'</div>'+
+      (html||'<div class="card empty">'+esc(t('empty'))+'</div>')+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function addHeaderFinanceAction(){
+    const route=(location.hash||'#home').slice(1);
+    if(route==='insuranceProducts')addHeaderAction('compare-insurers',L('مقارنة الخيارات','Compare options'));
+    if(route==='expenses')addHeaderAction('new-expense',L('مصروف جديد','New expense'));
   }
 
   async function handleAction(action){
@@ -7525,12 +7769,24 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(action.startsWith('delete-template:')){return deleteTemplate(action.split(':')[1]);}
     if(action.startsWith('duplicate-template:')){const x=profileTemplates().find(v=>v.id===action.split(':')[1]);if(!x)return;return editTemplate(null,{...x,id:null,name:(x.name||'Template')+' Copy'});}
     if(action.startsWith('use-template:')){return openEmailComposer({templateId:action.split(':')[1]});}
+    if(action==='compare-insurers')return compareInsurerOptions();
+    if(action==='new-expense'){location.hash='#expenses';return setTimeout(()=>document.querySelector('[data-add="expenses"]')?.click(),40);}
+    if(action.startsWith('customer-assessment:'))return openInsuranceAssessment(action.split(':')[1]);
+    if(action.startsWith('lead-needs-analysis:'))return openLeadNeedsAnalysis(action.split(':')[1]);
     if(action.startsWith('convert-lead:'))return convertLead(action.split(':')[1]);
     if(action.startsWith('convert-opportunity:'))return createQuoteFromOpportunity(action.split(':')[1]);
     if(action.startsWith('issue-quote:'))return issuePolicyFromQuote(action.split(':')[1]);
     if(action.startsWith('renew-policy:'))return startRenewal(action.split(':')[1]);
     if(action.startsWith('renewal-task:'))return renewalFollowUp(action.split(':')[1]);
     if(action.startsWith('claim-task:'))return claimFollowUp(action.split(':')[1]);
+    if(action.startsWith('claim-ai:'))return claimAssistant(action.split(':')[1]);
+    if(action.startsWith('policy-payment:'))return openPaymentDialog(action.split(':')[1]);
+    if(action.startsWith('renewal-whatsapp:'))return renewalCommunication(action.split(':')[1],'WhatsApp');
+    if(action.startsWith('renewal-email:'))return renewalCommunication(action.split(':')[1],'Email');
+    if(action.startsWith('policy-file-ai:'))return openPolicyIntelligence(action.split(':')[1]);
+    if(action.startsWith('document-extract:'))return requestDocumentExtraction(action.split(':')[1]);
+    if(action.startsWith('document-analyze:'))return requestInsuranceFileAnalysis(action.split(':')[1]);
+    if(action.startsWith('quote-followup:'))return quoteFollowUp(action.split(':')[1]);
     if(action.startsWith('insurer-contacts:'))return insurerContacts(action.split(':')[1]);
     if(action.startsWith('insurer-email:')){const id=action.split(':')[1],ins=await readDoc('insurers',id),to=Array.isArray(ins?.emailContacts)&&ins.emailContacts[0]?.email||ins?.email||'';return openEmailComposer({to});}
     if(action==='save-email-draft')return sendEmailWorkflow(true);

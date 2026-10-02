@@ -1,0 +1,211 @@
+{
+  "version": "2026-10-02",
+  "projectId": "insurnex-8a9df",
+  "collections": [
+    {
+      "name": "users",
+      "purpose": "Authentication/profile",
+      "scope": "user"
+    },
+    {
+      "name": "organizations",
+      "purpose": "Brokerage organizations",
+      "scope": "organization"
+    },
+    {
+      "name": "organizationMembers",
+      "purpose": "Organization membership/RBAC",
+      "scope": "organization"
+    },
+    {
+      "name": "brokerProfiles",
+      "purpose": "Broker professional profile",
+      "scope": "user"
+    },
+    {
+      "name": "customers",
+      "purpose": "Insurance customers / Customer 360",
+      "scope": "workspace"
+    },
+    {
+      "name": "leads",
+      "purpose": "Sales leads",
+      "scope": "workspace"
+    },
+    {
+      "name": "opportunities",
+      "purpose": "Sales opportunities",
+      "scope": "workspace"
+    },
+    {
+      "name": "quotations",
+      "purpose": "Insurance quotations",
+      "scope": "workspace"
+    },
+    {
+      "name": "policies",
+      "purpose": "Insurance policies",
+      "scope": "workspace"
+    },
+    {
+      "name": "renewals",
+      "purpose": "Renewal center",
+      "scope": "workspace"
+    },
+    {
+      "name": "claims",
+      "purpose": "Claims management",
+      "scope": "workspace"
+    },
+    {
+      "name": "tasks",
+      "purpose": "Tasks/follow-ups",
+      "scope": "workspace"
+    },
+    {
+      "name": "calendarEvents",
+      "purpose": "Calendar and appointments",
+      "scope": "workspace"
+    },
+    {
+      "name": "documents",
+      "purpose": "Client/workspace documents",
+      "scope": "workspace"
+    },
+    {
+      "name": "documentExtractions",
+      "purpose": "Document intelligence extraction results",
+      "scope": "workspace"
+    },
+    {
+      "name": "insurers",
+      "purpose": "Insurer master data",
+      "scope": "platform"
+    },
+    {
+      "name": "insuranceProducts",
+      "purpose": "Insurance product master data",
+      "scope": "platform"
+    },
+    {
+      "name": "insurerContacts",
+      "purpose": "Insurer contact directory",
+      "scope": "workspace"
+    },
+    {
+      "name": "insuranceAssessments",
+      "purpose": "Insurance portfolio assessments",
+      "scope": "workspace"
+    },
+    {
+      "name": "medicalAnalyses",
+      "purpose": "Medical consumption analysis",
+      "scope": "workspace"
+    },
+    {
+      "name": "insuranceFileAnalyses",
+      "purpose": "Policy/quotation/document analysis jobs",
+      "scope": "workspace"
+    },
+    {
+      "name": "aiInsights",
+      "purpose": "AI-derived operational insights",
+      "scope": "workspace"
+    },
+    {
+      "name": "aiActions",
+      "purpose": "AI assistant action/audit records",
+      "scope": "workspace"
+    },
+    {
+      "name": "commissions",
+      "purpose": "Commission tracking",
+      "scope": "workspace"
+    },
+    {
+      "name": "payments",
+      "purpose": "Policy/customer payments",
+      "scope": "workspace"
+    },
+    {
+      "name": "financialTransactions",
+      "purpose": "Broker financial ledger entries",
+      "scope": "workspace"
+    },
+    {
+      "name": "expenses",
+      "purpose": "Broker operating expenses",
+      "scope": "workspace"
+    },
+    {
+      "name": "insuranceComparisons",
+      "purpose": "Insurer/product comparison snapshots",
+      "scope": "workspace"
+    },
+    {
+      "name": "communications",
+      "purpose": "Customer/insurer communications",
+      "scope": "workspace"
+    },
+    {
+      "name": "notifications",
+      "purpose": "Recipient-scoped notifications",
+      "scope": "user_or_workspace"
+    },
+    {
+      "name": "subscriptions",
+      "purpose": "Brokerage subscriptions",
+      "scope": "workspace"
+    },
+    {
+      "name": "teams",
+      "purpose": "Broker teams",
+      "scope": "organization"
+    },
+    {
+      "name": "supportTickets",
+      "purpose": "Support tickets",
+      "scope": "workspace"
+    },
+    {
+      "name": "reports",
+      "purpose": "Saved reports",
+      "scope": "workspace"
+    },
+    {
+      "name": "analytics",
+      "purpose": "Saved analytics snapshots",
+      "scope": "workspace"
+    },
+    {
+      "name": "auditLogs",
+      "purpose": "Audit trail",
+      "scope": "workspace_or_platform"
+    },
+    {
+      "name": "knowledgeBase",
+      "purpose": "Admin knowledge base",
+      "scope": "platform"
+    },
+    {
+      "name": "announcements",
+      "purpose": "Admin announcements",
+      "scope": "platform"
+    },
+    {
+      "name": "plans",
+      "purpose": "Subscription plans",
+      "scope": "platform"
+    },
+    {
+      "name": "settings",
+      "purpose": "Platform/system settings",
+      "scope": "platform"
+    },
+    {
+      "name": "invoices",
+      "purpose": "Platform invoices",
+      "scope": "workspace"
+    }
+  ]
+}

@@ -442,6 +442,66 @@ service cloud.firestore {
 
     // Medical consumption analysis is scoped to the same personal or organization workspace.
     // Organization workspaces are limited to authorized broker/management roles.
+    match /insuranceAssessments/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','customerService']);
+    }
+
+    match /documentExtractions/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','claimsOfficer','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','claimsOfficer','customerService']);
+    }
+
+    match /insuranceFileAnalyses/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','claimsOfficer','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','claimsOfficer','customerService']);
+    }
+
+    match /aiInsights/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','operations','finance']);
+    }
+
+    match /aiActions/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService','operations','claimsOfficer','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent','customerService','operations','claimsOfficer','finance']);
+    }
+
+    match /financialTransactions/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','finance']);
+    }
+
+    match /expenses/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','finance']);
+    }
+
+    match /insuranceComparisons/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent']);
+    }
+
+    match /insurerContacts/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','salesAgent']);
+    }
+
+    match /clientServiceRequests/{id} {
+      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','customerService']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','customerService']);
+    }
+
     match /medicalAnalyses/{id} {
       allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
       allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker']);
