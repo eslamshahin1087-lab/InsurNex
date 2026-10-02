@@ -34,7 +34,7 @@ async function runContext(browser, name, options) {
     const needles = [['secure','path'].join(''), ['wathi','qati'].join('')];
     return needles.reduce((count, needle) => count + (html.match(new RegExp(needle, 'g')) || []).length, 0);
   });
-  await assert(legacyCount === 0, name + ': legacy SecurePath/Wathiqati references remain');
+  await assert(legacyCount === 0, name + ': legacy references remain');
 
   await page.locator('#switchAuth').click();
   await assert(await page.locator('input[name="confirmPassword"]').isVisible(), name + ': registration form did not open');
