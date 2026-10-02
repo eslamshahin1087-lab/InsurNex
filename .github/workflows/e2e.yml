@@ -42,7 +42,7 @@ jobs:
 
       - name: Run real Firebase browser E2E
         env:
-          E2E_BASE_URL: http://127.0.0.1:4173
+          E2E_BASE_URL: http://localhost:4173
           INSURNEX_E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
           INSURNEX_E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
         run: /tmp/insurnex-e2e-runner/node_modules/.bin/playwright test
