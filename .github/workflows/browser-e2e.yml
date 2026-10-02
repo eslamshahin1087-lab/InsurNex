@@ -1,0 +1,46 @@
+name: InsurNex Browser E2E
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
+      E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: npm install --no-save playwright@latest
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --directory . > /tmp/insurnex-http.log 2>&1 &
+          echo $! > /tmp/insurnex-http.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/InsurNex-User.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/insurnex-http.log
+          exit 1
+
+      - name: Run desktop + mobile browser E2E
+        run: node tests/e2e/browser-e2e.cjs
