@@ -59,7 +59,7 @@ async function cleanupWorkspace(page, uid, deleteAuth) {
 
       for (const collection of collections) {
         try {
-          const snap = await IN.db.collection(collection).where('ownerId', '==', uid).limit(200).get();
+          const snap = await IN.db.collection(collection).where('ownerId', '==', uid).where('workspaceType', '==', 'personal').limit(200).get();
           for (const doc of snap.docs) {
             try { await doc.ref.delete(); } catch (_) {}
           }
@@ -149,7 +149,7 @@ async function waitForRecord(page, collection, field, value) {
 
 async function countOwned(page, collection, uid) {
   return page.evaluate(async ({ collection, uid }) => {
-    const s = await window.InsurNex.db.collection(collection).where('ownerId', '==', uid).get();
+    const s = await window.InsurNex.db.collection(collection).where('ownerId', '==', uid).where('workspaceType', '==', 'personal').get();
     return s.size;
   }, { collection, uid });
 }
