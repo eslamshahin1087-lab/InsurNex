@@ -474,8 +474,8 @@ service cloud.firestore {
 
     match /financialTransactions/{id} {
       allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
-      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','finance']);
-      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','finance']);
+      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager','broker','finance']);
+      allow update, delete: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager','broker','finance']);
     }
 
     match /expenses/{id} {
