@@ -1,7 +1,9 @@
 const { chromium, devices } = require('playwright');
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://127.0.0.1:4173/InsurNex-User.html';
-const hasCreds = Boolean(process.env.E2E_EMAIL && process.env.E2E_PASSWORD);
+const e2eEmail = String(process.env.E2E_EMAIL || '').trim();
+const e2ePassword = String(process.env.E2E_PASSWORD || '');
+const hasCreds = Boolean(e2eEmail && e2ePassword);
 
 async function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -132,7 +134,7 @@ async function runContext(browser, name, options) {
       } catch (error) {
         return { ok: false, code: error.code || '', message: error.message || String(error) };
       }
-    }, { email: process.env.E2E_EMAIL, password: process.env.E2E_PASSWORD });
+    }, { email: e2eEmail, password: e2ePassword });
     await assert(directLogin.ok,
       name + ': direct Firebase Auth login failed (' + (directLogin.code || 'unknown') + '): ' +
       (directLogin.message || 'no Firebase error message') +
@@ -146,8 +148,8 @@ async function runContext(browser, name, options) {
     // regression.
     await page.evaluate(() => window.firebase.auth().signOut().catch(() => {}));
     await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
-    await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
-    await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
+    await page.locator('input[name="email"]').fill(e2eEmail);
+    await page.locator('input[name="password"]').fill(e2ePassword);
     await page.locator('.auth-submit').click();
 
     await page.waitForFunction(() => {
