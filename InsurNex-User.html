@@ -7353,14 +7353,24 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   async function convertLead(id){
     if(!canWrite('opportunities'))return;
-    const lead=await readDoc('leads',id); if(!lead){IN.toast(t('noRecords'),'error');return;}
+    const lead=await readDoc('leads',id);
+    if(!lead){IN.toast(t('noRecords'),'error');return;}
+    if(lead.convertedOpportunityId){
+      IN.toast(L('تم تحويل هذا العميل المحتمل مسبقًا.','This lead has already been converted.'),'info');
+      location.hash='#opportunities';
+      return;
+    }
     try{
       const ref=await addDoc('opportunities',{
-        sourceLeadId:id,customerName:lead.fullName||'',customerId:lead.customerId||null,
-        phone:lead.phone||'',email:lead.email||'',insuranceType:lead.insuranceType||'',
-        estimatedPremium:Number(lead.estimatedPremium||0),expectedCommission:Number(lead.expectedCommission||0),
-        priority:lead.priority||'warm',closingDate:lead.expectedCloseDate||null,
-        assignedBrokerName:state.profile?.fullName||state.profile?.name||'',status:'New'
+        sourceLeadId:id,customerName:lead.fullName||lead.customerName||'',customerId:lead.customerId||null,
+        phone:lead.phone||lead.mobile||'',email:lead.email||'',insuranceType:lead.insuranceType||'',
+        product:lead.product||'',insurer:lead.insurer||'',coverage:lead.coverage||'',
+        sumInsured:Number(lead.sumInsured||lead.coverageAmount||0),
+        estimatedPremium:Number(lead.estimatedPremium||lead.premium||0),
+        expectedCommission:Number(lead.expectedCommission||0),
+        priority:lead.priority||'warm',closingDate:lead.expectedCloseDate||lead.closingDate||null,
+        assignedBrokerName:state.profile?.fullName||state.profile?.name||'',status:'New',
+        workspaceType:lead.workspaceType,organizationId:lead.organizationId||null,ownerId:lead.ownerId||auth.currentUser.uid
       });
       await db.collection('leads').doc(id).update({stage:'Qualified',convertedOpportunityId:ref.id,updatedAt:FieldValue().serverTimestamp()});
       await audit('convert','leads',id,{to:'opportunities',opportunityId:ref.id});
@@ -7370,13 +7380,23 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   async function createQuoteFromOpportunity(id){
     if(!canWrite('quotations'))return;
-    const opp=await readDoc('opportunities',id); if(!opp){IN.toast(t('noRecords'),'error');return;}
+    const opp=await readDoc('opportunities',id);
+    if(!opp){IN.toast(t('noRecords'),'error');return;}
+    if(opp.quotationId){
+      IN.toast(L('يوجد عرض سعر مرتبط بهذه الفرصة بالفعل.','A quotation already exists for this opportunity.'),'info');
+      location.hash='#quotations';
+      return;
+    }
     try{
+      const validUntil=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
       const ref=await addDoc('quotations',{
         opportunityId:id,customerId:opp.customerId||null,customerName:opp.customerName||'',
+        phone:opp.phone||'',email:opp.email||'',insuranceType:opp.insuranceType||'',
         product:opp.product||'',insurer:opp.insurer||'',coverage:opp.coverage||'',
         sumInsured:Number(opp.sumInsured||0),premium:Number(opp.estimatedPremium||0),
-        commissionAmount:Number(opp.expectedCommission||0),validUntil:'',status:'Draft'
+        commissionAmount:Number(opp.expectedCommission||0),validUntil,status:'Draft',
+        assignedBrokerName:opp.assignedBrokerName||state.profile?.fullName||state.profile?.name||'',
+        workspaceType:opp.workspaceType,organizationId:opp.organizationId||null,ownerId:opp.ownerId||auth.currentUser.uid
       });
       await db.collection('opportunities').doc(id).update({status:'Quotation',quotationId:ref.id,updatedAt:FieldValue().serverTimestamp()});
       await audit('convert','opportunities',id,{to:'quotations',quotationId:ref.id});
