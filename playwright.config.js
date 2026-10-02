@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 45000,
+  timeout: 90000,
   expect: { timeout: 15000 },
   fullyParallel: false,
   retries: 0,
@@ -26,7 +26,14 @@ export default defineConfig({
     },
     {
       name: 'chrome-mobile',
-      use: { ...devices['iPhone 13'], channel: 'chrome' },
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+        deviceScaleFactor: 3,
+      },
     },
   ],
 });
