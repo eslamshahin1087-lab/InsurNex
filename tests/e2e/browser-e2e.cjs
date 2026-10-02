@@ -124,7 +124,24 @@ async function runContext(browser, name, options) {
     await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
     await page.locator('.auth-submit').click();
 
-    await page.waitForFunction(() => Boolean(window.firebase?.auth?.().currentUser), null, { timeout: 30000 });
+    // Wait for either a real Firebase session or the UI's surfaced auth error.
+    // This avoids a generic timeout hiding invalid credentials, disabled users,
+    // network failures, or account-provisioning problems.
+    await page.waitForFunction(() => {
+      const user = Boolean(window.firebase?.auth?.().currentUser);
+      const error = [...document.querySelectorAll('.auth-error, .error-box')]
+        .some(node => (node.textContent || '').trim().length > 0);
+      return user || error;
+    }, null, { timeout: 30000 }).catch(() => {});
+    const loginState = await page.evaluate(() => ({
+      authenticated: Boolean(window.firebase?.auth?.().currentUser),
+      error: [...document.querySelectorAll('.auth-error, .error-box')]
+        .map(node => (node.textContent || '').trim()).filter(Boolean).join(' | '),
+      url: location.href
+    }));
+    await assert(loginState.authenticated,
+      name + ': test account login failed; Firebase/UI error: ' + (loginState.error || 'no session and no visible auth error') +
+      '; verify INSURNEX_E2E_EMAIL/INSURNEX_E2E_PASSWORD and that the account can sign in to project insurnex-8a9df');
     await page.waitForTimeout(1500);
     await assert(await page.locator('#view, #app .shell, .app-shell').count() > 0, name + ': authenticated shell did not load');
 
