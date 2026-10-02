@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: insurnex-browser-e2e
+  cancel-in-progress: true
+
 jobs:
   browser-e2e:
     runs-on: ubuntu-latest
