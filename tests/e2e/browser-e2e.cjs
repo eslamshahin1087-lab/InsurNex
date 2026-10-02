@@ -119,38 +119,37 @@ async function runContext(browser, name, options) {
   let firebaseCrudProbe = null;
   let authenticatedRouteChecks = [];
   if (hasCreds) {
-    // Use a fresh page for the real account so the deliberately failed login
-    // above cannot leave stale form/error state or interfere with auth listeners.
-    await page.close();
-    page = await context.newPage();
-    page.on('console', msg => {
-      if (msg.type() === 'error') consoleErrors.push(msg.text());
-    });
-    page.on('pageerror', err => pageErrors.push(String(err)));
-    await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
-    // Capture the underlying Firebase Auth error code without exposing credentials.
-    await page.evaluate(() => {
+    // First prove the supplied credentials work directly against the same
+    // Firebase project. This gives us the real Firebase Auth error instead of
+    // relying on UI state while diagnosing credentials/network problems.
+    await page.evaluate(() => window.firebase.auth().signOut().catch(() => {}));
+    const directLogin = await page.evaluate(async ({ email, password }) => {
       const auth = window.firebase.auth();
-      const original = auth.signInWithEmailAndPassword.bind(auth);
-      auth.signInWithEmailAndPassword = async (...args) => {
-        try {
-          return await original(...args);
-        } catch (error) {
-          window.__INSURNEX_E2E_AUTH_ERROR = {
-            code: error.code || '',
-            message: error.message || String(error)
-          };
-          throw error;
-        }
-      };
-    });
+      try {
+        await auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+        const credential = await auth.signInWithEmailAndPassword(email, password);
+        return { ok: true, uid: credential.user?.uid || null };
+      } catch (error) {
+        return { ok: false, code: error.code || '', message: error.message || String(error) };
+      }
+    }, { email: process.env.E2E_EMAIL, password: process.env.E2E_PASSWORD });
+    await assert(directLogin.ok,
+      name + ': direct Firebase Auth login failed (' + (directLogin.code || 'unknown') + '): ' +
+      (directLogin.message || 'no Firebase error message') +
+      '; project=insurnex-8a9df');
+    await page.waitForFunction(() => Boolean(window.firebase?.auth?.().currentUser), null, { timeout: 30000 });
+    await assert(Boolean(await page.evaluate(() => window.firebase.auth().currentUser)),
+      name + ': Firebase reported successful sign-in but currentUser is still empty');
+
+    // Now verify the actual InsurNex login form against the same known-good
+    // credentials, on a clean page, so a passing backend login cannot hide a UI
+    // regression.
+    await page.evaluate(() => window.firebase.auth().signOut().catch(() => {}));
+    await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
     await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
     await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
     await page.locator('.auth-submit').click();
 
-    // Wait for either a real Firebase session or the UI's surfaced auth error.
-    // This avoids a generic timeout hiding invalid credentials, disabled users,
-    // network failures, or account-provisioning problems.
     await page.waitForFunction(() => {
       const user = Boolean(window.firebase?.auth?.().currentUser);
       const error = [...document.querySelectorAll('.auth-error, .error-box')]
@@ -161,12 +160,12 @@ async function runContext(browser, name, options) {
       authenticated: Boolean(window.firebase?.auth?.().currentUser),
       error: [...document.querySelectorAll('.auth-error, .error-box')]
         .map(node => (node.textContent || '').trim()).filter(Boolean).join(' | '),
-      firebaseAuthError: window.__INSURNEX_E2E_AUTH_ERROR || null,
       url: location.href
     }));
     await assert(loginState.authenticated,
-      name + ': test account login failed; Firebase/UI error: ' + (loginState.error || 'no session and no visible auth error') +
-      '; verify INSURNEX_E2E_EMAIL/INSURNEX_E2E_PASSWORD and that the account can sign in to project insurnex-8a9df');
+      name + ': InsurNex UI login failed after direct Firebase authentication succeeded; UI error: ' +
+      (loginState.error || 'no session and no visible auth error'));
+
     await page.waitForTimeout(1500);
     await assert(await page.locator('#view, #app .shell, .app-shell').count() > 0, name + ': authenticated shell did not load');
 
