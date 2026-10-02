@@ -6296,7 +6296,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       documents:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
       insurers:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
       insuranceProducts:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>',
-      commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1.5 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>', expenses:'<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/',
+      commissions:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M15 9.5c0-1-1.1-1.5-3-1.5s-3 .5-3 1.5 1 1 3 2 3 1 3 2-1 1.5-3 1.5-3-.5-3-1.5"/>', expenses:'<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
       communications:'<path d="M4 5h16v11H7l-3 3z"/><path d="M8 9h8M8 13h5"/>',
       reports:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-7"/>',      analytics:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-3M12 16V7M16 16v-5"/>',
       team:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.7-4 2.7-6 6-6s5.3 2 6 6"/><circle cx="17" cy="9" r="2"/><path d="M15 15c2.7 0 4.8 1.7 6 5"/>',
@@ -7506,18 +7506,162 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(route==='email-templates'){await templateManager();return;}
     const headerMap={commissions:['commission-calculator',w('commissionCalc')],operations:['new-operation',w('newOperation')],notifications:['mark-notifications-read',w('markAllRead')],['email-settings']:['email-templates',w('emailTemplates')]};
     if(headerMap[route]) addHeaderAction(headerMap[route][0],headerMap[route][1]);
+    addHeaderFinanceAction();
     root.querySelectorAll('[data-edit]').forEach(b=>{
       if(b.dataset.crmDecorated)return;b.dataset.crmDecorated='1';const [module,id]=String(b.dataset.edit).split(':');const holder=b.parentElement;if(!holder||!id)return;
-      if(module==='leads')holder.insertAdjacentHTML('beforeend',actionButton('convert-lead:'+id,w('leadToOpp'),'btn btn-secondary'));
+      if(module==='customers'){holder.insertAdjacentHTML('beforeend',actionButton('customer-assessment:'+id,L('تقييم الملف','Assess profile'),'btn btn-secondary'));}
+      if(module==='leads'){holder.insertAdjacentHTML('beforeend',actionButton('lead-needs-analysis:'+id,L('تحليل الاحتياج','Needs analysis'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('convert-lead:'+id,w('leadToOpp'),'btn btn-secondary'));}
       if(module==='opportunities')holder.insertAdjacentHTML('beforeend',actionButton('convert-opportunity:'+id,w('oppToQuote'),'btn btn-secondary'));
-      if(module==='quotations')holder.insertAdjacentHTML('beforeend',actionButton('issue-quote:'+id,w('quoteToPolicy'),'btn btn-secondary'));
-      if(module==='policies')holder.insertAdjacentHTML('beforeend',actionButton('renew-policy:'+id,w('policyRenew'),'btn btn-secondary'));
-      if(module==='renewals')holder.insertAdjacentHTML('beforeend',actionButton('renewal-task:'+id,w('renewalTask'),'btn btn-secondary'));
-      if(module==='claims')holder.insertAdjacentHTML('beforeend',actionButton('claim-task:'+id,w('claimTask'),'btn btn-secondary'));
+      if(module==='quotations'){holder.insertAdjacentHTML('beforeend',actionButton('issue-quote:'+id,w('quoteToPolicy'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('quote-followup:'+id,L('متابعة العرض','Quote follow-up'),'btn btn-secondary'));}
+      if(module==='policies'){holder.insertAdjacentHTML('beforeend',actionButton('renew-policy:'+id,w('policyRenew'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('policy-payment:'+id,L('تسجيل دفعة','Record payment'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('policy-file-ai:'+id,L('تحليل الملف','Analyze file'),'btn btn-secondary'));}
+      if(module==='renewals'){holder.insertAdjacentHTML('beforeend',actionButton('renewal-task:'+id,w('renewalTask'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('renewal-whatsapp:'+id,'WhatsApp','btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('renewal-email:'+id,t('email'),'btn btn-secondary'));}
+      if(module==='claims'){holder.insertAdjacentHTML('beforeend',actionButton('claim-task:'+id,w('claimTask'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('claim-ai:'+id,L('مساعد المطالبة','Claim AI'),'btn btn-secondary'));}
+      if(module==='documents')holder.insertAdjacentHTML('beforeend',actionButton('document-extract:'+id,L('استخراج','Extract'),'btn btn-secondary'));
       if(module==='insurers'){holder.insertAdjacentHTML('beforeend',actionButton('insurer-contacts:'+id,w('insurerContacts'),'btn btn-secondary'));holder.insertAdjacentHTML('beforeend',actionButton('insurer-email:'+id,t('email'),'btn btn-secondary'));}
     });
     root.querySelectorAll('[data-crm-action="issue-quote"]')?.forEach(()=>{});
     root.querySelectorAll('a[href]').forEach(a=>{const card=a.closest('.card');if(!card||card.querySelector('[data-crm-doc-delete]'))return;if(route!=='documents')return;const rowButton=document.createElement('button');rowButton.type='button';rowButton.className='btn btn-danger btn-sm';rowButton.textContent=t('delete');rowButton.dataset.crmDocDelete='1';card.querySelector('.actions')?.appendChild(rowButton);});
+  }
+
+
+  async function saveAIAction(type,targetCollection,targetId,result,status){
+    try{
+      await addDoc('aiActions',{actionType:type,targetCollection,targetId,result,status:status||'completed',engine:'rules-based',disclaimer:L('النتيجة مبنية على البيانات المدخلة وقواعد تشغيلية، وليست قرارًا آليًا نهائيًا.','The result is data-driven/rules-based and is not a final automated decision.')});
+    }catch(e){console.warn('ai action log',e);}
+  }
+
+  async function openInsuranceAssessment(id){
+    if(!canWrite('insuranceAssessments'))return;
+    const c=await readDoc('customers',id);if(!c){IN.toast(t('noRecords'),'error');return;}
+    const [policies,claims,renewals,docs]=await Promise.all(['policies','claims','renewals','documents'].map(async col=>{
+      const rows=await IN.queryDocs(col);return rows.filter(x=>x.customerId===id||x.customerName===(c.fullName||c.name||''));
+    }));
+    const lines=['Medical','Motor','Life','Property','Personal Accident','Travel','Marine','Engineering','Liability'];
+    const types=policies.map(x=>safe(x.insuranceType||x.product||'').toLowerCase());
+    const covered=lines.filter(x=>types.some(t=>t.indexOf(x.toLowerCase())>=0));
+    const gaps=lines.filter(x=>!covered.includes(x)).slice(0,5);
+    const expiring=policies.filter(x=>IN.isExpiring(x.expiryDate,45)).length;
+    const openClaims=claims.filter(x=>!['Settled','Closed','Rejected'].includes(x.status)).length;
+    const score=Math.max(0,Math.min(100,100-(gaps.length*10)-(expiring*4)-(openClaims*3)));
+    const renewalRisk=expiring>=2?'Elevated':expiring===1?'Moderate':'Low';
+    const assessment={
+      customerId:id,customerName:c.fullName||c.name||'',score,coveredLines:covered,gaps,
+      renewalRisk,activePolicies:policies.filter(x=>['Active','active','Renewed'].includes(x.status)).length,
+      expiringPolicies:expiring,openClaims,documentCount:docs.length,
+      status:'completed',method:'rules-based',createdBy:auth.currentUser.uid
+    };
+    const ref=await addDoc('insuranceAssessments',assessment);
+    await audit('insurance_assessment','customers',id,{assessmentId:ref.id,score,gaps:gaps.length});
+    await saveAIAction('insurance_portfolio_assessment','customers',id,{score,gaps,renewalRisk},'completed');
+    modal(L('تقييم الملف التأميني','Insurance Portfolio Assessment'),
+      '<div class="grid grid-2">'+
+      '<div class="card"><div class="eyebrow">Insurance Profile Score</div><div class="master-score">'+score+'/100</div><div class="master-note">'+esc(L('مؤشر مشتق من الوثائق والمطالبات والتجديدات الحالية.','Derived from current policies, claims and renewals.'))+'</div></div>'+
+      '<div class="card"><div class="eyebrow">'+esc(t('renewalRisk'))+'</div><div class="list-title">'+esc(renewalRisk)+'</div><div class="list-sub">'+esc(L(String(expiring)+' وثيقة تحتاج متابعة قريبة.',''+expiring+' policy/policies need near-term review.'))+'</div></div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('التغطيات الحالية','Current coverage'))+'</h3><p>'+esc(covered.join(' · ')||'—')+'</p><h3>'+esc(L('فجوات محتملة للمراجعة','Potential gaps for review'))+'</h3><p>'+esc(gaps.join(' · ')||L('لا توجد فجوات واضحة وفق البيانات الحالية.','No clear gaps from the current data.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('هذه النتيجة للمراجعة التشغيلية فقط ولا تعني أن منتجًا معينًا مناسب للعميل.','This is an operational review aid and does not mean any particular product is suitable.'))+'</div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-primary" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function openPaymentDialog(id){
+    if(!canWrite('payments'))return;
+    const p=await readDoc('policies',id);if(!p){IN.toast(t('noRecords'),'error');return;}
+    const payments=(await IN.queryDocs('payments')).filter(x=>x.policyId===id||x.policyNumber===p.policyNumber);
+    const paid=payments.filter(x=>['paid','partial'].includes(String(x.status||'').toLowerCase())).reduce((n,x)=>n+Number(x.amount||0),0);
+    modal(L('تسجيل دفعة','Record Payment'),
+      '<form id="wfPayment" class="form-stack"><div class="form-grid">'+
+      '<div class="field"><label>'+esc(t('policyNumber'))+'</label><input value="'+esc(p.policyNumber||'')+'" disabled></div>'+
+      '<div class="field"><label>'+esc(t('amount'))+'</label><input name="amount" type="number" min="0" step="0.01" required></div>'+
+      '<div class="field"><label>'+esc(t('method'))+'</label><select name="method"><option>Bank transfer</option><option>Card</option><option>Online</option><option>Cash</option></select></div>'+
+      '<div class="field"><label>'+esc(t('status'))+'</label><select name="status"><option>paid</option><option>partial</option><option>pending</option><option>refunded</option></select></div>'+
+      '<div class="field"><label>'+esc(t('date'))+'</label><input name="date" type="date" value="'+new Date().toISOString().slice(0,10)+'" required></div>'+
+      '</div><div class="card"><div class="list-row"><span>Premium</span><strong>'+esc(fmtMoney(p.premium||0))+'</strong></div><div class="list-row"><span>Paid to date</span><strong>'+esc(fmtMoney(paid))+'</strong></div></div>'+
+      '<div class="form-actions"><button type="button" class="btn" data-crm-cancel>'+esc(t('cancel'))+'</button><button class="btn btn-primary">'+esc(t('save'))+'</button></div></form>');
+    document.getElementById('wfPayment').onsubmit=async e=>{
+      e.preventDefault();const f=new FormData(e.currentTarget),amount=Number(f.get('amount')||0);
+      if(amount<=0){IN.toast(t('amount'),'error');return;}
+      try{
+        const ref=await addDoc('payments',{policyId:id,policyNumber:p.policyNumber||'',customerId:p.customerId||null,customerName:p.customerName||'',amount,date:f.get('date'),method:f.get('method'),status:f.get('status')});
+        await addDoc('financialTransactions',{type:'payment',direction:'in',source:'policy_payment',paymentId:ref.id,policyId:id,policyNumber:p.policyNumber||'',amount,date:f.get('date'),status:f.get('status')});
+        const totalPaid=paid+amount,premium=Number(p.premium||0);
+        const paymentStatus=totalPaid>=premium&&premium>0?'paid':totalPaid>0?'partial':'pending';
+        await db.collection('policies').doc(id).update({paymentStatus,updatedAt:FieldValue().serverTimestamp()});
+        await audit('payment_recorded','policies',id,{paymentId:ref.id,amount,paymentStatus});
+        close();IN.toast(t('saved'));refresh();
+      }catch(err){IN.toast(IN.friendlyError(err),'error');}
+    };
+  }
+
+  async function renewalCommunication(id,channel){
+    const r=await readDoc('renewals',id);if(!r)return;
+    const ctx={customerName:r.customerName||'',policyNumber:r.policyNumber||'',insurer:r.insurer||'',renewalDate:r.expiryDate||''};
+    if(channel==='Email'){
+      if(typeof openEmailComposer==='function')return openEmailComposer(ctx);
+    }
+    if(!canWrite('communications'))return;
+    const subject=L('متابعة تجديد الوثيقة '+ctx.policyNumber,'Renewal follow-up '+ctx.policyNumber);
+    const message=L('مرحبًا '+ctx.customerName+'، هذه مسودة متابعة لتجديد الوثيقة '+ctx.policyNumber+' قبل '+ctx.renewalDate+'.','Hello '+ctx.customerName+', this is a renewal follow-up draft for policy '+ctx.policyNumber+' before '+ctx.renewalDate+'.');
+    await addDoc('communications',{customerId:r.customerId||null,customerName:ctx.customerName,channel,subject,message,relatedType:'renewal',relatedId:id,status:'draft'});
+    await audit('communication_draft','renewals',id,{channel});
+    IN.toast(L('تم حفظ مسودة الرسالة.','Communication draft saved.'));
+  }
+
+  async function claimAssistant(id){
+    const c=await readDoc('claims',id);if(!c)return;
+    const docs=(await IN.queryDocs('documents')).filter(x=>x.entityId===id||x.entityId===c.claimNumber);
+    const missing=[];
+    if(!c.policyNumber)missing.push(L('رقم الوثيقة','Policy number'));
+    if(!c.dateOfLoss)missing.push(L('تاريخ الخسارة','Date of loss'));
+    if(!c.amount)missing.push(L('مبلغ المطالبة','Claim amount'));
+    if(!docs.length)missing.push(L('مستندات المطالبة','Claim documents'));
+    const summary={claimNumber:c.claimNumber||'',status:c.status||'',customerName:c.customerName||'',policyNumber:c.policyNumber||'',amount:Number(c.amount||0),missing};
+    await saveAIAction('claim_assistant','claims',id,summary,'completed');
+    modal(L('مساعد المطالبة','Claim Assistant'),
+      '<div class="grid grid-2"><div class="card"><div class="eyebrow">Claim Summary</div><div class="list"><div class="list-row"><span>Claim</span><strong>'+esc(summary.claimNumber||'—')+'</strong></div><div class="list-row"><span>Status</span><strong>'+esc(summary.status||'—')+'</strong></div><div class="list-row"><span>Customer</span><strong>'+esc(summary.customerName||'—')+'</strong></div></div></div>'+
+      '<div class="card"><div class="eyebrow">'+esc(L('الإجراء التالي','Next required action'))+'</div><div class="list-title">'+esc(missing.length?missing[0]:L('مراجعة المطالبة والمستندات ثم متابعة الحالة.','Review the claim and documents, then follow the current status.'))+'</div><div class="list-sub">'+esc(L('عناصر يجب مراجعتها','Items to review'))+'</div></div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('المستندات/البيانات الناقصة','Missing information'))+'</h3><p>'+esc(missing.join(' · ')||L('لا توجد عناصر ناقصة واضحة من البيانات الحالية.','No obvious missing items from the current data.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('المساعد يلخص البيانات المتاحة ولا يتخذ قرار قبول أو رفض المطالبة.','The assistant summarizes available data and does not decide claim approval or rejection.'))+'</div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-primary" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function requestInsuranceFileAnalysis(id){
+    if(!canWrite('insuranceFileAnalyses'))return;
+    const d=await readDoc('documents',id);if(!d)return;
+    const ref=await addDoc('insuranceFileAnalyses',{documentId:id,entityType:d.entityType||'',entityId:d.entityId||null,fileName:d.fileName||d.name||'',mimeType:d.mimeType||'',status:'backend_required',requestedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await saveAIAction('insurance_file_analysis_request','documents',id,{analysisId:ref.id,status:'backend_required'},'requested');
+    modal(L('تحليل ملف التأمين','Insurance File Analyzer'),
+      '<div class="card"><div class="eyebrow">'+esc(d.fileName||d.name||'Document')+'</div><h3>'+esc(L('تم إنشاء طلب التحليل','Analysis request created'))+'</h3><p>'+esc(L('الملف محفوظ وآمن، والنتيجة الذكية الكاملة تحتاج Backend/OCR متصلًا. لم يتم اختلاق أي استخراج أو قراءة غير متاحة.','The file is stored securely. Full AI/OCR extraction requires a connected backend. No unavailable extraction was fabricated.'))+'</p><div class="list"><div class="list-row"><span>Status</span><strong>backend_required</strong></div><div class="list-row"><span>Request ID</span><strong>'+esc(ref.id)+'</strong></div></div></div><div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function requestDocumentExtraction(id){
+    if(!canWrite('documentExtractions'))return;
+    const d=await readDoc('documents',id);if(!d)return;
+    const ref=await addDoc('documentExtractions',{documentId:id,fileName:d.fileName||d.name||'',mimeType:d.mimeType||'',status:'backend_required',requestedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    modal(L('استخراج بيانات المستند','Document Extraction'),
+      '<div class="card"><h3>'+esc(L('طلب الاستخراج محفوظ','Extraction request saved'))+'</h3><p>'+esc(L('القراءة الآلية الكاملة للـPDF/الصور تحتاج خدمة Backend/OCR.','Full PDF/image extraction requires a Backend/OCR service.'))+'</p><div class="list-row"><span>Status</span><strong>backend_required</strong></div><div class="list-row"><span>Request ID</span><strong>'+esc(ref.id)+'</strong></div></div><div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function compareInsurerOptions(){
+    const products=await IN.queryDocs('insuranceProducts');
+    const insurers=await IN.queryDocs('insurers');
+    const names=insurers.map(x=>x.name).filter(Boolean);
+    const rows=products.filter(x=>!names.length||names.includes(x.insurer)).slice(0,30);
+    const grouped={};
+    rows.forEach(x=>{const k=x.insuranceType||'Other';(grouped[k]||(grouped[k]=[])).push(x);});
+    const html=Object.keys(grouped).map(type=>{
+      const items=grouped[type];
+      return '<div class="card" style="margin-top:10px"><h3>'+esc(type)+'</h3><div class="list">'+items.map(x=>'<div class="list-row"><div><div class="list-title">'+esc(x.name||'—')+'</div><div class="list-sub">'+esc(x.insurer||'—')+' · '+esc(x.premiumRange||'')+'</div></div><span class="badge">'+esc(String(x.commission??'—'))+'</span></div>').join('')+'</div></div>';
+    }).join('');
+    await addDoc('insuranceComparisons',{criteria:'available insurer products',productCount:rows.length,status:'completed',method:'data-comparison'});
+    modal(L('مقارنة شركات ومنتجات التأمين','Insurer & Product Comparison'),
+      '<div class="section-note">'+esc(L('المقارنة تعرض البيانات المتاحة فقط ولا تختار شركة أو منتجًا بدلًا من الوسيط.','The comparison presents available data only and does not choose an insurer or product for the broker.'))+'</div>'+
+      (html||'<div class="card empty">'+esc(t('empty'))+'</div>')+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function addHeaderFinanceAction(){
+    const route=(location.hash||'#home').slice(1);
+    if(route==='insuranceProducts')addHeaderAction('compare-insurers',L('مقارنة الخيارات','Compare options'));
+    if(route==='expenses')addHeaderAction('new-expense',L('مصروف جديد','New expense'));
   }
 
   async function handleAction(action){
@@ -7530,12 +7674,23 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(action.startsWith('delete-template:')){return deleteTemplate(action.split(':')[1]);}
     if(action.startsWith('duplicate-template:')){const x=profileTemplates().find(v=>v.id===action.split(':')[1]);if(!x)return;return editTemplate(null,{...x,id:null,name:(x.name||'Template')+' Copy'});}
     if(action.startsWith('use-template:')){return openEmailComposer({templateId:action.split(':')[1]});}
+    if(action==='compare-insurers')return compareInsurerOptions();
+    if(action==='new-expense'){location.hash='#expenses';return setTimeout(()=>document.querySelector('[data-add="expenses"]')?.click(),40);}
+    if(action.startsWith('customer-assessment:'))return openInsuranceAssessment(action.split(':')[1]);
+    if(action.startsWith('lead-needs-analysis:'))return openLeadNeedsAnalysis(action.split(':')[1]);
     if(action.startsWith('convert-lead:'))return convertLead(action.split(':')[1]);
     if(action.startsWith('convert-opportunity:'))return createQuoteFromOpportunity(action.split(':')[1]);
     if(action.startsWith('issue-quote:'))return issuePolicyFromQuote(action.split(':')[1]);
     if(action.startsWith('renew-policy:'))return startRenewal(action.split(':')[1]);
     if(action.startsWith('renewal-task:'))return renewalFollowUp(action.split(':')[1]);
     if(action.startsWith('claim-task:'))return claimFollowUp(action.split(':')[1]);
+    if(action.startsWith('claim-ai:'))return claimAssistant(action.split(':')[1]);
+    if(action.startsWith('policy-payment:'))return openPaymentDialog(action.split(':')[1]);
+    if(action.startsWith('renewal-whatsapp:'))return renewalCommunication(action.split(':')[1],'WhatsApp');
+    if(action.startsWith('renewal-email:'))return renewalCommunication(action.split(':')[1],'Email');
+    if(action.startsWith('policy-file-ai:'))return openInsuranceAssessment(action.split(':')[1]);
+    if(action.startsWith('document-extract:'))return requestDocumentExtraction(action.split(':')[1]);
+    if(action.startsWith('quote-followup:'))return quoteFollowUp(action.split(':')[1]);
     if(action.startsWith('insurer-contacts:'))return insurerContacts(action.split(':')[1]);
     if(action.startsWith('insurer-email:')){const id=action.split(':')[1],ins=await readDoc('insurers',id),to=Array.isArray(ins?.emailContacts)&&ins.emailContacts[0]?.email||ins?.email||'';return openEmailComposer({to});}
     if(action==='save-email-draft')return sendEmailWorkflow(true);
