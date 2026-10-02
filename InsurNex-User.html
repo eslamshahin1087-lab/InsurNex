@@ -6122,7 +6122,10 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   function accountTypeOptions(){
     return '<option value="individual_broker">'+t("individualBroker")+'</option>'+
       '<option value="brokerage_office">'+t("brokerageOffice")+'</option>'+
-      '<option value="brokerage_company">'+t("brokerageCompany")+'</option>';
+      '<option value="brokerage_company">'+t("brokerageCompany")+'</option>'+
+      '<option value="broker_employee">'+t("brokerEmployee")+'</option>'+
+      '<option value="manager">'+t("manager")+'</option>'+
+      '<option value="customer">'+t("customer")+'</option>';
   }
 
   function authPage(mode,error){
@@ -6213,12 +6216,13 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     var uid=c.user.uid,type=String(f.get("accountType")||"individual_broker"),batch=db.batch();
     var roles=(type==="brokerage_company"||type==="brokerage_office")?["organizationOwner","broker"]:
       type==="manager"?["manager"]:
-      type==="customer"?["customer"]:["broker"];
+      type==="customer"?["customer"]:
+      type==="broker_employee"?["broker"]:["broker"];
     var fullName=String(f.get("name")||""),phone=String(f.get("mobile")||"");
     var userData={
       uid:uid,email:c.user.email,fullName:fullName,name:fullName,phone:phone,mobile:phone,
       country:String(f.get("country")||""),city:String(f.get("city")||""),accountType:type,
-      role:type==="brokerage_company"?"broker_owner":type==="manager"?"manager":type==="customer"?"customer":"broker_owner",
+      role:(type==="brokerage_company"||type==="brokerage_office")?"broker_owner":type==="manager"?"manager":type==="customer"?"customer":"broker",
       roles:roles,organizationId:null,photoURL:c.user.photoURL||null,status:"active",emailVerified:!!c.user.emailVerified,
       onboardingCompleted:false,onboardingComplete:false,
       createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()
@@ -6930,7 +6934,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     const sel=document.getElementById('accountType');
     if(!sel)return;
     if(!sel.dataset.masterEnhanced){
-      sel.innerHTML=`<option value="individual_broker">${esc(tr('individualBroker'))}</option><option value="brokerage_office">${esc(tr('brokerageOffice'))}</option><option value="brokerage_company">${esc(tr('brokerageCompany'))}</option>`;
+      sel.innerHTML=`<option value="individual_broker">${esc(tr('individualBroker'))}</option><option value="brokerage_office">${esc(tr('brokerageOffice'))}</option><option value="brokerage_company">${esc(tr('brokerageCompany'))}</option><option value="broker_employee">${esc(tr('brokerEmployee'))}</option><option value="manager">${esc(tr('manager'))}</option><option value="customer">${esc(tr('customer'))}</option>`;
       const hint=document.createElement('div');hint.className='auth-type-note';hint.id='authTypeHint';sel.parentElement?.appendChild(hint);
       sel.dataset.masterEnhanced='1';
       sel.onchange=()=>updateAuthAccountType(sel.value);
@@ -7011,8 +7015,8 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       const c=await auth.createUserWithEmailAndPassword(email,password);
       const uid=c.user.uid,TS=firebase.firestore.FieldValue.serverTimestamp();
       const isOrg=type==='brokerage_office'||type==='brokerage_company';
-      const roles=isOrg?['organizationOwner','broker']:['broker'];
-      const role=isOrg?'broker_owner':'broker_owner';
+      const roles=isOrg?['organizationOwner','broker']:type==='manager'?['manager']:type==='customer'?['customer']:['broker'];
+      const role=isOrg?'broker_owner':type==='manager'?'manager':type==='customer'?'customer':'broker';
       const fullName=String(f.get('name')||'').trim();
       const phone=String(f.get('mobile')||'').trim();
       const userData={
