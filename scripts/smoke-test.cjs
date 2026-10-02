@@ -93,6 +93,9 @@ for (const rel of canonicalApps) {
   if (rel === "InsurNex-User.html" && /registrationInProgress/.test(source)) {
     failures.push("InsurNex User runtime contains an unscoped registrationInProgress flag.");
   }
+  if (rel === "InsurNex-User.html" && !/var L\\s*=\\s*function\\(ar,en\\)/.test(source)) {
+    failures.push("InsurNex User base runtime is missing its local translation helper.");
+  }
   let match;
   while ((match = localScriptPattern.exec(source))) {
     const src = match[1].split(/[?#]/)[0];
