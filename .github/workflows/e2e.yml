@@ -28,15 +28,24 @@ jobs:
           node-version: 22
 
 
+      - name: Install isolated Playwright runner
+        run: |
+          rm -rf /tmp/insurnex-e2e-runner
+          mkdir -p /tmp/insurnex-e2e-runner
+          cd /tmp/insurnex-e2e-runner
+          npm init -y >/dev/null 2>&1
+          npm install --no-package-lock --ignore-scripts @playwright/test@1.55.0
+          ln -s /tmp/insurnex-e2e-runner/node_modules "$GITHUB_WORKSPACE/node_modules"
+
       - name: Install Chrome for Playwright
-        run: npx --yes playwright@1.55.0 install --with-deps chrome
+        run: /tmp/insurnex-e2e-runner/node_modules/.bin/playwright install --with-deps chrome
 
       - name: Run real Firebase browser E2E
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
           INSURNEX_E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
           INSURNEX_E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
-        run: npx --yes playwright@1.55.0 test
+        run: /tmp/insurnex-e2e-runner/node_modules/.bin/playwright test
 
       - name: Upload Playwright report
         if: always()
