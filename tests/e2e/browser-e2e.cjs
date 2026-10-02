@@ -61,6 +61,9 @@ async function runContext(browser, name, options) {
     }
   });
 
+  const unexpectedPageErrors = pageErrors.filter(Boolean);
+  await assert(unexpectedPageErrors.length === 0, name + ': unexpected browser page errors: ' + JSON.stringify(unexpectedPageErrors));
+
   if (hasCreds) {
     await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
     await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
