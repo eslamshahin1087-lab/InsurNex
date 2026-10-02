@@ -90,6 +90,9 @@ for (const rel of canonicalApps) {
   if (/<style\\b[^>]*>\\s*<style\\b/i.test(source) || /<\\/style>\\s*<\\/style>/i.test(source)) {
     failures.push("Nested or duplicated style tags detected in " + rel + ".");
   }
+  if (rel === "InsurNex-User.html" && /async function enhancedRegister\\(form\\)[\\s\\S]*?registrationInProgress(?!\\s*=\\s*false;)/m.test(source)) {
+    failures.push("Enhanced registration must use the shared window.__INSURNEX_REGISTERING flag.");
+  }
   let match;
   while ((match = localScriptPattern.exec(source))) {
     const src = match[1].split(/[?#]/)[0];
