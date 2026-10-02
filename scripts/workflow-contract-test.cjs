@@ -42,7 +42,7 @@ const handlerEnd = html.indexOf("document.addEventListener('click',e=>", handler
 assert.ok(handlerEnd > handlerStart, "central CRM action dispatcher is wired to click events");
 const dispatcher = html.slice(handlerStart, handlerEnd);
 
-const dispatchedPrefixes = [...dispatcher.matchAll(/action\\.startsWith\\('([^']+)'\\)/g)].map(match => match[1]);
+const dispatchedPrefixes = [...dispatcher.matchAll(/action\.startsWith\('([^']+)'\)/g)].map(match => match[1]);
 for (const prefix of dispatchedPrefixes) {
   assert.ok(html.includes(prefix), "UI or workflow contains action prefix: " + prefix);
 }
