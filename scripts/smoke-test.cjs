@@ -87,13 +87,13 @@ const localScriptPattern = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
 const canonicalApps = ["InsurNex-User.html", "InsurNex-admin.html"];
 for (const rel of canonicalApps) {
   const source = fs.readFileSync(path.join(root, rel), "utf8");
-  if (/<style\\b[^>]*>\\s*<style\\b/i.test(source) || /<\\/style>\\s*<\\/style>/i.test(source)) {
+  if (/<style\b[^>]*>\s*<style\b/i.test(source) || /<\/style>\s*<\/style>/i.test(source)) {
     failures.push("Nested or duplicated style tags detected in " + rel + ".");
   }
   if (rel === "InsurNex-User.html" && /registrationInProgress/.test(source)) {
     failures.push("InsurNex User runtime contains an unscoped registrationInProgress flag.");
   }
-  if (rel === "InsurNex-User.html" && !/var L\\s*=\\s*function\\(ar,en\\)/.test(source)) {
+  if (rel === "InsurNex-User.html" && !/var L\s*=\s*function\(ar,en\)/.test(source)) {
     failures.push("InsurNex User base runtime is missing its local translation helper.");
   }
   let match;
