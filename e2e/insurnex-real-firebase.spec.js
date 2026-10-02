@@ -75,11 +75,16 @@ async function registerOrLogin(page, testInfo) {
   const email = configuredEmail || `e2e-${Date.now()}-${testInfo.project.name}@example.com`;
   const password = configuredPassword || `InsurNex-E2E-${Date.now()}!`;
 
-  await page.goto(`${process.env.E2E_BASE_URL || 'http://127.0.0.1:4173'}${BASE_PATH}#register`);
+  await page.goto(`${process.env.E2E_BASE_URL || 'http://localhost:4173'}${BASE_PATH}#register`);
   await page.locator('#authForm').waitFor({ state: 'visible', timeout: 30000 });
 
   if (createdByTest) {
-    await page.locator('#authForm input[name="name"]').fill(`InsurNex E2E ${testInfo.project.name}`);
+    const registerName = page.locator('#authForm input[name="name"]');
+    if (!(await registerName.count())) {
+      await page.locator('#switchAuth').click();
+      await registerName.waitFor({ state: 'visible', timeout: 10000 });
+    }
+    await registerName.fill(`InsurNex E2E ${testInfo.project.name}`);
     await page.locator('#authForm input[name="mobile"]').fill('01000000000');
     await page.locator('#authForm input[name="country"]').fill('Egypt');
     await page.locator('#authForm input[name="city"]').fill('Cairo');
@@ -87,10 +92,7 @@ async function registerOrLogin(page, testInfo) {
     await page.locator('#authForm input[name="password"]').fill(password);
     await page.locator('#authForm input[name="confirmPassword"]').fill(password);
     await page.locator('#authForm input[name="terms"]').check();
-    await page.locator('#authForm input[name="accountType"]').count().then(async count => {
-      if (count) return;
-    });
-    const accountType = page.locator('#authForm select[name="accountType"]');
+        const accountType = page.locator('#authForm select[name="accountType"]');
     if (await accountType.count()) await accountType.selectOption('individual_broker');
     await page.locator('#authForm button[type="submit"]').click();
   } else {
