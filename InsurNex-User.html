@@ -7530,6 +7530,65 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     }catch(e){console.warn('ai action log',e);}
   }
 
+
+  async function openLeadNeedsAnalysis(id){
+    const lead=await readDoc('leads',id);if(!lead)return;
+    const known=[];
+    if(lead.insuranceType)known.push(L('نوع التأمين: ','Insurance type: ')+lead.insuranceType);
+    if(lead.estimatedPremium)known.push(L('القسط المتوقع: ','Estimated premium: ')+fmtMoney(lead.estimatedPremium));
+    if(lead.priority)known.push(L('الأولوية: ','Priority: ')+lead.priority);
+    const questions=[
+      L('ما الممتلكات أو الأشخاص المراد حمايتهم؟','What assets or people need protection?'),
+      L('ما حدود التغطية المطلوبة والميزانية المستهدفة؟','What coverage limits and target budget apply?'),
+      L('هل توجد وثائق حالية أو مطالبات سابقة أو استثناءات مهمة؟','Are there current policies, previous claims or important exclusions?'),
+      L('ما تاريخ التجديد أو تاريخ بدء التغطية المطلوب؟','What renewal/start date is required?')
+    ];
+    await saveAIAction('sales_needs_analysis','leads',id,{known,questions},'completed');
+    modal(L('تحليل احتياج العميل','Lead Needs Analysis'),
+      '<div class="card"><div class="eyebrow">'+esc(L('البيانات المتاحة','Known data'))+'</div><p>'+esc(known.join(' · ')||'—')+'</p></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('أسئلة مقترحة للوسيط','Suggested questions'))+'</h3><div class="list">'+questions.map(q=>'<div class="list-row"><span>•</span><strong>'+esc(q)+'</strong></div>').join('')+'</div></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('هذه الأسئلة تساعد الوسيط على استكمال التحليل؛ لا تنتج توصية منتج تلقائية.','These questions support broker-led needs analysis and do not automatically recommend a product.'))+'</div>'+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
+  async function quoteFollowUp(id){
+    const q=await readDoc('quotations',id);if(!q)return;
+    if(!canWrite('tasks'))return;
+    const task=await addDoc('tasks',{
+      title:L('متابعة عرض السعر','Quotation follow-up')+' · '+(q.customerName||''),
+      description:L('راجع حالة العرض والتواصل مع العميل قبل انتهاء الصلاحية.','Review quotation status and follow up before expiry.'),
+      dueDate:new Date().toISOString().slice(0,10),priority:'medium',assignedToName:state.profile?.name||'',
+      status:'To Do',linkedEntityType:'quotation',linkedEntityId:id,customerId:q.customerId||null,customerName:q.customerName||''
+    });
+    await addDoc('communications',{
+      customerId:q.customerId||null,customerName:q.customerName||'',
+      channel:'WhatsApp',subject:L('متابعة عرض السعر','Quotation follow-up'),
+      message:L('مرحبًا '+(q.customerName||'')+'، نتابع معك عرض السعر الخاص بك.','Hello '+(q.customerName||'')+', we are following up on your quotation.'),
+      relatedType:'quotation',relatedId:id,status:'draft'
+    });
+    await audit('quote_followup','quotations',id,{taskId:task.id});
+    IN.toast(L('تم إنشاء المتابعة وحفظ مسودة التواصل.','Follow-up task and communication draft created.'));
+  }
+
+  async function openPolicyIntelligence(id){
+    const p=await readDoc('policies',id);if(!p)return;
+    const docs=(await IN.queryDocs('documents')).filter(x=>x.entityId===id||x.entityId===p.policyNumber);
+    const findings=[
+      L('حد التغطية: ','Coverage limit: ')+(p.sumInsured||'—'),
+      L('التحمل: ','Deductible: ')+(p.deductible||'—'),
+      L('القسط: ','Premium: ')+(p.premium||'—'),
+      L('تاريخ الانتهاء: ','Expiry: ')+(p.expiryDate||'—')
+    ];
+    const missing=docs.length?[]:[L('المستند المرتبط بالوثيقة','Policy-linked document')];
+    const ref=await addDoc('insuranceFileAnalyses',{policyId:id,policyNumber:p.policyNumber||'',status:'backend_required',findings,missing,sourceDocuments:docs.map(x=>x.id)});
+    await saveAIAction('policy_file_analysis_request','policies',id,{analysisId:ref.id,findings,missing},'requested');
+    modal(L('تحليل ملف الوثيقة','Policy File Analyzer'),
+      '<div class="card"><h3>'+esc(p.policyNumber||'Policy')+'</h3><div class="list">'+findings.map(x=>'<div class="list-row"><span>'+esc(x.split(':')[0])+'</span><strong>'+esc(x.split(':').slice(1).join(':').trim()||'—')+'</strong></div>').join('')+'</div></div>'+
+      '<div class="card" style="margin-top:12px"><h3>'+esc(L('مراجعات مطلوبة','Review items'))+'</h3><p>'+esc(missing.join(' · ')||L('لا توجد فجوات مستندية واضحة من السجل الحالي.','No obvious document gaps in the current record.'))+'</p></div>'+
+      '<div class="section-note" style="margin-top:12px">'+esc(L('الاستخراج الكامل من PDF/Endorsements يحتاج Backend/OCR؛ البيانات الظاهرة هنا مأخوذة من سجل الوثيقة نفسه.','Full PDF/endorsement extraction requires Backend/OCR; the values shown are taken from the policy record itself.'))+'</div>'+
+      '<div class="form-actions"><button class="btn btn-primary" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div>');
+  }
+
   async function openInsuranceAssessment(id){
     if(!canWrite('insuranceAssessments'))return;
     const c=await readDoc('customers',id);if(!c){IN.toast(t('noRecords'),'error');return;}
@@ -7688,7 +7747,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(action.startsWith('policy-payment:'))return openPaymentDialog(action.split(':')[1]);
     if(action.startsWith('renewal-whatsapp:'))return renewalCommunication(action.split(':')[1],'WhatsApp');
     if(action.startsWith('renewal-email:'))return renewalCommunication(action.split(':')[1],'Email');
-    if(action.startsWith('policy-file-ai:'))return openInsuranceAssessment(action.split(':')[1]);
+    if(action.startsWith('policy-file-ai:'))return openPolicyIntelligence(action.split(':')[1]);
     if(action.startsWith('document-extract:'))return requestDocumentExtraction(action.split(':')[1]);
     if(action.startsWith('quote-followup:'))return quoteFollowUp(action.split(':')[1]);
     if(action.startsWith('insurer-contacts:'))return insurerContacts(action.split(':')[1]);
