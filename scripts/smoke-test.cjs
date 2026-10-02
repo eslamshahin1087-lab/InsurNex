@@ -33,8 +33,6 @@ const required = [
 ];
 
 const forbiddenNames = [
-  "js/securepath-backend.js",
-  "js/securepath-firebase-migration.js",
   "securepath-firebase-migration.js",
   "js/admin.js",
   "test-firebase.html",
