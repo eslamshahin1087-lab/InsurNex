@@ -7421,7 +7421,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     document.getElementById('wfPolicyForm').onsubmit=async e=>{
       e.preventDefault(); const f=new FormData(e.currentTarget),d=Object.fromEntries(f.entries());
       try{
-        const ref=await addDoc('policies',{quotationId:id,customerId:q.customerId||null,customerName:q.customerName||'',policyNumber:safe(d.policyNumber),insurer:safe(d.insurer),product:safe(d.product),insuranceType:q.insuranceType||'',coverage:q.coverage||'',sumInsured:Number(q.sumInsured||0),premium:Number(d.premium||0),startDate:d.startDate,expiryDate:d.expiryDate,commissionRate:0,commissionAmount:Number(d.commissionAmount||0),paymentStatus:d.paymentStatus,status:'Active'});
+        const ref=await addDoc('policies',{quotationId:id,customerId:q.customerId||null,customerName:q.customerName||'',phone:q.phone||'',email:q.email||'',policyNumber:safe(d.policyNumber),insurer:safe(d.insurer),product:safe(d.product),insuranceType:q.insuranceType||'',coverage:q.coverage||'',sumInsured:Number(q.sumInsured||0),premium:Number(d.premium||0),startDate:d.startDate,expiryDate:d.expiryDate,commissionRate:0,commissionAmount:Number(d.commissionAmount||0),paymentStatus:d.paymentStatus,status:'Active'});
         if(Number(d.commissionAmount||0)>0){await addDoc('commissions',{policyId:ref.id,quotationId:id,policyNumber:d.policyNumber,customerId:q.customerId||null,customerName:q.customerName||'',insurer:d.insurer||q.insurer||'',brokerName:state.profile?.name||'',premium:Number(d.premium||0),commissionRate:0,commissionAmount:Number(d.commissionAmount||0),paidCommission:0,commissionDate:d.startDate,status:'Expected'});}
         await db.collection('quotations').doc(id).update({status:'Accepted',policyId:ref.id,updatedAt:FieldValue().serverTimestamp()});
         await audit('convert','quotations',id,{to:'policies',policyId:ref.id});close();IN.toast(L('تم إصدار الوثيقة وتسجيل العمولة.','Policy issued and commission recorded.'));refresh();
@@ -7437,7 +7437,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   }
   async function startRenewal(id){
     if(!canWrite('renewals'))return; const p=await readDoc('policies',id);if(!p){IN.toast(t('noRecords'),'error');return;}
-    try{const ref=await addDoc('renewals',{policyId:id,policyNumber:p.policyNumber||'',customerId:p.customerId||null,customerName:p.customerName||'',insurer:p.insurer||'',expiryDate:p.expiryDate,stage:renewalStage(p.expiryDate),status:'Open',assignedBrokerName:state.profile?.name||'',notes:''});
+    try{const customer=p.customerId?await readDoc('customers',p.customerId):null;const ref=await addDoc('renewals',{policyId:id,policyNumber:p.policyNumber||'',customerId:p.customerId||null,customerName:p.customerName||customer?.fullName||customer?.name||'',phone:p.phone||customer?.phone||customer?.mobile||'',email:p.email||customer?.email||'',insurer:p.insurer||'',expiryDate:p.expiryDate,stage:renewalStage(p.expiryDate),status:'Open',assignedBrokerName:state.profile?.name||'',notes:''});
       await audit('renewal_started','policies',id,{renewalId:ref.id});IN.toast(L('تم بدء رحلة التجديد.','Renewal workflow started.'));refresh();
     }catch(e){IN.toast(IN.friendlyError(e),'error');}
   }
@@ -7708,16 +7708,28 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   async function renewalCommunication(id,channel){
     const r=await readDoc('renewals',id);if(!r)return;
-    const ctx={customerName:r.customerName||'',policyNumber:r.policyNumber||'',insurer:r.insurer||'',renewalDate:r.expiryDate||''};
+    const customer=r.customerId?await readDoc('customers',r.customerId):null;
+    const ctx={customerName:r.customerName||customer?.fullName||customer?.name||'',policyNumber:r.policyNumber||'',insurer:r.insurer||'',renewalDate:r.expiryDate||'',phone:r.phone||customer?.phone||customer?.mobile||'',email:r.email||customer?.email||''};
     if(channel==='Email'){
-      if(typeof openEmailComposer==='function')return openEmailComposer(ctx);
+      if(typeof openEmailComposer==='function')return openEmailComposer({to:ctx.email,customerName:ctx.customerName,policyNumber:ctx.policyNumber,insurer:ctx.insurer,renewalDate:ctx.renewalDate});
     }
     if(!canWrite('communications'))return;
     const subject=L('متابعة تجديد الوثيقة '+ctx.policyNumber,'Renewal follow-up '+ctx.policyNumber);
     const message=L('مرحبًا '+ctx.customerName+'، هذه مسودة متابعة لتجديد الوثيقة '+ctx.policyNumber+' قبل '+ctx.renewalDate+'.','Hello '+ctx.customerName+', this is a renewal follow-up draft for policy '+ctx.policyNumber+' before '+ctx.renewalDate+'.');
-    await addDoc('communications',{customerId:r.customerId||null,customerName:ctx.customerName,channel,subject,message,relatedType:'renewal',relatedId:id,status:'draft'});
+    await addDoc('communications',{customerId:r.customerId||null,customerName:ctx.customerName,phone:ctx.phone,channel,subject,message,relatedType:'renewal',relatedId:id,status:'draft'});
     await audit('communication_draft','renewals',id,{channel});
-    IN.toast(L('تم حفظ مسودة الرسالة.','Communication draft saved.'));
+    if(channel==='WhatsApp'){
+      const raw=String(ctx.phone||'').trim();
+      const international=/^\\+\\d{8,15}$/.test(raw)||/^00\\d{8,15}$/.test(raw);
+      const digits=raw.replace(/\\D/g,'').replace(/^00/,'');
+      const link=international&&digits?'https://wa.me/'+digits+'?text='+encodeURIComponent(message):'';
+      modal(L('متابعة التجديد عبر WhatsApp','WhatsApp renewal follow-up'),
+        '<div class="card"><div class="list-title">'+esc(ctx.customerName||'')+' · '+esc(ctx.policyNumber||'')+'</div><div class="field" style="margin-top:10px"><label>'+esc(L('نص الرسالة','Message draft'))+'</label><textarea rows="5" readonly>'+esc(message)+'</textarea></div>'+
+        (link?'<a class="btn btn-primary" href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+esc(L('فتح WhatsApp ومراجعة الرسالة','Open WhatsApp and review message'))+'</a>':'<div class="disabled-note">'+esc(L('تم حفظ المسودة، لكن رقم العميل غير مسجل بصيغة دولية (+رمز الدولة). حدّث رقم العميل ثم أعد المحاولة.','Draft saved, but the customer phone must be in international format (+country code). Update the customer record and try again.'))+'</div>')+
+        '<div class="form-actions"><button class="btn" type="button" data-crm-cancel>'+esc(t('close'))+'</button></div></div>');
+    }else{
+      IN.toast(L('تم حفظ مسودة الرسالة.','Communication draft saved.'));
+    }
   }
 
   async function claimAssistant(id){
