@@ -48,7 +48,7 @@ const dispatcher = html.slice(handlerStart, handlerEnd);
 
 const dispatchedPrefixes = [...dispatcher.matchAll(/action\.startsWith\('([^']+)'\)/g)].map(match => match[1]);
 for (const prefix of dispatchedPrefixes) {
-  assert.ok(html.includes(prefix), "UI or workflow contains action prefix: " + prefix);
+  assert.ok(html.slice(0, handlerStart).includes(prefix), "UI emits action prefix before the dispatcher: " + prefix);
 }
 assert.ok(dispatchedPrefixes.length >= 20, "expected the main CRM action set to be dispatched");
 
