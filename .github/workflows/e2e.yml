@@ -1,0 +1,48 @@
+name: InsurNex Browser E2E
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-package-lock
+
+      - name: Install Chrome for Playwright
+        run: npx playwright install --with-deps chrome
+
+      - name: Run real Firebase browser E2E
+        env:
+          E2E_BASE_URL: http://127.0.0.1:4173
+          INSURNEX_E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
+          INSURNEX_E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insurnex-e2e-report
+          path: |
+            e2e-report/
+            test-results/
+          if-no-files-found: ignore
