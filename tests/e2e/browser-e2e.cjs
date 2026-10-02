@@ -119,6 +119,10 @@ async function runContext(browser, name, options) {
   let firebaseCrudProbe = null;
   let authenticatedRouteChecks = [];
   if (hasCreds) {
+    // The preceding negative-login assertion intentionally leaves an auth error
+    // in the UI. Reload the page before the valid test-account login so that a
+    // stale error cannot satisfy the wait below before Firebase responds.
+    await page.reload({ waitUntil: 'networkidle', timeout: 60000 });
     await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
     await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
     await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
