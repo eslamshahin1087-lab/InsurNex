@@ -33,6 +33,14 @@ async function main() {
       await setDoc(doc(db, "leads/org-lead"), {
         workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "Private lead"
       });
+      await setDoc(doc(db, "insuranceAssessments/org-assessment"), {
+        workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1",
+        customerId: "customer-1", score: 82, status: "completed"
+      });
+      await setDoc(doc(db, "financialTransactions/org-ledger"), {
+        workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1",
+        type: "payment", amount: 1000
+      });
     });
 
     const ownerDb = testEnv.authenticatedContext("owner-1").firestore();
