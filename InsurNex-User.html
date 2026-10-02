@@ -5726,7 +5726,6 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   let lang=localStorage.getItem("insurnex-language")||"ar";
   let theme=localStorage.getItem("insurnex-theme")||"light";
   if(theme!=="dark")theme="light";
-  let registrationInProgress=false;
   const state={
     user:null, profile:null, memberships:[], adminRole:null,
     workspace:{type:"personal",id:null,name:null}, cache:new Map(), online:navigator.onLine
