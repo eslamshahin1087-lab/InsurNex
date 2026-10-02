@@ -82,15 +82,15 @@ for (const [label, rel] of [
 for (const rel of required) {
   if (!fs.existsSync(path.join(root, rel))) failures.push("Missing required file: " + rel);
 }
-const localScriptPattern = /<script\\b[^>]*\\bsrc=["']([^"']+)["'][^>]*>/gi;
+const localScriptPattern = /<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
 const canonicalApps = ["InsurNex-User.html", "InsurNex-admin.html"];
 for (const rel of canonicalApps) {
   const source = fs.readFileSync(path.join(root, rel), "utf8");
   let match;
   while ((match = localScriptPattern.exec(source))) {
     const src = match[1].split(/[?#]/)[0];
-    if (/^(?:https?:|\\/\\/|data:)/i.test(src)) continue;
-    const normalized = src.replace(/^\\.\\//, "").replace(/^\\//, "");
+    if (/^(?:https?:\/\/|\/\/|data:)/i.test(src)) continue;
+    const normalized = src.replace(/^\.\//, "").replace(/^\//, "");
     if (!fs.existsSync(path.join(root, normalized))) {
       failures.push("Missing local script referenced by " + rel + ": " + src);
     }
