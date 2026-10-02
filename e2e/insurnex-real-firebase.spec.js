@@ -68,7 +68,7 @@ async function cleanupWorkspace(page, uid, deleteAuth) {
   }, { uid, deleteAuth });
 }
 
-async function registerOrLogin(page, testInfo) {
+async function registerOrLogin(page, testInfo, pageErrors) {
   const configuredEmail = process.env.INSURNEX_E2E_EMAIL?.trim();
   const configuredPassword = process.env.INSURNEX_E2E_PASSWORD;
   const createdByTest = !configuredEmail;
@@ -126,7 +126,10 @@ async function countOwned(page, collection, uid) {
 
 test.describe('InsurNex real Firebase browser E2E', () => {
   test('auth + CRM pipeline + customer assessment + payment', async ({ page }, testInfo) => {
-    const account = await registerOrLogin(page, testInfo);
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+    const account = await registerOrLogin(page, testInfo, pageErrors);
+    expect(pageErrors, 'No uncaught browser JavaScript errors during authentication').toEqual([]);
 
     try {
       const initialCustomers = await countOwned(page, 'customers', account.uid);
