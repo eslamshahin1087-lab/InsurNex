@@ -15,6 +15,7 @@ const required = [
   "firebase.json",
   "firestore.rules",
   "storage.rules",
+  "firestore.collections.json",
   "js/config.js",
   "js/core.js",
   "js/user.js",
@@ -115,6 +116,16 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "u
 if (manifest.name !== "InsurNex" || manifest.short_name !== "InsurNex") failures.push("Manifest identity is not InsurNex.");
 if (manifest.start_url !== "./InsurNex-User.html") failures.push("Manifest start_url must be ./InsurNex-User.html.");
 
+const collectionBlueprint = JSON.parse(fs.readFileSync(path.join(root, "firestore.collections.json"), "utf8"));
+if (collectionBlueprint.projectId !== expectedProjectId || !Array.isArray(collectionBlueprint.collections)) {
+  failures.push("Firestore collection blueprint is missing or targets the wrong project.");
+}
+const rulesText = fs.readFileSync(path.join(root, "firestore.rules"), "utf8");
+for (const item of collectionBlueprint.collections || []) {
+  if (!item || typeof item.name !== "string" || !rulesText.includes("match /" + item.name + "/")) {
+    failures.push("Firestore collection is not represented in security rules: " + (item && item.name || "unknown"));
+  }
+}
 const firebase = JSON.parse(fs.readFileSync(path.join(root, "firebase.json"), "utf8"));
 if (!firebase.firestore?.rules || !firebase.firestore?.indexes || !firebase.storage?.rules || !firebase.hosting?.public) {
   failures.push("Firebase configuration is incomplete.");
