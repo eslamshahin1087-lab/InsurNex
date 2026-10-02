@@ -63,7 +63,7 @@ async function runAuthenticatedFirebaseProbe(page, name) {
 
 async function runContext(browser, name, options) {
   const context = await browser.newContext(options);
-  const page = await context.newPage();
+  let page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
   page.on('console', msg => {
@@ -119,11 +119,31 @@ async function runContext(browser, name, options) {
   let firebaseCrudProbe = null;
   let authenticatedRouteChecks = [];
   if (hasCreds) {
-    // The preceding negative-login assertion intentionally leaves an auth error
-    // in the UI. Reload the page before the valid test-account login so that a
-    // stale error cannot satisfy the wait below before Firebase responds.
-    await page.reload({ waitUntil: 'networkidle', timeout: 60000 });
+    // Use a fresh page for the real account so the deliberately failed login
+    // above cannot leave stale form/error state or interfere with auth listeners.
+    await page.close();
+    page = await context.newPage();
+    page.on('console', msg => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+    page.on('pageerror', err => pageErrors.push(String(err)));
     await page.goto(BASE_URL + '#login', { waitUntil: 'networkidle', timeout: 60000 });
+    // Capture the underlying Firebase Auth error code without exposing credentials.
+    await page.evaluate(() => {
+      const auth = window.firebase.auth();
+      const original = auth.signInWithEmailAndPassword.bind(auth);
+      auth.signInWithEmailAndPassword = async (...args) => {
+        try {
+          return await original(...args);
+        } catch (error) {
+          window.__INSURNEX_E2E_AUTH_ERROR = {
+            code: error.code || '',
+            message: error.message || String(error)
+          };
+          throw error;
+        }
+      };
+    });
     await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL);
     await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD);
     await page.locator('.auth-submit').click();
@@ -141,6 +161,7 @@ async function runContext(browser, name, options) {
       authenticated: Boolean(window.firebase?.auth?.().currentUser),
       error: [...document.querySelectorAll('.auth-error, .error-box')]
         .map(node => (node.textContent || '').trim()).filter(Boolean).join(' | '),
+      firebaseAuthError: window.__INSURNEX_E2E_AUTH_ERROR || null,
       url: location.href
     }));
     await assert(loginState.authenticated,
