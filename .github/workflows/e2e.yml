@@ -23,18 +23,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Playwright test runner
-        run: npm install --no-package-lock --ignore-scripts @playwright/test@1.55.0
 
       - name: Install Chrome for Playwright
-        run: npx playwright install --with-deps chrome
+        run: npx --yes playwright@1.55.0 install --with-deps chrome
 
       - name: Run real Firebase browser E2E
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
           INSURNEX_E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
           INSURNEX_E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
-        run: npx playwright test
+        run: npx --yes playwright@1.55.0 test
 
       - name: Upload Playwright report
         if: always()
