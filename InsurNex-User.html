@@ -6636,7 +6636,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
       '</h1><div class="muted">Secure workspace document management</div></div><button class="btn btn-primary" id="upload">'+t("add")+
       '</button></div>'+(rows.length?'<div class="grid grid-2">'+rows.map(function(r){return '<div class="card"><div class="list-title">'+esc(r.name||r.fileName||"Document")+
       '</div><div class="list-sub">'+esc(r.category||r.entityType||"")+' · '+esc(r.fileName||"")+'</div><div class="actions" style="margin-top:10px"><a class="btn" href="'+
-      esc(r.url||"#")+'" target="_blank" rel="noopener">'+t("open")+'</a></div></div>';}).join("")+
+      esc(r.url||"#")+'" target="_blank" rel="noopener">'+t("open")+'</a><button class="btn" type="button" data-crm-action="document-extract:'+r.id+'">'+L('استخراج','Extract')+'</button><button class="btn" type="button" data-crm-action="document-analyze:'+r.id+'">'+L('تحليل الملف','Analyze')+'</button></div></div>';}).join("")+
       '</div>':'<div class="card empty">📎<br>'+t("empty")+'</div>');
   }
 
@@ -7749,6 +7749,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     if(action.startsWith('renewal-email:'))return renewalCommunication(action.split(':')[1],'Email');
     if(action.startsWith('policy-file-ai:'))return openPolicyIntelligence(action.split(':')[1]);
     if(action.startsWith('document-extract:'))return requestDocumentExtraction(action.split(':')[1]);
+    if(action.startsWith('document-analyze:'))return requestInsuranceFileAnalysis(action.split(':')[1]);
     if(action.startsWith('quote-followup:'))return quoteFollowUp(action.split(':')[1]);
     if(action.startsWith('insurer-contacts:'))return insurerContacts(action.split(':')[1]);
     if(action.startsWith('insurer-email:')){const id=action.split(':')[1],ins=await readDoc('insurers',id),to=Array.isArray(ins?.emailContacts)&&ins.emailContacts[0]?.email||ins?.email||'';return openEmailComposer({to});}
