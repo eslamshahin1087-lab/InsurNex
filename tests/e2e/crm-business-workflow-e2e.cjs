@@ -649,7 +649,8 @@ async function runContext(browser, name, deviceOptions) {
       await isolationContext.close();
     }
 
-    // Payment was already deleted and verified above; clean up the remaining records.\n    for (const [collection, id] of [...created].reverse()) {
+    // Payment was already deleted and verified above; clean up the remaining records.
+    for (const [collection, id] of [...created].reverse()) {
       const deleted = await deleteRecord(page, collection, id);
       assert(
         deleted.deleted,
