@@ -1,0 +1,17 @@
+:root {
+  font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+  color: #08234f;
+  background: #f6f9fd;
+  font-synthesis: none;
+  --inx-navy: #05285f;
+  --inx-blue: #075eea;
+  --inx-cyan: #029fe9;
+  --inx-bg: #f6f9fd;
+  --inx-surface: #ffffff;
+  --inx-border: #dbe6f2;
+  --inx-muted: #667b99;
+  --inx-gradient: linear-gradient(135deg, #05285f 0%, #075eea 58%, #029fe9 100%);
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--inx-bg); }
+button, input { font: inherit; }

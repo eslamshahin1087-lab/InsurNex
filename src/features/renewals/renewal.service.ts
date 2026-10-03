@@ -1,0 +1,5 @@
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';import { db } from '../../firebase/config';import type { Policy } from '../../types/insurance';
+export type RenewalBand='expired'|'7'|'30'|'45'|'60'|'90'|'later';export interface RenewalItem extends Policy{daysLeft:number;band:RenewalBand}
+function daysUntil(date:string){const end=new Date(date+'T23:59:59');const now=new Date();now.setHours(0,0,0,0);return Math.ceil((end.getTime()-now.getTime())/86400000)}
+function band(days:number):RenewalBand{return days<0?'expired':days<=7?'7':days<=30?'30':days<=45?'45':days<=60?'60':days<=90?'90':'later'}
+export async function listRenewals(organizationId:string){const q=query(collection(db,'policies'),where('organizationId','==',organizationId),limit(300));const s=await getDocs(q);return s.docs.map(d=>{const p={id:d.id,...d.data()} as Policy;const daysLeft=daysUntil(p.expiryDate);return {...p,daysLeft,band:band(daysLeft)}}).filter(x=>x.status==='active'&&x.daysLeft<=90).sort((a,b)=>a.daysLeft-b.daysLeft) as RenewalItem[]}

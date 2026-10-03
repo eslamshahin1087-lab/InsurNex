@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn(){ return request.auth != null; }
+    function userPath(){ return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function hasProfile(){ return signedIn() && exists(userPath()); }
+    function me(){ return get(userPath()).data; }
+    function sameOrg(orgId){ return hasProfile() && me().status == 'active' && me().organizationId == orgId; }
+    function roleIs(roles){ return hasProfile() && me().role in roles; }
+    function privileged(){ return roleIs(['owner','admin']); }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || (hasProfile() && resource.data.organizationId == me().organizationId && privileged()));
+      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.role == 'owner' && request.resource.data.status == 'active';
+      allow update: if signedIn() && request.auth.uid == uid && request.resource.data.organizationId == resource.data.organizationId && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId} {
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if sameOrg(orgId);
+      allow update: if sameOrg(orgId) && privileged() && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if false;
+      match /members/{uid} {
+        allow create: if signedIn() && request.auth.uid == uid && uid == get(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId;
+        allow read: if sameOrg(orgId);
+        allow update: if sameOrg(orgId) && privileged();
+        allow delete: if sameOrg(orgId) && privileged() && uid != request.auth.uid;
+      }
+    }
+
+    match /{collection}/{docId} {
+      allow read: if resource.data.organizationId is string && sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string && sameOrg(request.resource.data.organizationId);
+      allow update: if resource.data.organizationId == request.resource.data.organizationId && sameOrg(resource.data.organizationId);
+      allow delete: if resource.data.organizationId is string && sameOrg(resource.data.organizationId) && roleIs(['owner','admin','broker']);
+    }
+  }
+}
