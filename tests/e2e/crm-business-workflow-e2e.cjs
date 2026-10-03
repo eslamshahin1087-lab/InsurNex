@@ -133,10 +133,34 @@ async function deleteRecord(page, collection, id) {
       const snap = await ref.get({ source: 'server' });
       return { deleted: !snap.exists, code: '' };
     } catch (error) {
+      let authUid = null;
+      let tokenUid = null;
+      let exists = null;
+      let ownerId = null;
+      let workspaceType = null;
+      try {
+        const user = app.auth().currentUser;
+        authUid = user?.uid || null;
+        if (user) {
+          const token = await user.getIdTokenResult(true);
+          tokenUid = token.claims?.user_id || token.claims?.sub || null;
+        }
+        const snap = await ref.get({ source: 'server' });
+        exists = snap.exists;
+        const data = snap.data() || {};
+        ownerId = data.ownerId || null;
+        workspaceType = data.workspaceType || null;
+      } catch (_) {}
+
       return {
         deleted: false,
         code: error.code || '',
-        message: error.message || String(error)
+        message: error.message || String(error),
+        authUid,
+        tokenUid,
+        exists,
+        ownerId,
+        workspaceType
       };
     }
   }, { collection, id });
