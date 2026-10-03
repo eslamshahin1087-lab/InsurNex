@@ -2,6 +2,12 @@ name: InsurNex Firebase Rules Repair Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "firestore.rules"
+      - "firebase.json"
+      - ".github/workflows/firebase-rules-repair-deploy.yml"
 
 permissions:
   contents: read
@@ -43,6 +49,11 @@ jobs:
 
       - name: Validate Firestore Rules locally
         run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "npm run test:rules"
+
+      - name: Show rules release marker
+        run: |
+          echo "Deploying Firestore Rules from commit ${GITHUB_SHA}"
+          grep -n "InsurNex production rules release marker" firestore.rules || true
 
       - name: Deploy Firestore Rules to InsurNex
         run: |
