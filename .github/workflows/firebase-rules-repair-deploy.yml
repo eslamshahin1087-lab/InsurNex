@@ -1,9 +1,6 @@
 name: InsurNex Firebase Rules Repair Deploy
 
 on:
-  push:
-    branches:
-      - test/crm-business-workflow-e2e-2026-10-03
   workflow_dispatch:
 
 permissions:
@@ -15,6 +12,7 @@ jobs:
     timeout-minutes: 10
     env:
       FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,19 +22,35 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Google Application Default Credentials
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON }}
+
       - name: Verify Firebase deployment credential
         run: |
-          if [ -z "$FIREBASE_TOKEN" ]; then
-            echo "FIREBASE_TOKEN GitHub Secret is not configured for this repository."
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ] && [ -z "$FIREBASE_TOKEN" ]; then
+            echo "No Firebase deployment credential is configured."
+            echo "Configure FIREBASE_SERVICE_ACCOUNT_JSON (recommended) or FIREBASE_TOKEN in GitHub Secrets, then run this workflow again."
             exit 2
           fi
-          echo "Firebase deployment credential is available."
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "Using Google Application Default Credentials."
+          else
+            echo "Using FIREBASE_TOKEN fallback."
+          fi
 
       - name: Validate Firestore Rules locally
         run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "npm run test:rules"
 
       - name: Deploy Firestore Rules to InsurNex
-        run: npx --yes firebase-tools@latest deploy --only firestore:rules --project insurnex-8a9df --token "$FIREBASE_TOKEN" --non-interactive
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            npx --yes firebase-tools@latest deploy --only firestore:rules --project insurnex-8a9df --non-interactive
+          else
+            npx --yes firebase-tools@latest deploy --only firestore:rules --project insurnex-8a9df --token "$FIREBASE_TOKEN" --non-interactive
+          fi
 
       - name: Confirm deployment command completed
         run: echo "Firestore rules deployment completed for insurnex-8a9df."
