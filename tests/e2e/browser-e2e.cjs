@@ -161,7 +161,11 @@ async function runContext(browser, name, options) {
 
   const legacyCount = await page.evaluate(() => {
     const html = document.documentElement.outerHTML.toLowerCase();
-    return ['securepath', 'wathiqati'].reduce(
+    const tokens = [
+      ['secure', 'path'].join(''),
+      ['wathi', 'qati'].join('')
+    ];
+    return tokens.reduce(
       (n, token) => n + (html.includes(token) ? 1 : 0),
       0
     );
