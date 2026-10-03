@@ -13,7 +13,7 @@ permissions:
 jobs:
   browser-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
       E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
@@ -60,5 +60,8 @@ jobs:
           E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
           E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
 
-      - name: Run desktop + mobile browser E2E
+      - name: Run baseline desktop + mobile browser E2E
         run: node tests/e2e/browser-e2e.cjs
+
+      - name: Run CRM business workflow E2E
+        run: node tests/e2e/crm-business-workflow-e2e.cjs
