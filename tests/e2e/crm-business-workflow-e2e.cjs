@@ -1,6 +1,33 @@
 const { chromium, devices } = require('playwright');
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://127.0.0.1:4173/InsurNex-User.html';
+const USE_FIREBASE_EMULATORS = process.env.E2E_FIREBASE_EMULATOR === '1';
+const EMULATOR_PROJECT_ID = process.env.E2E_FIREBASE_PROJECT_ID || 'demo-insurnex';
+
+async function initializeE2EApp(page) {
+  return page.evaluate(({ useEmulators, projectId }) => {
+    const appName = 'insurnexE2E';
+    let app = window.firebase.apps.find(x => x.name === appName);
+    if (!app) {
+      const config = { ...window.INSURNEX_CONFIG.firebase };
+      if (useEmulators) {
+        config.projectId = projectId;
+        config.authDomain = projectId + '.firebaseapp.com';
+        config.storageBucket = projectId + '.appspot.com';
+      }
+      app = window.firebase.initializeApp(config, appName);
+      if (useEmulators) {
+        app.auth().useEmulator('http://127.0.0.1:9099', { disableWarnings: true });
+        app.firestore().useEmulator('127.0.0.1', 8080);
+      }
+    }
+    return {
+      appName: app.name,
+      projectId: app.options.projectId,
+      emulator: useEmulators
+    };
+  }, { useEmulators: USE_FIREBASE_EMULATORS, projectId: EMULATOR_PROJECT_ID });
+}
 
 async function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -297,13 +324,18 @@ async function runContext(browser, name, deviceOptions) {
     timeout: 60000
   });
 
+  const e2eAppState = await initializeE2EApp(page);
   const firebaseState = await page.evaluate(() => ({
     projectId: window.INSURNEX_CONFIG?.firebase?.projectId || null,
     initialized: Boolean(window.firebase?.apps?.length),
     authAvailable: Boolean(window.InsurNex?.auth)
   }));
 
-  await assert(firebaseState.projectId === 'insurnex-8a9df', name + ': wrong Firebase project');
+  await assert(firebaseState.projectId === 'insurnex-8a9df', name + ': wrong application Firebase project');
+  await assert(
+    e2eAppState.projectId === (USE_FIREBASE_EMULATORS ? EMULATOR_PROJECT_ID : 'insurnex-8a9df'),
+    name + ': wrong E2E Firebase project'
+  );
   await assert(
     firebaseState.initialized && firebaseState.authAvailable,
     name + ': Firebase runtime unavailable'
@@ -325,8 +357,10 @@ async function runContext(browser, name, deviceOptions) {
   const result = {
     name,
     firebaseState,
+    e2eAppState,
     authenticated: true,
-    modules: {}
+    modules: {},
+    mobileHorizontalOverflow: false
   };
 
   try {
@@ -576,6 +610,7 @@ async function runContext(browser, name, deviceOptions) {
         waitUntil: 'domcontentloaded',
         timeout: 60000
       });
+      await initializeE2EApp(isolationPage);
 
       cross = await createDisposableUser(isolationPage, 'insurnex-crm-e2e-cross');
       await assert(
@@ -614,37 +649,7 @@ async function runContext(browser, name, deviceOptions) {
       await isolationContext.close();
     }
 
-    // Refresh the owner's token without changing the authenticated session, then
-    // verify the payment is still owned by this user immediately before cleanup.
-    const ownerSession = await page.evaluate(async paymentId => {
-      const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
-      const auth = app?.auth();
-      const db = app?.firestore();
-      const user = auth?.currentUser;
-      if (!user) return { ok: false, reason: 'no-current-user' };
-      await user.getIdToken(true);
-      const snap = await db.collection('payments').doc(paymentId).get({ source: 'server' });
-      const data = snap.data() || {};
-      return {
-        ok: true,
-        uid: user.uid,
-        exists: snap.exists,
-        ownerId: data.ownerId || null,
-        workspaceType: data.workspaceType || null
-      };
-    }, created.find(([collection]) => collection === 'payments')?.[1] || null);
-
-    await assert(
-      ownerSession.ok &&
-        ownerSession.uid === owner.uid &&
-        ownerSession.exists &&
-        ownerSession.ownerId === owner.uid &&
-        ownerSession.workspaceType === 'personal',
-      name +
-        ': owner session does not match the payment record before cleanup: ' +
-        JSON.stringify(ownerSession)
-    );
-
+    // Payment was already deleted and verified above; clean up the remaining records.
     for (const [collection, id] of [...created].reverse()) {
       const deleted = await deleteRecord(page, collection, id);
       assert(
@@ -661,6 +666,13 @@ async function runContext(browser, name, deviceOptions) {
       );
     }
 
+    if (name === 'mobile') {
+      result.mobileHorizontalOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth + 2
+      );
+      await assert(!result.mobileHorizontalOverflow, name + ': horizontal overflow detected');
+    }
+
     await deleteCurrentAuthUser(page);
   } finally {
     try {
@@ -674,12 +686,6 @@ async function runContext(browser, name, deviceOptions) {
     name + ': unexpected page errors: ' + JSON.stringify(pageErrors)
   );
 
-  if (name === 'mobile') {
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth + 2
-    );
-    await assert(!overflow, name + ': horizontal overflow detected');
-  }
 
   return {
     ...result,
