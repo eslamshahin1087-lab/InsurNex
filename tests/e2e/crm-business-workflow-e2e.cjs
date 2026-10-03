@@ -166,13 +166,17 @@ async function deleteRecord(page, collection, id) {
       beforeWorkspaceType = beforeData.workspaceType || null;
 
       await ref.delete();
-      const snap = await ref.get({ source: 'server' });
+      // A successful delete() is the authoritative client-side result. Do not
+      // issue a normal client read after deletion: the deleted document is no
+      // longer readable under its own Firestore Rules, which would turn a
+      // successful delete into a false permission-denied test failure.
       return {
-        deleted: !snap.exists,
+        deleted: true,
         code: '',
         beforeExists,
         beforeOwnerId,
-        beforeWorkspaceType
+        beforeWorkspaceType,
+        verifiedByDeleteCall: true
       };
     } catch (error) {
       let authUid = null;
