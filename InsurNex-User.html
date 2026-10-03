@@ -5606,6 +5606,274 @@ html,body{margin:0;min-height:100%;font-family:var(--font-ui)}body{display:flex;
 .auth-shell{width:390px;max-width:100%;height:820px;background:var(--paper);border:8px solid var(--navy-3);border-radius:38px;box-shadow:0 30px 75px rgba(7,29,64,.28);overflow:hidden}.auth-screen{height:100%;display:flex;flex-direction:column;overflow-y:auto;background:radial-gradient(circle at 50% 7%,rgba(242,189,99,.18),transparent 28%),linear-gradient(180deg,var(--navy) 0 40%,var(--paper) 40% 100%);padding-bottom:20px}.auth-hero{padding:24px 20px 20px;text-align:center;color:#fff}.auth-hero-actions{position:absolute;top:14px;left:14px}.auth-preference-row{display:flex;gap:6px}.auth-lang{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:8px 10px;font-weight:800;font-size:11px}.auth-hero-brand{display:flex;justify-content:center;margin-top:8px}.auth-logo{display:flex;flex-direction:column;align-items:center;gap:7px}.auth-logo img{width:min(220px,75%);max-height:94px;object-fit:contain;filter:drop-shadow(0 8px 16px rgba(0,0,0,.2))}.auth-logo span{color:#fff;font-size:20px;font-weight:900}.auth-kicker{margin-top:10px;color:rgba(255,255,255,.72);font-size:9px;font-weight:800;letter-spacing:.8px}.auth-hero h1{margin:4px 0 0;font-size:22px}.auth-hero p{margin:6px auto 0;max-width:300px;color:rgba(255,255,255,.8);font-size:10px;line-height:1.7}.auth-panel{background:var(--card);margin:0 18px;border-radius:24px;padding:22px 18px;border:1px solid rgba(14,42,92,.08);box-shadow:var(--shadow-xl);animation:slideUp .5s ease}.auth-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.auth-panel h2{font-family:var(--font-ar);font-size:18px;color:var(--navy);margin:3px 0 0}.auth-mini-mark{width:38px;height:38px;border-radius:12px;background:var(--gold-soft);color:var(--navy);display:grid;place-items:center;font-weight:900}.auth-form .field{margin-bottom:12px}.auth-submit{width:100%;margin-top:6px}.auth-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.auth-actions>*{flex:1;min-width:120px}.auth-link{border:0;background:transparent;color:var(--navy2);font-size:11px;text-decoration:underline}.auth-error{margin-bottom:12px}.auth-company{margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
 html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data-theme="dark"] .auth-screen{background:radial-gradient(circle at 50% 7%,rgba(242,189,99,.10),transparent 28%),linear-gradient(180deg,var(--navy) 0 40%,var(--paper) 40% 100%)}html[data-theme="dark"] .summary-card strong{color:var(--gold-2)}
 @media(max-width:480px){body{padding:0;background:var(--paper)}.phone.app-phone,.auth-shell{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+<style id="insurnex-auth-identity-v2">
+/* InsurNex authentication identity refresh */
+.insurnex-user .auth-shell{
+  width:min(430px,100%);
+  height:min(900px,100dvh);
+  border:0;
+  border-radius:30px;
+  background:#f4f8fc;
+  box-shadow:0 28px 70px rgba(9,47,88,.20);
+  overflow:hidden;
+}
+.insurnex-user .auth-screen{
+  min-height:100%;
+  height:100%;
+  padding:0 0 22px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:#f4f8fc;
+  color:#10243f;
+}
+.insurnex-user .auth-hero{
+  position:relative;
+  isolation:isolate;
+  padding:18px 18px 56px;
+  min-height:286px;
+  text-align:center;
+  color:#fff;
+  background:linear-gradient(160deg,#06285b 0%,#0a4e9d 58%,#0a72d8 100%);
+  overflow:hidden;
+}
+.insurnex-user .auth-hero::before,
+.insurnex-user .auth-hero::after{
+  content:"";
+  position:absolute;
+  border-radius:999px;
+  pointer-events:none;
+  z-index:-1;
+}
+.insurnex-user .auth-hero::before{
+  width:220px;height:220px;top:-120px;inset-inline-end:-70px;
+  background:rgba(255,255,255,.08);
+}
+.insurnex-user .auth-hero::after{
+  width:170px;height:170px;bottom:-95px;inset-inline-start:-55px;
+  background:rgba(35,164,242,.20);
+}
+.insurnex-user .auth-hero-actions{
+  position:absolute;
+  top:14px;
+  inset-inline-end:14px;
+  inset-inline-start:auto;
+  z-index:4;
+}
+.insurnex-user .auth-preference-row{display:flex;gap:6px}
+.insurnex-user .auth-lang{
+  min-width:38px;
+  height:36px;
+  padding:0 10px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:900;
+  backdrop-filter:blur(10px);
+}
+.insurnex-user .auth-hero-brand{
+  display:flex;
+  justify-content:center;
+  margin-top:58px;
+}
+.insurnex-user .auth-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  direction:ltr;
+}
+.insurnex-user .auth-logo-mark{
+  width:66px;
+  height:66px;
+  flex:none;
+  display:grid;
+  place-items:center;
+  background:#fff;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:20px;
+  box-shadow:0 14px 28px rgba(0,0,0,.14);
+  overflow:hidden;
+}
+.insurnex-user .auth-logo-mark img{
+  width:48px;
+  height:48px;
+  max-height:none;
+  object-fit:contain;
+  filter:none;
+}
+.insurnex-user .auth-logo-mark.fallback-visible::after{
+  content:"IN";
+  color:#0a3c7a;
+  font-weight:900;
+  font-size:18px;
+}
+.insurnex-user .auth-logo-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1;
+  text-align:left;
+}
+.insurnex-user .auth-logo-copy strong{
+  color:#fff;
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:-.04em;
+}
+.insurnex-user .auth-logo-copy span{
+  margin-top:7px;
+  color:rgba(255,255,255,.76);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+.insurnex-user .auth-kicker{
+  margin-top:18px;
+  color:rgba(255,255,255,.70);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.1px;
+}
+.insurnex-user .auth-hero h1{
+  margin:7px 0 0;
+  color:#fff;
+  font-size:24px;
+  line-height:1.25;
+  font-weight:900;
+}
+.insurnex-user .auth-hero p{
+  margin:7px auto 0;
+  max-width:315px;
+  color:rgba(255,255,255,.82);
+  font-size:10px;
+  line-height:1.8;
+}
+.insurnex-user .auth-panel{
+  position:relative;
+  z-index:5;
+  margin:-28px 14px 0;
+  padding:20px 17px 18px;
+  border-radius:24px;
+  background:#fff;
+  border:1px solid #dfe9f3;
+  box-shadow:0 20px 42px rgba(17,57,96,.12);
+}
+.insurnex-user .auth-panel-head{
+  margin-bottom:16px;
+  padding-bottom:12px;
+  border-bottom:1px solid #edf2f7;
+}
+.insurnex-user .auth-panel h2{
+  color:#0a2f66;
+  font-size:18px;
+  font-weight:900;
+}
+.insurnex-user .section-caption{
+  color:#0a72d8;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.insurnex-user .auth-mini-mark{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#edf6ff;
+  border:1px solid #d5e8f9;
+}
+.insurnex-user .auth-mini-mark img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+.insurnex-user .auth-form .field{
+  margin-bottom:12px;
+}
+.insurnex-user .auth-form .field label{
+  color:#5d7188;
+  font-size:10px;
+  font-weight:800;
+  margin-bottom:5px;
+}
+.insurnex-user .auth-form input,
+.insurnex-user .auth-form select{
+  min-height:46px;
+  border:1px solid #d9e6f2;
+  border-radius:14px;
+  background:#fbfdff;
+  color:#10243f;
+  box-shadow:none;
+}
+.insurnex-user .auth-form input:focus,
+.insurnex-user .auth-form select:focus{
+  border-color:#0a72d8;
+  box-shadow:0 0 0 4px rgba(10,114,216,.10);
+}
+.insurnex-user .auth-submit{
+  min-height:50px;
+  margin-top:4px;
+  border:0;
+  border-radius:15px;
+  background:linear-gradient(135deg,#082e63,#0a72d8);
+  box-shadow:0 10px 22px rgba(10,114,216,.18);
+  font-size:12px;
+  font-weight:900;
+}
+.insurnex-user .auth-actions{
+  margin-top:10px;
+  gap:8px;
+}
+.insurnex-user .auth-actions .btn-secondary{
+  min-height:43px;
+  border-color:#cfe0ef;
+  background:#f5f9fd;
+  color:#0a5fae;
+}
+.insurnex-user .auth-link{
+  min-height:43px;
+  border:1px solid #dbe7f2;
+  border-radius:13px;
+  color:#60758b;
+  text-decoration:none;
+  background:#fff;
+}
+.insurnex-user .auth-error{
+  border-radius:13px;
+}
+.insurnex-user .auth-company{
+  background:#f7fafd;
+}
+@media(max-width:480px){
+  .insurnex-user .auth-shell{
+    height:100dvh;
+    min-height:100dvh;
+    border-radius:0;
+    box-shadow:none;
+  }
+  .insurnex-user .auth-hero{
+    min-height:292px;
+    padding-top:14px;
+  }
+  .insurnex-user .auth-panel{
+    margin-left:12px;
+    margin-right:12px;
+  }
+}
+html[data-theme="dark"] .insurnex-user .auth-screen{background:#091321}
+html[data-theme="dark"] .insurnex-user .auth-panel{background:#111b2a;border-color:#26364a}
+html[data-theme="dark"] .insurnex-user .auth-panel h2{color:#edf6ff}
+html[data-theme="dark"] .insurnex-user .auth-panel-head{border-color:#243448}
+html[data-theme="dark"] .insurnex-user .auth-form input,
+html[data-theme="dark"] .insurnex-user .auth-form select{background:#0d1725;border-color:#2c4057;color:#edf6ff}
+html[data-theme="dark"] .insurnex-user .auth-actions .btn-secondary{background:#152438;color:#dceeff;border-color:#2d4056}
+html[data-theme="dark"] .insurnex-user .auth-link{background:#111b2a;color:#adc0d4;border-color:#2c4057}
 </style></head><body><div id="toastHost"></div><div id="app"></div><div id="modal" class="modal"><div class="modal-panel"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div><script>(() => {
   try {
   const firebaseConfig = window.INSURNEX_CONFIG?.firebase;
@@ -6135,7 +6403,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 
   function authPage(mode,error){
     var login=mode==="login";
-    var logo='<div class="auth-logo"><img src="assets/logo.svg" alt="InsurNex" loading="eager" decoding="async" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'fallback-visible\')"><span>InsurNex</span></div>';
+    var logo='<div class="auth-logo"><div class="auth-logo-mark"><img src="assets/logo-mark.svg" alt="" width="56" height="56" loading="eager" decoding="async" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'fallback-visible\')"></div><div class="auth-logo-copy"><strong>InsurNex</strong><span>Insurance Broker CRM</span></div></div>';
     var companyFields=!login?(
       '<section id="companyFields" class="auth-company" style="display:none">'+
       '<div class="auth-section-title">'+t("companyInfo")+'</div>'+
@@ -6161,7 +6429,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
             '<p>'+t("authDescription")+'</p>'+
           '</div>'+
           '<section class="auth-panel">'+
-            '<div class="auth-panel-head"><div><span class="section-caption">'+(login?t("welcomeBack").toUpperCase():t("getStarted").toUpperCase())+'</span><h2>'+ (login?t("welcomeBack"):t("getStarted")) +'</h2></div><div class="auth-mini-mark">IN</div></div>'+
+            '<div class="auth-panel-head"><div><span class="section-caption">'+(login?t("welcomeBack").toUpperCase():t("getStarted").toUpperCase())+'</span><h2>'+ (login?t("welcomeBack"):t("getStarted")) +'</h2></div><div class="auth-mini-mark"><img src="assets/logo-mark.svg" alt="" width="24" height="24"></div></div>'+
             (error?'<div class="error-box auth-error">'+esc(error)+'</div>':'')+
             '<form id="authForm" class="form-stack auth-form">'+
             (!login?'<div class="form-grid"><div class="field field-full"><label>'+t("name")+'</label><input name="name" autocomplete="name" required></div><div class="field"><label>'+t("mobile")+'</label><input name="mobile" type="tel" autocomplete="tel" required></div><div class="field"><label>'+t("country")+'</label><input name="country" value="Egypt" autocomplete="country-name"></div><div class="field"><label>'+t("city")+'</label><input name="city" autocomplete="address-level2"></div></div>':'')+
