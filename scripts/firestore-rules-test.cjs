@@ -80,6 +80,15 @@ async function main() {
     await assertFails(setDoc(doc(managerDb, "leads/misattributed-lead"), {
       workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "Wrong owner"
     }));
+
+    await assertFails(setDoc(doc(brokerDb, "teams/personal-team"), {
+      workspaceType: "personal", organizationId: null, ownerId: "broker-1", name: "Must be org-scoped"
+    }));
+    await assertSucceeds(setDoc(doc(ownerDb, "teams/org-team"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", name: "Broker Team"
+    }));
+    await assertSucceeds(updateDoc(doc(managerDb, "teams/org-team"), { name: "Manager Updated Team" }));
+    await assertFails(deleteDoc(doc(brokerDb, "teams/org-team")));
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
     await assertSucceeds(getDoc(doc(brokerDb, "insuranceAssessments/org-assessment")));
     await assertFails(getDoc(doc(outsiderDb, "insuranceAssessments/org-assessment")));
