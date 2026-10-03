@@ -13,7 +13,7 @@ permissions:
 jobs:
   browser-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
       E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
@@ -29,7 +29,7 @@ jobs:
       - name: Install Playwright
         run: npm install --no-save playwright@latest
 
-      - name: Setup Java for Firestore Emulator
+      - name: Setup Java for Firebase Emulators
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -62,15 +62,51 @@ jobs:
             mode: emailShape && password ? 'configured-account-with-disposable-fallback' : 'disposable-account'
           }));
           NODE
-        env:
-          E2E_EMAIL: ${{ secrets.INSURNEX_E2E_EMAIL }}
-          E2E_PASSWORD: ${{ secrets.INSURNEX_E2E_PASSWORD }}
 
       - name: Run baseline desktop + mobile browser E2E
         run: node tests/e2e/browser-e2e.cjs
 
-      - name: Run CRM business workflow E2E against branch rules
+      - name: Run CRM business workflow E2E with explicit emulator readiness
         env:
           E2E_FIREBASE_EMULATOR: "1"
           E2E_FIREBASE_PROJECT_ID: demo-insurnex
-        run: npx --yes firebase-tools@latest emulators:exec --only auth,firestore --project demo-insurnex "node tests/e2e/crm-business-workflow-e2e.cjs"
+        run: |
+          set -euo pipefail
+          npx --yes firebase-tools@latest emulators:start             --only auth,firestore             --project demo-insurnex             --non-interactive             > /tmp/insurnex-emulators.log 2>&1 &
+          EMULATOR_PID=$!
+          cleanup() {
+            kill "$EMULATOR_PID" >/dev/null 2>&1 || true
+            wait "$EMULATOR_PID" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          echo "Waiting for Firebase Auth and Firestore emulators..."
+          for i in $(seq 1 60); do
+            auth_ok=false
+            firestore_ok=false
+            if curl -sS -o /dev/null --max-time 2 http://127.0.0.1:9099/; then auth_ok=true; fi
+            if curl -sS -o /dev/null --max-time 2 http://127.0.0.1:8080/; then firestore_ok=true; fi
+            if [ "$auth_ok" = true ] && [ "$firestore_ok" = true ]; then
+              echo "Firebase emulators are ready."
+              break
+            fi
+            if ! kill -0 "$EMULATOR_PID" >/dev/null 2>&1; then
+              echo "Firebase emulator process exited before readiness."
+              cat /tmp/insurnex-emulators.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+          if ! curl -sS -o /dev/null --max-time 2 http://127.0.0.1:9099/; then
+            echo "Firebase Auth emulator did not become ready."
+            cat /tmp/insurnex-emulators.log
+            exit 1
+          fi
+          if ! curl -sS -o /dev/null --max-time 2 http://127.0.0.1:8080/; then
+            echo "Firestore emulator did not become ready."
+            cat /tmp/insurnex-emulators.log
+            exit 1
+          fi
+
+          node tests/e2e/crm-business-workflow-e2e.cjs
