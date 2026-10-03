@@ -45,7 +45,7 @@ async function signIn(page, email, password) {
       const app = window.firebase.apps.find(x => x.name === appName) ||
         window.firebase.initializeApp(window.INSURNEX_CONFIG.firebase, appName);
       await app.auth().signInWithEmailAndPassword(targetEmail, targetPassword);
-      return { ok: true, uid: window.firebase.auth().currentUser?.uid || null };
+      return { ok: true, uid: app.auth().currentUser?.uid || null };
     } catch (error) {
       return {
         ok: false,
