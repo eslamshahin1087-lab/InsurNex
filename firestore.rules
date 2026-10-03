@@ -19,14 +19,27 @@ service cloud.firestore {
 
     function isMember(orgId) {
       return signedIn()
-        && orgId is string
-        && exists(memberPath(orgId, request.auth.uid))
-        && get(memberPath(orgId, request.auth.uid)).data.status == 'active';
+        && (
+          orgId is string
+            ? (
+                exists(memberPath(orgId, request.auth.uid))
+                && get(memberPath(orgId, request.auth.uid)).data.status == 'active'
+              )
+            : false
+        );
     }
 
     function hasOrgRole(orgId, roles) {
-      return isMember(orgId)
-        && get(memberPath(orgId, request.auth.uid)).data.role in roles;
+      return signedIn()
+        && (
+          orgId is string
+            ? (
+                exists(memberPath(orgId, request.auth.uid))
+                && get(memberPath(orgId, request.auth.uid)).data.status == 'active'
+                && get(memberPath(orgId, request.auth.uid)).data.role in roles
+              )
+            : false
+        );
     }
 
     function validOrgRole(role) {
