@@ -522,10 +522,8 @@ async function runContext(browser, name, deviceOptions) {
     assert(
       paymentDeletedImmediately.deleted,
       name +
-        ': payment delete failed immediately after update (' +
-        (paymentDeletedImmediately.code || 'unknown') +
-        ') ' +
-        (paymentDeletedImmediately.message || '')
+        ': payment delete failed immediately after update: ' +
+        JSON.stringify(paymentDeletedImmediately)
     );
 
     created.pop();
