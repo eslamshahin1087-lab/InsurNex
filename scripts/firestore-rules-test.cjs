@@ -80,6 +80,15 @@ async function main() {
     await assertFails(setDoc(doc(managerDb, "leads/misattributed-lead"), {
       workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "Wrong owner"
     }));
+
+    await assertFails(setDoc(doc(brokerDb, "teams/personal-team"), {
+      workspaceType: "personal", organizationId: null, ownerId: "broker-1", name: "Must be org-scoped"
+    }));
+    await assertSucceeds(setDoc(doc(ownerDb, "teams/org-team"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", name: "Broker Team"
+    }));
+    await assertSucceeds(updateDoc(doc(managerDb, "teams/org-team"), { name: "Manager Updated Team" }));
+    await assertFails(deleteDoc(doc(brokerDb, "teams/org-team")));
     await assertSucceeds(getDoc(doc(brokerDb, "leads/org-lead")));
     await assertSucceeds(getDoc(doc(brokerDb, "insuranceAssessments/org-assessment")));
     await assertFails(getDoc(doc(outsiderDb, "insuranceAssessments/org-assessment")));
@@ -91,6 +100,28 @@ async function main() {
     await assertFails(updateDoc(doc(brokerDb, "leads/org-lead"), {
       workspaceType: "personal", organizationId: null, ownerId: "broker-1"
     }));
+
+    // Business collections must permit deletion only when the existing workspace
+    // record is readable by the acting owner/member. Regression coverage for the
+    // separate canDeleteExisting() rule path.
+    await setDoc(doc(ownerDb, "leads/personal-delete"), {
+      workspaceType: "personal", organizationId: null, ownerId: "owner-1", title: "personal delete"
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "leads/personal-delete")));
+
+    await setDoc(doc(ownerDb, "payments/personal-delete"), {
+      workspaceType: "personal", organizationId: null, ownerId: "owner-1", amount: 1000
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "payments/personal-delete")));
+
+    await setDoc(doc(ownerDb, "payments/org-delete"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", amount: 1000
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "payments/org-delete")));
+    await setDoc(doc(ownerDb, "leads/outsider-delete"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "delete isolation"
+    });
+    await assertFails(deleteDoc(doc(outsiderDb, "leads/outsider-delete")));
 
     // Brokerage office registration uses the same organization-owner authorization boundary.
     const officeRegistrationDb = testEnv.authenticatedContext("office-owner").firestore();

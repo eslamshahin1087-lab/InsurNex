@@ -220,7 +220,7 @@ async function runContext(browser, name, options) {
 
     if (
       !direct.ok &&
-      ['auth/invalid-credential', 'auth/invalid-email'].includes(direct.code)
+      ['auth/invalid-credential', 'auth/invalid-email', 'auth/too-many-requests'].includes(direct.code)
     ) {
       authMode = 'disposable-account';
     } else {

@@ -1,1 +1,21 @@
-{"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"},"storage":{"rules":"storage.rules"},"hosting":{"public":".","ignore":["firebase.json","firestore.rules","storage.rules","node_modules/**",".git/**"],"cleanUrls":true,"trailingSlash":false}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firestore.rules",
+      "storage.rules",
+      "node_modules/**",
+      ".git/**"
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
+  }
+}

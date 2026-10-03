@@ -1,0 +1,56 @@
+name: InsurNex Firebase Rules Repair Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-firestore-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Google Application Default Credentials
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.FIREBASE_SERVICE_ACCOUNT_JSON }}
+
+      - name: Verify Firebase deployment credential
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ] && [ -z "$FIREBASE_TOKEN" ]; then
+            echo "No Firebase deployment credential is configured."
+            echo "Configure FIREBASE_SERVICE_ACCOUNT_JSON (recommended) or FIREBASE_TOKEN in GitHub Secrets, then run this workflow again."
+            exit 2
+          fi
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "Using Google Application Default Credentials."
+          else
+            echo "Using FIREBASE_TOKEN fallback."
+          fi
+
+      - name: Validate Firestore Rules locally
+        run: npx --yes firebase-tools@latest emulators:exec --only firestore --project demo-insurnex "npm run test:rules"
+
+      - name: Deploy Firestore Rules to InsurNex
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            npx --yes firebase-tools@latest deploy --only firestore:rules --project insurnex-8a9df --non-interactive
+          else
+            npx --yes firebase-tools@latest deploy --only firestore:rules --project insurnex-8a9df --token "$FIREBASE_TOKEN" --non-interactive
+          fi
+
+      - name: Confirm deployment command completed
+        run: echo "Firestore rules deployment completed for insurnex-8a9df."

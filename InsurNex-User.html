@@ -6101,7 +6101,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
     return;
   }
   var auth=InsurNex.auth, db=InsurNex.db, storage=InsurNex.storage, state=InsurNex.state, Domain=InsurNex.Domain;
-  var t=InsurNex.t, esc=InsurNex.esc, fmtDate=InsurNex.fmtDate, fmtMoney=InsurNex.fmtMoney, toast=InsurNex.toast, friendlyError=InsurNex.friendlyError;
+  var t=InsurNex.t, L=function(ar,en){return InsurNex.locale()==="ar"?ar:en;}, esc=InsurNex.esc, fmtDate=InsurNex.fmtDate, fmtMoney=InsurNex.fmtMoney, toast=InsurNex.toast, friendlyError=InsurNex.friendlyError;
   var view=(location.hash||"#home").slice(1), search="";
 
   var nav=[
