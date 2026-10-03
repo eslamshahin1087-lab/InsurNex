@@ -38,6 +38,28 @@ service cloud.firestore {
         && member.data.role in roles;
     }
 
+    function canDeletePayment(data) {
+      return data.workspaceType == 'personal'
+        ? (
+            signedIn()
+            && data.ownerId == request.auth.uid
+          )
+        : data.workspaceType == 'organization'
+          ? (
+              data.organizationId is string
+              && hasOrgRole(
+                data.organizationId,
+                [
+                  'organizationOwner',
+                  'organizationAdmin',
+                  'manager',
+                  'finance'
+                ]
+              )
+            )
+          : false;
+    }
+
     function validOrgRole(role) {
       return role in [
         'organizationOwner',
@@ -944,27 +966,10 @@ service cloud.firestore {
           ]
         );
 
-      // Payment deletion is explicitly scoped so personal owners can remove
-      // their own payment records while organization deletion remains role-based.
+      // Payment deletion is explicitly scoped: personal owners can delete
+      // their own payments; organization payments remain role-gated.
       allow delete: if isPlatformAdmin()
-        || (
-          signedIn()
-          && resource.data.workspaceType == 'personal'
-          && resource.data.ownerId == request.auth.uid
-        )
-        || (
-          resource.data.workspaceType == 'organization'
-          && resource.data.organizationId is string
-          && hasOrgRole(
-            resource.data.organizationId,
-            [
-              'organizationOwner',
-              'organizationAdmin',
-              'manager',
-              'finance'
-            ]
-          )
-        );
+        || canDeletePayment(resource.data);
     }
 
     match /tasks/{id} {
