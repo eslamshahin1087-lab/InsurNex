@@ -21,19 +21,21 @@ service cloud.firestore {
       let membership = orgId is string
         ? memberPath(orgId, request.auth.uid)
         : /databases/$(database)/documents/organizationMembers/__invalid_org__;
+      let member = get(membership);
       return signedIn()
-        && exists(membership)
-        && get(membership).data.status == 'active';
+        && member != null
+        && member.data.status == 'active';
     }
 
     function hasOrgRole(orgId, roles) {
       let membership = orgId is string
         ? memberPath(orgId, request.auth.uid)
         : /databases/$(database)/documents/organizationMembers/__invalid_org__;
+      let member = get(membership);
       return signedIn()
-        && exists(membership)
-        && get(membership).data.status == 'active'
-        && get(membership).data.role in roles;
+        && member != null
+        && member.data.status == 'active'
+        && member.data.role in roles;
     }
 
     function validOrgRole(role) {
