@@ -1,4 +1,4 @@
-// InsurNex production rules release marker: 2026-10-03-rules-v4
+// InsurNex production rules release marker: 2026-10-03-rules-v5
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -939,7 +939,8 @@ service cloud.firestore {
       // their own payment records while organization deletion remains role-based.
       allow delete: if isPlatformAdmin()
         || (
-          resource.data.workspaceType == 'personal'
+          signedIn()
+          && resource.data.workspaceType == 'personal'
           && resource.data.ownerId == request.auth.uid
         )
         || (
