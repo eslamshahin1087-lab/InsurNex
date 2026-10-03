@@ -113,9 +113,17 @@ async function deleteRecord(page, collection, id) {
     const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
     const db = app.firestore();
     const ref = db.collection(collection).doc(id);
-    await ref.delete();
-    const snap = await ref.get({ source: 'server' });
-    return { deleted: !snap.exists };
+    try {
+      await ref.delete();
+      const snap = await ref.get({ source: 'server' });
+      return { deleted: !snap.exists, code: '' };
+    } catch (error) {
+      return {
+        deleted: false,
+        code: error.code || '',
+        message: error.message || String(error)
+      };
+    }
   }, { collection, id });
 }
 
@@ -454,14 +462,26 @@ async function runContext(browser, name, deviceOptions) {
     assert(isolation.isolated, name + ': workspace isolation failed for leads');
     result.crossWorkspaceIsolation = isolation;
 
+    const restored = await signIn(page, owner.email, owner.password);
     await assert(
-      (await signIn(page, owner.email, owner.password)).ok,
+      restored.ok && restored.uid === owner.uid,
       name + ': owner re-authentication failed after isolation check'
     );
 
     for (const [collection, id] of [...created].reverse()) {
       const deleted = await deleteRecord(page, collection, id);
-      assert(deleted.deleted, name + ': cleanup failed for ' + collection + '/' + id);
+      assert(
+        deleted.deleted,
+        name +
+          ': cleanup failed for ' +
+          collection +
+          '/' +
+          id +
+          ' (' +
+          (deleted.code || 'unknown') +
+          ') ' +
+          (deleted.message || '')
+      );
     }
 
     await page.evaluate(() => window.firebase.auth().signOut().catch(() => {}));
