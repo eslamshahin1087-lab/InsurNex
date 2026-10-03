@@ -73,4 +73,24 @@ jobs:
         env:
           E2E_FIREBASE_EMULATOR: "1"
           E2E_FIREBASE_PROJECT_ID: demo-insurnex
-        run: npx --yes firebase-tools@latest emulators:exec --only auth,firestore --project demo-insurnex "node tests/e2e/crm-business-workflow-e2e.cjs"
+        run: |
+          set -euo pipefail
+          npx --yes firebase-tools@latest emulators:start --only auth,firestore --project demo-insurnex > /tmp/insurnex-emulators.log 2>&1 &
+          EMULATOR_PID=$!
+          trap 'kill "$EMULATOR_PID" 2>/dev/null || true' EXIT
+
+          auth_ok=0
+          firestore_ok=0
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/projects/demo-insurnex/config >/dev/null 2>&1 && auth_ok=1 || true
+            curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1 && firestore_ok=1 || true
+            if [ "$auth_ok" -eq 1 ] && [ "$firestore_ok" -eq 1 ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          cat /tmp/insurnex-emulators.log
+          test "$auth_ok" -eq 1
+          test "$firestore_ok" -eq 1
+          node tests/e2e/crm-business-workflow-e2e.cjs
