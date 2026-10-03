@@ -29,6 +29,12 @@ jobs:
       - name: Install Playwright
         run: npm install --no-save playwright@latest
 
+      - name: Setup Java for Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
@@ -63,5 +69,8 @@ jobs:
       - name: Run baseline desktop + mobile browser E2E
         run: node tests/e2e/browser-e2e.cjs
 
-      - name: Run CRM business workflow E2E
-        run: node tests/e2e/crm-business-workflow-e2e.cjs
+      - name: Run CRM business workflow E2E against branch rules
+        env:
+          E2E_FIREBASE_EMULATOR: "1"
+          E2E_FIREBASE_PROJECT_ID: demo-insurnex
+        run: npx --yes firebase-tools@latest emulators:exec --only auth,firestore --project demo-insurnex "node tests/e2e/crm-business-workflow-e2e.cjs"
