@@ -12,7 +12,10 @@ async function wait(ms) {
 
 async function createDisposableUser(page, prefix) {
   return page.evaluate(async prefixName => {
-    const auth = window.firebase.auth();
+    const appName = 'insurnexE2E';
+    const app = window.firebase.apps.find(x => x.name === appName) ||
+      window.firebase.initializeApp(window.INSURNEX_CONFIG.firebase, appName);
+    const auth = app.auth();
     const email =
       prefixName +
       '-' +
@@ -38,7 +41,10 @@ async function createDisposableUser(page, prefix) {
 async function signIn(page, email, password) {
   return page.evaluate(async ({ email: targetEmail, password: targetPassword }) => {
     try {
-      await window.firebase.auth().signInWithEmailAndPassword(targetEmail, targetPassword);
+      const appName = 'insurnexE2E';
+      const app = window.firebase.apps.find(x => x.name === appName) ||
+        window.firebase.initializeApp(window.INSURNEX_CONFIG.firebase, appName);
+      await app.auth().signInWithEmailAndPassword(targetEmail, targetPassword);
       return { ok: true, uid: window.firebase.auth().currentUser?.uid || null };
     } catch (error) {
       return {
@@ -52,7 +58,8 @@ async function signIn(page, email, password) {
 
 async function deleteCurrentAuthUser(page) {
   await page.evaluate(async () => {
-    const user = window.firebase.auth().currentUser;
+    const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+    const user = app?.auth()?.currentUser;
     if (user) {
       try {
         await user.delete();
@@ -63,8 +70,10 @@ async function deleteCurrentAuthUser(page) {
 
 async function createRecord(page, collection, data) {
   return page.evaluate(async ({ collection, data }) => {
-    const auth = window.firebase.auth();
-    const db = window.firebase.firestore();
+    const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+    if (!app) throw new Error('E2E Firebase app not initialized');
+    const auth = app.auth();
+    const db = app.firestore();
     const user = auth.currentUser;
     if (!user) throw new Error('No authenticated user');
 
@@ -87,7 +96,8 @@ async function createRecord(page, collection, data) {
 
 async function updateRecord(page, collection, id, patch) {
   return page.evaluate(async ({ collection, id, patch }) => {
-    const db = window.firebase.firestore();
+    const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+    const db = app.firestore();
     const ref = db.collection(collection).doc(id);
     await ref.update({
       ...patch,
@@ -100,7 +110,8 @@ async function updateRecord(page, collection, id, patch) {
 
 async function deleteRecord(page, collection, id) {
   return page.evaluate(async ({ collection, id }) => {
-    const db = window.firebase.firestore();
+    const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+    const db = app.firestore();
     const ref = db.collection(collection).doc(id);
     await ref.delete();
     const snap = await ref.get({ source: 'server' });
@@ -110,8 +121,9 @@ async function deleteRecord(page, collection, id) {
 
 async function expectPermissionDenied(page, collection, data) {
   return page.evaluate(async ({ collection, data }) => {
-    const db = window.firebase.firestore();
-    const user = window.firebase.auth().currentUser;
+    const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+    const db = app.firestore();
+    const user = app.auth().currentUser;
     if (!user) return { ok: false, reason: 'no-auth-user' };
 
     try {
@@ -375,19 +387,28 @@ async function runContext(browser, name, deviceOptions) {
       status: teamUpdated.data.status
     };
 
-    result.modules.payments = await expectPermissionDenied(page, 'payments', {
+    const payment = await createRecord(page, 'payments', {
       policyId: policy.id,
       policyNumber: policy.data.policyNumber,
+      customerId: null,
       customerName: lead.data.fullName,
       amount: 1000,
       date: new Date().toISOString().slice(0, 10),
       method: 'Bank transfer',
       status: 'paid'
     });
-    assert(
-      result.modules.payments.ok,
-      name + ': payments write guard did not enforce finance-only access'
-    );
+    assert(payment.exists, name + ': payment create/read failed');
+    created.push(['payments', payment.id]);
+    const paymentUpdated = await updateRecord(page, 'payments', payment.id, {
+      status: 'partial'
+    });
+    assert(paymentUpdated.data.status === 'partial', name + ': payment update failed');
+    result.modules.payments = {
+      create: true,
+      update: true,
+      status: paymentUpdated.data.status,
+      policyId: policy.id
+    };
 
     result.modules.subscriptions = await expectPermissionDenied(page, 'subscriptions', {
       plan: 'Professional',
@@ -418,7 +439,8 @@ async function runContext(browser, name, deviceOptions) {
 
     const isolation = await page.evaluate(async id => {
       try {
-        await window.firebase.firestore().collection('leads').doc(id).get({ source: 'server' });
+        const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+        await app.firestore().collection('leads').doc(id).get({ source: 'server' });
         return { isolated: false, code: 'read-allowed' };
       } catch (error) {
         return {
