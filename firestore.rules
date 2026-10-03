@@ -1,4 +1,4 @@
-// InsurNex production rules release marker: 2026-10-03-rules-v5
+// InsurNex production rules release marker: 2026-10-03-rules-v6
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
