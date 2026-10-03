@@ -130,29 +130,97 @@ async function deleteRecord(page, collection, id) {
 async function expectPermissionDenied(page, collection, data) {
   return page.evaluate(async ({ collection, data }) => {
     const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
-    const db = app.firestore();
-    const user = app.auth().currentUser;
-    if (!user) return { ok: false, reason: 'no-auth-user' };
+    const auth = app?.auth();
+    const db = app?.firestore();
+    const user = auth?.currentUser;
+    if (!user) return { ok: false, code: 'no-auth-user', reason: 'no-auth-user' };
 
+    let tokenClaims = {};
     try {
-      await db.collection(collection).add({
-        ...data,
-        workspaceType: 'personal',
-        organizationId: null,
-        ownerId: user.uid,
-        createdBy: user.uid,
-        e2eTest: true,
-        createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-      });
-      return { ok: false, reason: 'write-was-allowed' };
-    } catch (error) {
-      return {
-        ok: error.code === 'permission-denied',
-        code: error.code || '',
-        message: error.message || String(error)
-      };
+      const token = await user.getIdTokenResult();
+      tokenClaims = token.claims || {};
+      delete tokenClaims.iat;
+      delete tokenClaims.exp;
+      delete tokenClaims.auth_time;
+    } catch (_) {}
+
+    const appInfo = {
+      projectId: app?.options?.projectId || null,
+      appName: app?.name || null,
+      uid: user.uid,
+      claims: tokenClaims
+    };
+
+    const transientCodes = new Set([
+      'unavailable',
+      'deadline-exceeded',
+      'resource-exhausted',
+      'aborted'
+    ]);
+
+    const payload = {
+      ...data,
+      workspaceType: 'personal',
+      organizationId: null,
+      ownerId: user.uid,
+      createdBy: user.uid,
+      e2eTest: true,
+      createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        const ref = await db.collection(collection).add(payload);
+
+        // A personal Team write being accepted is a real Rules defect. Remove the
+        // probe record immediately so the test never leaves residue behind.
+        try {
+          await ref.delete();
+        } catch (_) {}
+
+        return {
+          ok: false,
+          code: 'write-was-allowed',
+          reason: 'write-was-allowed',
+          attempt,
+          appInfo
+        };
+      } catch (error) {
+        const code = error.code || '';
+        const message = error.message || String(error);
+
+        if (code === 'permission-denied') {
+          return {
+            ok: true,
+            code,
+            message,
+            attempt,
+            appInfo
+          };
+        }
+
+        if (transientCodes.has(code) && attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        }
+
+        return {
+          ok: false,
+          code,
+          message,
+          attempt,
+          appInfo
+        };
+      }
     }
+
+    return {
+      ok: false,
+      code: 'unexpected-exit',
+      message: 'Permission probe exited without a result',
+      appInfo
+    };
   }, { collection, data });
 }
 
@@ -385,7 +453,9 @@ async function runContext(browser, name, deviceOptions) {
     });
     assert(
       result.modules.team.ok,
-      name + ': personal-workspace team creation must be denied because teams are organization-scoped'
+      name +
+        ': personal-workspace team creation must be denied because teams are organization-scoped. ' +
+        JSON.stringify(result.modules.team)
     );
 
     const payment = await createRecord(page, 'payments', {
