@@ -935,15 +935,25 @@ service cloud.firestore {
           ]
         );
 
+      // Payment deletion is explicitly scoped so personal owners can remove
+      // their own payment records while organization deletion remains role-based.
       allow delete: if isPlatformAdmin()
-        || canDeleteExisting(
-          resource.data,
-          [
-            'organizationOwner',
-            'organizationAdmin',
-            'manager',
-            'finance'
-          ]
+        || (
+          resource.data.workspaceType == 'personal'
+          && resource.data.ownerId == request.auth.uid
+        )
+        || (
+          resource.data.workspaceType == 'organization'
+          && resource.data.organizationId is string
+          && hasOrgRole(
+            resource.data.organizationId,
+            [
+              'organizationOwner',
+              'organizationAdmin',
+              'manager',
+              'finance'
+            ]
+          )
         );
     }
 
