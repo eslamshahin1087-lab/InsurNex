@@ -44,8 +44,23 @@ async function signIn(page, email, password) {
       const appName = 'insurnexE2E';
       const app = window.firebase.apps.find(x => x.name === appName) ||
         window.firebase.initializeApp(window.INSURNEX_CONFIG.firebase, appName);
-      await app.auth().signInWithEmailAndPassword(targetEmail, targetPassword);
-      return { ok: true, uid: app.auth().currentUser?.uid || null };
+      const auth = app.auth();
+      const credential = await auth.signInWithEmailAndPassword(targetEmail, targetPassword);
+      const user = credential.user || auth.currentUser;
+      if (!user) throw new Error('Firebase sign-in completed without a current user');
+
+      // Firebase Auth can switch users successfully before Firestore has observed
+      // the new ID token. Refresh the token and let the auth state settle before
+      // issuing security-sensitive Firestore operations.
+      await user.getIdToken(true);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const currentUser = auth.currentUser;
+      if (!currentUser || currentUser.uid !== user.uid) {
+        throw new Error('Firebase Auth session did not settle on the signed-in user');
+      }
+
+      return { ok: true, uid: currentUser.uid };
     } catch (error) {
       return {
         ok: false,
@@ -529,6 +544,37 @@ async function runContext(browser, name, deviceOptions) {
     await assert(
       restored.ok && restored.uid === owner.uid,
       name + ': owner re-authentication failed after isolation check'
+    );
+
+    // Verify the restored Auth identity reaches Firestore before cleanup. This
+    // distinguishes a stale-token transition from a real production Rules denial.
+    const restoredSession = await page.evaluate(async paymentId => {
+      const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+      const auth = app?.auth();
+      const db = app?.firestore();
+      const user = auth?.currentUser;
+      if (!user) return { ok: false, reason: 'no-current-user' };
+      await user.getIdToken(true);
+      const snap = await db.collection('payments').doc(paymentId).get({ source: 'server' });
+      const data = snap.data() || {};
+      return {
+        ok: true,
+        uid: user.uid,
+        exists: snap.exists,
+        ownerId: data.ownerId || null,
+        workspaceType: data.workspaceType || null
+      };
+    }, created.find(([collection]) => collection === 'payments')?.[1] || null);
+
+    await assert(
+      restoredSession.ok &&
+        restoredSession.uid === owner.uid &&
+        restoredSession.exists &&
+        restoredSession.ownerId === owner.uid &&
+        restoredSession.workspaceType === 'personal',
+      name +
+        ': owner session did not stabilize against the payment record before cleanup: ' +
+        JSON.stringify(restoredSession)
     );
 
     for (const [collection, id] of [...created].reverse()) {
