@@ -92,6 +92,28 @@ async function main() {
       workspaceType: "personal", organizationId: null, ownerId: "broker-1"
     }));
 
+    // Business collections must permit deletion only when the existing workspace
+    // record is readable by the acting owner/member. Regression coverage for the
+    // separate canDeleteExisting() rule path.
+    await setDoc(doc(ownerDb, "leads/personal-delete"), {
+      workspaceType: "personal", organizationId: null, ownerId: "owner-1", title: "personal delete"
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "leads/personal-delete")));
+
+    await setDoc(doc(ownerDb, "payments/personal-delete"), {
+      workspaceType: "personal", organizationId: null, ownerId: "owner-1", amount: 1000
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "payments/personal-delete")));
+
+    await setDoc(doc(ownerDb, "payments/org-delete"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", amount: 1000
+    });
+    await assertSucceeds(deleteDoc(doc(ownerDb, "payments/org-delete")));
+    await setDoc(doc(ownerDb, "leads/outsider-delete"), {
+      workspaceType: "organization", organizationId: "org-1", ownerId: "owner-1", title: "delete isolation"
+    });
+    await assertFails(deleteDoc(doc(outsiderDb, "leads/outsider-delete")));
+
     // Brokerage office registration uses the same organization-owner authorization boundary.
     const officeRegistrationDb = testEnv.authenticatedContext("office-owner").firestore();
     const officeBatch = writeBatch(officeRegistrationDb);
