@@ -942,9 +942,12 @@ service cloud.firestore {
           ]
         );
 
-      // Temporary diagnostic: isolate whether the payment match itself
-      // is the source of the rules evaluation error.
-      allow delete: if true;
+      // Personal payment deletion is self-owned only.
+      // Organization payment deletion remains admin-only until an explicit
+      // organization payment-delete workflow is introduced.
+      allow delete: if request.auth != null
+        && resource.data.workspaceType == 'personal'
+        && resource.data.ownerId == request.auth.uid;
     }
 
     match /tasks/{id} {
