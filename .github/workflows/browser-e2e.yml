@@ -37,7 +37,7 @@ jobs:
           python3 -m http.server 4173 --directory . > /tmp/insurnex-http.log 2>&1 &
           echo $! > /tmp/insurnex-http.pid
           for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:4173/InsurNex-User.html >/dev/null; then exit 0; fi
+            if curl -fsS http://127.0.0.1:4173/InsurNex-User.html >/dev/null 2>&1; then exit 0; fi
             sleep 1
           done
           cat /tmp/insurnex-http.log
