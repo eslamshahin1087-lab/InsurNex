@@ -18,20 +18,18 @@ service cloud.firestore {
     }
 
     function isMember(orgId) {
-      let membership = orgId is string
-        ? memberPath(orgId, request.auth.uid)
-        : /databases/$(database)/documents/organizationMembers/__invalid_org__;
-      let member = get(membership);
+      let member = get(
+        /databases/$(database)/documents/organizationMembers/$(orgId + '_' + request.auth.uid)
+      );
       return signedIn()
         && member != null
         && member.data.status == 'active';
     }
 
     function hasOrgRole(orgId, roles) {
-      let membership = orgId is string
-        ? memberPath(orgId, request.auth.uid)
-        : /databases/$(database)/documents/organizationMembers/__invalid_org__;
-      let member = get(membership);
+      let member = get(
+        /databases/$(database)/documents/organizationMembers/$(orgId + '_' + request.auth.uid)
+      );
       return signedIn()
         && member != null
         && member.data.status == 'active'
