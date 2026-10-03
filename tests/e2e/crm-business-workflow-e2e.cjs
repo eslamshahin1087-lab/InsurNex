@@ -377,23 +377,16 @@ async function runContext(browser, name, deviceOptions) {
       policyId: policy.id
     };
 
-    const team = await createRecord(page, 'teams', {
+    result.modules.team = await expectPermissionDenied(page, 'teams', {
       name: 'E2E Team ' + owner.uid.slice(0, 6),
       managerName: 'E2E Manager',
       description: 'E2E team workflow',
       status: 'active'
     });
-    assert(team.exists, name + ': team create/read failed');
-    created.push(['teams', team.id]);
-    const teamUpdated = await updateRecord(page, 'teams', team.id, {
-      status: 'inactive'
-    });
-    assert(teamUpdated.data.status === 'inactive', name + ': team update failed');
-    result.modules.team = {
-      create: true,
-      update: true,
-      status: teamUpdated.data.status
-    };
+    assert(
+      result.modules.team.ok,
+      name + ': personal-workspace team creation must be denied because teams are organization-scoped'
+    );
 
     const payment = await createRecord(page, 'payments', {
       policyId: policy.id,
