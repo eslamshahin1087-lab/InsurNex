@@ -489,9 +489,26 @@ async function runContext(browser, name, deviceOptions) {
       status: 'partial'
     });
     assert(paymentUpdated.data.status === 'partial', name + ': payment update failed');
+
+    // Delete the same freshly-created payment immediately after update. If this
+    // fails, the live Firestore payment delete rule is definitively rejecting a
+    // personal owner delete; if it succeeds, later workflow state is mutating the
+    // record/session and can be investigated separately.
+    const paymentDeletedImmediately = await deleteRecord(page, 'payments', payment.id);
+    assert(
+      paymentDeletedImmediately.deleted,
+      name +
+        ': payment delete failed immediately after update (' +
+        (paymentDeletedImmediately.code || 'unknown') +
+        ') ' +
+        (paymentDeletedImmediately.message || '')
+    );
+
+    created.pop();
     result.modules.payments = {
       create: true,
       update: true,
+      delete: true,
       status: paymentUpdated.data.status,
       policyId: policy.id
     };
