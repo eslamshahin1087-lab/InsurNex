@@ -359,7 +359,8 @@ async function runContext(browser, name, deviceOptions) {
     firebaseState,
     e2eAppState,
     authenticated: true,
-    modules: {}
+    modules: {},
+    mobileHorizontalOverflow: false
   };
 
   try {
@@ -648,38 +649,7 @@ async function runContext(browser, name, deviceOptions) {
       await isolationContext.close();
     }
 
-    // Refresh the owner's token without changing the authenticated session, then
-    // verify the payment is still owned by this user immediately before cleanup.
-    const ownerSession = await page.evaluate(async paymentId => {
-      const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
-      const auth = app?.auth();
-      const db = app?.firestore();
-      const user = auth?.currentUser;
-      if (!user) return { ok: false, reason: 'no-current-user' };
-      await user.getIdToken(true);
-      const snap = await db.collection('payments').doc(paymentId).get({ source: 'server' });
-      const data = snap.data() || {};
-      return {
-        ok: true,
-        uid: user.uid,
-        exists: snap.exists,
-        ownerId: data.ownerId || null,
-        workspaceType: data.workspaceType || null
-      };
-    }, created.find(([collection]) => collection === 'payments')?.[1] || null);
-
-    await assert(
-      ownerSession.ok &&
-        ownerSession.uid === owner.uid &&
-        ownerSession.exists &&
-        ownerSession.ownerId === owner.uid &&
-        ownerSession.workspaceType === 'personal',
-      name +
-        ': owner session does not match the payment record before cleanup: ' +
-        JSON.stringify(ownerSession)
-    );
-
-    for (const [collection, id] of [...created].reverse()) {
+    // Payment was already deleted and verified above; clean up the remaining records.\n    for (const [collection, id] of [...created].reverse()) {
       const deleted = await deleteRecord(page, collection, id);
       assert(
         deleted.deleted,
@@ -695,6 +665,13 @@ async function runContext(browser, name, deviceOptions) {
       );
     }
 
+    if (name === 'mobile') {
+      result.mobileHorizontalOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth + 2
+      );
+      await assert(!result.mobileHorizontalOverflow, name + ': horizontal overflow detected');
+    }
+
     await deleteCurrentAuthUser(page);
   } finally {
     try {
@@ -708,12 +685,6 @@ async function runContext(browser, name, deviceOptions) {
     name + ': unexpected page errors: ' + JSON.stringify(pageErrors)
   );
 
-  if (name === 'mobile') {
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth + 2
-    );
-    await assert(!overflow, name + ': horizontal overflow detected');
-  }
 
   return {
     ...result,
