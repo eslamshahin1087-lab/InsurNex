@@ -128,14 +128,29 @@ async function deleteRecord(page, collection, id) {
     const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
     const db = app.firestore();
     const ref = db.collection(collection).doc(id);
+    let beforeExists = null;
+    let beforeOwnerId = null;
+    let beforeWorkspaceType = null;
     try {
+      const before = await ref.get({ source: 'server' });
+      beforeExists = before.exists;
+      const beforeData = before.data() || {};
+      beforeOwnerId = beforeData.ownerId || null;
+      beforeWorkspaceType = beforeData.workspaceType || null;
+
       await ref.delete();
       const snap = await ref.get({ source: 'server' });
-      return { deleted: !snap.exists, code: '' };
+      return {
+        deleted: !snap.exists,
+        code: '',
+        beforeExists,
+        beforeOwnerId,
+        beforeWorkspaceType
+      };
     } catch (error) {
       let authUid = null;
       let tokenUid = null;
-      let exists = null;
+      let afterExists = null;
       let ownerId = null;
       let workspaceType = null;
       try {
@@ -146,7 +161,7 @@ async function deleteRecord(page, collection, id) {
           tokenUid = token.claims?.user_id || token.claims?.sub || null;
         }
         const snap = await ref.get({ source: 'server' });
-        exists = snap.exists;
+        afterExists = snap.exists;
         const data = snap.data() || {};
         ownerId = data.ownerId || null;
         workspaceType = data.workspaceType || null;
@@ -158,7 +173,10 @@ async function deleteRecord(page, collection, id) {
         message: error.message || String(error),
         authUid,
         tokenUid,
-        exists,
+        beforeExists,
+        beforeOwnerId,
+        beforeWorkspaceType,
+        afterExists,
         ownerId,
         workspaceType
       };
