@@ -464,10 +464,28 @@ service cloud.firestore {
     }
 
     match /teams/{id} {
-      allow read: if isPlatformAdmin() || readsWorkspace(resource.data);
-      allow create: if isPlatformAdmin() || createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager']);
-      allow update: if isPlatformAdmin() || canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager']);
-      allow delete: if isPlatformAdmin() || canDeleteExisting(resource.data, ['organizationOwner','organizationAdmin','manager']);
+      // Teams are organization-scoped by design; personal workspaces must not create
+      // or mutate team records.
+      allow read: if isPlatformAdmin()
+        || (
+          resource.data.workspaceType == 'organization'
+          && isMember(resource.data.organizationId)
+        );
+      allow create: if isPlatformAdmin()
+        || (
+          request.resource.data.workspaceType == 'organization'
+          && createsWorkspace(request.resource.data, ['organizationOwner','organizationAdmin','manager'])
+        );
+      allow update: if isPlatformAdmin()
+        || (
+          resource.data.workspaceType == 'organization'
+          && canWriteExisting(resource.data, ['organizationOwner','organizationAdmin','manager'])
+        );
+      allow delete: if isPlatformAdmin()
+        || (
+          resource.data.workspaceType == 'organization'
+          && canDeleteExisting(resource.data, ['organizationOwner','organizationAdmin','manager'])
+        );
     }
 
     match /plans/{id} {
