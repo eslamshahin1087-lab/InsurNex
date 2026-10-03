@@ -536,6 +536,122 @@ async function runContext(browser, name, deviceOptions) {
       policyId: policy.id
     };
 
+    const customer = await createRecord(page, 'customers', {
+      fullName: 'E2E Customer ' + owner.uid.slice(0, 6),
+      phone: '+201000000002',
+      email: owner.email,
+      category: 'Individual',
+      source: 'E2E'
+    });
+    assert(customer.exists, name + ': customer create/read failed');
+    created.push(['customers', customer.id]);
+    const customerUpdated = await updateRecord(page, 'customers', customer.id, {
+      category: 'VIP'
+    });
+    assert(customerUpdated.data.category === 'VIP', name + ': customer update failed');
+    result.modules.customers = { create: true, update: true };
+
+    const task = await createRecord(page, 'tasks', {
+      title: 'E2E Follow-up Task',
+      description: 'CRM workflow task',
+      status: 'open',
+      priority: 'high',
+      dueDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+      relatedType: 'lead',
+      relatedId: lead.id
+    });
+    assert(task.exists, name + ': task create/read failed');
+    created.push(['tasks', task.id]);
+    const taskUpdated = await updateRecord(page, 'tasks', task.id, {
+      status: 'completed'
+    });
+    assert(taskUpdated.data.status === 'completed', name + ': task update failed');
+    result.modules.tasks = { create: true, update: true };
+
+    const appointment = await createRecord(page, 'appointments', {
+      title: 'E2E Customer Meeting',
+      customerId: customer.id,
+      startAt: new Date(Date.now() + 86400000).toISOString(),
+      endAt: new Date(Date.now() + 9000000).toISOString(),
+      status: 'scheduled'
+    });
+    assert(appointment.exists, name + ': appointment create/read failed');
+    created.push(['appointments', appointment.id]);
+    const appointmentUpdated = await updateRecord(page, 'appointments', appointment.id, {
+      status: 'completed'
+    });
+    assert(appointmentUpdated.data.status === 'completed', name + ': appointment update failed');
+    result.modules.appointments = { create: true, update: true };
+
+    const note = await createRecord(page, 'notes', {
+      entityType: 'customer',
+      entityId: customer.id,
+      title: 'E2E Note',
+      body: 'CRM note lifecycle test'
+    });
+    assert(note.exists, name + ': note create/read failed');
+    created.push(['notes', note.id]);
+    const noteUpdated = await updateRecord(page, 'notes', note.id, {
+      body: 'CRM note lifecycle updated'
+    });
+    assert(noteUpdated.data.body === 'CRM note lifecycle updated', name + ': note update failed');
+    result.modules.notes = { create: true, update: true };
+
+    const document = await createRecord(page, 'documents', {
+      entityType: 'customer',
+      entityId: customer.id,
+      fileName: 'e2e-policy.pdf',
+      mimeType: 'application/pdf',
+      storagePath: 'e2e/' + owner.uid + '/policy.pdf',
+      status: 'uploaded'
+    });
+    assert(document.exists, name + ': document create/read failed');
+    created.push(['documents', document.id]);
+    const documentUpdated = await updateRecord(page, 'documents', document.id, {
+      status: 'verified'
+    });
+    assert(documentUpdated.data.status === 'verified', name + ': document update failed');
+    result.modules.documents = { create: true, update: true };
+
+    const message = await createRecord(page, 'messages', {
+      customerId: customer.id,
+      channel: 'internal',
+      subject: 'E2E Message',
+      body: 'CRM communication test',
+      status: 'draft'
+    });
+    assert(message.exists, name + ': message create/read failed');
+    created.push(['messages', message.id]);
+    const messageUpdated = await updateRecord(page, 'messages', message.id, {
+      status: 'sent'
+    });
+    assert(messageUpdated.data.status === 'sent', name + ': message update failed');
+    result.modules.messages = { create: true, update: true };
+
+    const conversation = await createRecord(page, 'conversations', {
+      customerId: customer.id,
+      subject: 'E2E Conversation',
+      channel: 'internal',
+      status: 'open'
+    });
+    assert(conversation.exists, name + ': conversation create/read failed');
+    created.push(['conversations', conversation.id]);
+    const conversationUpdated = await updateRecord(page, 'conversations', conversation.id, {
+      status: 'closed'
+    });
+    assert(conversationUpdated.data.status === 'closed', name + ': conversation update failed');
+    result.modules.conversations = { create: true, update: true };
+
+    const activity = await createRecord(page, 'activities', {
+      entityType: 'lead',
+      entityId: lead.id,
+      type: 'call',
+      subject: 'E2E Activity',
+      status: 'completed'
+    });
+    assert(activity.exists, name + ': activity create/read failed');
+    result.modules.activities = { create: true, update: false, delete: false };
+
     result.modules.team = await expectPermissionDenied(page, 'teams', {
       name: 'E2E Team ' + owner.uid.slice(0, 6),
       managerName: 'E2E Manager',
@@ -722,6 +838,14 @@ async function runContext(browser, name, deviceOptions) {
             'Policies',
             'Renewals',
             'Claims',
+            'Customers',
+            'Tasks',
+            'Appointments',
+            'Notes',
+            'Documents',
+            'Messages',
+            'Conversations',
+            'Activities',
             'Payments',
             'Subscription',
             'Team',
