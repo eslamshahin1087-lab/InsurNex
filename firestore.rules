@@ -942,15 +942,11 @@ service cloud.firestore {
           ]
         );
 
-      // Personal payment deletion is self-owned only.
-      // Organization payment deletion stays admin-only until an explicit
-      // organization payment-delete workflow is introduced.
-      allow delete: if isPlatformAdmin()
-        || (
-          signedIn()
-          && resource.data.workspaceType == 'personal'
-          && resource.data.ownerId == request.auth.uid
-        );
+      // Personal payment deletion is intentionally isolated from all
+      // organization-role helpers.
+      allow delete: if request.auth != null
+        && resource.data.workspaceType == 'personal'
+        && resource.data.ownerId == request.auth.uid;
     }
 
     match /tasks/{id} {
