@@ -5653,10 +5653,10 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
   background:rgba(35,164,242,.20);
 }
 .insurnex-user .auth-hero-actions{
-  position:absolute;
-  top:14px;
-  inset-inline-end:14px;
-  inset-inline-start:auto;
+  position:static;
+  display:flex;
+  justify-content:flex-end;
+  width:100%;
   z-index:10;
 }
 .insurnex-user .auth-preference-row{display:flex;gap:6px}
@@ -5677,7 +5677,7 @@ html[data-theme="dark"] .auth-panel{border-color:rgba(255,255,255,.06)}html[data
 .insurnex-user .auth-hero-brand{
   display:flex;
   justify-content:center;
-  margin-top:58px;
+  margin-top:20px;
 }
 .insurnex-user .auth-logo{
   display:flex;
