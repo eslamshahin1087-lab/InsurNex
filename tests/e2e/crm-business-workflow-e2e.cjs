@@ -508,47 +508,58 @@ async function runContext(browser, name, deviceOptions) {
       name + ': subscriptions unexpectedly allowed personal-workspace creation'
     );
 
-    cross = await createDisposableUser(page, 'insurnex-crm-e2e-cross');
-    await assert(
-      cross.ok,
-      name +
-        ': could not create cross-workspace test user (' +
-        (cross.code || 'unknown') +
-        '): ' +
-        (cross.message || 'no message')
-    );
+    // Run cross-workspace isolation in a separate browser context so the owner
+    // session is never switched away before cleanup. This makes a payment-delete
+    // failure unambiguously a production Rules failure rather than an Auth
+    // transition artifact in the test harness.
+    const isolationContext = await browser.newContext(deviceOptions);
+    const isolationPage = await isolationContext.newPage();
+    try {
+      await isolationPage.goto(BASE_URL + '#login', {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000
+      });
 
-    await assert(
-      (await signIn(page, cross.email, cross.password)).ok,
-      name + ': cross-workspace user sign-in failed'
-    );
+      cross = await createDisposableUser(isolationPage, 'insurnex-crm-e2e-cross');
+      await assert(
+        cross.ok,
+        name +
+          ': could not create cross-workspace test user (' +
+          (cross.code || 'unknown') +
+          '): ' +
+          (cross.message || 'no message')
+      );
 
-    const isolation = await page.evaluate(async id => {
-      try {
-        const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
-        await app.firestore().collection('leads').doc(id).get({ source: 'server' });
-        return { isolated: false, code: 'read-allowed' };
-      } catch (error) {
-        return {
-          isolated: error.code === 'permission-denied',
-          code: error.code || '',
-          message: error.message || String(error)
-        };
-      }
-    }, lead.id);
+      await assert(
+        (await signIn(isolationPage, cross.email, cross.password)).ok,
+        name + ': cross-workspace user sign-in failed'
+      );
 
-    assert(isolation.isolated, name + ': workspace isolation failed for leads');
-    result.crossWorkspaceIsolation = isolation;
+      const isolation = await isolationPage.evaluate(async id => {
+        try {
+          const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
+          await app.firestore().collection('leads').doc(id).get({ source: 'server' });
+          return { isolated: false, code: 'read-allowed' };
+        } catch (error) {
+          return {
+            isolated: error.code === 'permission-denied',
+            code: error.code || '',
+            message: error.message || String(error)
+          };
+        }
+      }, lead.id);
 
-    const restored = await signIn(page, owner.email, owner.password);
-    await assert(
-      restored.ok && restored.uid === owner.uid,
-      name + ': owner re-authentication failed after isolation check'
-    );
+      assert(isolation.isolated, name + ': workspace isolation failed for leads');
+      result.crossWorkspaceIsolation = isolation;
 
-    // Verify the restored Auth identity reaches Firestore before cleanup. This
-    // distinguishes a stale-token transition from a real production Rules denial.
-    const restoredSession = await page.evaluate(async paymentId => {
+      await deleteCurrentAuthUser(isolationPage);
+    } finally {
+      await isolationContext.close();
+    }
+
+    // Refresh the owner's token without changing the authenticated session, then
+    // verify the payment is still owned by this user immediately before cleanup.
+    const ownerSession = await page.evaluate(async paymentId => {
       const app = window.firebase.apps.find(x => x.name === 'insurnexE2E');
       const auth = app?.auth();
       const db = app?.firestore();
@@ -567,14 +578,14 @@ async function runContext(browser, name, deviceOptions) {
     }, created.find(([collection]) => collection === 'payments')?.[1] || null);
 
     await assert(
-      restoredSession.ok &&
-        restoredSession.uid === owner.uid &&
-        restoredSession.exists &&
-        restoredSession.ownerId === owner.uid &&
-        restoredSession.workspaceType === 'personal',
+      ownerSession.ok &&
+        ownerSession.uid === owner.uid &&
+        ownerSession.exists &&
+        ownerSession.ownerId === owner.uid &&
+        ownerSession.workspaceType === 'personal',
       name +
-        ': owner session did not stabilize against the payment record before cleanup: ' +
-        JSON.stringify(restoredSession)
+        ': owner session does not match the payment record before cleanup: ' +
+        JSON.stringify(ownerSession)
     );
 
     for (const [collection, id] of [...created].reverse()) {
@@ -593,22 +604,6 @@ async function runContext(browser, name, deviceOptions) {
       );
     }
 
-    await page.evaluate(() => window.firebase.auth().signOut().catch(() => {}));
-    const cleanupPage = await context.newPage();
-    await cleanupPage.goto(BASE_URL + '#login', {
-      waitUntil: 'domcontentloaded',
-      timeout: 60000
-    });
-    if (cross) {
-      const crossLogin = await signIn(cleanupPage, cross.email, cross.password);
-      if (crossLogin.ok) await deleteCurrentAuthUser(cleanupPage);
-    }
-    await cleanupPage.close();
-
-    await assert(
-      (await signIn(page, owner.email, owner.password)).ok,
-      name + ': owner re-authentication failed before account cleanup'
-    );
     await deleteCurrentAuthUser(page);
   } finally {
     try {
