@@ -1,4 +1,9 @@
 import {
+  lazy,
+  Suspense,
+} from 'react';
+
+import {
   BrowserRouter,
   Navigate,
   Route,
@@ -10,127 +15,260 @@ import ProtectedRoute from './features/auth/ProtectedRoute';
 
 import AppLayout from './layouts/AppLayout';
 
-import ClientDetailsPage from './pages/ClientDetailsPage';
-import ClientsPage from './pages/ClientsPage';
-import ComingSoonPage from './pages/ComingSoonPage';
-import DashboardPage from './pages/DashboardPage';
-import InsurersPage from './pages/InsurersPage';
-import LoginPage from './pages/LoginPage';
-import MorePage from './pages/MorePage';
-import PoliciesPage from './pages/PoliciesPage';
-import RegisterPage from './pages/RegisterPage';
-import RenewalsPage from './pages/RenewalsPage';
-import SetupPage from './pages/SetupPage';
-
 import './App.css';
+
+/*
+ * Public authentication pages
+ */
+const LoginPage = lazy(
+  () => import('./pages/LoginPage'),
+);
+
+const RegisterPage = lazy(
+  () => import('./pages/RegisterPage'),
+);
+
+const SetupPage = lazy(
+  () => import('./pages/SetupPage'),
+);
+
+/*
+ * Main application pages
+ */
+const DashboardPage = lazy(
+  () => import('./pages/DashboardPage'),
+);
+
+const ClientsPage = lazy(
+  () => import('./pages/ClientsPage'),
+);
+
+const ClientDetailsPage = lazy(
+  () => import('./pages/ClientDetailsPage'),
+);
+
+const PoliciesPage = lazy(
+  () => import('./pages/PoliciesPage'),
+);
+
+const RenewalsPage = lazy(
+  () => import('./pages/RenewalsPage'),
+);
+
+const ClaimsPage = lazy(
+  () => import('./pages/ClaimsPage'),
+);
+
+const ClaimDetailsPage = lazy(
+  () => import('./pages/ClaimDetailsPage'),
+);
+
+const TasksPage = lazy(
+  () => import('./pages/TasksPage'),
+);
+
+const NotificationsPage = lazy(
+  () => import('./pages/NotificationsPage'),
+);
+
+const InsurersPage = lazy(
+  () => import('./pages/InsurersPage'),
+);
+
+const MorePage = lazy(
+  () => import('./pages/MorePage'),
+);
+
+const ComingSoonPage = lazy(
+  () => import('./pages/ComingSoonPage'),
+);
+
+/*
+ * Mobile-friendly loading state
+ */
+function AppLoading() {
+  return (
+    <div
+      className="app-loading-screen"
+      dir="rtl"
+    >
+      <div className="app-loading-card">
+
+        <div className="app-loading-logo">
+          IN
+        </div>
+
+        <strong>
+          InsurNex
+        </strong>
+
+        <span>
+          جارٍ تحميل مساحة العمل...
+        </span>
+
+        <div className="app-loading-bar">
+          <div />
+        </div>
+
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+
       <AuthProvider>
-        <Routes>
 
-          {/* Public authentication */}
-          <Route
-            path="/login"
-            element={<LoginPage />}
-          />
+        <Suspense fallback={<AppLoading />}>
 
-          <Route
-            path="/register"
-            element={<RegisterPage />}
-          />
+          <Routes>
 
-          {/* Protected application */}
-          <Route element={<ProtectedRoute />}>
+            {/* Public Authentication */}
 
-            {/* First-time organization setup */}
             <Route
-              path="/setup"
-              element={<SetupPage />}
+              path="/login"
+              element={<LoginPage />}
             />
 
-            {/* Main mobile application shell */}
-            <Route element={<AppLayout />}>
+            <Route
+              path="/register"
+              element={<RegisterPage />}
+            />
 
-              {/* Home */}
-              <Route
-                index
-                element={<DashboardPage />}
-              />
+            {/* Protected Application */}
 
-              {/* CRM */}
-              <Route
-                path="clients"
-                element={<ClientsPage />}
-              />
+            <Route element={<ProtectedRoute />}>
+
+              {/* Organization Setup */}
 
               <Route
-                path="clients/:id"
-                element={<ClientDetailsPage />}
+                path="/setup"
+                element={<SetupPage />}
               />
 
-              {/* Policies */}
-              <Route
-                path="policies"
-                element={<PoliciesPage />}
-              />
+              {/* Mobile App Shell */}
 
-              {/* Renewals */}
-              <Route
-                path="renewals"
-                element={<RenewalsPage />}
-              />
+              <Route element={<AppLayout />}>
 
-              {/* Insurers */}
-              <Route
-                path="insurers"
-                element={<InsurersPage />}
-              />
+                {/* Dashboard */}
 
-              {/* Mobile More screen */}
-              <Route
-                path="more"
-                element={<MorePage />}
-              />
+                <Route
+                  index
+                  element={<DashboardPage />}
+                />
 
-              {/* Upcoming application modules */}
-              <Route
-                path="claims"
-                element={<ComingSoonPage />}
-              />
+                {/* CRM */}
 
-              <Route
-                path="leads"
-                element={<ComingSoonPage />}
-              />
+                <Route
+                  path="clients"
+                  element={<ClientsPage />}
+                />
 
-              <Route
-                path="documents"
-                element={<ComingSoonPage />}
-              />
+                <Route
+                  path="clients/:id"
+                  element={<ClientDetailsPage />}
+                />
 
-              <Route
-                path="analytics"
-                element={<ComingSoonPage />}
-              />
+                {/* Policies */}
 
-              <Route
-                path="settings"
-                element={<ComingSoonPage />}
-              />
+                <Route
+                  path="policies"
+                  element={<PoliciesPage />}
+                />
+
+                {/* Renewals */}
+
+                <Route
+                  path="renewals"
+                  element={<RenewalsPage />}
+                />
+
+                {/* Claims */}
+
+                <Route
+                  path="claims"
+                  element={<ClaimsPage />}
+                />
+
+                <Route
+                  path="claims/:id"
+                  element={<ClaimDetailsPage />}
+                />
+
+                {/* Tasks */}
+
+                <Route
+                  path="tasks"
+                  element={<TasksPage />}
+                />
+
+                {/* Notifications */}
+
+                <Route
+                  path="notifications"
+                  element={<NotificationsPage />}
+                />
+
+                {/* Insurance Companies */}
+
+                <Route
+                  path="insurers"
+                  element={<InsurersPage />}
+                />
+
+                {/* More */}
+
+                <Route
+                  path="more"
+                  element={<MorePage />}
+                />
+
+                {/* Future Modules */}
+
+                <Route
+                  path="leads"
+                  element={<ComingSoonPage />}
+                />
+
+                <Route
+                  path="documents"
+                  element={<ComingSoonPage />}
+                />
+
+                <Route
+                  path="analytics"
+                  element={<ComingSoonPage />}
+                />
+
+                <Route
+                  path="settings"
+                  element={<ComingSoonPage />}
+                />
+
+              </Route>
 
             </Route>
-          </Route>
 
-          {/* Unknown URLs */}
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
+            {/* Unknown URL */}
 
-        </Routes>
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to="/"
+                  replace
+                />
+              }
+            />
+
+          </Routes>
+
+        </Suspense>
+
       </AuthProvider>
+
     </BrowserRouter>
   );
 }
