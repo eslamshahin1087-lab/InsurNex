@@ -1,0 +1,83 @@
+/* InsurNex Sprint 8 - Policy modal viewport/scroll fix */
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding: max(16px, env(safe-area-inset-top)) 12px max(96px, calc(18px + env(safe-area-inset-bottom))) !important;
+  background: rgba(1, 16, 38, 0.68) !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.policy-modal {
+  position: relative !important;
+  width: min(760px, 100%) !important;
+  max-width: 760px !important;
+  max-height: none !important;
+  min-height: auto !important;
+  margin: auto 0 !important;
+  overflow: visible !important;
+  border: 1px solid var(--app-line) !important;
+  border-radius: 28px !important;
+  background: var(--app-elevated) !important;
+  color: var(--app-text) !important;
+  box-shadow: var(--app-shadow-strong) !important;
+}
+.policy-modal > header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+  padding: 16px 16px 12px !important;
+  border-radius: 28px 28px 0 0 !important;
+  background: color-mix(in srgb, var(--app-elevated) 94%, transparent) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.policy-modal .client-form {
+  overflow: visible !important;
+  padding: 0 16px 18px !important;
+}
+.policy-modal .form-grid {
+  overflow: visible !important;
+}
+.policy-modal form > footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 25 !important;
+  margin: 16px -16px -18px !important;
+  padding: 12px 16px max(14px, env(safe-area-inset-bottom)) !important;
+  border-top: 1px solid var(--app-line) !important;
+  border-radius: 0 0 28px 28px !important;
+  background: color-mix(in srgb, var(--app-elevated) 96%, transparent) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.policy-modal .insurer-dropdown-menu {
+  z-index: 1200 !important;
+}
+@media (max-width: 620px) {
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 10px 8px max(84px, calc(10px + env(safe-area-inset-bottom))) !important;
+  }
+  .policy-modal {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-radius: 26px 26px 18px 18px !important;
+    scrollbar-width: thin;
+  }
+  .policy-modal > header {
+    border-radius: 26px 26px 0 0 !important;
+  }
+  .policy-modal form > footer {
+    border-radius: 0 0 18px 18px !important;
+  }
+}

@@ -1,0 +1,6 @@
+src\types\task.ts
+src\features\tasks\task-relation.ts
+src\features\leads\lead.service.ts
+src\features\notifications\notification.service.ts
+src\pages\LeadDetailsPage.tsx
+firestore.indexes.json

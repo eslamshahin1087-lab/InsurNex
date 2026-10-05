@@ -1,0 +1,8 @@
+export type LeadStage='new'|'contacted'|'qualified'|'quotation'|'negotiation'|'won'|'lost';
+export type LeadSource='website'|'referral'|'phone'|'email'|'social'|'campaign'|'walk_in'|'existing_client'|'other';
+export type LeadPriority='low'|'medium'|'high';
+export interface Lead{id:string;organizationId:string;name:string;companyName?:string;phone:string;email:string;source:LeadSource;priority:LeadPriority;stage:LeadStage;insuranceType:string;preferredInsurerId?:string;preferredInsurerName?:string;estimatedValue:number;assignedTo:string;assignedToName?:string;notes?:string;lostReason?:string;clientId?:string;convertedAt?:unknown;wonAt?:unknown;lostAt?:unknown;lastActivityAt?:unknown;createdBy:string;createdAt?:unknown;updatedAt?:unknown;}
+export type LeadInput=Omit<Lead,'id'|'organizationId'|'createdBy'|'createdAt'|'updatedAt'|'convertedAt'|'wonAt'|'lostAt'|'lastActivityAt'|'clientId'>;
+export const LEAD_STAGE_LABELS:Record<LeadStage,string>={new:'Ø¬Ø¯ÙŠØ¯',contacted:'ØªÙ… Ø§Ù„ØªÙˆØ§ØµÙ„',qualified:'Ù…Ø¤Ù‡Ù„',quotation:'Ø¹Ø±Ø¶ Ø³Ø¹Ø±',negotiation:'ØªÙØ§ÙˆØ¶',won:'Ù†Ø§Ø¬Ø­',lost:'Ù…ÙÙ‚ÙˆØ¯'};
+export const LEAD_SOURCE_LABELS:Record<LeadSource,string>={website:'Ø§Ù„Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',referral:'ØªØ±Ø´ÙŠØ­',phone:'Ø§ØªØµØ§Ù„ Ù‡Ø§ØªÙÙŠ',email:'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',social:'ÙˆØ³Ø§Ø¦Ù„ Ø§Ù„ØªÙˆØ§ØµÙ„',campaign:'Ø­Ù…Ù„Ø© ØªØ³ÙˆÙŠÙ‚ÙŠØ©',walk_in:'Ø²ÙŠØ§Ø±Ø© Ù…Ø¨Ø§Ø´Ø±Ø©',existing_client:'Ø¹Ù…ÙŠÙ„ Ø­Ø§Ù„ÙŠ',other:'Ø£Ø®Ø±Ù‰'};
+export const LEAD_PRIORITY_LABELS:Record<LeadPriority,string>={low:'Ù…Ù†Ø®ÙØ¶Ø©',medium:'Ù…ØªÙˆØ³Ø·Ø©',high:'Ù…Ø±ØªÙØ¹Ø©'};

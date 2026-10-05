@@ -1,0 +1,29 @@
+import { useEffect,useMemo,useState } from 'react';
+import { ArrowRight, CalendarDays, ClipboardCheck, FileText, ListTodo, Mail, MapPin, Phone, ShieldCheck, StickyNote } from 'lucide-react';
+import { Link,useParams } from 'react-router-dom';
+import { useAuth } from '../features/auth/auth-context';
+import { getClient } from '../features/clients/client.service';
+import { getClientRelations,type ClientRelations } from '../features/relationships/relationship.service';
+import type { InsuranceClient } from '../types/client';
+import ClientEditForm from '../features/clients/ClientEditForm';
+const empty:ClientRelations={policies:[],claims:[],tasks:[]};
+function initials(n:string){const w=n.trim().split(/\s+/).filter(Boolean);return !w.length?'IN':(w.length===1?w[0].slice(0,2):w[0][0]+w[1][0]).toUpperCase();}
+function typeLabel(v:string){return v==='company'?'شركة':'فرد';} function statusLabel(v:string){return v==='active'?'نشط':v==='prospect'?'محتمل':v==='inactive'?'غير نشط':v;}
+export default function ClientDetailsPage(){
+ const {id}=useParams();const {profile}=useAuth();const [client,setClient]=useState<InsuranceClient|null>(null);const [editing,setEditing]=useState(false);const [relations,setRelations]=useState<ClientRelations>(empty);const [loading,setLoading]=useState(true);
+ useEffect(()=>{if(!id||!profile){return;}setLoading(true);Promise.all([getClient(id),getClientRelations(profile.organizationId,id)]).then(([c,r])=>{setClient(c);setRelations(r)}).finally(()=>setLoading(false));},[id,profile]);
+ const contact=useMemo(()=>({phone:client?.phone||'',email:client?.email||'',address:client?.address||'',city:client?.city||''}),[client]);
+ const renewals=useMemo(()=>relations.policies.filter(p=>{if(!p.expiryDate)return false;const d=Math.ceil((new Date(p.expiryDate).getTime()-Date.now())/86400000);return d>=0&&d<=90;}),[relations.policies]);
+ const openClaims=relations.claims.filter(c=>!['closed','rejected'].includes(c.status));const openTasks=relations.tasks.filter(t=>t.status!=='completed');
+ if(loading)return <main className="mobile-page c360"><div className="c360-empty">جارٍ تحميل ملف العميل...</div></main>;if(!client)return <main className="mobile-page c360"><div className="c360-empty">لم يتم العثور على العميل.</div></main>;
+ return <main className="mobile-page c360" dir="rtl">
+  <Link to="/clients" className="c360-back"><ArrowRight/>العودة للعملاء</Link>
+  <section className="c360-hero"><div className="c360-avatar">{initials(client.name)}</div><div className="c360-id"><span className="eyebrow">Client 360</span><h1>{client.name}</h1><p>{typeLabel(client.type)} · {client.city||'المدينة غير محددة'}</p><em className={`c360-status st-${client.status}`}>{statusLabel(client.status)}</em></div><div className="c360-actions">{contact.phone?<a href={`tel:${contact.phone}`}><Phone/>اتصال</a>:<span><Phone/>اتصال</span>}{contact.email?<a href={`mailto:${contact.email}`}><Mail/>بريد</a>:<span><Mail/>بريد</span>}<Link to="/tasks"><ListTodo/>المهام</Link><button type="button" onClick={()=>setEditing(true)}>ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª</button></div></section>
+  <section className="c360-section"><header><h2>نظرة سريعة</h2></header><div className="c360-kpis"><article><ShieldCheck/><small>الوثائق</small><b>{relations.policies.length}</b></article><article><ClipboardCheck/><small>مطالبات مفتوحة</small><b>{openClaims.length}</b></article><article><CalendarDays/><small>تجديدات ≤90</small><b>{renewals.length}</b></article><article><ListTodo/><small>مهام مفتوحة</small><b>{openTasks.length}</b></article></div></section>
+  <section className="c360-section"><header><h2>بيانات الاتصال</h2></header><div className="c360-info"><article><Phone/><div><small>الهاتف</small><b>{contact.phone||'غير مسجل'}</b></div></article><article><Mail/><div><small>البريد الإلكتروني</small><b>{contact.email||'غير مسجل'}</b></div></article><article><MapPin/><div><small>العنوان</small><b>{contact.address||contact.city||'غير مسجل'}</b></div></article></div></section>
+  <section className="c360-section"><header><h2>الوثائق</h2><Link to="/policies">عرض الكل</Link></header>{relations.policies.length===0?<div className="c360-empty small">لا توجد وثائق مرتبطة.</div>:<div className="c360-feed">{relations.policies.slice(0,5).map(p=><article key={p.id}><span><ShieldCheck/></span><div><b>{p.policyNumber}</b><small>{p.insurerName||'شركة غير محددة'} · {p.expiryDate||'بدون تاريخ انتهاء'}</small></div></article>)}</div>}</section>
+  <section className="c360-section"><header><h2>المطالبات</h2><Link to="/claims">عرض الكل</Link></header>{relations.claims.length===0?<div className="c360-empty small">لا توجد مطالبات مرتبطة.</div>:<div className="c360-feed">{relations.claims.slice(0,5).map(c=><Link to={`/claims/${c.id}`} key={c.id}><span><FileText/></span><div><b>{c.claimNumber}</b><small>{c.policyNumber||'بدون رقم وثيقة'} · {c.status}</small></div></Link>)}</div>}</section>
+  <section className="c360-section"><header><h2>المهام</h2><Link to="/tasks">عرض الكل</Link></header>{relations.tasks.length===0?<div className="c360-empty small">لا توجد مهام مرتبطة مباشرة بهذا العميل.</div>:<div className="c360-feed">{relations.tasks.slice(0,5).map(t=><Link to="/tasks" key={t.id}><span><ListTodo/></span><div><b>{t.title}</b><small>{t.dueDate||'بدون تاريخ'} · {t.priority}</small></div></Link>)}</div>}</section>
+  <section className="c360-section c360-last"><header><h2>الملاحظات</h2></header><div className="c360-notes"><StickyNote/><p>{client.notes||'لا توجد ملاحظات مسجلة حتى الآن.'}</p></div></section>
+ {editing&&<ClientEditForm client={client} organizationId={profile.organizationId} onCancel={()=>setEditing(false)} onUpdated={()=>{setEditing(false);void load()}}/>}</main>;
+}

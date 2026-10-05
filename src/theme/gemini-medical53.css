@@ -1,0 +1,5 @@
+.gemini53-progress{display:grid;gap:8px;padding:12px 14px;border-radius:14px;background:rgba(68,199,205,.09);border:1px solid rgba(109,212,217,.18)}
+.gemini53-progress strong{color:#baf4f1}.gemini53-progress small{opacity:.72;line-height:1.6}.gemini53-progress-line{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.gemini53-progress-line span{height:4px;border-radius:99px;background:rgba(255,255,255,.15)}
+.gemini53-progress.state-connecting .gemini53-progress-line span:nth-child(1),.gemini53-progress.state-retrying .gemini53-progress-line span:nth-child(-n+2),.gemini53-progress.state-fallback .gemini53-progress-line span:nth-child(-n+3),.gemini53-progress.state-complete .gemini53-progress-line span{background:#5ed8d7;box-shadow:0 0 10px rgba(94,216,215,.32)}
+.gemini53-spin{animation:gemini53-spin .9s linear infinite}@keyframes gemini53-spin{to{transform:rotate(360deg)}}
+.gemini53 .state-complete{background:rgba(73,173,124,.11);border-color:rgba(80,200,140,.24)}.gemini53 .state-complete strong{color:#9be8bc}
