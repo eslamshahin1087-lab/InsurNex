@@ -1,0 +1,19 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function memberOf(orgId) {
+      return signedIn() && firestore.exists(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+    function validUpload() {
+      return request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|image/jpeg|image/png|application/vnd.openxmlformats-officedocument.wordprocessingml.document|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+    match /organizations/{orgId}/documents/{documentId}/{fileName} {
+      allow read: if memberOf(orgId);
+      allow create, update: if memberOf(orgId) && validUpload();
+      allow delete: if memberOf(orgId);
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

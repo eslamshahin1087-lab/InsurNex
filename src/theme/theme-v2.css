@@ -1,0 +1,77 @@
+:root {
+  --app-bg: #f3f6fa;
+  --app-surface: #ffffff;
+  --app-surface-2: #f8fbff;
+  --app-elevated: #ffffff;
+  --app-text: #082653;
+  --app-muted: #70839d;
+  --app-line: #e2eaf3;
+  --app-blue: #075eea;
+  --app-cyan: #029fe9;
+  --app-blue-soft: #edf5ff;
+  --app-nav: rgba(255,255,255,.94);
+  --app-shadow: 0 14px 40px rgba(5,40,95,.09);
+  --app-shadow-strong: 0 22px 60px rgba(5,40,95,.14);
+  --app-radius-sm: 14px;
+  --app-radius-md: 20px;
+  --app-radius-lg: 28px;
+}
+
+:root[data-theme='dark'] {
+  --app-bg: #071426;
+  --app-surface: #0d1d33;
+  --app-surface-2: #10233c;
+  --app-elevated: #122743;
+  --app-text: #f4f8ff;
+  --app-muted: #94a7c3;
+  --app-line: #203854;
+  --app-blue: #4387ff;
+  --app-cyan: #32bceb;
+  --app-blue-soft: #102d55;
+  --app-nav: rgba(13,29,51,.95);
+  --app-shadow: 0 14px 42px rgba(0,0,0,.24);
+  --app-shadow-strong: 0 22px 64px rgba(0,0,0,.34);
+}
+
+html, body, #root { min-height: 100%; }
+body { background: var(--app-bg); color: var(--app-text); transition: background-color .2s ease, color .2s ease; }
+
+.mobile-shell { background: var(--app-bg) !important; }
+.app-header { background: var(--app-nav) !important; border-color: var(--app-line) !important; }
+.app-tabbar { background: var(--app-nav) !important; border-color: var(--app-line) !important; box-shadow: var(--app-shadow-strong) !important; }
+.app-tabbar a { color: var(--app-muted) !important; }
+.app-tabbar a.active { color: var(--app-blue) !important; background: var(--app-blue-soft) !important; }
+.circle-button { background: var(--app-surface) !important; color: var(--app-text) !important; border-color: var(--app-line) !important; }
+.panel, .home-hero, .home-kpis > a, .home-feed > a, .task-card, .notification-card, .insurer-mobile-card, .claim-card, .action-list > a {
+  background: var(--app-surface) !important;
+  border-color: var(--app-line) !important;
+  box-shadow: var(--app-shadow) !important;
+}
+.modal { background: var(--app-elevated) !important; color: var(--app-text) !important; }
+input, select, textarea { background: var(--app-surface-2) !important; color: var(--app-text) !important; border-color: var(--app-line) !important; }
+.insurer-dropdown-trigger, .insurer-dropdown-menu, .insurer-dropdown-options > button, .insurer-choice { background: var(--app-surface) !important; color: var(--app-text) !important; border-color: var(--app-line) !important; }
+
+.s8-header { min-height: 82px; padding: 12px 17px; }
+.s8-brand { display:flex; align-items:center; gap:10px; }
+.s8-brand img { width:104px; height:43px; object-fit:contain; }
+.s8-hello { display:grid; min-width:0; }
+.s8-hello strong { color:var(--app-text); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
+.s8-hello small { color:var(--app-muted); font-size:9px; }
+.s8-actions { display:flex; align-items:center; gap:7px; margin-inline-start:auto; }
+.s8-theme-button svg { transition: transform .18s ease; }
+
+.s8-tabbar { bottom: 10px !important; width:min(590px,calc(100% - 20px)) !important; height:70px !important; border-radius:28px !important; border:1px solid var(--app-line) !important; padding:6px !important; }
+.s8-tabbar a { border-radius:21px !important; }
+
+.theme-settings { padding:16px; border:1px solid var(--app-line); border-radius:22px; background:var(--app-surface); box-shadow:var(--app-shadow); }
+.theme-settings h3 { margin:0; font-size:14px; color:var(--app-text); }
+.theme-settings p { margin:4px 0 13px; color:var(--app-muted); font-size:10px; }
+.theme-options { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.theme-options button { min-height:72px; border-radius:17px; border:1px solid var(--app-line); background:var(--app-surface-2); color:var(--app-text); display:grid; place-items:center; gap:4px; font:inherit; font-size:10px; }
+.theme-options button.active { border-color:var(--app-blue); background:var(--app-blue-soft); color:var(--app-blue); }
+.theme-options svg { width:19px; }
+
+@media (max-width: 430px) {
+  .s8-brand img { width:88px; }
+  .s8-hello strong { max-width:100px; }
+}

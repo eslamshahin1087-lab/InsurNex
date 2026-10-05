@@ -1,0 +1,22 @@
+/* Client 360 action consistency */
+.c360-actions button {
+  min-height: 44px;
+  border: 1px solid var(--app-line);
+  border-radius: 15px;
+  background: var(--app-surface);
+  color: var(--app-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: none;
+}
+.c360-actions button svg { width: 17px; height: 17px; }
+.c360-actions a:hover,.c360-actions button:hover { border-color: var(--app-blue); background: var(--app-blue-soft); }
+.c360-actions button:focus-visible { outline: 3px solid color-mix(in srgb,var(--app-blue) 20%,transparent); outline-offset: 2px; }
+@media (max-width: 600px) { .c360-actions { grid-template-columns: repeat(2,1fr); } }
