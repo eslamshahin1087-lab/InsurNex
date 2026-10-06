@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 .firebase/
 .firebase/
+architecture-audit.txt
+architecture-audit.zip
+architecture.txt
+build-audit.txt
+git-audit.txt
+insurnex-ui-fix.zip
+project-state.txt
+project-tree.txt
