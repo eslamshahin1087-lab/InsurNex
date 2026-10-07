@@ -31,6 +31,8 @@ import {
   type RelatedTask,
 } from '../features/relationships/relationship.service';
 import type { InsuranceClient } from '../types/client';
+import RfqWorkspace from '../features/rfq/RfqWorkspace';
+import '../theme/rfq-v81.css';
 
 const EMPTY_RELATIONS: ClientRelations = { policies: [], claims: [], tasks: [] };
 
@@ -445,6 +447,15 @@ export default function ClientDetailsPage() {
               <ClientDocumentsPanel
                 clientId={client.id}
                 organizationId={profile.organizationId}
+              />
+            ) : null}
+
+            {profile?.organizationId ? (
+              <RfqWorkspace
+                organizationId={profile.organizationId}
+                clientId={client.id}
+                clientName={client.name}
+                uid={profile.uid ?? ''}
               />
             ) : null}
 
