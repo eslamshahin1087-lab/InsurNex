@@ -1,115 +1,42 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  Building2,
-  CalendarClock,
-  CheckCircle2,
-  ChevronLeft,
-  CircleDollarSign,
-  ClipboardCheck,
-  FileCheck2,
-  FilePenLine,
-  FileX2,
-  ListTodo,
-  RefreshCw,
-  ShieldCheck,
-  TimerReset,
-} from 'lucide-react';
+import { useCallback,useEffect,useMemo,useState } from 'react';
+import type { FormEvent } from 'react';
+import { AlertTriangle,BriefcaseBusiness,Building2,CheckCircle2,ChevronLeft,FileCheck2,FolderOpen,Inbox,Mail,Paperclip,Plus,RefreshCw,Search,ShieldCheck,UserRound,Users,X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
-import {
-  loadOperationsSnapshot,
-  type OperationsSnapshot,
-} from '../features/operations/operations.service';
-import '../theme/operations.css';
+import { listClients } from '../features/clients/client.service';
+import { listDocuments } from '../features/documents/document.service';
+import type { InsuranceClient,ClientType } from '../types/client';
+import type { DocumentRecord } from '../types/document';
+import { loadOperationsSnapshot,type OperationsSnapshot } from '../features/operations/operations.service';
+import { addOperationsEmail,listOperationsEmails,removeOperationsEmail,type OperationsEmailContact } from '../features/operations/operations-directory.service';
+import { onboardOperationsClient,type ClientOnboardingDocument,type ClientOnboardingInput } from '../features/operations/operations-v80-foundation.service';
+import '../theme/operations-v80.css';
 
-const EMPTY: OperationsSnapshot = { tasks: [], claims: [], renewals: [] };
-
-function formatDate(value?: string) {
-  if (!value) return 'بدون تاريخ';
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ar-EG', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  }).format(date);
+type View='overview'|'inbox'|'new-business'|'accounts'|'smart'|'emails';
+const EMPTY:OperationsSnapshot={tasks:[],claims:[],renewals:[],workItems:[]};
+export default function OperationsPage(){
+ const {profile,user}=useAuth(); const [view,setView]=useState<View>('overview'); const [data,setData]=useState<OperationsSnapshot>(EMPTY); const [clients,setClients]=useState<InsuranceClient[]>([]); const [documents,setDocuments]=useState<DocumentRecord[]>([]); const [emails,setEmails]=useState<OperationsEmailContact[]>([]); const [loading,setLoading]=useState(true); const [error,setError]=useState(''); const [showRequest,setShowRequest]=useState(false); const [selectedClientId,setSelectedClientId]=useState('');
+ const load=useCallback(async()=>{if(!profile?.organizationId){setLoading(false);return}setLoading(true);try{const [snapshot,c,d,e]=await Promise.all([loadOperationsSnapshot(profile.organizationId),listClients(profile.organizationId),listDocuments(profile.organizationId),listOperationsEmails(profile.organizationId)]);setData(snapshot);setClients(c);setDocuments(d);setEmails(e)}catch(x){console.error(x);setError('تعذر تحميل مركز العمليات.')}finally{setLoading(false)}},[profile?.organizationId]); useEffect(()=>{void load()},[load]);
+ const activeOps=useMemo(()=>data.workItems.filter(i=>!['completed','cancelled'].includes(i.status)),[data.workItems]); const overdue=activeOps.filter(i=>i.dueDate&&i.dueDate<new Date().toISOString().slice(0,10)); const today=activeOps.filter(i=>i.dueDate===new Date().toISOString().slice(0,10)); const prospect=clients.filter(c=>c.status==='prospect');
+ function proceed(clientId:string){setSelectedClientId(clientId);setShowRequest(false);setView('new-business')}
+ if(loading)return <main className="op80" dir="rtl"><div className="op80-empty"><RefreshCw/>جارٍ تجهيز مركز العمليات...</div></main>;
+ return <main className="op80" dir="rtl">
+  <header className="op80-top"><div><span>INSURNEX · OPERATIONS V8</span><h1>مركز العمليات</h1><p>رحلة موحدة تبدأ من العميل وتستمر إلى عرض السعر والإصدار وإدارة الحساب.</p></div><button className="op80-primary" onClick={()=>setShowRequest(true)}><Plus/>طلب جديد</button></header>
+  {error&&<div className="op80-alert"><AlertTriangle/>{error}</div>}
+  <nav className="op80-nav">{([['overview','نظرة عامة',BriefcaseBusiness],['inbox','صندوق العمليات',Inbox],['new-business','أعمال جديدة',FileCheck2],['accounts','العملاء الحاليون',Users],['smart','Smart Operate',ShieldCheck],['emails','E-mails',Mail]] as const).map(([id,label,Icon])=><button key={id} className={view===id?'active':''} onClick={()=>setView(id)}><Icon size={17}/>{label}</button>)}</nav>
+  {view==='overview'&&<><section className="op80-metrics"><button onClick={()=>setView('inbox')}><b>{activeOps.length}</b><span>عمليات نشطة</span></button><button onClick={()=>setView('inbox')}><b>{today.length}</b><span>مطلوب اليوم</span></button><button className="danger" onClick={()=>setView('inbox')}><b>{overdue.length}</b><span>متأخرة</span></button><button onClick={()=>setView('new-business')}><b>{prospect.length}</b><span>عملاء محتملون</span></button></section><section className="op80-panel"><Heading title="مسار العمل" text="الصفحة تقود المستخدم إلى الإجراء التالي بدل نقله بين Modules."/><div className="op80-flow">{['إنشاء العميل','طلب عرض سعر','استلام العروض','المقارنة','موافقة العميل','طلب الإصدار','استلام الوثيقة','تفعيل الحساب'].map((x,i)=><div key={x}><span>{i+1}</span><strong>{x}</strong></div>)}</div></section><section className="op80-panel"><Heading title="ابدأ من هنا" text="العميل هو محور كل ما سيأتي بعد ذلك."/><div className="op80-actions"><button onClick={()=>setShowRequest(true)}><UserRound/><b>طلب جديد</b><small>عميل حالي أو عميل جديد</small></button><button onClick={()=>setView('new-business')}><FileCheck2/><b>أعمال جديدة</b><small>متابعة العملاء المحتملين</small></button><button onClick={()=>setView('accounts')}><Users/><b>العملاء الحاليون</b><small>بوابة Account Manager</small></button><button onClick={()=>setView('emails')}><Mail/><b>E-mails</b><small>دليل بريد شركات التأمين</small></button></div></section></>}
+  {view==='inbox'&&<InboxView items={activeOps}/>}
+  {view==='new-business'&&<NewBusiness clients={clients} selectedClientId={selectedClientId} docs={documents}/>}
+  {view==='accounts'&&<Accounts clients={clients}/>}
+  {view==='smart'&&<Smart clients={clients} docs={documents}/>}
+  {view==='emails'&&profile&&user&&<EmailSettings items={emails} organizationId={profile.organizationId} uid={user.uid} onChanged={load}/>}
+  {showRequest&&profile&&user&&<NewRequestWizard clients={clients} organizationId={profile.organizationId} uid={user.uid} onClose={()=>setShowRequest(false)} onReady={proceed} onChanged={load}/>}
+ </main>
 }
-
-function priorityLabel(value: string) {
-  return ({ urgent: 'عاجلة', high: 'مرتفعة', medium: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[value] || 'عادية';
-}
-
-export default function OperationsPage() {
-  const { profile } = useAuth();
-  const [data, setData] = useState<OperationsSnapshot>(EMPTY);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const load = useCallback(async () => {
-    if (!profile?.organizationId) { setLoading(false); return; }
-    setLoading(true); setError('');
-    try { setData(await loadOperationsSnapshot(profile.organizationId)); }
-    catch (err) {
-      console.error('Failed to load operations', err);
-      setError('تعذر تحميل مركز العمليات الآن. يرجى إعادة المحاولة.');
-    } finally { setLoading(false); }
-  }, [profile?.organizationId]);
-
-  useEffect(() => { void load(); }, [load]);
-
-  const openTasks = useMemo(() => data.tasks.filter((t) => t.status !== 'completed'), [data.tasks]);
-  const urgentTasks = useMemo(() => openTasks.filter((t) => t.priority === 'urgent'), [openTasks]);
-  const openClaims = useMemo(() => data.claims.filter((c) => !['approved', 'rejected', 'closed'].includes(c.status)), [data.claims]);
-  const renewals30 = useMemo(() => data.renewals.filter((r) => r.daysLeft >= 0 && r.daysLeft <= 30), [data.renewals]);
-  const overdueRenewals = useMemo(() => data.renewals.filter((r) => r.daysLeft < 0), [data.renewals]);
-
-  const workstreams = [
-    { title: 'إصدار الوثائق', subtitle: 'طلبات الإصدار والربط والتفعيل', value: openTasks.filter((t) => t.relatedType === 'policy').length, icon: FileCheck2, href: '/policies', tone: 'blue' },
-    { title: 'التعديلات', subtitle: 'Endorsements وإدارة تغييرات الوثائق', value: 0, icon: FilePenLine, href: '/policies', tone: 'cyan' },
-    { title: 'الإلغاءات', subtitle: 'طلبات إلغاء الوثائق ومتابعتها', value: 0, icon: FileX2, href: '/policies', tone: 'red' },
-    { title: 'المطالبات', subtitle: 'ملفات تحتاج متابعة تشغيلية', value: openClaims.length, icon: ClipboardCheck, href: '/claims', tone: 'orange' },
-    { title: 'التجديدات', subtitle: 'تستحق خلال 30 يومًا', value: renewals30.length, icon: CalendarClock, href: '/renewals', tone: 'purple' },
-    { title: 'تحصيل الأقساط', subtitle: 'التحصيل والمبالغ المستحقة', value: 0, icon: CircleDollarSign, href: '/policies', tone: 'green' },
-    { title: 'تسوية العمولات', subtitle: 'العمولات والفروقات مع شركات التأمين', value: 0, icon: CircleDollarSign, href: '/insurers', tone: 'teal' },
-  ];
-
-  const alerts = useMemo(() => [
-    ...urgentTasks.slice(0, 4).map((task) => ({ id: `task-${task.id}`, title: task.title, body: `${priorityLabel(task.priority)} • ${formatDate(task.dueDate)}`, href: task.relatedType === 'claim' && task.relatedId ? `/claims/${task.relatedId}` : '/tasks', urgent: true })),
-    ...renewals30.filter((r) => r.daysLeft <= 7).slice(0, 4).map((r) => ({ id: `renewal-${r.id}`, title: `تجديد ${r.policyNumber}`, body: `متبقي ${r.daysLeft} يوم`, href: '/renewals', urgent: false })),
-    ...overdueRenewals.slice(0, 3).map((r) => ({ id: `overdue-${r.id}`, title: `وثيقة متأخرة ${r.policyNumber}`, body: `انتهت منذ ${Math.abs(r.daysLeft)} يوم`, href: '/renewals', urgent: true })),
-  ], [urgentTasks, renewals30, overdueRenewals]);
-
-  if (loading) return <main className="mobile-page operations-page" dir="rtl"><section className="operations-empty"><RefreshCw className="operations-spin"/><strong>جارٍ تجهيز مركز العمليات...</strong><p>يتم تجميع المهام والمطالبات والتجديدات الحالية.</p></section></main>;
-
-  return <main className="mobile-page operations-page" dir="rtl">
-    <header className="operations-hero">
-      <div><span className="eyebrow">Operations Center</span><h1>العمليات</h1><p>مركز موحد لإدارة الأعمال ومتابعة دورة حياة التأمين من مكان واحد.</p></div>
-      <button type="button" className="operations-refresh" onClick={() => void load()}><RefreshCw size={18}/> تحديث</button>
-    </header>
-
-    {error && <section className="operations-error"><AlertTriangle size={20}/><span>{error}</span><button type="button" onClick={() => void load()}>إعادة المحاولة</button></section>}
-
-    <section className="operations-kpis">
-      <article className="operations-kpi blue"><ListTodo/><small>مهام مفتوحة</small><strong>{openTasks.length}</strong></article>
-      <article className="operations-kpi red"><AlertTriangle/><small>عاجلة</small><strong>{urgentTasks.length}</strong></article>
-      <article className="operations-kpi orange"><ClipboardCheck/><small>مطالبات مفتوحة</small><strong>{openClaims.length}</strong></article>
-      <article className="operations-kpi purple"><CalendarClock/><small>تجديد خلال 30 يومًا</small><strong>{renewals30.length}</strong></article>
-    </section>
-
-    <section className="operations-section">
-      <header className="operations-section-heading"><div><span className="eyebrow">Workstreams</span><h2>مسارات العمليات</h2><p>الوصول السريع إلى مراحل العمل التأميني الأساسية.</p></div><ShieldCheck size={22}/></header>
-      <div className="operations-workstreams">
-        {workstreams.map((item) => { const Icon = item.icon; return <Link key={item.title} to={item.href} className="operations-workstream"><span className={`operations-workstream-icon ${item.tone}`}><Icon/></span><div><strong>{item.title}</strong><small>{item.subtitle}</small></div><span className="operations-count">{item.value}<ChevronLeft size={17}/></span></Link>; })}
-      </div>
-    </section>
-
-    <section className="operations-section">
-      <header className="operations-section-heading"><div><span className="eyebrow">Action Center</span><h2>تحتاج تدخلًا</h2><p>العناصر ذات الأولوية الأعلى في دورة العمل الحالية.</p></div><TimerReset size={22}/></header>
-      {alerts.length === 0 ? <div className="operations-empty"><CheckCircle2/><strong>لا توجد تنبيهات حرجة</strong><p>لا توجد حاليًا عناصر عاجلة تحتاج تدخلًا مباشرًا.</p></div> : <div className="operations-list">{alerts.slice(0, 8).map((a) => <Link key={a.id} to={a.href} className={`operations-row ${a.urgent ? 'urgent' : 'warning'}`}><AlertTriangle size={19}/><div><strong>{a.title}</strong><small>{a.body}</small></div><ChevronLeft size={18}/></Link>)}</div>}
-    </section>
-
-    <section className="operations-section">
-      <header className="operations-section-heading"><div><span className="eyebrow">Operations Inbox</span><h2>قائمة العمل</h2><p>أحدث المهام المفتوحة المسجلة داخل النظام.</p></div><Building2 size={22}/></header>
-      {openTasks.length === 0 ? <div className="operations-empty"><CheckCircle2/><strong>قائمة العمل محدثة</strong><p>لا توجد مهام تشغيلية مفتوحة حاليًا.</p></div> : <div className="operations-list">{openTasks.slice(0, 7).map((t) => <Link to="/tasks" className="operations-row" key={t.id}><span className={`priority-dot priority-${t.priority}`}/><div><strong>{t.title}</strong><small>{priorityLabel(t.priority)} • {formatDate(t.dueDate)}</small></div><ChevronLeft size={18}/></Link>)}</div>}
-    </section>
-  </main>;
-}
+function Heading({title,text}:{title:string;text:string}){return <header className="op80-heading"><div><h2>{title}</h2><p>{text}</p></div></header>}
+function InboxView({items}:{items:any[]}){const [q,setQ]=useState('');const visible=items.filter(i=>`${i.title} ${i.clientName||''} ${i.insurerName||''}`.toLowerCase().includes(q.toLowerCase()));return <section className="op80-panel"><Heading title="My Operations Inbox" text="كل ما يحتاج تدخلًا بشريًا في قائمة واحدة."/><label className="op80-search"><Search/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="ابحث بالعميل أو العملية أو شركة التأمين"/></label><div className="op80-list">{visible.map(i=><div className="op80-row" key={i.id}><span className={`op80-dot ${i.priority||''}`}/><div><b>{i.title}</b><small>{i.clientName||'بدون عميل'} · {i.insurerName||'بدون شركة'} · {i.status}</small></div>{i.clientId&&<Link to={`/clients/${i.clientId}`}>فتح العميل <ChevronLeft/></Link>}</div>)}{!visible.length&&<div className="op80-empty"><CheckCircle2/>لا توجد عمليات مطابقة</div>}</div></section>}
+function NewBusiness({clients,selectedClientId,docs}:{clients:InsuranceClient[];selectedClientId:string;docs:DocumentRecord[]}){const rows=clients.filter(c=>c.status==='prospect');return <section className="op80-panel"><Heading title="أعمال جديدة" text="هذه هي نقطة التسليم إلى RFQ في V8.1. البيانات لا يعاد إدخالها مرة أخرى."/><div className="op80-client-grid">{rows.map(c=><article className={selectedClientId===c.id?'selected':''} key={c.id}><span className="op80-avatar">{c.type==='company'?<Building2/>:<UserRound/>}</span><div><b>{c.name}</b><small>{c.type==='company'?'شركة / جماعي':'فردي'} · {c.phone||'بدون هاتف'}</small><small>{docs.filter(d=>d.relatedType==='client'&&d.relatedId===c.id).length} مستند</small></div><div className="op80-card-actions"><Link to={`/clients/${c.id}`}>Client 360</Link><button disabled title="سيتم تفعيله في V8.1">طلب عرض سعر · V8.1</button></div></article>)}{!rows.length&&<div className="op80-empty">أنشئ أول طلب جديد لبدء رحلة New Business.</div>}</div></section>}
+function Accounts({clients}:{clients:InsuranceClient[]}){return <section className="op80-panel"><Heading title="العملاء الحاليون" text="Foundation لواجهة Personal Account Manager القادمة."/><div className="op80-client-grid">{clients.filter(c=>c.status==='active').map(c=><article key={c.id}><span className="op80-avatar"><Users/></span><div><b>{c.name}</b><small>{c.email||c.phone||'بيانات الاتصال غير مكتملة'}</small></div><Link to={`/clients/${c.id}`}>فتح الحساب <ChevronLeft/></Link></article>)}</div></section>}
+function Smart({clients,docs}:{clients:InsuranceClient[];docs:DocumentRecord[]}){const missing=clients.filter(c=>docs.filter(d=>d.relatedType==='client'&&d.relatedId===c.id).length===0);return <section className="op80-panel"><Heading title="Smart Operate" text="في V8.0 نؤسس File Health دون ادعاء وجود تحليل AI غير مبني بعد."/><div className="op80-metrics"><div><b>{clients.length}</b><span>ملفات عملاء</span></div><div className="danger"><b>{missing.length}</b><span>بدون مستندات</span></div></div><p className="op80-note">V8.4 ستضيف Risk Assessment والتحليلات المتخصصة حسب نوع التأمين.</p></section>}
+function NewRequestWizard({clients,organizationId,uid,onClose,onReady,onChanged}:{clients:InsuranceClient[];organizationId:string;uid:string;onClose:()=>void;onReady:(id:string)=>void;onChanged:()=>Promise<void>}){const [mode,setMode]=useState<'choose'|'existing'|'new'>('choose');const [query,setQuery]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [type,setType]=useState<ClientType>('company');const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');const [nationalId,setNationalId]=useState('');const [taxId,setTaxId]=useState('');const [industry,setIndustry]=useState('');const [city,setCity]=useState('');const [address,setAddress]=useState('');const [notes,setNotes]=useState('');const [files,setFiles]=useState<ClientOnboardingDocument[]>([]);const filtered=clients.filter(c=>`${c.name} ${c.phone} ${c.email}`.toLowerCase().includes(query.toLowerCase()));function addFiles(list:FileList|null){if(!list)return;setFiles(x=>[...x,...Array.from(list).map(file=>({file,name:file.name,category:'client' as const}))])}async function submit(e:FormEvent){e.preventDefault();setBusy(true);setError('');try{const input:ClientOnboardingInput={type,name,email,phone,nationalId:nationalId||undefined,taxId:taxId||undefined,industry:industry||undefined,city:city||undefined,address:address||undefined,notes:notes||undefined};const result=await onboardOperationsClient(input,files,organizationId,uid);await onChanged();onReady(result.clientId)}catch(x){console.error(x);setError('تعذر إنشاء العميل أو رفع أحد المستندات. تحقق من الأنواع والأحجام المسموحة.')}finally{setBusy(false)}}return <div className="op80-modal"><section><header><div><span>New Request</span><h2>{mode==='choose'?'بدء طلب جديد':mode==='existing'?'اختيار عميل حالي':'إنشاء عميل جديد'}</h2></div><button onClick={onClose}><X/></button></header>{mode==='choose'&&<div className="op80-choice"><button onClick={()=>setMode('existing')}><Users/><b>عميل حالي</b><small>ربط الطلب بعميل مسجل بالفعل</small></button><button onClick={()=>setMode('new')}><Plus/><b>عميل جديد</b><small>إنشاء ملف عميل ومستنداته</small></button></div>}{mode==='existing'&&<><label className="op80-search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="الاسم أو الهاتف أو البريد"/></label><div className="op80-picker">{filtered.map(c=><button key={c.id} onClick={()=>onReady(c.id)}><span>{c.type==='company'?<Building2/>:<UserRound/>}</span><div><b>{c.name}</b><small>{c.phone} · {c.email}</small></div><ChevronLeft/></button>)}</div><footer><button onClick={()=>setMode('choose')}>رجوع</button></footer></>}{mode==='new'&&<form onSubmit={submit}><div className="op80-type"><button type="button" className={type==='individual'?'active':''} onClick={()=>setType('individual')}><UserRound/>فردي</button><button type="button" className={type==='company'?'active':''} onClick={()=>setType('company')}><Building2/>شركة / جماعي</button></div><div className="op80-form"><label><span>{type==='company'?'اسم الشركة *':'اسم العميل *'}</span><input required value={name} onChange={e=>setName(e.target.value)}/></label><label><span>الهاتف *</span><input required value={phone} onChange={e=>setPhone(e.target.value)}/></label><label><span>البريد</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>{type==='individual'?<label><span>الرقم القومي</span><input value={nationalId} onChange={e=>setNationalId(e.target.value)}/></label>:<><label><span>الرقم / البطاقة الضريبية</span><input value={taxId} onChange={e=>setTaxId(e.target.value)}/></label><label><span>النشاط</span><input value={industry} onChange={e=>setIndustry(e.target.value)}/></label></>}<label><span>المدينة</span><input value={city} onChange={e=>setCity(e.target.value)}/></label><label className="wide"><span>العنوان</span><input value={address} onChange={e=>setAddress(e.target.value)}/></label><label className="wide"><span>ملاحظات</span><textarea value={notes} onChange={e=>setNotes(e.target.value)}/></label><label className="wide op80-upload"><Paperclip/><span>مستندات العميل</span><input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" onChange={e=>addFiles(e.target.files)}/><small>مثل السجل التجاري، البطاقة الضريبية، الهوية أو أي مستند داعم. الحد الحالي 10MB وفق Document Service.</small></label></div>{files.length>0&&<div className="op80-files">{files.map((f,i)=><span key={`${f.file.name}-${i}`}><FolderOpen/>{f.file.name}<button type="button" onClick={()=>setFiles(x=>x.filter((_,n)=>n!==i))}><X/></button></span>)}</div>}{error&&<div className="op80-alert"><AlertTriangle/>{error}</div>}<footer><button type="button" onClick={()=>setMode('choose')}>رجوع</button><button className="op80-primary" disabled={busy}>{busy?'جارٍ إنشاء الملف...':'إنشاء العميل والمتابعة'}</button></footer></form>}</section></div>}
+function EmailSettings({items,organizationId,uid,onChanged}:{items:OperationsEmailContact[];organizationId:string;uid:string;onChanged:()=>Promise<void>}){const [email,setEmail]=useState('');const [label,setLabel]=useState('');const [busy,setBusy]=useState(false);async function add(){if(!email.includes('@'))return;setBusy(true);try{await addOperationsEmail(organizationId,email,label,uid);setEmail('');setLabel('');await onChanged()}finally{setBusy(false)}}return <section className="op80-panel"><Heading title="E-mails" text="Foundation لدليل بريد شركات التأمين. V8.1 ستضيف الربط المنظم Company + Insurance Line."/><div className="op80-email-add"><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="underwriting@insurer.com"/><input value={label} onChange={e=>setLabel(e.target.value)} placeholder="الشركة / القسم"/><button className="op80-primary" disabled={busy} onClick={()=>void add()}>إضافة</button></div><div className="op80-email-list">{items.map(i=><div key={i.id}><Mail/><div><b>{i.email}</b><small>{i.label||'Operations'}</small></div><button onClick={async()=>{await removeOperationsEmail(i.id);await onChanged()}}>حذف</button></div>)}</div></section>}

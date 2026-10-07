@@ -1,0 +1,5 @@
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { db, storage } from '../../firebase/config';
+export function validateOperationFile(file:File){if(!/[.](pdf|xls|xlsx|csv)$/i.test(file.name))throw new Error('UNSUPPORTED_FILE');if(file.size>20*1024*1024)throw new Error('FILE_TOO_LARGE');}
+export async function uploadOperationAttachments(files:File[],org:string,operationId:string,uid:string){for(const file of files){validateOperationFile(file);const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=`organizations/${org}/operations/${operationId}/${Date.now()}-${safe}`;const storageRef=ref(storage,path);await uploadBytes(storageRef,file,{contentType:file.type||undefined});const downloadUrl=await getDownloadURL(storageRef);await addDoc(collection(db,'operationAttachments'),{organizationId:org,operationId,name:file.name,contentType:file.type,size:file.size,storagePath:path,downloadUrl,uploadedBy:uid,createdAt:serverTimestamp()});}}
