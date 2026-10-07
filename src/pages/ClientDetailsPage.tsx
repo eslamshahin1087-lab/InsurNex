@@ -22,6 +22,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { getClient } from '../features/clients/client.service';
 import ClientEditForm from '../features/clients/ClientEditForm';
+import ClientDocumentsPanel from '../features/documents/ClientDocumentsPanel';
 import {
   getClientRelations,
   type ClientRelations,
@@ -440,7 +441,14 @@ export default function ClientDetailsPage() {
         </section>
       )}
 
-      <section className="client-section">
+            {profile?.organizationId ? (
+              <ClientDocumentsPanel
+                clientId={client.id}
+                organizationId={profile.organizationId}
+              />
+            ) : null}
+
+<section className="client-section">
         <header className="section-heading">
           <div><span className="eyebrow">Notes</span><h2>الملاحظات</h2></div>
           <StickyNote size={20} />
