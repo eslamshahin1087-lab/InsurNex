@@ -9,6 +9,7 @@ import {
   parentRecordPath,
   resolveUniqueAttachmentRecord,
   resolveActiveMembership,
+  resolveDocumentRelation,
 } from '../supabase/functions/document-storage/policy.js';
 
 const org = 'org_test123';
@@ -86,6 +87,34 @@ assert.equal(foreignUploaderInfo?.kind, 'operation');
 deny(authorizeUpload({ role: 'operations', pathInfo: foreignUploaderInfo, uid, size: 1024, contentType: pdf }),
   'a caller cannot upload into another user UID folder');
 pass('shared files can be classified for reads but their uploader path remains immutable');
+
+const documentCenterPath = `organizations/${org}/documents/${uid}/doc-center-id/file-2.pdf`;
+const documentCenterInfo = classifyStoragePath(documentCenterPath, org, uid);
+assert.equal(documentCenterInfo?.kind, 'documentCenter');
+assert.equal(documentCenterInfo?.resourceId, 'doc-center-id');
+assert.equal(parentRecordPath(documentCenterInfo), null);
+assert.equal(authorizeUpload({ role: 'broker', pathInfo: documentCenterInfo, uid, size: 1024, contentType: pdf }), true);
+assert.deepEqual(resolveDocumentRelation(documentCenterInfo, 'general', ''), {
+  collectionName: null,
+  documentId: null,
+});
+assert.deepEqual(resolveDocumentRelation(documentCenterInfo, 'client', clientId), {
+  collectionName: 'clients',
+  documentId: clientId,
+});
+assert.deepEqual(resolveDocumentRelation(documentCenterInfo, 'policy', 'policy-1'), {
+  collectionName: 'policies',
+  documentId: 'policy-1',
+});
+assert.deepEqual(resolveDocumentRelation(documentCenterInfo, 'claim', 'claim-1'), {
+  collectionName: 'claims',
+  documentId: 'claim-1',
+});
+assert.equal(resolveDocumentRelation(documentCenterInfo, 'client', ''), null);
+assert.equal(resolveDocumentRelation(documentCenterInfo, 'client', '../other-org'), null);
+deny(authorizeUpload({ role: 'broker', pathInfo: documentCenterInfo, uid: otherUid, size: 1024, contentType: pdf }),
+  'Document Center upload path must bind the authenticated UID');
+pass('Document Center uploads support general/client/policy/claim relations with UID-bound paths');
 
 const legacyDocumentPath = `organizations/${org}/clients/${clientId}/onboarding/old-file.pdf`;
 const legacyDocumentInfo = classifyStoragePath(legacyDocumentPath, org, uid);
