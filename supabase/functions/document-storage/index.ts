@@ -6,6 +6,7 @@ import {
   parentRecordPath,
   resolveUniqueAttachmentRecord,
   resolveActiveMembership,
+  resolveDocumentRelation,
 } from './policy.js';
 
 const corsHeaders = {
@@ -149,22 +150,14 @@ async function verifyParentResource(
   }
   if (pathInfo.kind !== 'documentCenter') throw new Error('INVALID_STORAGE_PATH');
 
-  const relatedType = String(relation.relatedType || 'general');
-  const relatedId = String(relation.relatedId || '');
-  if (relatedType === 'general') {
-    if (relatedId) throw new Error('GENERAL_DOCUMENT_MUST_NOT_HAVE_RELATED_ID');
-    return;
-  }
-  const relatedCollections: Record<string, string> = {
-    client: 'clients',
-    policy: 'policies',
-    claim: 'claims',
-  };
-  const collectionName = relatedCollections[relatedType];
-  if (!collectionName || !relatedId || relatedId.includes('/')) {
-    throw new Error('INVALID_DOCUMENT_RELATION');
-  }
-  const data = await getFirestoreDocument(projectId, `${collectionName}/${relatedId}`, token);
+  const relationTarget = resolveDocumentRelation(pathInfo, relation.relatedType, relation.relatedId);
+  if (!relationTarget) throw new Error('INVALID_DOCUMENT_RELATION');
+  if (!relationTarget.collectionName || !relationTarget.documentId) return;
+  const data = await getFirestoreDocument(
+    projectId,
+    `${relationTarget.collectionName}/${relationTarget.documentId}`,
+    token,
+  );
   if (!data || data.organizationId !== organizationId) {
     throw new Error('RELATED_RESOURCE_ORGANIZATION_MISMATCH');
   }
