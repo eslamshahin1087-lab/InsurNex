@@ -10,6 +10,7 @@ export type StoredObject = {
 export type UploadContext = {
   organizationId: string;
   clientId: string;
+  userId: string;
   userToken: string;
   area?: 'onboarding' | 'quotation' | 'issuance' | 'policy' | 'claim' | 'renewal';
 };
