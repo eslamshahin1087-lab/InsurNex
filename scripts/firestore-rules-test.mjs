@@ -282,6 +282,30 @@ try {
     'business record creator and creation time remain immutable'
   );
 
+  // Membership role/status, not the stale profile role, governs authorization.
+  await updateDoc(doc(ownerA.db, 'organizations', orgA, 'members', broker.user.uid), { role: 'viewer' });
+  await expectDenied(
+    () => setDoc(doc(broker.db, 'clients', 'demoted-broker-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'A demoted broker must not write',
+      createdBy: broker.user.uid,
+    }),
+    'member role downgrade immediately removes business write permission'
+  );
+  await updateDoc(doc(ownerA.db, 'organizations', orgA, 'members', broker.user.uid), { status: 'suspended' });
+  await expectDenied(
+    () => getDoc(doc(broker.db, 'clients', clientA)),
+    'suspended organization membership revokes Firestore reads'
+  );
+  await expectDenied(
+    () => setDoc(doc(broker.db, 'clients', 'suspended-member-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Suspended member must not write',
+      createdBy: broker.user.uid,
+    }),
+    'suspended organization membership revokes Firestore writes'
+  );
+
   const attacker = await makeActor('attacker');
   await expectDenied(
     () => setDoc(doc(attacker.db, 'users', attacker.user.uid), {
