@@ -132,12 +132,41 @@ async function findAttachmentRecord(projectId: string, organizationId: string, p
   return resolveUniqueAttachmentRecord(records, organizationId, path, uploaderId);
 }
 
-async function verifyParentResource(projectId: string, organizationId: string, pathInfo: NonNullable<ReturnType<typeof classifyStoragePath>>, token: string) {
+async function verifyParentResource(
+  projectId: string,
+  organizationId: string,
+  pathInfo: NonNullable<ReturnType<typeof classifyStoragePath>>,
+  token: string,
+  relation: { relatedType?: unknown; relatedId?: unknown } = {},
+) {
   const parent = parentRecordPath(pathInfo);
-  if (!parent) throw new Error('INVALID_STORAGE_PATH');
-  const data = await getFirestoreDocument(projectId, `${parent.collectionName}/${parent.documentId}`, token);
+  if (parent) {
+    const data = await getFirestoreDocument(projectId, `${parent.collectionName}/${parent.documentId}`, token);
+    if (!data || data.organizationId !== organizationId) {
+      throw new Error('PARENT_RESOURCE_ORGANIZATION_MISMATCH');
+    }
+    return;
+  }
+  if (pathInfo.kind !== 'documentCenter') throw new Error('INVALID_STORAGE_PATH');
+
+  const relatedType = String(relation.relatedType || 'general');
+  const relatedId = String(relation.relatedId || '');
+  if (relatedType === 'general') {
+    if (relatedId) throw new Error('GENERAL_DOCUMENT_MUST_NOT_HAVE_RELATED_ID');
+    return;
+  }
+  const relatedCollections: Record<string, string> = {
+    client: 'clients',
+    policy: 'policies',
+    claim: 'claims',
+  };
+  const collectionName = relatedCollections[relatedType];
+  if (!collectionName || !relatedId || relatedId.includes('/')) {
+    throw new Error('INVALID_DOCUMENT_RELATION');
+  }
+  const data = await getFirestoreDocument(projectId, `${collectionName}/${relatedId}`, token);
   if (!data || data.organizationId !== organizationId) {
-    throw new Error('PARENT_RESOURCE_ORGANIZATION_MISMATCH');
+    throw new Error('RELATED_RESOURCE_ORGANIZATION_MISMATCH');
   }
 }
 
@@ -174,7 +203,14 @@ Deno.serve(async req => {
       if (!authorizeUpload({ role: membership.role, pathInfo, uid, size, contentType })) {
         return json({ ok: false, error: 'UPLOAD_NOT_AUTHORIZED' }, 403);
       }
-      await verifyParentResource(projectId, organizationId, pathInfo, token);
+      if (pathInfo.kind === 'documentCenter'
+        && String(body.documentId || '') !== pathInfo.resourceId) {
+        return json({ ok: false, error: 'DOCUMENT_ID_PATH_MISMATCH' }, 400);
+      }
+      await verifyParentResource(projectId, organizationId, pathInfo, token, {
+        relatedType: body.relatedType,
+        relatedId: body.relatedId,
+      });
       const { data, error } = await admin.storage.from(bucket).createSignedUploadUrl(path, { upsert: false });
       if (error) throw error;
       return json({ ok: true, path, token: data.token });
