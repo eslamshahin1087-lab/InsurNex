@@ -29,6 +29,7 @@ const MorePage = lazy(() => import('./pages/MorePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
 const CopilotPage = lazy(() => import('./pages/CopilotPage'));
+const FinancePage = lazy(() => import('./pages/FinancePage'));
 
 function AppLoading() {
   return (
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="analytics/medical" element={<MedicalIntelligencePage />} />
                 <Route path="ai/file-analysis" element={<AIFileAnalysisPage />} />
                 <Route path="copilot" element={<CopilotPage />} />
+                <Route path="finance" element={<FinancePage />} />
                 <Route path="more" element={<MorePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="documents" element={<ComingSoonPage />} />
