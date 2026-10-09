@@ -180,6 +180,23 @@ try {
   await uploadBytes(object, pdfBytes, uploadOptions(broker, organizationId, docId));
   check((await getBytes(object)).byteLength === pdfBytes.byteLength, 'active broker can upload and read their organization document');
 
+  // Compatibility path for existing user profiles that predate nested members.
+  const legacyActor = await makeActor('legacy-storage');
+  await seedEmulatorDocument(`users/${legacyActor.user.uid}`, {
+    uid: legacyActor.user.uid,
+    email: legacyActor.user.email,
+    displayName: 'Legacy Storage Broker',
+    organizationId,
+    role: 'broker',
+    status: 'active',
+  });
+  const legacyDocId = 'legacy-doc-' + randomUUID();
+  const legacyObject = fileRef(legacyActor, organizationId, legacyDocId);
+  await uploadBytes(legacyObject, pdfBytes, uploadOptions(legacyActor, organizationId, legacyDocId));
+  check((await getBytes(legacyObject)).byteLength === pdfBytes.byteLength,
+    'legacy profile without a membership document keeps existing Storage access during staged rollout');
+  await deleteObject(legacyObject);
+
   const peerObject = fileRef(otherBroker, organizationId, docId);
   check((await getBytes(peerObject)).byteLength === pdfBytes.byteLength, 'another active organization member can read a shared document');
   await expectDenied(
