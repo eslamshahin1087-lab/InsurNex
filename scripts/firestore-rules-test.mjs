@@ -324,6 +324,42 @@ try {
     'business record creator and creation time remain immutable'
   );
 
+  const documentRecordId = 'document-meta-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'documents', documentRecordId), {
+    organizationId: orgA,
+    uploadedBy: ownerA.user.uid,
+    name: 'Immutable storage metadata',
+    originalFileName: 'test.pdf',
+    storagePath: `organizations/${orgA}/documents/${ownerA.user.uid}/${documentRecordId}/test.pdf`,
+    storageProvider: 'supabase',
+    storageBucket: 'insurnex-documents',
+    contentType: 'application/pdf',
+    size: 1024,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'documents', documentRecordId), { storagePath: 'organizations/another-org/secret.pdf' }),
+    'a member cannot change the protected object storage path'
+  );
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'documents', documentRecordId), { contentType: 'text/html' }),
+    'a member cannot forge the stored file MIME type'
+  );
+
+  const activityId = 'lead-activity-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'leadActivities', activityId), {
+    organizationId: orgA,
+    leadId: 'test-lead',
+    type: 'created',
+    message: 'Immutable activity',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'leadActivities', activityId), { message: 'Rewritten history' }),
+    'lead activity history cannot be rewritten after creation'
+  );
+
   // Membership role/status, not the stale profile role, governs authorization.
   await updateDoc(doc(ownerA.db, 'organizations', orgA, 'members', broker.user.uid), { role: 'viewer' });
   await expectDenied(
