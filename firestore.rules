@@ -357,8 +357,10 @@ service cloud.firestore {
     }
     match /subscriptions/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
     match /audit_logs/{docId} {
@@ -369,32 +371,42 @@ service cloud.firestore {
     }
     match /settings/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
     match /teams/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
     match /roles/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
     match /permissions/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
     match /organizationMembers/{docId} {
       allow read: if sameOrg(resource.data.organizationId) && orgManager();
-      allow create, update: if request.resource.data.organizationId is string
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow update: if sameOrg(resource.data.organizationId)
+        && immutableCoreFields() && adminDataEditor();
       allow delete: if false;
     }
 
