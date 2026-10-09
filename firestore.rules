@@ -4,14 +4,32 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function userPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
     function organizationPath(orgId) { return /databases/$(database)/documents/organizations/$(orgId); }
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid);
+    }
     function hasProfile() { return signedIn() && exists(userPath()); }
     function me() { return get(userPath()).data; }
+    function activeMembership(orgId) {
+      return signedIn()
+        && exists(memberPath(orgId))
+        && get(memberPath(orgId)).data.uid == request.auth.uid
+        && get(memberPath(orgId)).data.status == 'active';
+    }
     function sameOrg(orgId) {
       return hasProfile()
         && me().status == 'active'
-        && me().organizationId == orgId;
+        && me().organizationId == orgId
+        && activeMembership(orgId);
     }
-    function roleIs(roles) { return hasProfile() && me().role in roles; }
+    // The organization membership is authoritative for privileges. This way,
+    // role changes and membership suspensions take effect without changing UIDs
+    // or relying on client-controlled profile role fields.
+    function roleIs(roles) {
+      return hasProfile()
+        && me().organizationId is string
+        && activeMembership(me().organizationId)
+        && get(memberPath(me().organizationId)).data.role in roles;
+    }
     function privileged() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']); }
     function orgManager() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager']); }
     function activeStaff() {
