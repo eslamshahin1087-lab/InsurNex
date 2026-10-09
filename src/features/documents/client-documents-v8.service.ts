@@ -37,6 +37,7 @@ export async function uploadClientDocumentV8(input: {
     stored = await supabaseDocumentStorage.upload(input.file, {
       organizationId: input.organizationId,
       clientId: input.clientId,
+      userId: input.userId,
       userToken: firebaseToken,
       area: 'onboarding',
     });
@@ -108,7 +109,7 @@ export async function uploadInsurerQuoteDocumentV95(input:{organizationId:string
   const firebaseToken=await currentUser.getIdToken();
   let stored:StoredObject|null=null;
   try{
-    stored=await supabaseDocumentStorage.upload(input.file,{organizationId:input.organizationId,clientId:input.clientId,userToken:firebaseToken,area:'quotation'});
+    stored=await supabaseDocumentStorage.upload(input.file,{organizationId:input.organizationId,clientId:input.clientId,userId:input.userId,userToken:firebaseToken,area:'quotation'});
     const metadata=await addDoc(collection(db,'documents'),{organizationId:input.organizationId,name:input.file.name,category:'proposal',originalFileName:input.file.name,contentType:input.file.type,size:input.file.size,storagePath:stored.path,storageProvider:stored.provider,storageBucket:stored.bucket,downloadUrl:'',relatedType:'client',relatedId:input.clientId,uploadedBy:input.userId,notes:'QUOTE|RFQ:'+input.rfqId+'|INSURER:'+input.insurerId+'|'+input.insurerName,createdAt:serverTimestamp()});
     return {documentId:metadata.id,documentName:input.file.name};
   }catch(error){if(stored)await supabaseDocumentStorage.remove(stored,firebaseToken,input.organizationId).catch(()=>undefined);throw error}
