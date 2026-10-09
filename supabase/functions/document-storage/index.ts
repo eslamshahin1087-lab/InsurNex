@@ -53,7 +53,31 @@ async function getFirestoreDocument(projectId: string, path: string, token: stri
   return firestoreData(await response.json());
 }
 
-async function verifyFirebase(token: string) {
+async function verifyFirebase(token: string, expectedProjectId: string) {
+  // Identity Toolkit validates the token signature and revocation/session state.
+  // Match JWT audience/issuer to the expected InsurNex Firebase project as well.
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('INVALID_FIREBASE_TOKEN');
+  let claims: Record<string, unknown>;
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    const bytes = Uint8Array.from(atob(padded), character => character.charCodeAt(0));
+    claims = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    throw new Error('INVALID_FIREBASE_TOKEN');
+  }
+  if (
+    claims.aud !== expectedProjectId
+    || claims.iss !== `https://securetoken.google.com/${expectedProjectId}`
+    || typeof claims.sub !== 'string'
+    || !claims.sub
+    || typeof claims.exp !== 'number'
+    || claims.exp <= Math.floor(Date.now() / 1000)
+  ) {
+    throw new Error('FIREBASE_TOKEN_PROJECT_OR_EXPIRY_MISMATCH');
+  }
+
   const apiKey = Deno.env.get('FIREBASE_WEB_API_KEY');
   if (!apiKey) throw new Error('FIREBASE_WEB_API_KEY_MISSING');
   const response = await fetch(
@@ -67,7 +91,7 @@ async function verifyFirebase(token: string) {
   if (!response.ok) throw new Error('INVALID_FIREBASE_TOKEN');
   const data = await response.json();
   const uid = data?.users?.[0]?.localId as string | undefined;
-  if (!uid) throw new Error('INVALID_FIREBASE_USER');
+  if (!uid || uid !== claims.sub) throw new Error('INVALID_FIREBASE_USER');
   return uid;
 }
 
@@ -177,9 +201,9 @@ Deno.serve(async req => {
     const path = String(body.path || '');
     if (!organizationId || !path) return json({ ok: false, error: 'INVALID_STORAGE_PATH' }, 400);
 
-    const uid = await verifyFirebase(token);
     const projectId = Deno.env.get('FIREBASE_PROJECT_ID') || '';
     if (!projectId) throw new Error('FIREBASE_PROJECT_ID_MISSING');
+    const uid = await verifyFirebase(token, projectId);
 
     const membership = await verifyMembership(projectId, organizationId, uid, token);
     const pathInfo = classifyStoragePath(path, organizationId, uid);
