@@ -3,37 +3,73 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn(){ return request.auth != null; }
     function userPath(){ return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function organizationPath(orgId){ return /databases/$(database)/documents/organizations/$(orgId); }
     function hasProfile(){ return signedIn() && exists(userPath()); }
     function me(){ return get(userPath()).data; }
     function sameOrg(orgId){ return hasProfile() && me().status == 'active' && me().organizationId == orgId; }
     function roleIs(roles){ return hasProfile() && me().role in roles; }
     function privileged(){ return roleIs(['owner','admin']); }
+    function ownsOrganizationAfterWrite(orgId){
+      return existsAfter(organizationPath(orgId))
+        && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
+    }
 
     match /users/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || (hasProfile() && resource.data.organizationId == me().organizationId && privileged()));
-      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.role == 'owner' && request.resource.data.status == 'active';
-      allow update: if signedIn() && request.auth.uid == uid && request.resource.data.organizationId == resource.data.organizationId && request.resource.data.role == resource.data.role;
+      allow read: if signedIn() && (
+        request.auth.uid == uid
+        || (hasProfile() && resource.data.organizationId == me().organizationId && privileged())
+      );
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'owner'
+        && request.resource.data.status == 'active'
+        && request.resource.data.organizationId is string
+        && ownsOrganizationAfterWrite(request.resource.data.organizationId);
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.organizationId == resource.data.organizationId
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.status == resource.data.status;
       allow delete: if false;
     }
 
     match /organizations/{orgId} {
       allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
       allow read: if sameOrg(orgId);
-      allow update: if sameOrg(orgId) && privileged() && request.resource.data.ownerId == resource.data.ownerId;
+      allow update: if sameOrg(orgId) && privileged()
+        && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if false;
+
       match /members/{uid} {
-        allow create: if signedIn() && request.auth.uid == uid && uid == get(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId;
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && uid == getAfter(organizationPath(orgId)).data.ownerId;
         allow read: if sameOrg(orgId);
         allow update: if sameOrg(orgId) && privileged();
         allow delete: if sameOrg(orgId) && privileged() && uid != request.auth.uid;
       }
     }
 
+    // Firestore combines overlapping allow rules with OR. Keep identity and
+    // organization documents out of the generic business-record rule.
     match /{collection}/{docId} {
-      allow read: if resource.data.organizationId is string && sameOrg(resource.data.organizationId);
-      allow create: if request.resource.data.organizationId is string && sameOrg(request.resource.data.organizationId);
-      allow update: if resource.data.organizationId == request.resource.data.organizationId && sameOrg(resource.data.organizationId);
-      allow delete: if resource.data.organizationId is string && sameOrg(resource.data.organizationId) && roleIs(['owner','admin','broker']);
+      allow read: if collection != 'users'
+        && collection != 'organizations'
+        && resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId);
+      allow create: if collection != 'users'
+        && collection != 'organizations'
+        && request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId);
+      allow update: if collection != 'users'
+        && collection != 'organizations'
+        && resource.data.organizationId == request.resource.data.organizationId
+        && sameOrg(resource.data.organizationId);
+      allow delete: if collection != 'users'
+        && collection != 'organizations'
+        && resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+        && roleIs(['owner','admin','broker']);
     }
   }
 }
