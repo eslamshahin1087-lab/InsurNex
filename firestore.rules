@@ -80,8 +80,7 @@ service cloud.firestore {
     function genericBusinessCollection(collectionName) {
       return collectionName in [
         'clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
-        'documents', 'communications', 'messages', 'notifications', 'activities',
-        'relationships', 'clientActivities', 'policyActivities', 'claimActivities'
+        'documents', 'communications', 'messages', 'notifications', 'relationships'
       ];
     }
     function restrictedCollection(collectionName) {
@@ -124,6 +123,12 @@ service cloud.firestore {
         && (!resource.data.keys().hasAny(['storageBucket'])
           || (request.resource.data.keys().hasAny(['storageBucket'])
             && request.resource.data.storageBucket == resource.data.storageBucket))
+        && (!resource.data.keys().hasAny(['contentType'])
+          || (request.resource.data.keys().hasAny(['contentType'])
+            && request.resource.data.contentType == resource.data.contentType))
+        && (!resource.data.keys().hasAny(['size'])
+          || (request.resource.data.keys().hasAny(['size'])
+            && request.resource.data.size == resource.data.size))
         && (!resource.data.keys().hasAny(['operationId'])
           || (request.resource.data.keys().hasAny(['operationId'])
             && request.resource.data.operationId == resource.data.operationId));
@@ -391,6 +396,38 @@ service cloud.firestore {
       allow create, update: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
       allow delete: if false;
+    }
+
+    // Activity/history records are append-only so users cannot rewrite audit trails.
+    match /leadActivities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
+    }
+    match /activities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
+    }
+    match /clientActivities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
+    }
+    match /policyActivities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
+    }
+    match /claimActivities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
     }
 
     // These generic permissions deliberately exclude the collections above.
