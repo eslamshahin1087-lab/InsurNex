@@ -27,7 +27,11 @@ service cloud.firestore {
         // Strict membership is enabled on new profiles and on migrated profiles.
         // Legacy profiles remain readable until their existing membership data
         // has been audited, avoiding an accidental lockout during rollout.
-        && (!isMembershipEnforced() || activeMembership(orgId));
+        && (
+          isMembershipEnforced()
+            ? activeMembership(orgId)
+            : (!exists(memberPath(orgId)) || activeMembership(orgId))
+        );
     }
     // New/migrated profiles use the active membership document as the role
     // authority. Untagged legacy profiles retain their protected existing role
@@ -35,11 +39,18 @@ service cloud.firestore {
     function roleIs(roles) {
       return hasProfile()
         && (
-          (isMembershipEnforced()
-            && me().organizationId is string
+          (
+            me().organizationId is string
+            && (isMembershipEnforced() || exists(memberPath(me().organizationId)))
             && activeMembership(me().organizationId)
-            && get(memberPath(me().organizationId)).data.role in roles)
-          || (!isMembershipEnforced() && me().role in roles)
+            && get(memberPath(me().organizationId)).data.role in roles
+          )
+          || (
+            !isMembershipEnforced()
+            && me().organizationId is string
+            && !exists(memberPath(me().organizationId))
+            && me().role in roles
+          )
         );
     }
     function privileged() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']); }
@@ -223,7 +234,10 @@ service cloud.firestore {
         && request.resource.data.role == 'owner'
         && request.resource.data.status == 'active'
         && request.resource.data.organizationId is string
-        && request.resource.data.membershipEnforced == true
+        && (
+          !request.resource.data.keys().hasAny(['membershipEnforced'])
+          || request.resource.data.membershipEnforced == true
+        )
         && ownsOrganizationAfterWrite(request.resource.data.organizationId);
       allow update: if signedIn()
         && request.auth.uid == uid
