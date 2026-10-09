@@ -1,0 +1,5 @@
+[functions.document-storage]
+# The function validates the Firebase ID token itself via Identity Toolkit and
+# Firestore, so the Supabase gateway must not require a separate Supabase user JWT.
+# All actions fail closed unless a valid InsurNex Firebase token is supplied.
+verify_jwt = false
