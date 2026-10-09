@@ -46,7 +46,7 @@ export function classifyStoragePath(path, organizationId, uid) {
   // even if the metadata-document write fails after the object upload.
   if (parts[2] === 'clients' && parts.length === 7
     && safeSegment(parts[3]) && CLIENT_AREAS.has(parts[4])
-    && parts[5] === uid && safeSegment(parts[6])) {
+    && safeSegment(parts[5]) && safeSegment(parts[6])) {
     return {
       kind: 'document',
       organizationId,
@@ -76,7 +76,7 @@ export function classifyStoragePath(path, organizationId, uid) {
   }
 
   if (parts[2] === 'operations' && parts.length === 6
-    && safeSegment(parts[3]) && parts[4] === uid && safeSegment(parts[5])) {
+    && safeSegment(parts[3]) && safeSegment(parts[4]) && safeSegment(parts[5])) {
     return {
       kind: 'operation',
       organizationId,
