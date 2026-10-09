@@ -90,6 +90,7 @@ async function createOwnerWorkspace(actor, name) {
     organizationId,
     role: 'owner',
     status: 'active',
+    membershipEnforced: true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -132,6 +133,7 @@ async function seedRoleFixture(actor, organizationId, role, status = 'active') {
     organizationId,
     role,
     status,
+    membershipEnforced: true,
   });
   await seedEmulatorDocument(`organizations/${organizationId}/members/${actor.user.uid}`, {
     uid: actor.user.uid,
