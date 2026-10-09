@@ -75,6 +75,21 @@ export function classifyStoragePath(path, organizationId, uid) {
     };
   }
 
+  // Document Center files bind their Firebase metadata document ID and uploader
+  // in the object path. Their related parent is separately checked by the gateway.
+  if (parts[2] === 'documents' && parts.length === 6
+    && safeSegment(parts[3]) && safeSegment(parts[4]) && safeSegment(parts[5])) {
+    return {
+      kind: 'documentCenter',
+      organizationId,
+      resourceId: parts[4],
+      uploaderId: parts[3],
+      fileName: parts[5],
+      legacy: false,
+      collectionName: 'documents',
+    };
+  }
+
   if (parts[2] === 'operations' && parts.length === 6
     && safeSegment(parts[3]) && safeSegment(parts[4]) && safeSegment(parts[5])) {
     return {
@@ -109,7 +124,7 @@ export function classifyStoragePath(path, organizationId, uid) {
 export function authorizeUpload({ role, pathInfo, uid, size, contentType }) {
   if (!pathInfo || pathInfo.legacy || !UPLOAD_ROLES.has(role)
     || pathInfo.uploaderId !== uid) return false;
-  if (pathInfo.kind === 'document') {
+  if (pathInfo.kind === 'document' || pathInfo.kind === 'documentCenter') {
     return Number.isFinite(size) && size > 0 && size <= DOCUMENT_MAX_BYTES
       && DOCUMENT_TYPES.has(contentType);
   }
@@ -165,9 +180,10 @@ export function resolveUniqueAttachmentRecord(records, organizationId, path, upl
 
 export function parentRecordPath(pathInfo) {
   if (!pathInfo) return null;
-  return pathInfo.kind === 'document'
-    ? { collectionName: 'clients', documentId: pathInfo.resourceId }
-    : { collectionName: 'operations', documentId: pathInfo.resourceId };
+  if (pathInfo.kind === 'document') return { collectionName: 'clients', documentId: pathInfo.resourceId };
+  if (pathInfo.kind === 'operation') return { collectionName: 'operations', documentId: pathInfo.resourceId };
+  if (pathInfo.kind === 'documentCenter') return null;
+  return null;
 }
 
 export function roleCanUpload(role) {
