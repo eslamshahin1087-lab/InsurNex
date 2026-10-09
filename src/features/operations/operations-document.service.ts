@@ -32,6 +32,7 @@ export async function uploadClientDocumentsAtomic(input: {
       const stored = await supabaseDocumentStorage.upload(pending.file, {
         organizationId: input.organizationId,
         clientId: input.clientId,
+        userId: input.userId,
         userToken: input.firebaseToken,
         area: 'onboarding',
       });
