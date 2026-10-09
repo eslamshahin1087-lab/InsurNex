@@ -1,19 +1,81 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function signedIn() { return request.auth != null; }
+    function signedIn() {
+      return request.auth != null;
+    }
+    function userPath() {
+      return /databases/(default)/documents/users/$(request.auth.uid);
+    }
+    function memberPath(orgId) {
+      return /databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid);
+    }
+    function activeProfile(orgId) {
+      return signedIn()
+        && firestore.exists(userPath())
+        && firestore.get(userPath()).data.status == 'active'
+        && firestore.get(userPath()).data.organizationId == orgId;
+    }
     function memberOf(orgId) {
-      return signedIn() && firestore.exists(/databases/(default)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+      return activeProfile(orgId)
+        && firestore.exists(memberPath(orgId))
+        && firestore.get(memberPath(orgId)).data.status == 'active'
+        && firestore.get(memberPath(orgId)).data.uid == request.auth.uid;
     }
-    function validUpload() {
-      return request.resource.size <= 10 * 1024 * 1024
-        && request.resource.contentType.matches('application/pdf|image/jpeg|image/png|application/vnd.openxmlformats-officedocument.wordprocessingml.document|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    function memberRole(orgId) {
+      return firestore.get(memberPath(orgId)).data.role;
     }
+    function canUpload(orgId) {
+      return memberOf(orgId)
+        && memberRole(orgId) in [
+          'owner', 'admin', 'organizationOwner', 'organizationAdmin',
+          'manager', 'broker', 'operations', 'claimsOfficer',
+          'customerSupport', 'finance'
+        ];
+    }
+    function canManageFiles(orgId) {
+      return memberOf(orgId)
+        && memberRole(orgId) in [
+          'owner', 'admin', 'organizationOwner', 'organizationAdmin',
+          'manager', 'operations'
+        ];
+    }
+    function validUpload(orgId, documentId) {
+      return request.resource != null
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches(
+          'application/pdf|image/jpeg|image/png|application/vnd.openxmlformats-officedocument.wordprocessingml.document|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        && request.resource.metadata.organizationId == orgId
+        && request.resource.metadata.documentId == documentId
+        && request.resource.metadata.uploaderId == request.auth.uid;
+    }
+    function fileUploader() {
+      return resource.metadata.uploaderId == request.auth.uid;
+    }
+
     match /organizations/{orgId}/documents/{documentId}/{fileName} {
+      // All active organization members (including read-only viewers) may read.
       allow read: if memberOf(orgId);
-      allow create, update: if memberOf(orgId) && validUpload();
-      allow delete: if memberOf(orgId);
+
+      // Uploads are limited by membership, role, size, MIME type, and metadata.
+      allow create: if canUpload(orgId) && validUpload(orgId, documentId);
+
+      // Replacing an existing file requires being its uploader or a file manager.
+      // Keep path and organization checks in force for every replacement.
+      allow update: if canUpload(orgId)
+        && (fileUploader() || canManageFiles(orgId))
+        && validUpload(orgId, documentId)
+        && resource.metadata.organizationId == orgId
+        && resource.metadata.documentId == documentId;
+
+      // Members may remove their own uploaded file; managers may administer files.
+      allow delete: if memberOf(orgId)
+        && (fileUploader() || canManageFiles(orgId));
     }
-    match /{allPaths=**} { allow read, write: if false; }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
   }
 }
