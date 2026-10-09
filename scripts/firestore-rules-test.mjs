@@ -253,6 +253,26 @@ try {
   check((await getDoc(doc(broker.db, 'policies', policyId))).data().status === 'renewal_pending',
     'broker can update a policy workflow field without changing financial values');
 
+  const claimId = 'claim-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'claims', claimId), {
+    organizationId: orgA,
+    createdBy: ownerA.user.uid,
+    claimNumber: 'CL-' + randomUUID(),
+    claimAmount: 25000,
+    approvedAmount: 0,
+    currency: 'EGP',
+    status: 'new',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'claims', claimId), { claimAmount: 999999 }),
+    'broker cannot change the claimed loss amount'
+  );
+  await updateDoc(doc(broker.db, 'claims', claimId), { status: 'review', updatedAt: serverTimestamp() });
+  check((await getDoc(doc(broker.db, 'claims', claimId))).data().status === 'review',
+    'broker can advance a claim workflow without changing settlement amounts');
+
   const paymentId = 'payment-' + randomUUID();
   await setDoc(doc(finance.db, 'payments', paymentId), {
     organizationId: orgA,
