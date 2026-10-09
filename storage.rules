@@ -16,6 +16,10 @@ service firebase.storage {
         && firestore.get(userPath()).data.status == 'active'
         && firestore.get(userPath()).data.organizationId == orgId;
     }
+    function profileRequiresMembership() {
+      return firestore.get(userPath()).data.keys().hasAny(['membershipEnforced'])
+        && firestore.get(userPath()).data.membershipEnforced == true;
+    }
     function activeMemberRecord(orgId) {
       return firestore.exists(memberPath(orgId))
         && firestore.get(memberPath(orgId)).data.status == 'active'
@@ -24,14 +28,13 @@ service firebase.storage {
     function memberOf(orgId) {
       return activeProfile(orgId)
         && (
-          firestore.get(userPath()).data.membershipEnforced == true
+          profileRequiresMembership()
             ? activeMemberRecord(orgId)
             : (!firestore.exists(memberPath(orgId)) || activeMemberRecord(orgId))
         );
     }
     function memberRole(orgId) {
-      return (firestore.get(userPath()).data.membershipEnforced == true
-        || firestore.exists(memberPath(orgId)))
+      return (profileRequiresMembership() || firestore.exists(memberPath(orgId)))
         ? firestore.get(memberPath(orgId)).data.role
         : firestore.get(userPath()).data.role;
     }
