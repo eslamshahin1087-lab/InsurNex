@@ -28,9 +28,12 @@ service cloud.firestore {
         // Legacy profiles remain readable until their existing membership data
         // has been audited, avoiding an accidental lockout during rollout.
         && (
-          isMembershipEnforced()
-            ? activeMembership(orgId)
-            : (exists(memberPath(orgId)) ? activeMembership(orgId) : true)
+          exists(memberPath(orgId))
+            ? (
+              get(memberPath(orgId)).data.uid == request.auth.uid
+              && get(memberPath(orgId)).data.status == 'active'
+            )
+            : !isMembershipEnforced()
         );
     }
     // New/migrated profiles use the active membership document as the role
@@ -40,13 +43,13 @@ service cloud.firestore {
       return hasProfile()
         && me().organizationId is string
         && (
-          isMembershipEnforced()
-            ? (activeMembership(me().organizationId)
-              && get(memberPath(me().organizationId)).data.role in roles)
-            : (exists(memberPath(me().organizationId))
-              ? (activeMembership(me().organizationId)
-                && get(memberPath(me().organizationId)).data.role in roles)
-              : me().role in roles)
+          exists(memberPath(me().organizationId))
+            ? (
+              get(memberPath(me().organizationId)).data.uid == request.auth.uid
+              && get(memberPath(me().organizationId)).data.status == 'active'
+              && get(memberPath(me().organizationId)).data.role in roles
+            )
+            : (!isMembershipEnforced() && me().role in roles)
         );
     }
     function privileged() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']); }
@@ -74,19 +77,22 @@ service cloud.firestore {
         'clientActivities', 'policyActivities', 'claimActivities'
       ];
     }
-    function adminOnlyCollection(collectionName) {
-      return collectionName in ['subscriptions', 'audit_logs', 'settings', 'roles', 'permissions', 'teams', 'organizationMembers'];
+    function genericBusinessCollection(collectionName) {
+      return collectionName in [
+        'clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
+        'documents', 'communications', 'messages', 'notifications', 'activities',
+        'relationships', 'clientActivities', 'policyActivities', 'claimActivities'
+      ];
     }
-    function catalogueCollection(collectionName) {
-      return collectionName in ['insurers', 'insurance_products', 'products'];
+    function restrictedCollection(collectionName) {
+      return collectionName in [
+        'users', 'organizations',
+        'opportunities', 'quotations', 'quotes', 'policies', 'rfqs', 'claims',
+        'payments', 'commissions', 'insurers', 'insurance_products', 'products',
+        'subscriptions', 'audit_logs', 'settings', 'teams', 'roles', 'permissions',
+        'organizationMembers', 'operations', 'operationEvents', 'operationAttachments'
+      ];
     }
-    function financialCollection(collectionName) {
-      return collectionName in ['payments', 'commissions'];
-    }
-    function quoteOrPolicyCollection(collectionName) {
-      return collectionName in ['policies', 'quotations', 'quotes', 'opportunities', 'rfqs'];
-    }
-
     function validCreator() {
       return (!request.resource.data.keys().hasAny(['createdBy'])
           || request.resource.data.createdBy == request.auth.uid)
@@ -108,7 +114,19 @@ service cloud.firestore {
             && request.resource.data.uploadedBy == resource.data.uploadedBy))
         && (!resource.data.keys().hasAny(['ownerId'])
           || (request.resource.data.keys().hasAny(['ownerId'])
-            && request.resource.data.ownerId == resource.data.ownerId));
+            && request.resource.data.ownerId == resource.data.ownerId))
+        && (!resource.data.keys().hasAny(['storagePath'])
+          || (request.resource.data.keys().hasAny(['storagePath'])
+            && request.resource.data.storagePath == resource.data.storagePath))
+        && (!resource.data.keys().hasAny(['storageProvider'])
+          || (request.resource.data.keys().hasAny(['storageProvider'])
+            && request.resource.data.storageProvider == resource.data.storageProvider))
+        && (!resource.data.keys().hasAny(['storageBucket'])
+          || (request.resource.data.keys().hasAny(['storageBucket'])
+            && request.resource.data.storageBucket == resource.data.storageBucket))
+        && (!resource.data.keys().hasAny(['operationId'])
+          || (request.resource.data.keys().hasAny(['operationId'])
+            && request.resource.data.operationId == resource.data.operationId));
     }
     function noPolicyFinancialChanges() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
@@ -116,7 +134,7 @@ service cloud.firestore {
         'basePremium', 'netPremium', 'taxAmount', 'totalPremium',
         'coverageAmount', 'brokerageCommission', 'brokerCommission',
         'grossPremium', 'discountAmount', 'feeAmount', 'insuredValue',
-        'amount', 'currency', 'price'
+        'amount', 'currency', 'price', 'estimatedValue', 'insuredAmount'
       ]);
     }
     function noClaimSettlementChanges() {
@@ -141,58 +159,26 @@ service cloud.firestore {
         'updatedAt', 'receiptDocumentId', 'transactionReference'
       ]);
     }
-    function canCreateRecord(collectionName) {
-      return financialCollection(collectionName)
-        ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'finance'])
-        : quoteOrPolicyCollection(collectionName)
-          ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
-          : collectionName == 'claims'
-            ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
-            : catalogueCollection(collectionName)
-              ? orgManager()
-              : collectionName in ['clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
-                  'documents', 'communications', 'messages', 'notifications', 'activities',
-                  'relationships', 'operationAttachments', 'clientActivities', 'policyActivities', 'claimActivities']
-                ? activeStaff()
-                : collectionName == 'operations'
-                  ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
-                  : collectionName == 'operationEvents'
-                    ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
-                    : collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
-                      ? privileged()
-                      : false;
+    function quoteEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations']);
     }
-    function canUpdateRecord(collectionName) {
-      return financialCollection(collectionName)
-        ? (privileged() ? true : (roleIs(['finance']) && financeAllowedChanges()))
-        : quoteOrPolicyCollection(collectionName)
-          ? (privileged() ? true : (roleIs(['manager', 'broker', 'operations']) && noPolicyFinancialChanges()))
-          : collectionName == 'claims'
-            ? (privileged()
-              ? true
-              : (roleIs(['finance'])
-                ? claimFinanceAllowedChanges()
-                : (roleIs(['manager', 'broker', 'operations', 'claimsOfficer']) && noClaimSettlementChanges())))
-            : catalogueCollection(collectionName)
-              ? orgManager()
-              : collectionName in ['clients', 'leads', 'tasks', 'calendar_events',
-                  'documents', 'communications', 'messages', 'notifications', 'relationships']
-                ? activeStaff()
-                : collectionName == 'operations'
-                  ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'operations'])
-                  : collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
-                    ? privileged()
-                    : false;
+    function claimEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer']);
     }
-    function canDeleteRecord(collectionName) {
-      return collectionName in ['clients', 'leads', 'tasks', 'calendar_events', 'communications', 'messages']
-        ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker'])
-        : collectionName == 'documents'
-          ? (privileged()
-            ? true
-            : (roleIs(['manager', 'operations'])
-              || (resource.data.keys().hasAny(['uploadedBy']) && resource.data.uploadedBy == request.auth.uid)))
-          : false;
+    function financeEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'finance']);
+    }
+    function catalogEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager']);
+    }
+    function operationEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations']);
+    }
+    function operationEventWriter() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer']);
+    }
+    function adminDataEditor() {
+      return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']);
     }
 
     match /users/{uid} {
@@ -253,32 +239,191 @@ service cloud.firestore {
       }
     }
 
-    // Firestore allow expressions are OR-combined across all matching blocks.
-    // Keep user and organization records exclusively governed by their rules above.
+    // Role-specific matches isolate financial and workflow collections from
+    // the generic business-record permissions.
+    match /policies/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && quoteEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (quoteEditor() && noPolicyFinancialChanges()));
+      allow delete: if false;
+    }
+    match /quotations/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && quoteEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (quoteEditor() && noPolicyFinancialChanges()));
+      allow delete: if false;
+    }
+    match /quotes/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && quoteEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (quoteEditor() && noPolicyFinancialChanges()));
+      allow delete: if false;
+    }
+    match /opportunities/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && quoteEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (quoteEditor() && noPolicyFinancialChanges()));
+      allow delete: if false;
+    }
+    match /rfqs/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && quoteEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (quoteEditor() && noPolicyFinancialChanges()));
+      allow delete: if false;
+    }
+    match /claims/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && claimEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (
+          privileged()
+          || (roleIs(['finance']) && claimFinanceAllowedChanges())
+          || (roleIs(['manager', 'broker', 'operations', 'claimsOfficer']) && noClaimSettlementChanges())
+        );
+      allow delete: if false;
+    }
+    match /payments/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && financeEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (roleIs(['finance']) && financeAllowedChanges()));
+      allow delete: if false;
+    }
+    match /commissions/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && financeEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && (privileged() || (roleIs(['finance']) && financeAllowedChanges()));
+      allow delete: if false;
+    }
+    match /insurers/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && catalogEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields() && catalogEditor();
+      allow delete: if false;
+    }
+    match /insurance_products/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && catalogEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields() && catalogEditor();
+      allow delete: if false;
+    }
+    match /products/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && catalogEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields() && catalogEditor();
+      allow delete: if false;
+    }
+    match /operations/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && operationEditor();
+      allow update: if sameOrg(resource.data.organizationId) && immutableCoreFields()
+        && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'operations']);
+      allow delete: if false;
+    }
+    match /operationEvents/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && operationEventWriter();
+      allow update, delete: if false;
+    }
+    match /operationAttachments/{docId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && operationEditor();
+      allow update, delete: if false;
+    }
+    match /subscriptions/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+    match /audit_logs/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && activeStaff();
+      allow update, delete: if false;
+    }
+    match /settings/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+    match /teams/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+    match /roles/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+    match /permissions/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+    match /organizationMembers/{docId} {
+      allow read: if sameOrg(resource.data.organizationId) && orgManager();
+      allow create, update: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId) && validCreator() && adminDataEditor();
+      allow delete: if false;
+    }
+
+    // These generic permissions deliberately exclude the collections above.
+    // Firestore OR-combines matching rules, so no broad rule may re-open a
+    // restricted collection after a stricter match rejects a request.
     match /{collectionName}/{docId} {
       allow read: if collectionName != 'users'
         && collectionName != 'organizations'
         && knownBusinessCollection(collectionName)
         && sameOrg(resource.data.organizationId)
-        && (!adminOnlyCollection(collectionName) || orgManager());
-      allow create: if collectionName != 'users'
-        && collectionName != 'organizations'
-        && knownBusinessCollection(collectionName)
-        && request.resource.data.organizationId is string
+        && (collectionName not in [
+          'subscriptions', 'audit_logs', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers'
+        ] || orgManager());
+      allow create: if genericBusinessCollection(collectionName)
         && sameOrg(request.resource.data.organizationId)
-        && validCreator()
-        && canCreateRecord(collectionName);
-      allow update: if collectionName != 'users'
-        && collectionName != 'organizations'
-        && knownBusinessCollection(collectionName)
+        && request.resource.data.organizationId is string
+        && validCreator() && activeStaff();
+      allow update: if genericBusinessCollection(collectionName)
         && sameOrg(resource.data.organizationId)
         && immutableCoreFields()
-        && canUpdateRecord(collectionName);
-      allow delete: if collectionName != 'users'
-        && collectionName != 'organizations'
-        && knownBusinessCollection(collectionName)
+        && activeStaff();
+      allow delete: if collectionName in [
+          'clients', 'leads', 'tasks', 'calendar_events', 'communications', 'messages'
+        ]
         && sameOrg(resource.data.organizationId)
-        && canDeleteRecord(collectionName);
+        && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker'])
+        || collectionName == 'documents'
+          && sameOrg(resource.data.organizationId)
+          && (
+            privileged()
+            || roleIs(['manager', 'operations'])
+            || (resource.data.keys().hasAny(['uploadedBy']) && resource.data.uploadedBy == request.auth.uid)
+          );
     }
   }
 }
