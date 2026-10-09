@@ -7,6 +7,7 @@ import {
   canManageStorage,
   classifyStoragePath,
   parentRecordPath,
+  resolveUniqueAttachmentRecord,
 } from '../supabase/functions/document-storage/policy.js';
 
 const org = 'org_test123';
@@ -85,8 +86,19 @@ deny(authorizeUpload({ role: 'operations', pathInfo: operationInfo, uid, size: 1
 const ownRecord = {
   organizationId: org,
   storagePath: documentPath,
+  storageProvider: 'supabase',
   uploadedBy: uid,
 };
+assert.deepEqual(resolveUniqueAttachmentRecord([ownRecord], org, documentPath, uid), ownRecord);
+assert.equal(resolveUniqueAttachmentRecord([
+  ownRecord,
+  { ...ownRecord, uploadedBy: otherUid },
+], org, documentPath, uid), null);
+assert.equal(resolveUniqueAttachmentRecord([
+  ownRecord,
+  ownRecord,
+], org, documentPath, uid), null);
+pass('file metadata lookup fails closed for forged owner or duplicate matching records');
 assert.equal(authorizeRecordAction({
   action: 'sign-download', organizationId: org, path: documentPath,
   pathInfo: documentInfo, role: 'viewer', uid: otherUid, record: ownRecord,
