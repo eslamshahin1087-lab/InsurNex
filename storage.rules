@@ -51,7 +51,8 @@ service firebase.storage {
         && request.resource.metadata.uploaderId == request.auth.uid;
     }
     function fileUploader() {
-      return resource.metadata.uploaderId == request.auth.uid;
+      return resource.metadata.keys().hasAny(['uploaderId'])
+        && resource.metadata.uploaderId == request.auth.uid;
     }
 
     match /organizations/{orgId}/documents/{documentId}/{fileName} {
@@ -66,8 +67,10 @@ service firebase.storage {
       allow update: if canUpload(orgId)
         && (fileUploader() || canManageFiles(orgId))
         && validUpload(orgId, documentId)
-        && resource.metadata.organizationId == orgId
-        && resource.metadata.documentId == documentId;
+        && (!resource.metadata.keys().hasAny(['organizationId'])
+          || resource.metadata.organizationId == orgId)
+        && (!resource.metadata.keys().hasAny(['documentId'])
+          || resource.metadata.documentId == documentId);
 
       // Members may remove their own uploaded file; managers may administer files.
       allow delete: if memberOf(orgId)
