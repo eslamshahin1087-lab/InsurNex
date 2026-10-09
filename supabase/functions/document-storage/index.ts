@@ -5,6 +5,7 @@ import {
   classifyStoragePath,
   parentRecordPath,
   resolveUniqueAttachmentRecord,
+  resolveActiveMembership,
 } from './policy.js';
 
 const corsHeaders = {
@@ -74,13 +75,9 @@ async function verifyMembership(projectId: string, organizationId: string, uid: 
     getFirestoreDocument(projectId, `users/${uid}`, token),
     getFirestoreDocument(projectId, `organizations/${organizationId}/members/${uid}`, token),
   ]);
-  if (!profile || profile.status !== 'active' || profile.organizationId !== organizationId) {
-    throw new Error('ACTIVE_PROFILE_REQUIRED');
-  }
-  if (!member || member.uid !== uid || member.status !== 'active' || typeof member.role !== 'string') {
-    throw new Error('ACTIVE_ORGANIZATION_MEMBERSHIP_REQUIRED');
-  }
-  return { role: member.role as string };
+  const membership = resolveActiveMembership({ profile, member, organizationId, uid });
+  if (!membership) throw new Error('ACTIVE_PROFILE_AND_ORGANIZATION_MEMBERSHIP_REQUIRED');
+  return membership;
 }
 
 async function findAttachmentRecord(projectId: string, organizationId: string, path: string, token: string, uploaderId: string | null) {
