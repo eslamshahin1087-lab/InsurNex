@@ -144,6 +144,9 @@ async function seedRoleFixture(actor, organizationId, role, status = 'active') {
 function fileRef(actor, organizationId, documentId, fileName = 'sample.pdf') {
   return ref(actor.storage, `organizations/${organizationId}/documents/${documentId}/${fileName}`);
 }
+function operationFileRef(actor, organizationId, operationId, fileName = 'attachment.pdf') {
+  return ref(actor.storage, `organizations/${organizationId}/operations/${operationId}/${fileName}`);
+}
 
 function uploadOptions(actor, organizationId, documentId, contentType = 'application/pdf') {
   return {
@@ -184,6 +187,27 @@ try {
 
   await uploadBytes(object, new Uint8Array([37, 80, 68, 70, 45, 50]), uploadOptions(broker, organizationId, docId));
   check((await getBytes(object)).byteLength > 0, 'uploader may replace their own file with a valid upload');
+
+  const operationId = 'operation-' + randomUUID();
+  const operationObject = operationFileRef(broker, organizationId, operationId);
+  await uploadBytes(operationObject, pdfBytes, {
+    contentType: 'application/pdf',
+    customMetadata: { organizationId, operationId, uploaderId: broker.user.uid },
+  });
+  check((await getBytes(operationObject)).byteLength === pdfBytes.byteLength,
+    'active broker can upload and read operation attachments through the supported operations path');
+  const invalidOperationId = 'metadata-mismatch-' + randomUUID();
+  await expectDenied(
+    () => uploadBytes(
+      operationFileRef(broker, organizationId, invalidOperationId),
+      pdfBytes,
+      { contentType: 'application/pdf', customMetadata: {
+        organizationId, operationId: 'forged-operation-id', uploaderId: broker.user.uid,
+      } }
+    ),
+    'operation attachment metadata must match the organization and operation path'
+  );
+  await deleteObject(operationFileRef(owner, organizationId, operationId));
 
   const badDocId = 'bad-type-' + randomUUID();
   await expectDenied(
