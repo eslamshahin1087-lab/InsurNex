@@ -77,6 +77,33 @@ service firebase.storage {
         && (fileUploader() || canManageFiles(orgId));
     }
 
+    function validOperationUpload(orgId, operationId) {
+      return request.resource != null
+        && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType.matches(
+          'application/pdf|application/vnd.ms-excel|application/vnd.openxmlformats-officedocument.spreadsheetml.sheet|text/csv|application/csv'
+        )
+        && request.resource.metadata.organizationId == orgId
+        && request.resource.metadata.operationId == operationId
+        && request.resource.metadata.uploaderId == request.auth.uid;
+    }
+
+    // Operations attachments use a different product workflow and a 20 MB
+    // limit; this preserves its supported PDF/XLS/XLSX/CSV uploads.
+    match /organizations/{orgId}/operations/{operationId}/{fileName} {
+      allow read: if memberOf(orgId);
+      allow create: if canUpload(orgId) && validOperationUpload(orgId, operationId);
+      allow update: if canUpload(orgId)
+        && (fileUploader() || canManageFiles(orgId))
+        && validOperationUpload(orgId, operationId)
+        && (!resource.metadata.keys().hasAny(['organizationId'])
+          || resource.metadata.organizationId == orgId)
+        && (!resource.metadata.keys().hasAny(['operationId'])
+          || resource.metadata.operationId == operationId);
+      allow delete: if memberOf(orgId)
+        && (fileUploader() || canManageFiles(orgId));
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }
