@@ -176,6 +176,15 @@ export function roleCanUpload(role) {
 
 export function resolveActiveMembership({ profile, member, organizationId, uid }) {
   if (!profile || profile.status !== 'active' || profile.organizationId !== organizationId) return null;
-  if (!member || member.uid !== uid || member.status !== 'active' || typeof member.role !== 'string') return null;
-  return { role: member.role };
+
+  // Strict profiles (all new profiles and migrated legacy profiles) require
+  // an active nested membership. Existing profiles without the flag retain a
+  // safe fallback only if no membership record exists; an explicit suspended,
+  // malformed, or mismatched membership always denies access.
+  if (profile.membershipEnforced === true || member) {
+    if (!member || member.uid !== uid || member.status !== 'active' || typeof member.role !== 'string') return null;
+    return { role: member.role, legacy: false };
+  }
+  if (typeof profile.role !== 'string') return null;
+  return { role: profile.role, legacy: true };
 }
