@@ -34,16 +34,24 @@ service cloud.firestore {
     }
 
     match /organizations/{orgId} {
-      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.type in ['individual', 'office', 'company'];
       allow read: if sameOrg(orgId);
       allow update: if sameOrg(orgId) && privileged()
         && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if false;
 
       match /members/{uid} {
+        // Initial owner membership must be part of the same atomic
+        // onboarding batch and must carry the expected owner role/state.
         allow create: if signedIn()
           && request.auth.uid == uid
-          && uid == getAfter(organizationPath(orgId)).data.ownerId;
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.role == 'owner'
+          && request.resource.data.status == 'active'
+          && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
         allow read: if sameOrg(orgId);
         allow update: if sameOrg(orgId) && privileged();
         allow delete: if sameOrg(orgId) && privileged() && uid != request.auth.uid;

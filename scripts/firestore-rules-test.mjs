@@ -116,6 +116,31 @@ try {
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
 
+  // Regression for Firestore's OR semantics across overlapping match blocks.
+  // This record can be created under the explicit organization-create rule,
+  // but its organizationId must not let the generic business rule bypass
+  // access checks for the different organization document path.
+  const shadowOrg = 'shadow-org-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'organizations', shadowOrg), {
+    name: 'Wildcard regression fixture',
+    type: 'office',
+    ownerId: ownerA.user.uid,
+    organizationId: orgA,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => getDoc(doc(ownerA.db, 'organizations', shadowOrg)),
+    'generic organization rule cannot expose a document outside the path organization'
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'organizations', shadowOrg), { ownerId: 'forged-owner' }),
+    'generic organization rule cannot bypass the path-based organization update check'
+  );
+  await expectDenied(
+    () => deleteDoc(doc(ownerA.db, 'organizations', shadowOrg)),
+    'generic organization rule cannot bypass the organization delete prohibition'
+  );
+
   await expectDenied(
     () => getDoc(doc(ownerB.db, 'clients', clientA)),
     'a user from another organization cannot read a client record'
