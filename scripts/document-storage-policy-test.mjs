@@ -8,6 +8,7 @@ import {
   classifyStoragePath,
   parentRecordPath,
   resolveUniqueAttachmentRecord,
+  resolveActiveMembership,
 } from '../supabase/functions/document-storage/policy.js';
 
 const org = 'org_test123';
@@ -26,6 +27,22 @@ function deny(condition, message) {
   assert.equal(condition, false, message);
   console.log('PASS denied: ' + message);
 }
+
+const activeMember = {
+  uid,
+  status: 'active',
+  role: 'broker',
+};
+const activeProfile = {
+  status: 'active',
+  organizationId: org,
+};
+assert.deepEqual(resolveActiveMembership({ profile: activeProfile, member: activeMember, organizationId: org, uid }), { role: 'broker' });
+assert.equal(resolveActiveMembership({ profile: { ...activeProfile, status: 'suspended' }, member: activeMember, organizationId: org, uid }), null);
+assert.equal(resolveActiveMembership({ profile: { ...activeProfile, organizationId: 'org_other' }, member: activeMember, organizationId: org, uid }), null);
+assert.equal(resolveActiveMembership({ profile: activeProfile, member: { ...activeMember, status: 'suspended' }, organizationId: org, uid }), null);
+assert.equal(resolveActiveMembership({ profile: activeProfile, member: { ...activeMember, uid: otherUid }, organizationId: org, uid }), null);
+pass('storage gateway requires the matching active profile and active membership');
 
 const documentPath = `organizations/${org}/clients/${clientId}/onboarding/${uid}/file-1.pdf`;
 const documentInfo = classifyStoragePath(documentPath, org, uid);
