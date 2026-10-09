@@ -48,9 +48,7 @@ function getInitials(name: string) {
   }
 
   if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
+    return words[0].slice(0, 2).toUpperCase();
   }
 
   return (
@@ -102,16 +100,16 @@ export default function ClientsPage() {
   const loadClients = useCallback(
     async () => {
       if (!profile) {
+        setLoading(false);
         return;
       }
 
       setLoading(true);
 
       try {
-        const data =
-          await listClients(
-            profile.organizationId,
-          );
+        const data = await listClients(
+          profile.organizationId,
+        );
 
         setClients(data);
       } finally {
@@ -129,27 +127,24 @@ export default function ClientsPage() {
     () => ({
       total: clients.length,
 
-      active:
-        clients.filter(
-          (client) =>
-            client.status === 'active',
-        ).length,
+      active: clients.filter(
+        (client) =>
+          client.status === 'active',
+      ).length,
 
-      prospect:
-        clients.filter(
-          (client) =>
-            client.status === 'prospect',
-        ).length,
+      prospect: clients.filter(
+        (client) =>
+          client.status === 'prospect',
+      ).length,
     }),
     [clients],
   );
 
   const filteredClients = useMemo(
     () => {
-      const query =
-        search
-          .trim()
-          .toLowerCase();
+      const query = search
+        .trim()
+        .toLowerCase();
 
       return clients.filter(
         (client) => {
@@ -391,9 +386,7 @@ export default function ClientsPage() {
                         </div>
 
                         <span
-                          className={
-                            `s83-status s83-status-${client.status}`
-                          }
+                          className={`s83-status s83-status-${client.status}`}
                         >
                           {getClientStatusLabel(
                             client.status,
