@@ -19,6 +19,7 @@ export interface RfqRecord {
   clientId: string;
   clientName: string;
   insuranceType: string;
+  coverageAmount?:number;
   coverageSummary: string;
   status: RfqStatus;
   documentIds: string[];
@@ -33,6 +34,7 @@ export interface CreateRfqInput {
   clientId: string;
   clientName: string;
   insuranceType: string;
+  coverageAmount?: number;
   coverageSummary: string;
   documentIds: string[];
   insurers: Array<{ insurerId: string; insurerName: string }>;
