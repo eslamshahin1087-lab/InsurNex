@@ -183,8 +183,8 @@ export function resolveActiveMembership({ profile, member, organizationId, uid }
   // malformed, or mismatched membership always denies access.
   if (profile.membershipEnforced === true || member) {
     if (!member || member.uid !== uid || member.status !== 'active' || typeof member.role !== 'string') return null;
-    return { role: member.role, legacy: false };
+    return { role: member.role };
   }
   if (typeof profile.role !== 'string') return null;
-  return { role: profile.role, legacy: true };
+  return { role: profile.role };
 }
