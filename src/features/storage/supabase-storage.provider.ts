@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import type { DocumentStorageProvider } from './storage-provider';
+import type { DocumentStorageProvider, StoredObject } from './storage-provider';
+import type { DocumentRelationType } from '../../types/document';
 
 const MAX_SIZE = 10 * 1024 * 1024;
 const ALLOWED = new Set([
@@ -72,6 +73,52 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
     return payload.signedUrl;
   },
 };
+
+export async function uploadOrganizationDocument(
+  file: File,
+  context: {
+    organizationId: string;
+    documentId: string;
+    userId: string;
+    userToken: string;
+    relatedType: DocumentRelationType;
+    relatedId: string;
+  },
+): Promise<StoredObject> {
+  supabaseDocumentStorage.validate(file);
+  if (context.relatedType === 'general' && context.relatedId) {
+    throw new Error('GENERAL_DOCUMENT_MUST_NOT_HAVE_RELATED_ID');
+  }
+  if (context.relatedType !== 'general' && !context.relatedId.trim()) {
+    throw new Error('DOCUMENT_RELATION_REQUIRED');
+  }
+
+  const path = `organizations/${context.organizationId}/documents/${context.userId}/${context.documentId}/${crypto.randomUUID()}-${safeName(file.name)}`;
+  const payload = await invoke<{ ok: true; token: string; path: string }>('sign-upload', {
+    organizationId: context.organizationId,
+    path,
+    documentId: context.documentId,
+    relatedType: context.relatedType,
+    relatedId: context.relatedType === 'general' ? '' : context.relatedId,
+    contentType: file.type,
+    size: file.size,
+  }, context.userToken);
+
+  const client = configured();
+  const { error } = await client.storage.from(bucket).uploadToSignedUrl(payload.path, payload.token, file, {
+    contentType: file.type,
+    cacheControl: '3600',
+  });
+  if (error) throw new Error(`DOCUMENT_UPLOAD_FAILED:${error.message}`);
+  return {
+    provider: 'supabase',
+    bucket,
+    path: payload.path,
+    originalFileName: file.name,
+    contentType: file.type,
+    size: file.size,
+  };
+}
 
 const OPERATION_MAX_SIZE = 20 * 1024 * 1024;
 const OPERATION_MIME_BY_EXTENSION: Record<string, string> = {
