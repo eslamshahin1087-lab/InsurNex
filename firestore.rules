@@ -103,7 +103,8 @@ service cloud.firestore {
     function noClaimSettlementChanges() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
         'settlementAmount', 'approvedAmount', 'paidAmount', 'reserveAmount',
-        'amountPaid', 'payoutAmount', 'reimbursedAmount', 'paymentAmount'
+        'amountPaid', 'payoutAmount', 'reimbursedAmount', 'paymentAmount',
+        'claimAmount', 'claimedAmount', 'requestedAmount', 'currency'
       ]);
     }
     function financeAllowedChanges() {
