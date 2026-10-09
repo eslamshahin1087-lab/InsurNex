@@ -79,7 +79,7 @@ service cloud.firestore {
     }
     function genericBusinessCollection(collectionName) {
       return collectionName in [
-        'clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
+        'clients', 'leads', 'tasks', 'calendar_events',
         'documents', 'communications', 'messages', 'notifications', 'relationships'
       ];
     }
