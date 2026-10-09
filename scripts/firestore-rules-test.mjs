@@ -37,6 +37,18 @@ function check(condition, message) {
   console.log('PASS ' + message);
 }
 
+async function expectDenied(operation, message) {
+  let denied = false;
+  try {
+    await operation();
+  } catch (error) {
+    if (!String(error?.code || '').includes('permission-denied')) throw error;
+    denied = true;
+  }
+  assert.equal(denied, true, 'Expected permission-denied: ' + message);
+  console.log('PASS denied: ' + message);
+}
+
 async function makeActor(label) {
   const app = initializeApp(projectConfig, 'rules-' + label + '-' + randomUUID());
   apps.push(app);
@@ -50,18 +62,6 @@ async function makeActor(label) {
     'LocalRulesTest-Password-123!'
   );
   return { app, auth, db, user: credential.user };
-}
-
-async function expectDenied(operation, message) {
-  let denied = false;
-  try {
-    await operation();
-  } catch (error) {
-    if (!String(error?.code || '').includes('permission-denied')) throw error;
-    denied = true;
-  }
-  assert.equal(denied, true, 'Expected permission-denied: ' + message);
-  console.log('PASS denied: ' + message);
 }
 
 async function createOwnerWorkspace(actor, organizationName) {
@@ -97,6 +97,45 @@ async function createOwnerWorkspace(actor, organizationName) {
   return organizationId;
 }
 
+// The Firestore emulator accepts the "owner" token for test-fixture seeding.
+// This is emulator-only and intentionally guarded by the project-ID check above.
+async function seedEmulatorDocument(path, data) {
+  const fields = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [key, { stringValue: String(value) }])
+  );
+  const response = await fetch(
+    `http://127.0.0.1:8080/v1/projects/${projectId}/databases/(default)/documents/${path}`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Bearer owner',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fields }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Emulator fixture seeding failed for ${path}: ${response.status} ${await response.text()}`);
+  }
+}
+
+async function seedRoleFixture(actor, organizationId, role) {
+  await seedEmulatorDocument(`users/${actor.user.uid}`, {
+    uid: actor.user.uid,
+    email: actor.user.email,
+    displayName: `Rules test ${role}`,
+    organizationId,
+    role,
+    status: 'active',
+  });
+  await seedEmulatorDocument(`organizations/${organizationId}/members/${actor.user.uid}`, {
+    uid: actor.user.uid,
+    email: actor.user.email,
+    role,
+    status: 'active',
+  });
+}
+
 try {
   const ownerA = await makeActor('owner-a');
   const orgA = await createOwnerWorkspace(ownerA, 'InsurNex Rules Test A');
@@ -117,9 +156,6 @@ try {
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
 
   // Regression for Firestore's OR semantics across overlapping match blocks.
-  // This record can be created under the explicit organization-create rule,
-  // but its organizationId must not let the generic business rule bypass
-  // access checks for the different organization document path.
   const shadowOrg = 'shadow-org-' + randomUUID();
   await setDoc(doc(ownerA.db, 'organizations', shadowOrg), {
     name: 'Wildcard regression fixture',
@@ -154,6 +190,98 @@ try {
     'a user cannot create a business record in another organization'
   );
 
+  const broker = await makeActor('broker-fixture');
+  await seedRoleFixture(broker, orgA, 'broker');
+  const finance = await makeActor('finance-fixture');
+  await seedRoleFixture(finance, orgA, 'finance');
+  const viewer = await makeActor('viewer-fixture');
+  await seedRoleFixture(viewer, orgA, 'viewer');
+
+  check((await getDoc(doc(viewer.db, 'clients', clientA))).exists(), 'read-only viewer can read own organization records');
+  await expectDenied(
+    () => setDoc(doc(viewer.db, 'clients', 'viewer-write-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Viewer write must fail',
+      createdBy: viewer.user.uid,
+    }),
+    'read-only viewer cannot create client records'
+  );
+  await expectDenied(
+    () => setDoc(doc(broker.db, 'payments', 'broker-payment-' + randomUUID()), {
+      organizationId: orgA,
+      amount: 100,
+      status: 'pending',
+      createdBy: broker.user.uid,
+      createdAt: serverTimestamp(),
+    }),
+    'broker cannot create a payment record'
+  );
+  await expectDenied(
+    () => setDoc(doc(broker.db, 'clients', 'forged-creator-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Forged creator',
+      createdBy: ownerA.user.uid,
+    }),
+    'creator cannot be forged in a new business record'
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'unknown-business-collection', 'unknown-' + randomUUID()), {
+      organizationId: orgA,
+      createdBy: ownerA.user.uid,
+    }),
+    'unregistered top-level collections do not inherit generic create permission'
+  );
+
+  const policyId = 'policy-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'policies', policyId), {
+    organizationId: orgA,
+    createdBy: ownerA.user.uid,
+    clientId: clientA,
+    policyNumber: 'TEST-' + randomUUID(),
+    premium: 1000,
+    commissionRate: 10,
+    commissionAmount: 100,
+    status: 'active',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'policies', policyId), { premium: 9000 }),
+    'broker cannot change policy premium or other protected financial values'
+  );
+  await updateDoc(doc(broker.db, 'policies', policyId), { status: 'renewal_pending', updatedAt: serverTimestamp() });
+  check((await getDoc(doc(broker.db, 'policies', policyId))).data().status === 'renewal_pending',
+    'broker can update a policy workflow field without changing financial values');
+
+  const paymentId = 'payment-' + randomUUID();
+  await setDoc(doc(finance.db, 'payments', paymentId), {
+    organizationId: orgA,
+    createdBy: finance.user.uid,
+    amount: 1500,
+    status: 'pending',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await updateDoc(doc(finance.db, 'payments', paymentId), { status: 'paid', updatedAt: serverTimestamp() });
+  check((await getDoc(doc(finance.db, 'payments', paymentId))).data().status === 'paid',
+    'finance role can update payment state');
+  await expectDenied(
+    () => updateDoc(doc(finance.db, 'payments', paymentId), { amount: 999999 }),
+    'finance role cannot alter a payment amount after creation'
+  );
+  await expectDenied(
+    () => deleteDoc(doc(ownerA.db, 'payments', paymentId)),
+    'payment records cannot be deleted, even by organization owners'
+  );
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'clients', clientA), { organizationId: orgB }),
+    'business records cannot be moved to another organization by updating organizationId'
+  );
+  await expectDenied(
+    () => updateDoc(doc(broker.db, 'clients', clientA), { createdBy: broker.user.uid }),
+    'business record creator and creation time remain immutable'
+  );
+
   const attacker = await makeActor('attacker');
   await expectDenied(
     () => setDoc(doc(attacker.db, 'users', attacker.user.uid), {
@@ -175,7 +303,7 @@ try {
       role: 'broker',
       status: 'active',
     }),
-    'a user cannot create another users profile through the generic business rule'
+    'a user cannot create another users profile'
   );
 
   await expectDenied(
