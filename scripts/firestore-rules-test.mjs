@@ -82,6 +82,7 @@ async function createOwnerWorkspace(actor, organizationName) {
     organizationId,
     role: 'owner',
     status: 'active',
+    membershipEnforced: true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -127,6 +128,7 @@ async function seedRoleFixture(actor, organizationId, role) {
     organizationId,
     role,
     status: 'active',
+    membershipEnforced: true,
   });
   await seedEmulatorDocument(`organizations/${organizationId}/members/${actor.user.uid}`, {
     uid: actor.user.uid,
@@ -154,6 +156,26 @@ try {
   const ownerB = await makeActor('owner-b');
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
+
+  // Legacy profile without the new flag keeps its existing organization access
+  // while production membership data is audited before strict migration.
+  const legacyActor = await makeActor('legacy-profile');
+  await seedEmulatorDocument(`users/${legacyActor.user.uid}`, {
+    uid: legacyActor.user.uid,
+    email: legacyActor.user.email,
+    displayName: 'Legacy broker',
+    organizationId: orgA,
+    role: 'broker',
+    status: 'active',
+  });
+  check((await getDoc(doc(legacyActor.db, 'organizations', orgA))).exists(),
+    'legacy profile without membershipEnforced stays readable during staged rollout');
+  await setDoc(doc(legacyActor.db, 'clients', 'legacy-' + randomUUID()), {
+    organizationId: orgA,
+    name: 'Legacy profile can continue CRM writes',
+    createdBy: legacyActor.user.uid,
+  });
+  check(true, 'legacy profile with protected role retains existing business write compatibility');
 
   // Regression for Firestore's OR semantics across overlapping match blocks.
   const shadowOrg = 'shadow-org-' + randomUUID();
