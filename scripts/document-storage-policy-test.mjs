@@ -36,13 +36,18 @@ const activeMember = {
 const activeProfile = {
   status: 'active',
   organizationId: org,
+  role: 'broker',
+  membershipEnforced: true,
 };
 assert.deepEqual(resolveActiveMembership({ profile: activeProfile, member: activeMember, organizationId: org, uid }), { role: 'broker' });
 assert.equal(resolveActiveMembership({ profile: { ...activeProfile, status: 'suspended' }, member: activeMember, organizationId: org, uid }), null);
 assert.equal(resolveActiveMembership({ profile: { ...activeProfile, organizationId: 'org_other' }, member: activeMember, organizationId: org, uid }), null);
 assert.equal(resolveActiveMembership({ profile: activeProfile, member: { ...activeMember, status: 'suspended' }, organizationId: org, uid }), null);
 assert.equal(resolveActiveMembership({ profile: activeProfile, member: { ...activeMember, uid: otherUid }, organizationId: org, uid }), null);
-pass('storage gateway requires the matching active profile and active membership');
+assert.equal(resolveActiveMembership({ profile: { status: 'active', organizationId: org, role: 'broker' }, member: null, organizationId: org, uid })?.role, 'broker');
+assert.equal(resolveActiveMembership({ profile: { status: 'active', organizationId: org, role: 'broker' }, member: { ...activeMember, status: 'suspended' }, organizationId: org, uid }), null);
+assert.equal(resolveActiveMembership({ profile: activeProfile, member: null, organizationId: org, uid }), null);
+pass('storage gateway requires strict active membership for new profiles while preserving legacy users without membership records');
 
 const documentPath = `organizations/${org}/clients/${clientId}/onboarding/${uid}/file-1.pdf`;
 const documentInfo = classifyStoragePath(documentPath, org, uid);
