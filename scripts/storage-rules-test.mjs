@@ -195,11 +195,12 @@ try {
     'unsupported MIME types are rejected'
   );
 
+  const crossOrgDocId = 'cross-org-' + randomUUID();
   await expectDenied(
     () => uploadBytes(
-      fileRef(otherOwner, organizationId, 'cross-org-' + randomUUID()),
+      fileRef(otherOwner, organizationId, crossOrgDocId),
       pdfBytes,
-      uploadOptions(otherOwner, organizationId, 'cross-org-' + randomUUID())
+      uploadOptions(otherOwner, organizationId, crossOrgDocId)
     ),
     'a different organization cannot upload into another organization path'
   );
@@ -222,16 +223,17 @@ try {
     () => getBytes(suspendedObject),
     'a suspended organization member can no longer read stored documents'
   );
+  const suspendedUploadId = 'suspended-upload-' + randomUUID();
   await expectDenied(
     () => uploadBytes(
-      fileRef(broker, organizationId, 'suspended-upload-' + randomUUID()),
+      fileRef(broker, organizationId, suspendedUploadId),
       pdfBytes,
-      uploadOptions(broker, organizationId, 'suspended-upload-' + randomUUID())
+      uploadOptions(broker, organizationId, suspendedUploadId)
     ),
     'a suspended organization member can no longer upload documents'
   );
 
-  await deleteObject(object);
+  await deleteObject(fileRef(owner, organizationId, docId));
   console.log('All Storage emulator security regression tests passed.');
 } finally {
   await Promise.allSettled(apps.map((app) => deleteApp(app)));
