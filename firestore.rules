@@ -33,7 +33,7 @@ service cloud.firestore {
         'products', 'payments', 'commissions', 'communications', 'messages',
         'notifications', 'activities', 'subscriptions', 'audit_logs', 'settings',
         'reports', 'teams', 'roles', 'permissions', 'organizationMembers',
-        'relationships', 'operations', 'operationEvents', 'rfqs',
+        'relationships', 'operations', 'operationEvents', 'operationAttachments', 'rfqs',
         'clientActivities', 'policyActivities', 'claimActivities'
       ];
     }
@@ -119,11 +119,11 @@ service cloud.firestore {
         ) || (
           collectionName in ['clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
             'documents', 'communications', 'messages', 'notifications', 'activities',
-            'relationships', 'clientActivities', 'policyActivities', 'claimActivities']
+            'relationships', 'operationAttachments', 'clientActivities', 'policyActivities', 'claimActivities']
           && activeStaff()
         ) || (
-          collectionName in ['operations', 'operationEvents']
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
+          collectionName == 'operations'
+          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'operations'])
         ) || (
           collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
           && privileged()
