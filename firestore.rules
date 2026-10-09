@@ -30,7 +30,7 @@ service cloud.firestore {
         && (
           isMembershipEnforced()
             ? activeMembership(orgId)
-            : (!exists(memberPath(orgId)) || activeMembership(orgId))
+            : (exists(memberPath(orgId)) ? activeMembership(orgId) : true)
         );
     }
     // New/migrated profiles use the active membership document as the role
@@ -38,19 +38,15 @@ service cloud.firestore {
     // until a controlled, non-destructive membership migration marks them strict.
     function roleIs(roles) {
       return hasProfile()
+        && me().organizationId is string
         && (
-          (
-            me().organizationId is string
-            && (isMembershipEnforced() || exists(memberPath(me().organizationId)))
-            && activeMembership(me().organizationId)
-            && get(memberPath(me().organizationId)).data.role in roles
-          )
-          || (
-            !isMembershipEnforced()
-            && me().organizationId is string
-            && !exists(memberPath(me().organizationId))
-            && me().role in roles
-          )
+          isMembershipEnforced()
+            ? (activeMembership(me().organizationId)
+              && get(memberPath(me().organizationId)).data.role in roles)
+            : (exists(memberPath(me().organizationId))
+              ? (activeMembership(me().organizationId)
+                && get(memberPath(me().organizationId)).data.role in roles)
+              : me().role in roles)
         );
     }
     function privileged() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']); }
@@ -146,82 +142,57 @@ service cloud.firestore {
       ]);
     }
     function canCreateRecord(collectionName) {
-      return (
-          financialCollection(collectionName)
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'finance'])
-        ) || (
-          quoteOrPolicyCollection(collectionName)
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
-        ) || (
-          collectionName == 'claims'
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
-        ) || (
-          catalogueCollection(collectionName)
-          && orgManager()
-        ) || (
-          collectionName in ['clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
-            'documents', 'communications', 'messages', 'notifications', 'activities',
-            'relationships', 'operationAttachments', 'clientActivities', 'policyActivities', 'claimActivities']
-          && activeStaff()
-        ) || (
-          collectionName == 'operations'
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
-        ) || (
-          collectionName == 'operationEvents'
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
-        ) || (
-          collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
-          && privileged()
-        );
+      return financialCollection(collectionName)
+        ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'finance'])
+        : quoteOrPolicyCollection(collectionName)
+          ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
+          : collectionName == 'claims'
+            ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
+            : catalogueCollection(collectionName)
+              ? orgManager()
+              : collectionName in ['clients', 'leads', 'leadActivities', 'tasks', 'calendar_events',
+                  'documents', 'communications', 'messages', 'notifications', 'activities',
+                  'relationships', 'operationAttachments', 'clientActivities', 'policyActivities', 'claimActivities']
+                ? activeStaff()
+                : collectionName == 'operations'
+                  ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations'])
+                  : collectionName == 'operationEvents'
+                    ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker', 'operations', 'claimsOfficer'])
+                    : collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
+                      ? privileged()
+                      : false;
     }
     function canUpdateRecord(collectionName) {
-      return (
-          financialCollection(collectionName)
-          && (
-            privileged()
-            || (roleIs(['finance']) && financeAllowedChanges())
-          )
-        ) || (
-          quoteOrPolicyCollection(collectionName)
-          && (
-            privileged()
-            || (roleIs(['manager', 'broker', 'operations']) && noPolicyFinancialChanges())
-          )
-        ) || (
-          collectionName == 'claims'
-          && (
-            privileged()
-            || (roleIs(['finance']) && claimFinanceAllowedChanges())
-            || (roleIs(['manager', 'broker', 'operations', 'claimsOfficer']) && noClaimSettlementChanges())
-          )
-        ) || (
-          catalogueCollection(collectionName)
-          && orgManager()
-        ) || (
-          collectionName in ['clients', 'leads', 'tasks', 'calendar_events',
-            'documents', 'communications', 'messages', 'notifications', 'relationships']
-          && activeStaff()
-        ) || (
-          collectionName == 'operations'
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'operations'])
-        ) || (
-          collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
-          && privileged()
-        );
+      return financialCollection(collectionName)
+        ? (privileged() ? true : (roleIs(['finance']) && financeAllowedChanges()))
+        : quoteOrPolicyCollection(collectionName)
+          ? (privileged() ? true : (roleIs(['manager', 'broker', 'operations']) && noPolicyFinancialChanges()))
+          : collectionName == 'claims'
+            ? (privileged()
+              ? true
+              : (roleIs(['finance'])
+                ? claimFinanceAllowedChanges()
+                : (roleIs(['manager', 'broker', 'operations', 'claimsOfficer']) && noClaimSettlementChanges())))
+            : catalogueCollection(collectionName)
+              ? orgManager()
+              : collectionName in ['clients', 'leads', 'tasks', 'calendar_events',
+                  'documents', 'communications', 'messages', 'notifications', 'relationships']
+                ? activeStaff()
+                : collectionName == 'operations'
+                  ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'operations'])
+                  : collectionName in ['subscriptions', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers']
+                    ? privileged()
+                    : false;
     }
     function canDeleteRecord(collectionName) {
-      return (
-          collectionName in ['clients', 'leads', 'tasks', 'calendar_events', 'communications', 'messages']
-          && roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker'])
-        ) || (
-          collectionName == 'documents'
-          && sameOrg(resource.data.organizationId)
-          && (
-            privileged()
-            || roleIs(['manager', 'operations'])
-            || (resource.data.keys().hasAny(['uploadedBy']) && resource.data.uploadedBy == request.auth.uid)
-          )
-        );
+      return collectionName in ['clients', 'leads', 'tasks', 'calendar_events', 'communications', 'messages']
+        ? roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager', 'broker'])
+        : collectionName == 'documents'
+          ? (privileged()
+            ? true
+            : (roleIs(['manager', 'operations'])
+              || (resource.data.keys().hasAny(['uploadedBy']) && resource.data.uploadedBy == request.auth.uid)))
+          : false;
     }
 
     match /users/{uid} {
