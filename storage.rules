@@ -16,14 +16,24 @@ service firebase.storage {
         && firestore.get(userPath()).data.status == 'active'
         && firestore.get(userPath()).data.organizationId == orgId;
     }
-    function memberOf(orgId) {
-      return activeProfile(orgId)
-        && firestore.exists(memberPath(orgId))
+    function activeMemberRecord(orgId) {
+      return firestore.exists(memberPath(orgId))
         && firestore.get(memberPath(orgId)).data.status == 'active'
         && firestore.get(memberPath(orgId)).data.uid == request.auth.uid;
     }
+    function memberOf(orgId) {
+      return activeProfile(orgId)
+        && (
+          firestore.get(userPath()).data.membershipEnforced == true
+            ? activeMemberRecord(orgId)
+            : (!firestore.exists(memberPath(orgId)) || activeMemberRecord(orgId))
+        );
+    }
     function memberRole(orgId) {
-      return firestore.get(memberPath(orgId)).data.role;
+      return (firestore.get(userPath()).data.membershipEnforced == true
+        || firestore.exists(memberPath(orgId)))
+        ? firestore.get(memberPath(orgId)).data.role
+        : firestore.get(userPath()).data.role;
     }
     function canUpload(orgId) {
       return memberOf(orgId)
