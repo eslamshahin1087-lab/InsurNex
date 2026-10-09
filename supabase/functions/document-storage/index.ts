@@ -82,56 +82,63 @@ async function verifyMembership(projectId: string, organizationId: string, uid: 
   return { role: member.role as string };
 }
 
-async function findAttachmentRecord(projectId: string, organizationId: string, path: string, token: string) {
+async function findAttachmentRecord(projectId: string, organizationId: string, path: string, token: string, uploaderId: string | null) {
+  const records: Record<string, unknown>[] = [];
   for (const collectionName of ['documents', 'operationAttachments']) {
     const response = await fetch(
       `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents:runQuery`,
       {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        structuredQuery: {
-          from: [{ collectionId: collectionName }],
-          where: {
-            compositeFilter: {
-              op: 'AND',
-              filters: [
-                {
-                  fieldFilter: {
-                    field: { fieldPath: 'organizationId' },
-                    op: 'EQUAL',
-                    value: { stringValue: organizationId },
-                  },
-                },
-                {
-                  fieldFilter: {
-                    field: { fieldPath: 'storagePath' },
-                    op: 'EQUAL',
-                    value: { stringValue: path },
-                  },
-                },
-              ],
-            },
-          },
-          limit: 2,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      }),
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: collectionName }],
+            where: {
+              compositeFilter: {
+                op: 'AND',
+                filters: [
+                  {
+                    fieldFilter: {
+                      field: { fieldPath: 'organizationId' },
+                      op: 'EQUAL',
+                      value: { stringValue: organizationId },
+                    },
+                  },
+                  {
+                    fieldFilter: {
+                      field: { fieldPath: 'storagePath' },
+                      op: 'EQUAL',
+                      value: { stringValue: path },
+                    },
+                  },
+                ],
+              },
+            },
+            limit: 2,
+          },
+        }),
       },
     );
     if (!response.ok) throw new Error('FILE_METADATA_AUTHORIZATION_CHECK_FAILED');
     const results = await response.json();
-    const documents = (Array.isArray(results) ? results : [])
+    records.push(...(Array.isArray(results) ? results : [])
       .filter((entry: any) => entry?.document)
-      .map((entry: any) => firestoreData(entry.document));
-    const match = documents.find((record: any) =>
-      record.organizationId === organizationId && record.storagePath === path
-    );
-    if (match) return match;
+      .map((entry: any) => firestoreData(entry.document))
+      .filter((record: any) => record.organizationId === organizationId && record.storagePath === path));
   }
-  return null;
+
+  // Reject ambiguous/duplicated metadata instead of choosing an arbitrary
+  // record, which could otherwise let a forged duplicate change file ownership.
+  if (uploaderId) {
+    const ownedRecords = records.filter((record) => record.uploadedBy === uploaderId);
+    return ownedRecords.length === 1 && records.every((record) => record.uploadedBy === uploaderId)
+      ? ownedRecords[0]
+      : null;
+  }
+  return records.length === 1 ? records[0] : null;
 }
 
 async function verifyParentResource(projectId: string, organizationId: string, pathInfo: NonNullable<ReturnType<typeof classifyStoragePath>>, token: string) {
@@ -183,7 +190,7 @@ Deno.serve(async req => {
     }
 
     if (action === 'delete' || action === 'sign-download') {
-      const record = await findAttachmentRecord(projectId, organizationId, path, token);
+      const record = await findAttachmentRecord(projectId, organizationId, path, token, pathInfo.uploaderId);
       if (!authorizeRecordAction({
         action,
         organizationId,
