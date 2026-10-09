@@ -233,10 +233,8 @@ service cloud.firestore {
       allow read: if collectionName != 'users'
         && collectionName != 'organizations'
         && knownBusinessCollection(collectionName)
-        && (
-          (adminOnlyCollection(collectionName) && orgManager())
-          || (!adminOnlyCollection(collectionName) && sameOrg(resource.data.organizationId))
-        );
+        && sameOrg(resource.data.organizationId)
+        && (!adminOnlyCollection(collectionName) || orgManager());
       allow create: if collectionName != 'users'
         && collectionName != 'organizations'
         && knownBusinessCollection(collectionName)
