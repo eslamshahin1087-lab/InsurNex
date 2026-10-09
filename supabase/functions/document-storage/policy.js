@@ -178,6 +178,17 @@ export function resolveUniqueAttachmentRecord(records, organizationId, path, upl
   return record;
 }
 
+export function resolveDocumentRelation(pathInfo, relatedType, relatedId) {
+  if (!pathInfo || pathInfo.kind !== 'documentCenter') return null;
+  const type = typeof relatedType === 'string' && relatedType ? relatedType : 'general';
+  const id = typeof relatedId === 'string' ? relatedId : '';
+  if (type === 'general') return id ? null : { collectionName: null, documentId: null };
+  const relatedCollections = { client: 'clients', policy: 'policies', claim: 'claims' };
+  const collectionName = relatedCollections[type];
+  if (!collectionName || !id || id.includes('/')) return null;
+  return { collectionName, documentId: id };
+}
+
 export function parentRecordPath(pathInfo) {
   if (!pathInfo) return null;
   if (pathInfo.kind === 'document') return { collectionName: 'clients', documentId: pathInfo.resourceId };
