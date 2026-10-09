@@ -36,3 +36,17 @@ project-tree.txt
 *.bak
 operations-audit.txt
 README-V1.2.txt
+
+# --- Environment files ---
+.env
+.env.local
+.env.*.local
+
+# --- Patch and rollback scripts ---
+apply-*.cmd
+rollback-*.cmd
+apply-*.ps1
+
+# --- Backups and duplicates ---
+README.txt
+patch/

@@ -1,1 +1,0 @@
-.med41-benchmark{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:16px;border:1px solid #bcdfe1;border-radius:18px;background:rgba(8,128,136,.06)}.med41-benchmark h2,.med41-benchmark small{grid-column:1/-1}.med41-benchmark span{padding:9px;border-radius:11px;background:var(--surface,#fff);font-weight:700}.med41-benchmark small{opacity:.68}

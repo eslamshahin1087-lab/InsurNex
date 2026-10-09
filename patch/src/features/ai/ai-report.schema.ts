@@ -1,2 +1,0 @@
-export type AIInsuranceNarrative={summary:string;risks:string[];opportunities:string[];actions:string[];confidence:'low'|'medium'|'high';dataGaps:string[]};
-export const AI_INSURANCE_RULES=`حلل فقط الأرقام المجمعة المقدمة. لا تخترع بيانات. افصل الحقائق عن التوصيات. لا تقدم تشخيصًا أو علاجًا طبيًا. إذا غابت earned premium أو incurred claims والاحتياطيات فلا تسم المؤشر Loss Ratio اكتواري نهائي. أعد JSON منظم فقط.`;
