@@ -47,7 +47,7 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
   async upload(file, context) {
     this.validate(file);
     const unique = crypto.randomUUID();
-    const path = `organizations/${context.organizationId}/clients/${context.clientId}/${context.area || 'onboarding'}/${unique}-${safeName(file.name)}`;
+    const path = `organizations/${context.organizationId}/clients/${context.clientId}/${context.area || 'onboarding'}/${context.userId}/${unique}-${safeName(file.name)}`;
     const payload = await invoke<{ ok: true; token: string; path: string }>('sign-upload', {
       organizationId: context.organizationId,
       path,
@@ -72,3 +72,50 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
     return payload.signedUrl;
   },
 };
+
+const OPERATION_MAX_SIZE = 20 * 1024 * 1024;
+const OPERATION_MIME_BY_EXTENSION: Record<string, string> = {
+  pdf: 'application/pdf',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  csv: 'text/csv',
+};
+const OPERATION_TYPES = new Set(Object.values(OPERATION_MIME_BY_EXTENSION));
+
+export async function uploadOperationsAttachment(
+  file: File,
+  context: { organizationId: string; operationId: string; userId: string; userToken: string },
+) {
+  if (file.size <= 0) throw new Error('EMPTY_FILE');
+  if (file.size > OPERATION_MAX_SIZE) throw new Error('FILE_TOO_LARGE');
+  const extension = file.name.split('.').pop()?.toLowerCase() || '';
+  const expectedType = OPERATION_MIME_BY_EXTENSION[extension];
+  if (!expectedType) throw new Error('FILE_TYPE_NOT_ALLOWED');
+  if (file.type && file.type !== expectedType && !(extension === 'csv' && file.type === 'application/csv')) {
+    throw new Error('FILE_TYPE_EXTENSION_MISMATCH');
+  }
+  if (!OPERATION_TYPES.has(expectedType)) throw new Error('FILE_TYPE_NOT_ALLOWED');
+
+  const contentType = expectedType;
+  const path = `organizations/${context.organizationId}/operations/${context.operationId}/${context.userId}/${crypto.randomUUID()}-${safeName(file.name)}`;
+  const payload = await invoke<{ ok: true; token: string; path: string }>('sign-upload', {
+    organizationId: context.organizationId,
+    path,
+    contentType,
+    size: file.size,
+  }, context.userToken);
+  const client = configured();
+  const { error } = await client.storage.from(bucket).uploadToSignedUrl(payload.path, payload.token, file, {
+    contentType,
+    cacheControl: '3600',
+  });
+  if (error) throw new Error(`DOCUMENT_UPLOAD_FAILED:${error.message}`);
+  return {
+    provider: 'supabase' as const,
+    bucket,
+    path: payload.path,
+    originalFileName: file.name,
+    contentType,
+    size: file.size,
+  };
+}
