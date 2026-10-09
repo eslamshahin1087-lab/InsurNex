@@ -150,6 +150,19 @@ export function authorizeRecordAction({ action, organizationId, path, pathInfo, 
   return false;
 }
 
+export function resolveUniqueAttachmentRecord(records, organizationId, path, uploaderId = null) {
+  const matching = records.filter((record) =>
+    record
+    && record.organizationId === organizationId
+    && record.storagePath === path
+    && (!record.storageProvider || record.storageProvider === 'supabase')
+  );
+  if (matching.length !== 1) return null;
+  const record = matching[0];
+  if (uploaderId && record.uploadedBy !== uploaderId) return null;
+  return record;
+}
+
 export function parentRecordPath(pathInfo) {
   if (!pathInfo) return null;
   return pathInfo.kind === 'document'
