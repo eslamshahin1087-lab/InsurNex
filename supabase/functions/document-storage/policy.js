@@ -173,3 +173,9 @@ export function parentRecordPath(pathInfo) {
 export function roleCanUpload(role) {
   return UPLOAD_ROLES.has(role);
 }
+
+export function resolveActiveMembership({ profile, member, organizationId, uid }) {
+  if (!profile || profile.status !== 'active' || profile.organizationId !== organizationId) return null;
+  if (!member || member.uid !== uid || member.status !== 'active' || typeof member.role !== 'string') return null;
+  return { role: member.role };
+}
