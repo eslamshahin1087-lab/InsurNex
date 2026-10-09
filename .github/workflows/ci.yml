@@ -21,5 +21,5 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Firestore security rules regression tests (demo emulator only)
-        run: npx --yes firebase-tools emulators:exec --project demo-insurnex --only auth,firestore "GCLOUD_PROJECT=demo-insurnex node scripts/firestore-rules-test.mjs"
+      - name: Firestore and Storage security regression tests (demo emulators only)
+        run: npx --yes firebase-tools emulators:exec --project demo-insurnex --only auth,firestore,storage "GCLOUD_PROJECT=demo-insurnex node scripts/firestore-rules-test.mjs && GCLOUD_PROJECT=demo-insurnex node scripts/storage-rules-test.mjs"
