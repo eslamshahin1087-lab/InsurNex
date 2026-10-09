@@ -401,9 +401,9 @@ service cloud.firestore {
         && collectionName != 'organizations'
         && knownBusinessCollection(collectionName)
         && sameOrg(resource.data.organizationId)
-        && (collectionName not in [
+        && (!(collectionName in [
           'subscriptions', 'audit_logs', 'settings', 'teams', 'roles', 'permissions', 'organizationMembers'
-        ] || orgManager());
+        ]) || orgManager());
       allow create: if genericBusinessCollection(collectionName)
         && sameOrg(request.resource.data.organizationId)
         && request.resource.data.organizationId is string
