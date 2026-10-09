@@ -125,21 +125,27 @@ export function canManageStorage(role) {
 }
 
 export function authorizeRecordAction({ action, organizationId, path, pathInfo, role, uid, record }) {
-  if (!pathInfo || !UPLOAD_ROLES.has(role) && role !== 'viewer') return false;
+  if (!pathInfo || (!UPLOAD_ROLES.has(role) && role !== 'viewer')) return false;
+  const recordMatchesPath = Boolean(record
+    && record.organizationId === organizationId
+    && record.storagePath === path
+    && (!pathInfo.uploaderId || record.uploadedBy === pathInfo.uploaderId)
+    && (!record.storageProvider || record.storageProvider === 'supabase'));
   if (action === 'sign-download') {
-    return Boolean(record
-      && record.organizationId === organizationId
-      && record.storagePath === path);
+    return recordMatchesPath;
   }
   if (action === 'delete') {
-    if (record) {
-      return record.organizationId === organizationId
-        && record.storagePath === path
-        && (record.uploadedBy === uid || canManageStorage(role));
+    if (recordMatchesPath) {
+      // For UID-scoped paths, ownership is verifiable from both path and
+      // immutable uploadedBy metadata. Legacy paths can only be deleted by
+      // file managers because their path cannot prove uploader identity.
+      if (!pathInfo.legacy && pathInfo.uploaderId === uid && record.uploadedBy === uid) return true;
+      if (canManageStorage(role)) return true;
+      return false;
     }
-    // Cleanup of a newly uploaded object is safe only when the object path
-    // includes this exact UID and the caller has upload permission.
-    return pathInfo.uploaderId === uid && UPLOAD_ROLES.has(role) && !pathInfo.legacy;
+    // Cleanup of an upload that failed before its Firestore metadata write:
+    // only the original uploader can delete a new UID-scoped object.
+    return !record && pathInfo.uploaderId === uid && UPLOAD_ROLES.has(role) && !pathInfo.legacy;
   }
   return false;
 }
