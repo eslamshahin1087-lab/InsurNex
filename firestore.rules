@@ -9,6 +9,11 @@ service cloud.firestore {
     }
     function hasProfile() { return signedIn() && exists(userPath()); }
     function me() { return get(userPath()).data; }
+    function isMembershipEnforced() {
+      return hasProfile()
+        && me().keys().hasAny(['membershipEnforced'])
+        && me().membershipEnforced == true;
+    }
     function activeMembership(orgId) {
       return signedIn()
         && exists(memberPath(orgId))
@@ -19,16 +24,23 @@ service cloud.firestore {
       return hasProfile()
         && me().status == 'active'
         && me().organizationId == orgId
-        && activeMembership(orgId);
+        // Strict membership is enabled on new profiles and on migrated profiles.
+        // Legacy profiles remain readable until their existing membership data
+        // has been audited, avoiding an accidental lockout during rollout.
+        && (!isMembershipEnforced() || activeMembership(orgId));
     }
-    // The organization membership is authoritative for privileges. This way,
-    // role changes and membership suspensions take effect without changing UIDs
-    // or relying on client-controlled profile role fields.
+    // New/migrated profiles use the active membership document as the role
+    // authority. Untagged legacy profiles retain their protected existing role
+    // until a controlled, non-destructive membership migration marks them strict.
     function roleIs(roles) {
       return hasProfile()
-        && me().organizationId is string
-        && activeMembership(me().organizationId)
-        && get(memberPath(me().organizationId)).data.role in roles;
+        && (
+          (isMembershipEnforced()
+            && me().organizationId is string
+            && activeMembership(me().organizationId)
+            && get(memberPath(me().organizationId)).data.role in roles)
+          || (!isMembershipEnforced() && me().role in roles)
+        );
     }
     function privileged() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin']); }
     function orgManager() { return roleIs(['owner', 'admin', 'organizationOwner', 'organizationAdmin', 'manager']); }
@@ -211,6 +223,7 @@ service cloud.firestore {
         && request.resource.data.role == 'owner'
         && request.resource.data.status == 'active'
         && request.resource.data.organizationId is string
+        && request.resource.data.membershipEnforced == true
         && ownsOrganizationAfterWrite(request.resource.data.organizationId);
       allow update: if signedIn()
         && request.auth.uid == uid
@@ -218,7 +231,14 @@ service cloud.firestore {
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status
         && (!resource.data.keys().hasAny(['createdAt'])
-          || request.resource.data.createdAt == resource.data.createdAt);
+          || request.resource.data.createdAt == resource.data.createdAt)
+        && (
+          (!resource.data.keys().hasAny(['membershipEnforced'])
+            && !request.resource.data.keys().hasAny(['membershipEnforced']))
+          || (resource.data.keys().hasAny(['membershipEnforced'])
+            && request.resource.data.keys().hasAny(['membershipEnforced'])
+            && request.resource.data.membershipEnforced == resource.data.membershipEnforced)
+        );
       allow delete: if false;
     }
 
