@@ -4,6 +4,7 @@ import {
   authorizeUpload,
   classifyStoragePath,
   parentRecordPath,
+  resolveUniqueAttachmentRecord,
 } from './policy.js';
 
 const corsHeaders = {
@@ -130,15 +131,8 @@ async function findAttachmentRecord(projectId: string, organizationId: string, p
       .filter((record: any) => record.organizationId === organizationId && record.storagePath === path));
   }
 
-  // Reject ambiguous/duplicated metadata instead of choosing an arbitrary
-  // record, which could otherwise let a forged duplicate change file ownership.
-  if (uploaderId) {
-    const ownedRecords = records.filter((record) => record.uploadedBy === uploaderId);
-    return ownedRecords.length === 1 && records.every((record) => record.uploadedBy === uploaderId)
-      ? ownedRecords[0]
-      : null;
-  }
-  return records.length === 1 ? records[0] : null;
+  // Reject ambiguous/duplicated metadata instead of choosing an arbitrary record.
+  return resolveUniqueAttachmentRecord(records, organizationId, path, uploaderId);
 }
 
 async function verifyParentResource(projectId: string, organizationId: string, pathInfo: NonNullable<ReturnType<typeof classifyStoragePath>>, token: string) {
