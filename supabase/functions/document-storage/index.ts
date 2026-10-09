@@ -84,7 +84,9 @@ async function verifyMembership(projectId: string, organizationId: string, uid: 
 
 async function findAttachmentRecord(projectId: string, organizationId: string, path: string, token: string) {
   for (const collectionName of ['documents', 'operationAttachments']) {
-    const response = await fetch(firestoreDocumentUrl(projectId, `${collectionName}:runQuery`), {
+    const response = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents:runQuery`,
+      {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -117,7 +119,8 @@ async function findAttachmentRecord(projectId: string, organizationId: string, p
           limit: 2,
         },
       }),
-    });
+      },
+    );
     if (!response.ok) throw new Error('FILE_METADATA_AUTHORIZATION_CHECK_FAILED');
     const results = await response.json();
     const documents = (Array.isArray(results) ? results : [])
