@@ -16,3 +16,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - name: Firestore security rules regression tests (demo emulator only)
+        run: npx --yes firebase-tools emulators:exec --project demo-insurnex --only auth,firestore "GCLOUD_PROJECT=demo-insurnex node scripts/firestore-rules-test.mjs"
