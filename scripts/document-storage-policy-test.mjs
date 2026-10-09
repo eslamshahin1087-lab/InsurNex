@@ -52,11 +52,17 @@ for (const path of [
   `organizations/${org}/clients/../onboarding/${uid}/file.pdf`,
   `organizations/${org}/clients/${clientId}/onboarding/${uid}/../file.pdf`,
   `organizations/${org}/clients/${clientId}/onboarding/%2fadmin/file.pdf`,
-  `organizations/${org}/operations/${operationId}/${otherUid}/file.pdf`,
 ]) {
   assert.equal(classifyStoragePath(path, org, uid), null, 'unsafe or foreign path must be rejected: ' + path);
 }
-pass('absolute, traversal, encoded-slash, and foreign uploader paths are rejected');
+pass('absolute, traversal, and encoded-slash paths are rejected');
+
+const foreignUploaderPath = `organizations/${org}/operations/${operationId}/${otherUid}/file.pdf`;
+const foreignUploaderInfo = classifyStoragePath(foreignUploaderPath, org, uid);
+assert.equal(foreignUploaderInfo?.kind, 'operation');
+deny(authorizeUpload({ role: 'operations', pathInfo: foreignUploaderInfo, uid, size: 1024, contentType: pdf }),
+  'a caller cannot upload into another user UID folder');
+pass('shared files can be classified for reads but their uploader path remains immutable');
 
 const legacyDocumentPath = `organizations/${org}/clients/${clientId}/onboarding/old-file.pdf`;
 const legacyDocumentInfo = classifyStoragePath(legacyDocumentPath, org, uid);
