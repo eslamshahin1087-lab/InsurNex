@@ -16,13 +16,12 @@ import {
 } from '../features/relationships/relationship.service';
 
 type Filter = 'all' | 'active' | 'pending' | 'expired' | 'cancelled';
-
 const FILTERS: Filter[] = ['all', 'active', 'pending', 'expired', 'cancelled'];
 
 const FILTER_LABELS: Record<Filter, string> = {
   all: 'الكل',
-  active: 'نشطة',
-  pending: 'قيد الإصدار',
+  active: 'سارية',
+  pending: 'قيد الانتظار',
   expired: 'منتهية',
   cancelled: 'ملغاة',
 };
@@ -33,7 +32,7 @@ const LINE_LABELS: Record<string, string> = {
   property: 'ممتلكات',
   marine: 'بحري',
   life: 'حياة',
-  liability: 'مسؤوليات',
+  liability: 'مسؤولية',
   other: 'أخرى',
 };
 
@@ -55,19 +54,23 @@ function statusLabel(status: string) {
   return FILTER_LABELS[status as Filter] || status || 'غير محدد';
 }
 
+function statusTone(status: string) {
+  if (status === 'active') return 'success';
+  if (status === 'pending') return 'warning';
+  if (status === 'expired') return 'danger';
+  if (status === 'cancelled' || status === 'canceled') return 'neutral';
+  return 'neutral';
+}
+
 function lineLabel(line: string) {
-  return LINE_LABELS[line] || line || 'فرع غير محدد';
+  return LINE_LABELS[line] || line || 'نوع غير محدد';
 }
 
 function formatDate(value: string) {
   if (!value) return 'غير محدد';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ar-EG', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
+  return new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
 }
 
 export default function PoliciesPage() {
@@ -80,237 +83,147 @@ export default function PoliciesPage() {
   const [filter, setFilter] = useState<Filter>('all');
 
   const loadPolicies = useCallback(async () => {
-    if (!profile) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
+    if (!profile) { setItems([]); setLoading(false); return; }
+    setLoading(true); setError('');
     try {
-      const data = await listPoliciesForOrganization(profile.organizationId);
-      setItems(data);
-    } catch (errorValue) {
-      console.error('Failed to load policies', errorValue);
+      setItems(await listPoliciesForOrganization(profile.organizationId));
+    } catch (err) {
+      console.error('Failed to load policies', err);
       setError('تعذر تحميل الوثائق. حاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
   }, [profile]);
 
-  useEffect(() => {
-    void loadPolicies();
-  }, [loadPolicies]);
+  useEffect(() => { void loadPolicies(); }, [loadPolicies]);
 
-  const stats = useMemo(() => {
-    const active = items.filter((item) => item.status === 'active').length;
-    const pending = items.filter((item) => item.status === 'pending').length;
-    const expired = items.filter((item) => item.status === 'expired').length;
-    const totalPremium = items.reduce((sum, item) => sum + Number(item.premium || 0), 0);
-
-    return {
-      total: items.length,
-      active,
-      pending,
-      expired,
-      totalPremium,
-    };
-  }, [items]);
+  const stats = useMemo(() => ({
+    total: items.length,
+    active: items.filter((i) => i.status === 'active').length,
+    pending: items.filter((i) => i.status === 'pending').length,
+    expired: items.filter((i) => i.status === 'expired').length,
+    totalPremium: items.reduce((s, i) => s + Number(i.premium || 0), 0),
+  }), [items]);
 
   const visible = useMemo(() => {
-    const queryText = search.trim().toLowerCase();
-
-    return items.filter((item) => {
-      const statusMatches =
-        filter === 'all' ||
-        item.status === filter ||
-        (filter === 'cancelled' && item.status === 'canceled');
-
-      if (!statusMatches) return false;
-      if (!queryText) return true;
-
-      const searchableText = [
-        item.policyNumber,
-        item.clientName,
-        item.insurerName,
-        lineLabel(item.line),
-        item.line,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      return searchableText.includes(queryText);
+    const q = search.trim().toLowerCase();
+    return items.filter((i) => {
+      const ok = filter === 'all' || i.status === filter || (filter === 'cancelled' && i.status === 'canceled');
+      if (!ok) return false;
+      if (!q) return true;
+      return [i.policyNumber, i.clientName, i.insurerName, lineLabel(i.line), i.line]
+        .filter(Boolean).join(' ').toLowerCase().includes(q);
     });
   }, [items, search, filter]);
 
-  const portfolioCurrency = items[0]?.currency || 'EGP';
+  const currency = items[0]?.currency || 'EGP';
 
   return (
-    <main className="mobile-page p20-page" dir="rtl">
-      <header className="p20-heading">
-        <div>
-          <span className="eyebrow">Policy Management</span>
-          <h1>الوثائق</h1>
-          <p>إدارة المحفظة التأمينية وربط العميل بشركة التأمين والتغطية.</p>
-        </div>
-
-        <button
-          className="floating-add"
-          type="button"
-          onClick={() => setShowCreate(true)}
-          aria-label="إضافة وثيقة"
-          title="إضافة وثيقة"
-        >
-          <Plus size={22} aria-hidden="true" />
-        </button>
-      </header>
-
-      <section className="p20-stats" aria-label="ملخص الوثائق">
-        <article>
-          <span><WalletCards /></span>
-          <small>الإجمالي</small>
-          <b>{stats.total}</b>
-        </article>
-
-        <article>
-          <span><ShieldCheck /></span>
-          <small>نشطة</small>
-          <b>{stats.active}</b>
-        </article>
-
-        <article>
-          <span><CalendarDays /></span>
-          <small>قيد الإصدار</small>
-          <b>{stats.pending}</b>
-        </article>
-
-        <article>
-          <span><CalendarDays /></span>
-          <small>منتهية</small>
-          <b>{stats.expired}</b>
-        </article>
-      </section>
-
-      <section className="p20-tools">
-        <div className="p20-search">
-          <Search aria-hidden="true" />
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="ابحث برقم الوثيقة أو العميل أو شركة التأمين"
-            aria-label="البحث في الوثائق"
-          />
-        </div>
-
-        <div className="p20-filters" aria-label="تصفية الوثائق حسب الحالة">
-          {FILTERS.map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={filter === item ? 'active' : ''}
-              onClick={() => setFilter(item)}
-            >
-              {FILTER_LABELS[item]}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="p20-list-section">
-        <header>
+    <main className="mobile-page" dir="rtl">
+      <div className="inx-container">
+        <header className="inx-section-head" style={{ marginTop: 0 }}>
           <div>
-            <h2>المحفظة</h2>
-            <small>{visible.length} وثيقة</small>
+            <span className="eyebrow">Policy Management</span>
+            <h2>الوثائق</h2>
+            <small style={{ color: 'var(--inx-muted)' }}>
+              إدارة محفظة الوثائق التأمينية وتتبع حالتها.
+            </small>
           </div>
-          <div className="p20-portfolio-total">
-            <CircleDollarSign size={18} aria-hidden="true" />
-            <span>إجمالي الأقساط</span>
-            <strong>{formatMoney(stats.totalPremium, portfolioCurrency)}</strong>
-          </div>
+          <button type="button" className="inx-icon-btn filled" onClick={() => setShowCreate(true)} aria-label="إضافة وثيقة">
+            <Plus size={20} />
+          </button>
         </header>
 
-        {error && (
-          <div className="p20-empty" role="alert">
-            <strong>{error}</strong>
-            <button type="button" className="secondary-button" onClick={() => void loadPolicies()}>
-              إعادة المحاولة
-            </button>
-          </div>
-        )}
+        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle"><WalletCards size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.total}</div>
+            <small className="inx-kpi-label">إجمالي الوثائق</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-success"><ShieldCheck size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.active}</div>
+            <small className="inx-kpi-label">سارية</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-warning"><CalendarDays size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.pending}</div>
+            <small className="inx-kpi-label">قيد الانتظار</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-danger"><CalendarDays size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.expired}</div>
+            <small className="inx-kpi-label">منتهية</small>
+          </article>
+        </div>
 
-        {!error && loading && (
-          <div className="p20-empty">جارٍ تحميل الوثائق...</div>
-        )}
+        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
+            <Search size={18} style={{ color: 'var(--inx-muted)' }} />
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="ابحث برقم الوثيقة، العميل، الشركة، نوع التغطية"
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
+          </div>
+          <div className="inx-chips">
+            {FILTERS.map((item) => (
+              <button key={item} type="button" className={`inx-chip ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)}>
+                {FILTER_LABELS[item]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="inx-section-head">
+          <h2>قائمة الوثائق</h2>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
+            {visible.length} وثيقة · {formatMoney(stats.totalPremium, currency)}
+          </small>
+        </div>
+
+        {error && <div className="inx-empty"><ShieldCheck size={28} /><b>{error}</b>
+          <button type="button" className="inx-btn inx-btn-secondary" onClick={() => void loadPolicies()}>إعادة المحاولة</button></div>}
+
+        {!error && loading && <div className="inx-empty">جاري تحميل الوثائق...</div>}
 
         {!error && !loading && visible.length === 0 && (
-          <div className="p20-empty">
-            <ShieldCheck size={28} aria-hidden="true" />
-            <strong>{items.length === 0 ? 'لا توجد وثائق حتى الآن' : 'لا توجد وثائق مطابقة'}</strong>
-            <p>
-              {items.length === 0
-                ? 'ابدأ بإضافة أول وثيقة إلى المحفظة التأمينية.'
-                : 'جرّب تغيير البحث أو اختيار حالة أخرى.'}
-            </p>
+          <div className="inx-empty">
+            <ShieldCheck size={28} />
+            <b>{items.length === 0 ? 'لا توجد وثائق مسجلة بعد' : 'لا توجد نتائج مطابقة'}</b>
             {items.length === 0 && (
-              <button type="button" className="primary-button" onClick={() => setShowCreate(true)}>
-                <Plus size={18} aria-hidden="true" />
-                إضافة وثيقة
+              <button type="button" className="inx-btn inx-btn-primary" onClick={() => setShowCreate(true)} style={{ marginTop: 8 }}>
+                <Plus size={16} /> إضافة وثيقة
               </button>
             )}
           </div>
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <div className="p20-list">
+          <ul className="inx-list">
             {visible.map((policy) => (
-              <article className="p20-card" key={policy.id}>
-                <div className="p20-icon">
-                  <ShieldCheck aria-hidden="true" />
-                </div>
-
-                <div className="p20-copy">
-                  <div>
-                    <b>{policy.policyNumber || 'وثيقة بدون رقم'}</b>
-                    <span className={'p20-status st-' + policy.status}>
-                      {statusLabel(policy.status)}
-                    </span>
+              <li key={policy.id}>
+                <div className="inx-list-item">
+                  <span className="inx-icon-circle tone-cyan"><ShieldCheck size={18} /></span>
+                  <div className="inx-list-copy">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <b style={{ marginBottom: 0 }}>{policy.policyNumber || 'وثيقة'}</b>
+                      <span className={`inx-badge inx-badge-${statusTone(policy.status)}`}>{statusLabel(policy.status)}</span>
+                    </div>
+                    <small style={{ marginBottom: 4 }}>{policy.clientName || 'عميل غير محدد'} · {policy.insurerName || 'شركة غير محددة'} · {lineLabel(policy.line)}</small>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><UserRound size={12} />{policy.clientName || 'غير محدد'}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={12} />{formatDate(policy.expiryDate)}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><CircleDollarSign size={12} />{formatMoney(policy.premium, policy.currency)}</span>
+                    </div>
                   </div>
-
-                  <strong>{policy.clientName || 'عميل غير محدد'}</strong>
-                  <small>
-                    {policy.insurerName || 'شركة غير محددة'} · {lineLabel(policy.line)}
-                  </small>
-
-                  <footer>
-                    <span>
-                      <UserRound aria-hidden="true" />
-                      {policy.clientName || 'غير محدد'}
-                    </span>
-                    <span>
-                      <CalendarDays aria-hidden="true" />
-                      {formatDate(policy.expiryDate)}
-                    </span>
-                    <span>{formatMoney(policy.premium, policy.currency)}</span>
-                  </footer>
                 </div>
-              </article>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </section>
+      </div>
 
       {showCreate && (
-        <PolicyForm
-          onCancel={() => setShowCreate(false)}
-          onDone={() => {
-            setShowCreate(false);
-            void loadPolicies();
-          }}
-        />
+        <PolicyForm onCancel={() => setShowCreate(false)} onDone={() => { setShowCreate(false); void loadPolicies(); }} />
       )}
     </main>
   );
