@@ -4,6 +4,7 @@ import { AuthProvider } from './features/auth/AuthProvider';
 import ProtectedRoute from './features/auth/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 import './App.css';
+import './theme/identity.css';
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));

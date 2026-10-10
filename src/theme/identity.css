@@ -1,0 +1,475 @@
+/* =====================================================================
+   InsurNex — Identity Design System
+   All colors use tokens; safe in both light and dark themes.
+   ===================================================================== */
+
+/* ---------- 1. Container ---------- */
+
+.inx-container {
+  padding: var(--inx-gap, 14px);
+  padding-bottom: 100px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ---------- 2. Cards ---------- */
+
+.inx-card {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius);
+  padding: 16px;
+  box-shadow: var(--inx-shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.inx-card-lg {
+  padding: 20px;
+  border-radius: var(--inx-radius-lg);
+  box-shadow: var(--inx-shadow);
+}
+
+.inx-card-hover:hover {
+  box-shadow: var(--inx-shadow);
+  transform: translateY(-1px);
+}
+
+.inx-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.inx-card-head h2,
+.inx-card-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--inx-text);
+}
+
+.inx-card-head small {
+  color: var(--inx-muted);
+  font-size: 12px;
+}
+
+/* ---------- 3. Section head ---------- */
+
+.inx-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  margin: 20px 0 12px;
+}
+
+.inx-section-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--inx-text);
+}
+
+.inx-section-head .inx-link {
+  color: var(--inx-blue);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inx-section-head .inx-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 4. Icon circle ---------- */
+
+.inx-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  flex-shrink: 0;
+}
+
+.inx-icon-circle-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+
+.inx-icon-circle-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.inx-icon-circle.tone-success { background: var(--inx-success-bg); color: var(--inx-success); }
+.inx-icon-circle.tone-warning { background: var(--inx-warning-bg); color: var(--inx-warning); }
+.inx-icon-circle.tone-danger  { background: var(--inx-danger-bg);  color: var(--inx-danger); }
+.inx-icon-circle.tone-navy    { background: var(--inx-navy-bg);    color: var(--inx-blue); }
+.inx-icon-circle.tone-cyan    { background: var(--inx-cyan-bg);    color: var(--inx-cyan); }
+
+/* ---------- 5. Badges / Status pills ---------- */
+
+.inx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--inx-radius-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.inx-badge-primary { background: var(--inx-info-bg); color: var(--inx-info); }
+.inx-badge-success { background: var(--inx-success-bg); color: var(--inx-success); }
+.inx-badge-warning { background: var(--inx-warning-bg); color: var(--inx-warning); }
+.inx-badge-danger  { background: var(--inx-danger-bg);  color: var(--inx-danger); }
+.inx-badge-navy    { background: var(--inx-navy-bg);    color: var(--inx-text); }
+.inx-badge-cyan    { background: var(--inx-cyan-bg);    color: var(--inx-cyan); }
+.inx-badge-neutral { background: var(--inx-neutral-bg); color: var(--inx-neutral-text); }
+
+/* ---------- 6. Buttons ---------- */
+
+.inx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--inx-radius);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.inx-btn:active { transform: scale(0.98); }
+.inx-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.inx-btn-primary {
+  background: var(--inx-gradient);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+}
+.inx-btn-primary:hover:not(:disabled) { box-shadow: 0 10px 24px rgba(37, 99, 235, 0.32); }
+
+.inx-btn-secondary {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  color: var(--inx-text);
+}
+.inx-btn-secondary:hover:not(:disabled) { background: var(--inx-bg); }
+
+.inx-btn-ghost {
+  background: transparent;
+  color: var(--inx-blue);
+}
+.inx-btn-ghost:hover:not(:disabled) { background: var(--inx-info-bg); }
+
+.inx-btn-danger {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+}
+.inx-btn-danger:hover:not(:disabled) {
+  background: var(--inx-danger-bg);
+  filter: brightness(0.95);
+}
+
+.inx-btn-sm {
+  padding: 7px 12px;
+  font-size: 12.5px;
+  border-radius: 10px;
+}
+
+.inx-btn-block { width: 100%; }
+
+/* Circular icon button */
+.inx-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--inx-border);
+  background: var(--inx-surface);
+  color: var(--inx-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.inx-icon-btn:hover {
+  background: var(--inx-bg);
+  border-color: var(--inx-blue);
+  color: var(--inx-blue);
+}
+
+.inx-icon-btn.filled {
+  background: var(--inx-gradient);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+}
+
+/* ---------- 7. Filter chips ---------- */
+
+.inx-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+
+.inx-chips::-webkit-scrollbar { display: none; }
+
+.inx-chip {
+  padding: 7px 14px;
+  border-radius: var(--inx-radius-pill);
+  border: 1px solid var(--inx-border);
+  background: var(--inx-surface);
+  color: var(--inx-text-soft);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.inx-chip:hover { border-color: var(--inx-blue); color: var(--inx-blue); }
+
+.inx-chip.active {
+  background: var(--inx-navy);
+  border-color: var(--inx-navy);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .inx-chip.active {
+  background: var(--inx-blue);
+  border-color: var(--inx-blue);
+  color: #0a1628;
+}
+
+/* ---------- 8. KPI cards ---------- */
+
+.inx-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.inx-kpi {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--inx-shadow-sm);
+}
+
+.inx-kpi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inx-kpi-label {
+  color: var(--inx-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.inx-kpi-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--inx-text);
+  line-height: 1.1;
+}
+
+.inx-kpi-value small {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--inx-muted);
+  margin-inline-start: 4px;
+}
+
+.inx-kpi-delta {
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.inx-kpi-delta.up   { color: var(--inx-success); }
+.inx-kpi-delta.down { color: var(--inx-danger); }
+
+.inx-kpi-featured {
+  background: var(--inx-gradient);
+  color: #fff;
+  border: none;
+}
+
+.inx-kpi-featured .inx-kpi-label,
+.inx-kpi-featured .inx-kpi-value,
+.inx-kpi-featured .inx-kpi-value small {
+  color: #fff;
+}
+
+.inx-kpi-featured .inx-kpi-label { opacity: 0.85; }
+
+/* ---------- 9. List ---------- */
+
+.inx-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inx-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.inx-list-item:hover {
+  background: var(--inx-bg);
+  border-color: var(--inx-blue);
+}
+
+.inx-list-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.inx-list-copy b {
+  display: block;
+  font-size: 14px;
+  color: var(--inx-text);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.inx-list-copy small {
+  display: block;
+  font-size: 12px;
+  color: var(--inx-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inx-list-chevron {
+  color: var(--inx-muted);
+  flex-shrink: 0;
+}
+
+/* ---------- 10. Avatar ---------- */
+
+.inx-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.inx-avatar.tone-navy   { background: var(--inx-navy-bg);    color: var(--inx-blue); }
+.inx-avatar.tone-cyan   { background: var(--inx-cyan-bg);    color: var(--inx-cyan); }
+.inx-avatar.tone-success{ background: var(--inx-success-bg); color: var(--inx-success); }
+.inx-avatar.tone-warning{ background: var(--inx-warning-bg); color: var(--inx-warning); }
+
+/* ---------- 11. Progress bar ---------- */
+
+.inx-progress {
+  height: 6px;
+  border-radius: var(--inx-radius-pill);
+  background: var(--inx-border);
+  overflow: hidden;
+}
+
+.inx-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--inx-radius-pill);
+  background: var(--inx-gradient);
+  transition: width 0.3s;
+}
+
+/* ---------- 12. Empty state ---------- */
+
+.inx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--inx-muted);
+  font-size: 13px;
+  text-align: center;
+  background: var(--inx-bg);
+  border-radius: var(--inx-radius);
+  border: 1px dashed var(--inx-border);
+}
+
+.inx-empty svg {
+  color: var(--inx-blue);
+  opacity: 0.6;
+}
+
+/* ---------- 13. Divider ---------- */
+
+.inx-divider {
+  height: 1px;
+  background: var(--inx-border);
+  border: none;
+  margin: 16px 0;
+}
+
+/* ---------- 14. Responsive tweaks ---------- */
+
+@media (max-width: 480px) {
+  .inx-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .inx-kpi-value {
+    font-size: 20px;
+  }
+  .inx-card {
+    padding: 14px;
+  }
+}
