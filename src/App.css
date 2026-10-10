@@ -10,3 +10,21 @@
 .policy-list{display:grid}.policy-row{display:grid;grid-template-columns:44px 1.3fr .7fr auto;align-items:center;gap:12px;padding:14px 6px;border-top:1px solid #edf2f7}.policy-row:first-child{border-top:0}.policy-row strong,.policy-row small,.money b,.money small{display:block}.policy-row small,.money small{color:var(--inx-muted);margin-top:4px}.money{text-align:left}.inline-create>div{display:flex;gap:8px;align-items:end}.inline-create input{flex:1}.insurer-add{display:flex;gap:10px;margin-bottom:18px}.insurer-add input{flex:1;border:1px solid var(--inx-border);border-radius:12px;padding:12px;outline:0}.insurer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.insurer-card{border:1px solid var(--inx-border);border-radius:15px;padding:16px;display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:9px;color:var(--inx-navy)}.insurer-card svg{color:var(--inx-blue)}@media(max-width:760px){.policy-row{grid-template-columns:44px 1fr}.policy-row>.money,.policy-row>.status{grid-column:2}.money{text-align:right}.insurer-grid{grid-template-columns:1fr}.insurer-add{flex-direction:column}}
 
 .renewal-bands{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}.renewal-bands button{border:1px solid var(--inx-border);background:#fff;border-radius:15px;padding:14px;color:var(--inx-muted);cursor:pointer;text-align:right}.renewal-bands button strong{display:block;font-size:25px;color:var(--inx-navy);margin-top:6px}.renewal-bands button.selected{border-color:var(--inx-blue);background:#eef7ff}.renewal-list{display:grid}.renewal-row{display:grid;grid-template-columns:44px 1fr 150px auto;gap:12px;align-items:center;padding:14px 5px;border-top:1px solid #edf2f7}.renewal-row:first-child{border-top:0}.renewal-row strong,.renewal-row small,.renewal-date b,.renewal-date small{display:block}.renewal-row small,.renewal-date small{color:var(--inx-muted);margin-top:4px}.urgency{font-size:12px;font-weight:800;border-radius:999px;padding:6px 9px}.u-expired,.u-7{background:#fff0f0;color:#b42318}.u-30{background:#fff6e8;color:#a15c00}.u-45,.u-60{background:#fffbe6;color:#816400}.u-90{background:#eef6ff;color:#2366aa}.dash-renewal{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #edf2f7}.dash-renewal span b,.dash-renewal span small{display:block}.dash-renewal small{color:var(--inx-muted);margin-top:3px}.dash-renewal>strong{color:var(--inx-blue)}@media(max-width:760px){.renewal-bands{grid-template-columns:repeat(2,1fr)}.renewal-row{grid-template-columns:44px 1fr}.renewal-date,.renewal-row>.urgency{grid-column:2}}
+/* InsureFlow-inspired 6-item bottom navigation */
+.inx-tabbar-6 {
+  grid-template-columns: repeat(6, 1fr) !important;
+}
+.inx-tabbar-6 a {
+  padding: 6px 2px;
+  font-size: 10.5px;
+  gap: 2px;
+}
+.inx-tabbar-6 a svg {
+  width: 20px;
+  height: 20px;
+}
+@media (max-width: 380px) {
+  .inx-tabbar-6 a span {
+    font-size: 9.5px;
+  }
+}

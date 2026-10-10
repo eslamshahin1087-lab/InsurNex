@@ -1,4 +1,15 @@
-import { Bell, Home, LogOut, Moon, MoreHorizontal, ShieldCheck, Sparkles, Sun, Users } from 'lucide-react';
+import {
+  Bell,
+  Home,
+  LogOut,
+  Moon,
+  MoreHorizontal,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Users,
+} from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
 import { useAuth } from '../features/auth/auth-context';
@@ -8,6 +19,7 @@ const navigation = [
   ['/', 'الرئيسية', Home],
   ['/clients', 'CRM', Users],
   ['/policies', 'الوثائق', ShieldCheck],
+  ['/operations', 'العمليات', Settings2],
   ['/copilot', 'الذكاء', Sparkles],
 ] as const;
 
@@ -64,15 +76,18 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      <nav className="app-tabbar s8-tabbar" aria-label="التنقل الرئيسي">
+      <nav
+        className="app-tabbar s8-tabbar inx-tabbar-6"
+        aria-label="التنقل الرئيسي"
+      >
         {navigation.map(([to, label, Icon]) => (
           <NavLink key={to} to={to} end={to === '/'}>
-            <Icon size={22} />
+            <Icon size={21} />
             <span>{label}</span>
           </NavLink>
         ))}
         <NavLink to="/more">
-          <MoreHorizontal size={23} />
+          <MoreHorizontal size={22} />
           <span>المزيد</span>
         </NavLink>
       </nav>
