@@ -1,170 +1,307 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Bot, MessageSquare, Send } from 'lucide-react';
+import { useAuth } from '../features/auth/auth-context';
+import ChatMessage from '../features/copilot/ChatMessage';
+import ConversationSidebar from '../features/copilot/ConversationSidebar';
+import SuggestedPrompts from '../features/copilot/SuggestedPrompts';
 import {
-  Sparkles,
-  MessageSquare,
-  FileSearch,
-  TrendingUp,
-  ShieldCheck,
-} from 'lucide-react';
+  createConversation,
+  deleteConversation,
+  listConversations,
+  listMessages,
+  sendMessage,
+} from '../features/copilot/copilot.service';
+import {
+  buildTitleFromFirstMessage,
+  canSendMessage,
+} from '../features/copilot/copilot-utils';
+import type { CopilotConversation, CopilotMessage } from '../features/copilot/copilot.types';
+import { updateDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import '../theme/copilot.css';
 
 export default function CopilotPage() {
-  return (
-    <main className="mobile-page" dir="rtl">
-      <div className="inx-container">
-        <header className="inx-section-head">
-          <div>
-            <span className="eyebrow">Insurance Intelligence Layer</span>
-            <h2>InsurNex AI</h2>
-          </div>
-        </header>
+  const { profile, user } = useAuth();
+  const [conversations, setConversations] = useState<CopilotConversation[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<CopilotMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const [loadingConvs, setLoadingConvs] = useState(true);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [error, setError] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-        <div className="inx-card inx-card-lg" style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span className="inx-icon-circle inx-icon-circle-lg">
-              <Sparkles size={22} />
+  const activeConversation = useMemo(
+    () => conversations.find((c) => c.id === activeId) || null,
+    [conversations, activeId],
+  );
+
+  // Load conversations
+  const loadConversations = useCallback(async () => {
+    if (!profile?.organizationId || !user?.uid) {
+      setLoadingConvs(false);
+      return;
+    }
+    setLoadingConvs(true);
+    try {
+      const rows = await listConversations(profile.organizationId, user.uid);
+      setConversations(rows);
+    } catch (e) {
+      console.error('Failed to load conversations', e);
+      setError('تعذر تحميل المحادثات.');
+    } finally {
+      setLoadingConvs(false);
+    }
+  }, [profile?.organizationId, user?.uid]);
+
+  useEffect(() => {
+    void loadConversations();
+  }, [loadConversations]);
+
+  // Load messages for active conversation
+  useEffect(() => {
+    if (!activeId || !profile?.organizationId) {
+      setMessages([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingMsgs(true);
+    (async () => {
+      try {
+        const rows = await listMessages(activeId, profile.organizationId);
+        if (!cancelled) setMessages(rows);
+      } catch (e) {
+        console.error('Failed to load messages', e);
+        if (!cancelled) setError('تعذر تحميل الرسائل.');
+      } finally {
+        if (!cancelled) setLoadingMsgs(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeId, profile?.organizationId]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, sending]);
+
+  // Focus textarea
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, [activeId]);
+
+  async function handleNew() {
+    if (!profile?.organizationId || !user?.uid) return;
+    try {
+      const id = await createConversation(profile.organizationId, user.uid);
+      setActiveId(id);
+      setMessages([]);
+      setError('');
+      await loadConversations();
+    } catch (e) {
+      console.error(e);
+      setError('تعذر إنشاء محادثة جديدة.');
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteConversation(id);
+      if (id === activeId) {
+        setActiveId(null);
+        setMessages([]);
+      }
+      await loadConversations();
+    } catch (e) {
+      console.error(e);
+      setError('تعذر حذف المحادثة.');
+    }
+  }
+
+  async function submitText(text: string) {
+    if (!profile?.organizationId || !user?.uid) return;
+    if (!canSendMessage(text) || sending) return;
+
+    let conversationId = activeId;
+    if (!conversationId) {
+      try {
+        conversationId = await createConversation(
+          profile.organizationId,
+          user.uid,
+          buildTitleFromFirstMessage(text),
+        );
+        setActiveId(conversationId);
+      } catch (e) {
+        console.error(e);
+        setError('تعذر بدء محادثة جديدة.');
+        return;
+      }
+    }
+
+    setSending(true);
+    setError('');
+    const previousHistory = messages;
+    const userText = text.trim();
+    setInput('');
+
+    const optimistic: CopilotMessage = {
+      id: `local-${Date.now()}`,
+      conversationId,
+      organizationId: profile.organizationId,
+      userId: user.uid,
+      role: 'user',
+      content: userText,
+    };
+    setMessages((prev) => [...prev, optimistic]);
+
+    try {
+      const response = await sendMessage({
+        organizationId: profile.organizationId,
+        userId: user.uid,
+        conversationId,
+        userText,
+        history: previousHistory,
+      });
+
+      const fresh = await listMessages(conversationId, profile.organizationId);
+      setMessages(fresh);
+
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId
+            ? {
+                ...c,
+                lastMessage: response.reply.slice(0, 120),
+                title:
+                  c.title === 'محادثة جديدة'
+                    ? buildTitleFromFirstMessage(userText)
+                    : c.title,
+              }
+            : c,
+        ),
+      );
+
+      if (activeConversation?.title === 'محادثة جديدة' || !activeConversation) {
+        try {
+          await updateDoc(doc(db, 'copilotConversations', conversationId), {
+            title: buildTitleFromFirstMessage(userText),
+          });
+        } catch {
+          /* ignore */
+        }
+      }
+    } catch (e) {
+      console.error('Copilot request failed', e);
+      setError('تعذر الاتصال بالمساعد الذكي. حاول مرة أخرى.');
+      setMessages(previousHistory);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void submitText(input);
+    }
+  }
+
+  return (
+    <main className="mobile-page copilot-page" dir="rtl">
+      <ConversationSidebar
+        conversations={conversations}
+        activeId={activeId}
+        onSelect={setActiveId}
+        onNew={handleNew}
+        onDelete={handleDelete}
+        loading={loadingConvs}
+      />
+
+      <section className="copilot-chat">
+        <header className="copilot-chat-head">
+          <div className="title">
+            <span className="inx-icon-circle tone-cyan">
+              <Bot size={18} />
             </span>
             <div>
-              <b
-                style={{
-                  display: 'block',
-                  fontSize: 16,
-                  color: 'var(--inx-text)',
-
-                }}
-              >
-                مساعدك الذكي
-              </b>
-              <small style={{ color: 'var(--inx-muted)' }}>
-                سيكون متاحًا قريبًا مع محادثة كاملة وتحليل السياق.
+              <h2>InsurNex AI Copilot</h2>
+              <small>
+                {activeConversation?.title || 'مساعدك الذكي داخل المنصة'}
               </small>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="inx-section-head">
-          <h2>قدرات قادمة</h2>
-        </div>
+        <div className="copilot-messages">
+          {error && <div className="copilot-error">{error}</div>}
 
-        <div className="inx-kpi-grid">
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle">
-                <MessageSquare size={18} />
+          {messages.length === 0 && !loadingMsgs && (
+            <div className="copilot-empty">
+              <span className="inx-icon-circle inx-icon-circle-lg tone-primary">
+                <MessageSquare size={22} />
               </span>
-              <span className="inx-badge inx-badge-primary">قريبًا</span>
+              <h3>كيف يمكنني مساعدتك؟</h3>
+              <p>
+                اسألني عن عملائك، وثائقك، مطالباتك، أو أي مفهوم تأميني.
+                سأجيبك بناءً على السياق المتاح.
+              </p>
             </div>
-            <div className="inx-kpi-value" style={{ fontSize: 16 }}>
-              محادثة ذكية
-            </div>
-            <small className="inx-kpi-label">اسأل عن أي عميل أو وثيقة</small>
-          </article>
+          )}
 
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-cyan">
-                <FileSearch size={18} />
-              </span>
-              <span className="inx-badge inx-badge-cyan">قريبًا</span>
-            </div>
-            <div className="inx-kpi-value" style={{ fontSize: 16 }}>
-              تحليل الملفات
-            </div>
-            <small className="inx-kpi-label">استخراج ذكي من PDF و Excel</small>
-          </article>
+          {loadingMsgs && messages.length === 0 && (
+            <div className="copilot-empty">جاري التحميل...</div>
+          )}
 
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-success">
-                <TrendingUp size={18} />
-              </span>
-              <span className="inx-badge inx-badge-success">قريبًا</span>
-            </div>
-            <div className="inx-kpi-value" style={{ fontSize: 16 }}>
-              رؤى المبيعات
-            </div>
-            <small className="inx-kpi-label">تحليل تلقائي للفرص</small>
-          </article>
+          {messages.map((m) => (
+            <ChatMessage key={m.id} message={m} />
+          ))}
 
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-warning">
-                <ShieldCheck size={18} />
-              </span>
-              <span className="inx-badge inx-badge-warning">قريبًا</span>
+          {sending && (
+            <div className="copilot-typing">
+              <span />
+              <span />
+              <span />
+              المساعد يفكر...
             </div>
-            <div className="inx-kpi-value" style={{ fontSize: 16 }}>
-              فحص التغطية
-            </div>
-            <small className="inx-kpi-label">اكتشاف الفجوات تلقائيًا</small>
-          </article>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
 
-        <div className="inx-section-head">
-          <h2>اختبار المكونات</h2>
-        </div>
+        {messages.length === 0 && !loadingMsgs && (
+          <div style={{ padding: '0 16px' }}>
+            <SuggestedPrompts
+              onPick={(prompt) => void submitText(prompt)}
+              disabled={sending}
+            />
+          </div>
+        )}
 
-        <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head">
-            <h3>الشارات</h3>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <span className="inx-badge inx-badge-primary">نشط</span>
-            <span className="inx-badge inx-badge-success">مكتمل</span>
-            <span className="inx-badge inx-badge-warning">معلق</span>
-            <span className="inx-badge inx-badge-danger">متأخر</span>
-            <span className="inx-badge inx-badge-cyan">جديد</span>
-            <span className="inx-badge inx-badge-neutral">مسودة</span>
-          </div>
+        <div className="copilot-input">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="اكتب سؤالك هنا... (Shift+Enter لسطر جديد)"
+            rows={1}
+            disabled={sending}
+          />
+          <button
+            type="button"
+            className="copilot-send"
+            disabled={sending || !canSendMessage(input)}
+            onClick={() => void submitText(input)}
+            aria-label="إرسال"
+          >
+            <Send size={18} />
+          </button>
         </div>
-
-        <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head">
-            <h3>الفلاتر</h3>
-          </div>
-          <div className="inx-chips">
-            <button type="button" className="inx-chip active">
-              الكل
-            </button>
-            <button type="button" className="inx-chip">
-              أفراد
-            </button>
-            <button type="button" className="inx-chip">
-              شركات
-            </button>
-            <button type="button" className="inx-chip">
-              نشط
-            </button>
-          </div>
-        </div>
-
-        <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head">
-            <h3>الأزرار</h3>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            <button type="button" className="inx-btn inx-btn-primary">
-              <Sparkles size={16} /> إجراء أساسي
-            </button>
-            <button type="button" className="inx-btn inx-btn-secondary">
-              إجراء ثانوي
-            </button>
-            <button type="button" className="inx-btn inx-btn-ghost">
-              رابط
-            </button>
-            <button type="button" className="inx-icon-btn">
-              <Sparkles size={18} />
-            </button>
-            <button type="button" className="inx-icon-btn filled">
-              <Sparkles size={18} />
-            </button>
-          </div>
-        </div>
-
-        <div className="inx-empty">
-          <Sparkles size={32} />
-          <b>لا توجد عناصر لعرضها</b>
-          <small>هذه حالة فارغة موحّدة</small>
-        </div>
-      </div>
+      </section>
     </main>
   );
 }

@@ -93,9 +93,11 @@ async function touchConversation(
 
 export async function listMessages(
   conversationId: string,
+  organizationId: string,
 ): Promise<CopilotMessage[]> {
   const q = query(
     collection(db, 'copilotMessages'),
+    where('organizationId', '==', organizationId),
     where('conversationId', '==', conversationId),
     orderBy('createdAt', 'asc'),
     limit(200),
