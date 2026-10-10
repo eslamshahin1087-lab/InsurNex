@@ -1,1 +1,103 @@
 .ai21{display:grid;gap:16px}.ai21-hero{padding:22px;border-radius:24px;background:linear-gradient(135deg,#071d2b,#075b65);color:#fff;display:flex;justify-content:space-between;gap:16px}.ai21-hero h1{display:flex;gap:8px;align-items:center}.ai21-kpis,.ai21-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.ai21-kpis article,.ai21-grid article,.ai21-panel,.ai21-warning{padding:16px;border:1px solid var(--border-color,#d9e4e7);border-radius:20px;background:var(--surface,#fff)}.ai21-kpis b{font-size:1.3rem}.ai21-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.ai21-types>div{display:grid;gap:5px;padding:13px;border-radius:15px;background:rgba(21,156,162,.08)}.ai21-warning{border-color:#d49c36;background:rgba(212,156,54,.08)}@media(max-width:600px){.ai21-hero{flex-direction:column}}
+/* =====================================================================
+   InsurNex Identity — AI Intelligence 2.1 overrides
+   ===================================================================== */
+
+.ai21 {
+  color: var(--inx-text);
+}
+
+/* Hero */
+.ai21-hero {
+  background: var(--inx-gradient);
+  border-radius: var(--inx-radius-lg, 18px);
+  color: #fff;
+  padding: 22px;
+}
+
+.ai21-hero h1,
+.ai21-hero p,
+.ai21-hero span {
+  color: #fff;
+}
+
+.ai21-hero p { opacity: 0.88; }
+
+.ai21-hero button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  border-radius: var(--inx-radius, 14px);
+  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+/* KPI grid */
+.ai21-kpis article {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+  color: var(--inx-text);
+}
+.ai21-kpis small { color: var(--inx-muted); }
+.ai21-kpis b { color: var(--inx-text); }
+
+/* Grid panels */
+.ai21-grid article,
+.ai21-panel {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+  color: var(--inx-text);
+}
+
+.ai21-grid h2,
+.ai21-panel h2 {
+  color: var(--inx-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai21-grid svg,
+.ai21-panel svg { color: var(--inx-blue); }
+
+.ai21-grid p { color: var(--inx-text-soft); }
+.ai21-grid small { color: var(--inx-muted); }
+
+/* Types grid */
+.ai21-types > div {
+  background: var(--inx-bg);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  color: var(--inx-text);
+}
+.ai21-types strong { color: var(--inx-text); }
+.ai21-types span { color: var(--inx-text-soft); }
+
+/* Warning */
+.ai21-warning {
+  background: var(--inx-warning-bg);
+  color: #a16207;
+  border-radius: var(--inx-radius-lg, 18px);
+  border: 1px solid var(--inx-warning);
+  padding: 16px;
+}
+.ai21-warning strong { color: #a16207; }
+.ai21-warning p { color: #a16207; }
+
+/* Back link */
+.ai21 a { color: var(--inx-blue); }
+
+/* Error message */
+.ai21 .error-message {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+  border-radius: var(--inx-radius, 14px);
+  padding: 12px;
+}
