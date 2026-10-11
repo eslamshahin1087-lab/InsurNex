@@ -11,9 +11,8 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import { getApp } from 'firebase/app';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db } from '../../firebase/config';
+import { createClient } from '@supabase/supabase-js';
+import { auth, db } from '../../firebase/config';
 import type {
   CopilotContextPayload,
   CopilotConversation,
@@ -22,16 +21,28 @@ import type {
   CopilotResponse,
 } from './copilot.types';
 
-const REGION = 'europe-west1';
 const MAX_HISTORY = 20;
 
-let cachedFunctions: ReturnType<typeof getFunctions> | null = null;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  | string
+  | undefined;
 
-function functionsInstance() {
-  if (!cachedFunctions) {
-    cachedFunctions = getFunctions(getApp(), REGION);
+let cachedSupabase: ReturnType<typeof createClient> | null = null;
+function supabaseInstance() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('SUPABASE_NOT_CONFIGURED');
   }
-  return cachedFunctions;
+  if (!cachedSupabase) {
+    cachedSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  return cachedSupabase;
 }
 
 // ---------- Conversations ----------
@@ -68,10 +79,14 @@ export async function createConversation(
   return ref.id;
 }
 
-export async function deleteConversation(conversationId: string): Promise<void> {
+export async function deleteConversation(
+  conversationId: string,
+  organizationId: string,
+): Promise<void> {
   const msgs = await getDocs(
     query(
       collection(db, 'copilotMessages'),
+      where('organizationId', '==', organizationId),
       where('conversationId', '==', conversationId),
     ),
   );
@@ -123,23 +138,51 @@ async function saveMessage(params: {
   });
 }
 
-// ---------- Claude Call ----------
+// ---------- Copilot Call (Supabase Edge Function) ----------
 
 export async function sendToCopilot(params: {
   history: CopilotRequestMessage[];
   context?: CopilotContextPayload;
 }): Promise<CopilotResponse> {
-  const fn = httpsCallable<
-    { messages: CopilotRequestMessage[]; context?: CopilotContextPayload },
-    CopilotResponse
-  >(functionsInstance(), 'copilotChat');
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('NOT_AUTHENTICATED');
+  const idToken = await currentUser.getIdToken();
 
-  const result = await fn({
-    messages: params.history.slice(-MAX_HISTORY),
-    context: params.context,
+  const client = supabaseInstance();
+  const { data, error } = await client.functions.invoke('copilot-chat', {
+    body: {
+      messages: params.history.slice(-MAX_HISTORY),
+      context: params.context,
+    },
+    headers: { 'x-firebase-token': idToken },
   });
 
-  return result.data;
+  if (error) {
+    let realMessage = error.message;
+    const ctx = (error as { context?: Response }).context;
+    if (ctx) {
+      try {
+        const body = await ctx.clone().json();
+        if (body?.error) realMessage = String(body.error);
+        if (body?.message) realMessage = String(body.message);
+      } catch {
+        try {
+          const txt = await ctx.clone().text();
+          if (txt) realMessage = txt.slice(0, 300);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    throw new Error(`COPILOT_GATEWAY_FAILED:${realMessage}`);
+  }
+
+  if (!data?.ok) throw new Error(data?.error || 'COPILOT_GATEWAY_REJECTED');
+
+  return {
+    reply: String(data.reply || '').trim(),
+    model: data.model,
+  };
 }
 
 // ---------- High-level flow ----------
