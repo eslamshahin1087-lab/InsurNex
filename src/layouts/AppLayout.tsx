@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Bell,
   Bot,
@@ -9,10 +10,10 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
 import { useAuth } from '../features/auth/auth-context';
-import { getCurrentContext } from '../features/copilot/copilot-context.store';
+import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 
 const navigation = [
   ['/', 'الرئيسية', Home],
@@ -26,23 +27,13 @@ export default function AppLayout() {
   const { profile } = useAuth();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
-  const navigate = useNavigate();
+  const [floatingOpen, setFloatingOpen] = useState(false);
 
   const isCopilotPage = location.pathname === '/copilot';
   const isAuthPage =
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
   const showFab = !isCopilotPage && !isAuthPage;
-
-  const openCopilot = () => {
-    // Use the context stored by the page, or a minimal fallback
-    const stored = getCurrentContext();
-    const context = stored ?? {
-      page: location.pathname,
-      notes: `The broker is on route: ${location.pathname}`,
-    };
-    navigate('/copilot', { state: { context } });
-  };
 
   return (
     <div className="mobile-shell" dir="rtl">
@@ -83,16 +74,20 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {showFab && (
+      {showFab && !floatingOpen && (
         <button
           type="button"
           className="copilot-fab"
-          onClick={openCopilot}
+          onClick={() => setFloatingOpen(true)}
           aria-label="مساعد InsurNex الذكي"
           title="مساعد InsurNex الذكي"
         >
           <Bot size={22} />
         </button>
+      )}
+
+      {floatingOpen && (
+        <CopilotFloatingPanel onClose={() => setFloatingOpen(false)} />
       )}
 
       <nav
