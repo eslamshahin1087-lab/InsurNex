@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, CheckCircle2, Clock3, ListTodo, Search, TriangleAlert } from 'lucide-react';
+import {
+  Bot,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  ListTodo,
+  Search,
+  TriangleAlert,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../features/auth/auth-context';
 import type { AppTask } from '../types/task';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 type Filter = 'all' | 'open' | 'urgent' | 'completed';
 
@@ -24,11 +34,14 @@ function priorityTone(p: string) {
 function dateLabel(v?: string) {
   if (!v) return 'بدون تاريخ';
   const d = new Date(v + 'T00:00:00');
-  return Number.isNaN(d.getTime()) ? v : new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
+  return Number.isNaN(d.getTime())
+    ? v
+    : new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
 }
 
 export default function TasksPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<AppTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,9 +50,14 @@ export default function TasksPage() {
 
   const load = useCallback(async () => {
     if (!profile) { setLoading(false); return; }
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
-      const q = query(collection(db, 'tasks'), where('organizationId', '==', profile.organizationId), limit(300));
+      const q = query(
+        collection(db, 'tasks'),
+        where('organizationId', '==', profile.organizationId),
+        limit(300),
+      );
       const s = await getDocs(q);
       setItems(s.docs.map((d) => ({ id: d.id, ...d.data() } as AppTask)));
     } catch {
@@ -49,7 +67,28 @@ export default function TasksPage() {
     }
   }, [profile]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!items.length) return;
+    setCurrentContext({
+      page: 'tasks',
+      tasks: items.slice(0, 15).map((t) => ({
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate,
+      })),
+      stats: {
+        totalLeads: items.length,
+        wonLeads: items.filter((x) => x.status === 'completed').length,
+      },
+      notes: `The broker is viewing the tasks board (${items.length} tasks total)`,
+    });
+  }, [items]);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -77,6 +116,23 @@ export default function TasksPage() {
     completed: 'مكتملة',
   };
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'tasks',
+          tasks: items.slice(0, 15).map((t) => ({
+            title: t.title,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.dueDate,
+          })),
+          notes: `The broker is viewing the tasks board (${items.length} tasks total)`,
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -88,6 +144,9 @@ export default function TasksPage() {
               إدارة المهام وجدولة المتابعة اليومية.
             </small>
           </div>
+          <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+            <Bot size={18} />
+          </button>
         </header>
 
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
@@ -116,9 +175,13 @@ export default function TasksPage() {
         <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
-            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث في المهام"
-              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }}
+            />
           </div>
           <div className="inx-chips">
             {FILTERS.map((f) => (
@@ -139,10 +202,7 @@ export default function TasksPage() {
         {!error && loading && <div className="inx-empty">جاري تحميل المهام...</div>}
 
         {!error && !loading && visible.length === 0 && (
-          <div className="inx-empty">
-            <ListTodo size={28} />
-            <b>لا توجد مهام مطابقة</b>
-          </div>
+          <div className="inx-empty"><ListTodo size={28} /><b>لا توجد مهام مطابقة</b></div>
         )}
 
         {!error && !loading && visible.length > 0 && (
