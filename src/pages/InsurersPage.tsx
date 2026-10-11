@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Building2, Plus, Search } from 'lucide-react';
+import { Bot, Building2, Plus, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { createInsurer, listInsurers } from '../features/insurers/insurer.service';
 import { SYSTEM_INSURERS } from '../features/insurers/system-insurers';
 import type { Insurer } from '../types/insurance';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 type Filter = 'all' | 'general' | 'life' | 'general_life' | 'takaful' | 'custom';
 
@@ -19,6 +21,7 @@ const LABELS: Record<string, string> = {
 
 export default function InsurersPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [custom, setCustom] = useState<Insurer[]>([]);
   const [name, setName] = useState('');
   const [term, setTerm] = useState('');
@@ -52,6 +55,19 @@ export default function InsurersPage() {
       `${i.name} ${i.shortName}`.toLowerCase().includes(term.toLowerCase()),
   );
 
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!all.length) return;
+    setCurrentContext({
+      page: 'insurers',
+      insurers: all.slice(0, 20).map((i) => ({
+        name: i.name,
+        category: i.category,
+      })),
+      notes: `The broker is viewing the insurance companies directory (${all.length} companies)`,
+    });
+  }, [all]);
+
   async function add() {
     if (
       !profile ||
@@ -67,6 +83,21 @@ export default function InsurersPage() {
     await load();
   }
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'insurers',
+          insurers: all.slice(0, 20).map((i) => ({
+            name: i.name,
+            category: i.category,
+          })),
+          notes: `The broker is viewing the insurance companies directory (${all.length} companies)`,
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -78,6 +109,9 @@ export default function InsurersPage() {
               الدليل الشامل لشركات التأمين المتاحة في السوق.
             </small>
           </div>
+          <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+            <Bot size={18} />
+          </button>
         </header>
 
         <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
@@ -99,14 +133,7 @@ export default function InsurersPage() {
               value={term}
               onChange={(e) => setTerm(e.target.value)}
               placeholder="ابحث باسم شركة التأمين"
-              style={{
-                flex: 1,
-                border: 0,
-                outline: 0,
-                background: 'transparent',
-                color: 'var(--inx-text)',
-                fontSize: 13.5,
-              }}
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }}
             />
           </div>
           <div className="inx-chips">
@@ -125,9 +152,7 @@ export default function InsurersPage() {
 
         <div className="inx-section-head">
           <h2>الشركات المتاحة</h2>
-          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-            {shown.length} شركة
-          </small>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{shown.length} شركة</small>
         </div>
 
         {shown.length === 0 ? (
@@ -141,9 +166,7 @@ export default function InsurersPage() {
             {shown.map((i) => (
               <article key={`${i.custom ? 'c' : 's'}-${i.id}`} className="inx-kpi">
                 <div className="inx-kpi-head">
-                  <span className="inx-icon-circle tone-cyan">
-                    <Building2 size={18} />
-                  </span>
+                  <span className="inx-icon-circle tone-cyan"><Building2 size={18} /></span>
                   {i.custom && <span className="inx-badge inx-badge-primary">مخصصة</span>}
                 </div>
                 <div className="inx-kpi-value" style={{ fontSize: 15 }}>{i.name}</div>
@@ -157,14 +180,7 @@ export default function InsurersPage() {
           <h2>إضافة شركة مخصصة</h2>
         </div>
         <div className="inx-card">
-          <small
-            style={{
-              display: 'block',
-              color: 'var(--inx-muted)',
-              marginBottom: 10,
-              fontSize: 12,
-            }}
-          >
+          <small style={{ display: 'block', color: 'var(--inx-muted)', marginBottom: 10, fontSize: 12 }}>
             أضف شركة تأمين جديدة إلى قائمتك الخاصة.
           </small>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -183,11 +199,7 @@ export default function InsurersPage() {
                 fontSize: 13.5,
               }}
             />
-            <button
-              type="button"
-              className="inx-btn inx-btn-primary"
-              onClick={() => void add()}
-            >
+            <button type="button" className="inx-btn inx-btn-primary" onClick={() => void add()}>
               <Plus size={16} /> إضافة
             </button>
           </div>

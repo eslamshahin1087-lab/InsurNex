@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Bot,
   CalendarDays,
   CircleDollarSign,
   Plus,
@@ -8,12 +9,14 @@ import {
   UserRound,
   WalletCards,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import PolicyForm from '../features/policies/PolicyForm';
 import {
   listPoliciesForOrganization,
   type RelatedPolicy,
 } from '../features/relationships/relationship.service';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 type Filter = 'all' | 'active' | 'pending' | 'expired' | 'cancelled';
 const FILTERS: Filter[] = ['all', 'active', 'pending', 'expired', 'cancelled'];
@@ -75,6 +78,7 @@ function formatDate(value: string) {
 
 export default function PoliciesPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<RelatedPolicy[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,6 +101,25 @@ export default function PoliciesPage() {
 
   useEffect(() => { void loadPolicies(); }, [loadPolicies]);
 
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!items.length) return;
+    setCurrentContext({
+      page: 'policies',
+      policies: items.slice(0, 20).map((p) => ({
+        policyNumber: p.policyNumber,
+        clientName: p.clientName,
+        insurerName: p.insurerName,
+        line: p.line,
+        expiryDate: p.expiryDate,
+        premium: p.premium,
+        currency: p.currency,
+        status: p.status,
+      })),
+      notes: `The broker is viewing the policies list (${items.length} total)`,
+    });
+  }, [items]);
+
   const stats = useMemo(() => ({
     total: items.length,
     active: items.filter((i) => i.status === 'active').length,
@@ -118,6 +141,27 @@ export default function PoliciesPage() {
 
   const currency = items[0]?.currency || 'EGP';
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'policies',
+          policies: items.slice(0, 20).map((p) => ({
+            policyNumber: p.policyNumber,
+            clientName: p.clientName,
+            insurerName: p.insurerName,
+            line: p.line,
+            expiryDate: p.expiryDate,
+            premium: p.premium,
+            currency: p.currency,
+            status: p.status,
+          })),
+          notes: `The broker is viewing the policies list (${items.length} total)`,
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -129,9 +173,14 @@ export default function PoliciesPage() {
               إدارة محفظة الوثائق التأمينية وتتبع حالتها.
             </small>
           </div>
-          <button type="button" className="inx-icon-btn filled" onClick={() => setShowCreate(true)} aria-label="إضافة وثيقة">
-            <Plus size={20} />
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+              <Bot size={18} />
+            </button>
+            <button type="button" className="inx-icon-btn" onClick={() => setShowCreate(true)} aria-label="إضافة وثيقة">
+              <Plus size={20} />
+            </button>
+          </div>
         </header>
 
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>

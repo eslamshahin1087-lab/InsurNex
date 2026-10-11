@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  Bot,
   CheckCircle2,
   CircleDollarSign,
   ClipboardCheck,
@@ -10,11 +11,12 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import ClaimForm from '../features/claims/ClaimForm';
 import { listClaims } from '../features/claims/claim.service';
 import type { Claim } from '../types/claim';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 const STATUS_LABELS: Record<string, string> = {
   new: 'جديدة',
@@ -66,6 +68,7 @@ function dateText(v?: string) {
 
 export default function ClaimsPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<Claim[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState('');
@@ -88,6 +91,25 @@ export default function ClaimsPage() {
   }, [profile]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!items.length) return;
+    setCurrentContext({
+      page: 'claims',
+      claims: items.slice(0, 15).map((c) => ({
+        claimNumber: c.claimNumber,
+        clientName: c.clientName,
+        insurerName: c.insurerName,
+        policyNumber: c.policyNumber,
+        claimAmount: c.claimAmount,
+        currency: c.currency,
+        status: c.status,
+        incidentDate: c.incidentDate,
+      })),
+      notes: `The broker is viewing the claims list (${items.length} total)`,
+    });
+  }, [items]);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -116,6 +138,27 @@ export default function ClaimsPage() {
 
   const currency = items[0]?.currency || 'EGP';
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'claims',
+          claims: items.slice(0, 15).map((c) => ({
+            claimNumber: c.claimNumber,
+            clientName: c.clientName,
+            insurerName: c.insurerName,
+            policyNumber: c.policyNumber,
+            claimAmount: c.claimAmount,
+            currency: c.currency,
+            status: c.status,
+            incidentDate: c.incidentDate,
+          })),
+          notes: `The broker is viewing the claims list (${items.length} total)`,
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -125,9 +168,14 @@ export default function ClaimsPage() {
             <h2>المطالبات</h2>
             <small style={{ color: 'var(--inx-muted)' }}>إدارة دورة المطالبات حتى التسوية.</small>
           </div>
-          <button type="button" className="inx-icon-btn filled" onClick={() => setShowCreate(true)} aria-label="إضافة مطالبة">
-            <Plus size={20} />
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+              <Bot size={18} />
+            </button>
+            <button type="button" className="inx-icon-btn" onClick={() => setShowCreate(true)} aria-label="إضافة مطالبة">
+              <Plus size={20} />
+            </button>
+          </div>
         </header>
 
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>

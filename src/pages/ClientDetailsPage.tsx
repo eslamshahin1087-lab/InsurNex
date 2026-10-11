@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
+  Bot,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -18,7 +19,7 @@ import {
   StickyNote,
   UserRound,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { getClient } from '../features/clients/client.service';
 import ClientEditForm from '../features/clients/ClientEditForm';
@@ -32,6 +33,7 @@ import {
 } from '../features/relationships/relationship.service';
 import type { InsuranceClient } from '../types/client';
 import RfqWorkspace from '../features/rfq/RfqWorkspace';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import '../theme/rfq-v81.css';
 
 const EMPTY_RELATIONS: ClientRelations = { policies: [], claims: [], tasks: [] };
@@ -158,6 +160,7 @@ function isUpcomingRenewal(policy: RelatedPolicy) {
 export default function ClientDetailsPage() {
   const { id } = useParams();
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [client, setClient] = useState<InsuranceClient | null>(null);
   const [relations, setRelations] = useState<ClientRelations>(EMPTY_RELATIONS);
   const [loading, setLoading] = useState(true);
@@ -198,6 +201,51 @@ export default function ClientDetailsPage() {
     void loadClient();
   }, [loadClient]);
 
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!client) return;
+    setCurrentContext({
+      page: 'client-details',
+      client: {
+        id: client.id,
+        name: client.name,
+        type: client.type,
+        status: client.status,
+        phone: client.phone,
+        email: client.email,
+        city: client.city,
+        notes: client.notes,
+      },
+      policies: relations.policies.slice(0, 20).map((p) => ({
+        policyNumber: p.policyNumber,
+        clientName: p.clientName,
+        insurerName: p.insurerName,
+        line: p.line,
+        expiryDate: p.expiryDate,
+        premium: p.premium,
+        currency: p.currency,
+        status: p.status,
+      })),
+      claims: relations.claims.slice(0, 15).map((c) => ({
+        claimNumber: c.claimNumber,
+        clientName: c.clientName,
+        insurerName: c.insurerName,
+        policyNumber: c.policyNumber,
+        claimAmount: c.claimAmount,
+        currency: c.currency,
+        status: c.status,
+        incidentDate: c.incidentDate,
+      })),
+      tasks: relations.tasks.slice(0, 15).map((t) => ({
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate,
+      })),
+      notes: `The broker is viewing Client 360 for: ${client.name}`,
+    });
+  }, [client, relations]);
+
   const openClaims = useMemo(() => relations.claims.filter(isOpenClaim), [relations.claims]);
   const openTasks = useMemo(() => relations.tasks.filter(isOpenTask), [relations.tasks]);
   const renewals = useMemo(() => relations.policies.filter(isUpcomingRenewal), [relations.policies]);
@@ -209,6 +257,54 @@ export default function ClientDetailsPage() {
     () => relations.claims.reduce((sum, claim) => sum + (claim.claimAmount || 0), 0),
     [relations.claims],
   );
+
+  const askCopilot = () => {
+    if (!client) return;
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'client-details',
+          client: {
+            id: client.id,
+            name: client.name,
+            type: client.type,
+            status: client.status,
+            phone: client.phone,
+            email: client.email,
+            city: client.city,
+            notes: client.notes,
+          },
+          policies: relations.policies.slice(0, 20).map((p) => ({
+            policyNumber: p.policyNumber,
+            clientName: p.clientName,
+            insurerName: p.insurerName,
+            line: p.line,
+            expiryDate: p.expiryDate,
+            premium: p.premium,
+            currency: p.currency,
+            status: p.status,
+          })),
+          claims: relations.claims.slice(0, 15).map((c) => ({
+            claimNumber: c.claimNumber,
+            clientName: c.clientName,
+            insurerName: c.insurerName,
+            policyNumber: c.policyNumber,
+            claimAmount: c.claimAmount,
+            currency: c.currency,
+            status: c.status,
+            incidentDate: c.incidentDate,
+          })),
+          tasks: relations.tasks.slice(0, 15).map((t) => ({
+            title: t.title,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.dueDate,
+          })),
+          notes: `The broker is viewing Client 360 for: ${client.name}`,
+        },
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -243,7 +339,6 @@ export default function ClientDetailsPage() {
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-        {/* ===== Back + Header ===== */}
         <header className="inx-section-head" style={{ marginTop: 0 }}>
           <div>
             <Link
@@ -259,13 +354,22 @@ export default function ClientDetailsPage() {
               عرض شامل لملف العميل ووثائقه ومطالباته ومهامه.
             </small>
           </div>
-          <button
-            type="button"
-            className="inx-btn inx-btn-secondary"
-            onClick={() => setShowEdit(true)}
-          >
-            <Pencil size={16} /> تعديل
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              className="inx-btn inx-btn-primary"
+              onClick={askCopilot}
+            >
+              <Bot size={16} /> اسأل المساعد
+            </button>
+            <button
+              type="button"
+              className="inx-btn inx-btn-secondary"
+              onClick={() => setShowEdit(true)}
+            >
+              <Pencil size={16} /> تعديل
+            </button>
+          </div>
         </header>
 
         {error && (
@@ -274,7 +378,6 @@ export default function ClientDetailsPage() {
           </div>
         )}
 
-        {/* ===== Hero card ===== */}
         <section className="inx-card inx-card-lg" style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
             <div className="inx-avatar" style={{ width: 64, height: 64, fontSize: 20, borderRadius: 16 }}>
@@ -309,50 +412,37 @@ export default function ClientDetailsPage() {
           </div>
         </section>
 
-        {/* ===== Stats ===== */}
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-cyan">
-                <ShieldCheck size={18} />
-              </span>
+              <span className="inx-icon-circle tone-cyan"><ShieldCheck size={18} /></span>
             </div>
             <div className="inx-kpi-value">{relations.policies.length}</div>
             <small className="inx-kpi-label">الوثائق</small>
           </article>
-
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-primary">
-                <ClipboardCheck size={18} />
-              </span>
+              <span className="inx-icon-circle tone-primary"><ClipboardCheck size={18} /></span>
             </div>
             <div className="inx-kpi-value">{openClaims.length}</div>
             <small className="inx-kpi-label">مطالبات مفتوحة</small>
           </article>
-
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-warning">
-                <CalendarDays size={18} />
-              </span>
+              <span className="inx-icon-circle tone-warning"><CalendarDays size={18} /></span>
             </div>
             <div className="inx-kpi-value">{renewals.length}</div>
             <small className="inx-kpi-label">تجديدات خلال 90 يوم</small>
           </article>
-
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-success">
-                <ListTodo size={18} />
-              </span>
+              <span className="inx-icon-circle tone-success"><ListTodo size={18} /></span>
             </div>
             <div className="inx-kpi-value">{openTasks.length}</div>
             <small className="inx-kpi-label">مهام مفتوحة</small>
           </article>
         </div>
 
-        {/* ===== Profile + Contact ===== */}
         <div className="inx-section-head">
           <h2>بيانات العميل</h2>
         </div>
@@ -416,36 +506,28 @@ export default function ClientDetailsPage() {
             </div>
             <ul className="inx-list">
               <li className="inx-list-item">
-                <span className="inx-icon-circle inx-icon-circle-sm">
-                  <Phone size={14} />
-                </span>
+                <span className="inx-icon-circle inx-icon-circle-sm"><Phone size={14} /></span>
                 <div className="inx-list-copy">
                   <small>الهاتف</small>
                   <b>{client.phone || 'غير متوفر'}</b>
                 </div>
               </li>
               <li className="inx-list-item">
-                <span className="inx-icon-circle inx-icon-circle-sm">
-                  <Mail size={14} />
-                </span>
+                <span className="inx-icon-circle inx-icon-circle-sm"><Mail size={14} /></span>
                 <div className="inx-list-copy">
                   <small>البريد الإلكتروني</small>
                   <b>{client.email || 'غير متوفر'}</b>
                 </div>
               </li>
               <li className="inx-list-item">
-                <span className="inx-icon-circle inx-icon-circle-sm">
-                  <MapPin size={14} />
-                </span>
+                <span className="inx-icon-circle inx-icon-circle-sm"><MapPin size={14} /></span>
                 <div className="inx-list-copy">
                   <small>المدينة</small>
                   <b>{client.city || 'غير متوفرة'}</b>
                 </div>
               </li>
               <li className="inx-list-item">
-                <span className="inx-icon-circle inx-icon-circle-sm">
-                  <MapPin size={14} />
-                </span>
+                <span className="inx-icon-circle inx-icon-circle-sm"><MapPin size={14} /></span>
                 <div className="inx-list-copy">
                   <small>العنوان</small>
                   <b>{client.address || 'غير متوفر'}</b>
@@ -455,7 +537,6 @@ export default function ClientDetailsPage() {
           </article>
         </div>
 
-        {/* ===== Financial summary ===== */}
         <div className="inx-section-head">
           <h2>الملخص المالي</h2>
           <CircleDollarSign size={20} style={{ color: 'var(--inx-muted)' }} />
@@ -483,7 +564,6 @@ export default function ClientDetailsPage() {
           </article>
         </div>
 
-        {/* ===== Policies ===== */}
         <div className="inx-section-head">
           <h2>الوثائق</h2>
           <span className="inx-badge inx-badge-neutral">{relations.policies.length}</span>
@@ -499,9 +579,7 @@ export default function ClientDetailsPage() {
             {relations.policies.map((policy) => (
               <li key={policy.id}>
                 <Link to="/policies" className="inx-list-item">
-                  <span className="inx-icon-circle tone-cyan">
-                    <ShieldCheck size={16} />
-                  </span>
+                  <span className="inx-icon-circle tone-cyan"><ShieldCheck size={16} /></span>
                   <div className="inx-list-copy">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                       <b style={{ marginBottom: 0 }}>{policy.policyNumber || 'وثيقة'}</b>
@@ -525,7 +603,6 @@ export default function ClientDetailsPage() {
           </ul>
         )}
 
-        {/* ===== Claims ===== */}
         <div className="inx-section-head">
           <h2>المطالبات</h2>
           <span className="inx-badge inx-badge-neutral">{relations.claims.length}</span>
@@ -541,9 +618,7 @@ export default function ClientDetailsPage() {
             {relations.claims.map((claim) => (
               <li key={claim.id}>
                 <Link to={`/claims/${claim.id}`} className="inx-list-item">
-                  <span className="inx-icon-circle tone-primary">
-                    <ClipboardCheck size={16} />
-                  </span>
+                  <span className="inx-icon-circle tone-primary"><ClipboardCheck size={16} /></span>
                   <div className="inx-list-copy">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                       <b style={{ marginBottom: 0 }}>{claim.claimNumber || 'مطالبة'}</b>
@@ -567,7 +642,6 @@ export default function ClientDetailsPage() {
           </ul>
         )}
 
-        {/* ===== Tasks ===== */}
         <div className="inx-section-head">
           <h2>المهام</h2>
           <span className="inx-badge inx-badge-neutral">{relations.tasks.length}</span>
@@ -583,9 +657,7 @@ export default function ClientDetailsPage() {
             {relations.tasks.map((task) => (
               <li key={task.id}>
                 <Link to="/tasks" className="inx-list-item">
-                  <span className="inx-icon-circle tone-success">
-                    <ListTodo size={16} />
-                  </span>
+                  <span className="inx-icon-circle tone-success"><ListTodo size={16} /></span>
                   <div className="inx-list-copy">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                       <b style={{ marginBottom: 0 }}>{task.title || 'مهمة'}</b>
@@ -606,7 +678,6 @@ export default function ClientDetailsPage() {
           </ul>
         )}
 
-        {/* ===== Renewals ===== */}
         {renewals.length > 0 && (
           <>
             <div className="inx-section-head">
@@ -635,7 +706,6 @@ export default function ClientDetailsPage() {
           </>
         )}
 
-        {/* ===== Documents & RFQ (unchanged logic) ===== */}
         <div className="inx-section-head">
           <h2>المستندات وطلبات العروض</h2>
         </div>
@@ -651,7 +721,6 @@ export default function ClientDetailsPage() {
           />
         ) : null}
 
-        {/* ===== Notes ===== */}
         <div className="inx-section-head">
           <h2>الملاحظات</h2>
           <StickyNote size={20} style={{ color: 'var(--inx-muted)' }} />
@@ -667,7 +736,6 @@ export default function ClientDetailsPage() {
             </div>
           )}
         </article>
-
       </div>
 
       {showEdit && profile && (

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  Bot,
   CalendarClock,
   CalendarDays,
   ChevronLeft,
@@ -13,9 +14,10 @@ import {
   UserRound,
   WalletCards,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { listRenewals2, type Renewal2Item, type RenewalStage } from '../features/renewals/renewal2.service';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 const STAGES: RenewalStage[] = ['overdue', 'urgent', 'due30', 'due60', 'due90', 'later'];
 
@@ -80,6 +82,7 @@ function stageIcon(stage: RenewalStage) {
 
 export default function RenewalsPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<Renewal2Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -100,6 +103,25 @@ export default function RenewalsPage() {
   }, [profile]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!items.length) return;
+    setCurrentContext({
+      page: 'renewals',
+      renewals: items.slice(0, 15).map((r) => ({
+        policyNumber: r.policyNumber,
+        clientName: r.clientName,
+        insurerName: r.insurerName,
+        line: r.line,
+        expiryDate: r.expiryDate,
+        premium: r.premium,
+        daysLeft: r.daysLeft,
+        currency: r.currency,
+      })),
+      notes: `The broker is viewing the renewals list (${items.length} total)`,
+    });
+  }, [items]);
 
   const counts = useMemo(() => {
     const next = Object.fromEntries(STAGES.map((s) => [s, 0])) as Record<RenewalStage, number>;
@@ -127,6 +149,27 @@ export default function RenewalsPage() {
 
   const currency = items[0]?.currency || 'EGP';
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'renewals',
+          renewals: items.slice(0, 15).map((r) => ({
+            policyNumber: r.policyNumber,
+            clientName: r.clientName,
+            insurerName: r.insurerName,
+            line: r.line,
+            expiryDate: r.expiryDate,
+            premium: r.premium,
+            daysLeft: r.daysLeft,
+            currency: r.currency,
+          })),
+          notes: `The broker is viewing the renewals list (${items.length} total)`,
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -138,9 +181,14 @@ export default function RenewalsPage() {
               إدارة التجديدات القادمة وتنبيهات الاستحقاق.
             </small>
           </div>
-          <Link to="/policies" className="inx-btn inx-btn-secondary">
-            <ShieldCheck size={16} /> الوثائق
-          </Link>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+              <Bot size={18} />
+            </button>
+            <Link to="/policies" className="inx-btn inx-btn-secondary inx-btn-sm">
+              <ShieldCheck size={16} /> الوثائق
+            </Link>
+          </div>
         </header>
 
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>

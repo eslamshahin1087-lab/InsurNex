@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Bot,
   Building2,
   Mail,
   Phone,
@@ -22,26 +23,13 @@ import {
   LEAD_SOURCE_LABELS,
   LEAD_STAGE_LABELS,
 } from '../types/lead';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 const stageOptions: LeadStage[] = [
-  'new',
-  'contacted',
-  'qualified',
-  'quotation',
-  'negotiation',
-  'won',
-  'lost',
+  'new', 'contacted', 'qualified', 'quotation', 'negotiation', 'won', 'lost',
 ];
 const sourceOptions: LeadSource[] = [
-  'website',
-  'referral',
-  'phone',
-  'email',
-  'social',
-  'campaign',
-  'walk_in',
-  'existing_client',
-  'other',
+  'website', 'referral', 'phone', 'email', 'social', 'campaign', 'walk_in', 'existing_client', 'other',
 ];
 const priorityOptions: LeadPriority[] = ['low', 'medium', 'high'];
 
@@ -97,6 +85,29 @@ export default function LeadsPage() {
   useEffect(() => {
     void load();
   }, [profile?.organizationId]);
+
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!leads.length) return;
+    setCurrentContext({
+      page: 'leads',
+      leads: leads.slice(0, 15).map((l) => ({
+        name: l.name,
+        companyName: l.companyName,
+        stage: l.stage,
+        insuranceType: l.insuranceType,
+        estimatedValue: l.estimatedValue,
+      })),
+      stats: {
+        totalLeads: leads.length,
+        wonLeads: leads.filter((l) => l.stage === 'won').length,
+        pipelineValue: leads
+          .filter((l) => !['won', 'lost'].includes(l.stage))
+          .reduce((s, l) => s + (Number(l.estimatedValue) || 0), 0),
+      },
+      notes: 'The broker is viewing the sales pipeline',
+    });
+  }, [leads]);
 
   const filtered = useMemo(() => {
     const q = normalize(search);
@@ -181,6 +192,31 @@ export default function LeadsPage() {
     }
   }
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'leads',
+          leads: leads.slice(0, 15).map((l) => ({
+            name: l.name,
+            companyName: l.companyName,
+            stage: l.stage,
+            insuranceType: l.insuranceType,
+            estimatedValue: l.estimatedValue,
+          })),
+          stats: {
+            totalLeads: leads.length,
+            wonLeads: leads.filter((l) => l.stage === 'won').length,
+            pipelineValue: leads
+              .filter((l) => !['won', 'lost'].includes(l.stage))
+              .reduce((s, l) => s + (Number(l.estimatedValue) || 0), 0),
+          },
+          notes: 'The broker is viewing the sales pipeline',
+        },
+      },
+    });
+  };
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
@@ -192,55 +228,43 @@ export default function LeadsPage() {
               إدارة دورة المبيعات من الفرصة حتى الإصدار.
             </small>
           </div>
-          <button
-            type="button"
-            className="inx-icon-btn filled"
-            onClick={() => setShowForm((v) => !v)}
-            aria-label="إضافة عميل محتمل"
-          >
-            <Plus size={20} />
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+              <Bot size={18} />
+            </button>
+            <button type="button" className="inx-icon-btn" onClick={() => setShowForm((v) => !v)} aria-label="إضافة عميل محتمل">
+              <Plus size={20} />
+            </button>
+          </div>
         </header>
 
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle"><Users size={18} /></span>
-            </div>
+            <div className="inx-kpi-head"><span className="inx-icon-circle"><Users size={18} /></span></div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي العملاء</small>
           </article>
           <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-warning"><Target size={18} /></span>
-            </div>
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-warning"><Target size={18} /></span></div>
             <div className="inx-kpi-value">{stats.active}</div>
             <small className="inx-kpi-label">فرص نشطة</small>
           </article>
           <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-cyan"><TrendingUp size={18} /></span>
-            </div>
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-cyan"><TrendingUp size={18} /></span></div>
             <div className="inx-kpi-value" style={{ fontSize: 16 }}>
               {money(stats.pipeline)} ج.م
             </div>
             <small className="inx-kpi-label">قيمة الفرص</small>
           </article>
           <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-icon-circle tone-success"><UserRound size={18} /></span>
-            </div>
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-success"><UserRound size={18} /></span></div>
             <div className="inx-kpi-value">{stats.won}</div>
             <small className="inx-kpi-label">صفقات مغلقة</small>
           </article>
         </div>
 
         {error && (
-          <div
-            className="inx-card"
-            role="alert"
-            style={{ marginBottom: 16, borderColor: 'var(--inx-danger)' }}
-          >
+          <div className="inx-card" role="alert" style={{ marginBottom: 16, borderColor: 'var(--inx-danger)' }}>
             <span className="inx-badge inx-badge-danger">{error}</span>
           </div>
         )}
@@ -289,17 +313,9 @@ export default function LeadsPage() {
                 <select
                   value={source}
                   onChange={(e) => setSource(e.target.value as LeadSource)}
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)' }}
                 >
-                  {sourceOptions.map((x) => (
-                    <option key={x} value={x}>{LEAD_SOURCE_LABELS[x]}</option>
-                  ))}
+                  {sourceOptions.map((x) => (<option key={x} value={x}>{LEAD_SOURCE_LABELS[x]}</option>))}
                 </select>
               </label>
 
@@ -308,17 +324,9 @@ export default function LeadsPage() {
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as LeadPriority)}
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)' }}
                 >
-                  {priorityOptions.map((x) => (
-                    <option key={x} value={x}>{LEAD_PRIORITY_LABELS[x]}</option>
-                  ))}
+                  {priorityOptions.map((x) => (<option key={x} value={x}>{LEAD_PRIORITY_LABELS[x]}</option>))}
                 </select>
               </label>
 
@@ -328,13 +336,7 @@ export default function LeadsPage() {
                   value={insuranceType}
                   onChange={(e) => setInsuranceType(e.target.value)}
                   required
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)' }}
                 />
               </label>
 
@@ -343,18 +345,10 @@ export default function LeadsPage() {
                 <select
                   value={preferredInsurerId}
                   onChange={(e) => setPreferredInsurerId(e.target.value)}
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)' }}
                 >
                   <option value="">غير محددة</option>
-                  {insurers.map((i) => (
-                    <option key={i.id} value={i.id}>{i.name}</option>
-                  ))}
+                  {insurers.map((i) => (<option key={i.id} value={i.id}>{i.name}</option>))}
                 </select>
               </label>
 
@@ -366,13 +360,7 @@ export default function LeadsPage() {
                   step="1"
                   value={estimatedValue}
                   onChange={(e) => setEstimatedValue(e.target.value)}
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)' }}
                 />
               </label>
 
@@ -382,14 +370,7 @@ export default function LeadsPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  style={{
-                    padding: '9px 12px',
-                    border: '1px solid var(--inx-border)',
-                    borderRadius: 'var(--inx-radius-sm)',
-                    background: 'var(--inx-surface)',
-                    color: 'var(--inx-text)',
-                    resize: 'vertical',
-                  }}
+                  style={{ padding: '9px 12px', border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius-sm)', background: 'var(--inx-surface)', color: 'var(--inx-text)', resize: 'vertical' }}
                 />
               </label>
 
@@ -401,10 +382,7 @@ export default function LeadsPage() {
                   type="button"
                   className="inx-btn inx-btn-secondary"
                   disabled={saving}
-                  onClick={() => {
-                    reset();
-                    setShowForm(false);
-                  }}
+                  onClick={() => { reset(); setShowForm(false); }}
                 >
                   إلغاء
                 </button>
@@ -414,68 +392,28 @@ export default function LeadsPage() {
         )}
 
         <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              border: '1px solid var(--inx-border)',
-              borderRadius: 'var(--inx-radius)',
-              padding: '8px 12px',
-              background: 'var(--inx-bg)',
-              marginBottom: 12,
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم، الشركة، الهاتف، النوع"
-              style={{
-                flex: 1,
-                border: 0,
-                outline: 0,
-                background: 'transparent',
-                color: 'var(--inx-text)',
-                fontSize: 13.5,
-              }}
-            />
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
           </div>
           <div className="inx-chips">
-            <button
-              type="button"
-              className={`inx-chip ${stageFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStageFilter('all')}
-            >
+            <button type="button" className={`inx-chip ${stageFilter === 'all' ? 'active' : ''}`} onClick={() => setStageFilter('all')}>
               كل المراحل
             </button>
             {stageOptions.map((x) => (
-              <button
-                key={x}
-                type="button"
-                className={`inx-chip ${stageFilter === x ? 'active' : ''}`}
-                onClick={() => setStageFilter(x)}
-              >
+              <button key={x} type="button" className={`inx-chip ${stageFilter === x ? 'active' : ''}`} onClick={() => setStageFilter(x)}>
                 {LEAD_STAGE_LABELS[x]}
               </button>
             ))}
           </div>
           <div className="inx-chips" style={{ marginTop: 8 }}>
-            <button
-              type="button"
-              className={`inx-chip ${sourceFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setSourceFilter('all')}
-            >
+            <button type="button" className={`inx-chip ${sourceFilter === 'all' ? 'active' : ''}`} onClick={() => setSourceFilter('all')}>
               كل المصادر
             </button>
             {sourceOptions.map((x) => (
-              <button
-                key={x}
-                type="button"
-                className={`inx-chip ${sourceFilter === x ? 'active' : ''}`}
-                onClick={() => setSourceFilter(x)}
-              >
+              <button key={x} type="button" className={`inx-chip ${sourceFilter === x ? 'active' : ''}`} onClick={() => setSourceFilter(x)}>
                 {LEAD_SOURCE_LABELS[x]}
               </button>
             ))}
@@ -484,9 +422,7 @@ export default function LeadsPage() {
 
         <div className="inx-section-head">
           <h2>قائمة العملاء المحتملين</h2>
-          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-            {filtered.length} عميل
-          </small>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{filtered.length} عميل</small>
         </div>
 
         {loading ? (
@@ -502,43 +438,20 @@ export default function LeadsPage() {
             {filtered.map((l) => (
               <li key={l.id}>
                 <Link to={`/leads/${l.id}`} className="inx-list-item">
-                  <span className="inx-icon-circle tone-primary">
-                    <UserRound size={18} />
-                  </span>
+                  <span className="inx-icon-circle tone-primary"><UserRound size={18} /></span>
                   <div className="inx-list-copy">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                       <b style={{ marginBottom: 0 }}>{l.name}</b>
-                      <span className="inx-badge inx-badge-primary">
-                        {LEAD_STAGE_LABELS[l.stage]}
-                      </span>
+                      <span className="inx-badge inx-badge-primary">{LEAD_STAGE_LABELS[l.stage]}</span>
                     </div>
                     {l.companyName && (
                       <small style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-                        <Building2 size={12} />
-                        {l.companyName}
+                        <Building2 size={12} />{l.companyName}
                       </small>
                     )}
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 8,
-                        fontSize: 11.5,
-                        color: 'var(--inx-muted)',
-                      }}
-                    >
-                      {l.phone && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          <Phone size={11} />
-                          {l.phone}
-                        </span>
-                      )}
-                      {l.email && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          <Mail size={11} />
-                          {l.email}
-                        </span>
-                      )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)' }}>
+                      {l.phone && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Phone size={11} />{l.phone}</span>)}
+                      {l.email && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Mail size={11} />{l.email}</span>)}
                       <span>{l.insuranceType}</span>
                       <span>{money(l.estimatedValue)} ج.م</span>
                     </div>

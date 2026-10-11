@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, MessageSquare, Send } from 'lucide-react';
+import { Bot, MessageSquare, Send, Sparkles } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import ChatMessage from '../features/copilot/ChatMessage';
 import ConversationSidebar from '../features/copilot/ConversationSidebar';
@@ -15,13 +16,24 @@ import {
   buildTitleFromFirstMessage,
   canSendMessage,
 } from '../features/copilot/copilot-utils';
-import type { CopilotConversation, CopilotMessage } from '../features/copilot/copilot.types';
+import type {
+  CopilotContextPayload,
+  CopilotConversation,
+  CopilotMessage,
+} from '../features/copilot/copilot.types';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import '../theme/copilot.css';
 
 export default function CopilotPage() {
   const { profile, user } = useAuth();
+  const location = useLocation();
+
+  const incomingContext = useMemo<CopilotContextPayload | undefined>(() => {
+    const state = location.state as { context?: CopilotContextPayload } | null;
+    return state?.context;
+  }, [location.state]);
+
   const [conversations, setConversations] = useState<CopilotConversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<CopilotMessage[]>([]);
@@ -38,7 +50,6 @@ export default function CopilotPage() {
     [conversations, activeId],
   );
 
-  // Load conversations
   const loadConversations = useCallback(async () => {
     if (!profile?.organizationId || !user?.uid) {
       setLoadingConvs(false);
@@ -60,7 +71,6 @@ export default function CopilotPage() {
     void loadConversations();
   }, [loadConversations]);
 
-  // Load messages for active conversation
   useEffect(() => {
     if (!activeId || !profile?.organizationId) {
       setMessages([]);
@@ -84,12 +94,10 @@ export default function CopilotPage() {
     };
   }, [activeId, profile?.organizationId]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, sending]);
 
-  // Focus textarea
   useEffect(() => {
     textareaRef.current?.focus();
   }, [activeId]);
@@ -109,8 +117,9 @@ export default function CopilotPage() {
   }
 
   async function handleDelete(id: string) {
+    if (!profile?.organizationId) return;
     try {
-      await deleteConversation(id);
+      await deleteConversation(id, profile.organizationId);
       if (id === activeId) {
         setActiveId(null);
         setMessages([]);
@@ -165,6 +174,7 @@ export default function CopilotPage() {
         conversationId,
         userText,
         history: previousHistory,
+        context: incomingContext,
       });
 
       const fresh = await listMessages(conversationId, profile.organizationId);
@@ -234,6 +244,11 @@ export default function CopilotPage() {
               </small>
             </div>
           </div>
+          {incomingContext?.page && (
+            <span className="inx-badge inx-badge-primary" title="السياق الحالي">
+              <Sparkles size={11} /> {incomingContext.page}
+            </span>
+          )}
         </header>
 
         <div className="copilot-messages">
@@ -246,8 +261,15 @@ export default function CopilotPage() {
               </span>
               <h3>كيف يمكنني مساعدتك؟</h3>
               <p>
-                اسألني عن عملائك، وثائقك، مطالباتك، أو أي مفهوم تأميني.
-                سأجيبك بناءً على السياق المتاح.
+                اسألني عن عملائك، وثائقك، مطالباتك، تجديداتك، أو أي مفهوم تأميني.
+                {incomingContext?.page && (
+                  <>
+                    <br />
+                    <span style={{ fontSize: 12, color: 'var(--inx-blue)' }}>
+                      السياق الحالي: {incomingContext.page}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           )}

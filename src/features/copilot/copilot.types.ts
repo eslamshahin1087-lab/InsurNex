@@ -21,20 +21,12 @@ export interface CopilotConversation {
   updatedAt?: unknown;
 }
 
-export type CopilotContextPage =
-  | 'client'
-  | 'policy'
-  | 'claim'
-  | 'renewal'
-  | 'dashboard'
-  | 'general';
-
 export interface CopilotContextPayload {
-  page?: CopilotContextPage;
+  page?: string;
   client?: {
     id: string;
     name: string;
-    type: 'individual' | 'company';
+    type: string;
     status: string;
     phone?: string;
     email?: string;
@@ -45,28 +37,76 @@ export interface CopilotContextPayload {
     policyNumber: string;
     insurerName: string;
     line: string;
-    startDate: string;
+    startDate?: string;
     expiryDate: string;
     premium: number;
     currency: string;
     status: string;
   };
-  claim?: {
+  policies?: Array<{
+    policyNumber: string;
+    clientName?: string;
+    insurerName: string;
+    line: string;
+    expiryDate: string;
+    premium: number;
+    currency: string;
+    status: string;
+  }>;
+  claims?: Array<{
     claimNumber: string;
-    clientName: string;
+    clientName?: string;
     insurerName: string;
     policyNumber: string;
     claimAmount: number;
-    approvedAmount?: number;
     currency: string;
     status: string;
     incidentDate: string;
+  }>;
+  renewals?: Array<{
+    policyNumber: string;
+    clientName?: string;
+    insurerName: string;
+    line: string;
+    expiryDate: string;
+    premium: number;
+    daysLeft: number;
+    currency: string;
+  }>;
+  leads?: Array<{
+    name: string;
+    companyName?: string;
+    stage: string;
+    insuranceType: string;
+    estimatedValue: number;
+  }>;
+  insurers?: Array<{
+    name: string;
+    category: string;
+    status?: string;
+  }>;
+  tasks?: Array<{
+    title: string;
+    status: string;
+    priority: string;
+    dueDate?: string;
+  }>;
+  finance?: {
+    totalRevenue?: number;
+    totalExpenses?: number;
+    netIncome?: number;
+    pendingCommissions?: number;
+    receivedCommissions?: number;
+    currency?: string;
   };
   stats?: {
     totalClients?: number;
     activePolicies?: number;
     openClaims?: number;
     upcomingRenewals?: number;
+    totalLeads?: number;
+    wonLeads?: number;
+    pipelineValue?: number;
   };
   notes?: string;
 }

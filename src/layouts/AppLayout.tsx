@@ -1,5 +1,6 @@
 import {
   Bell,
+  Bot,
   Home,
   LogOut,
   MoreHorizontal,
@@ -8,9 +9,10 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
 import { useAuth } from '../features/auth/auth-context';
+import { getCurrentContext } from '../features/copilot/copilot-context.store';
 
 const navigation = [
   ['/', 'الرئيسية', Home],
@@ -23,6 +25,24 @@ const navigation = [
 export default function AppLayout() {
   const { profile } = useAuth();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isCopilotPage = location.pathname === '/copilot';
+  const isAuthPage =
+    location.pathname.startsWith('/login') ||
+    location.pathname.startsWith('/register');
+  const showFab = !isCopilotPage && !isAuthPage;
+
+  const openCopilot = () => {
+    // Use the context stored by the page, or a minimal fallback
+    const stored = getCurrentContext();
+    const context = stored ?? {
+      page: location.pathname,
+      notes: `The broker is on route: ${location.pathname}`,
+    };
+    navigate('/copilot', { state: { context } });
+  };
 
   return (
     <div className="mobile-shell" dir="rtl">
@@ -39,7 +59,6 @@ export default function AppLayout() {
           </div>
         </div>
         <div className="s8-actions">
-          {/* Theme toggle hidden until Phase 6 — see ThemeProvider DARK_MODE_ENABLED */}
           <Link
             className="circle-button notification-button"
             to="/notifications"
@@ -63,6 +82,18 @@ export default function AppLayout() {
       <main className="app-body">
         <Outlet />
       </main>
+
+      {showFab && (
+        <button
+          type="button"
+          className="copilot-fab"
+          onClick={openCopilot}
+          aria-label="مساعد InsurNex الذكي"
+          title="مساعد InsurNex الذكي"
+        >
+          <Bot size={22} />
+        </button>
+      )}
 
       <nav
         className="app-tabbar s8-tabbar inx-tabbar-6"
