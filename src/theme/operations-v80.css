@@ -17,3 +17,294 @@
 .op953-issued{display:grid;gap:4px;margin:10px 0;padding:11px;border:1px solid #86efac;border-radius:11px;background:#f0fdf4;color:#166534}.op953-issued span{font-family:monospace;direction:ltr;text-align:right}
 
 .op96-workspace{display:grid;gap:12px;padding:14px;border:1px solid #dbe5f1;border-radius:16px;background:#fff}.op96-workspace>header{display:flex;justify-content:space-between;gap:10px}.op96-context{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.op96-context span{display:grid;padding:8px;border-radius:10px;background:#f4f7fb}.op96-steps{display:flex;gap:6px;flex-wrap:wrap}.op96-steps span{padding:7px 9px;border-radius:999px;background:#eef2f7;color:#64748b}.op96-steps .done{background:#ecfdf5;color:#047857}.op96-steps .current{background:#dbeafe;color:#0754a6}.op96-reason,.op96-action,.op96-final{display:grid;gap:8px;padding:12px;border:1px solid #e2e8f0;border-radius:12px}.op96-action button,.op96-final>button,.op96-open{border:0;border-radius:9px;padding:9px 12px;background:#0766d7;color:#fff;cursor:pointer}.op96-final{grid-template-columns:repeat(2,1fr)}.op96-final h3,.op96-final textarea,.op96-final>button,.op96-final .op95-quote-upload{grid-column:1/-1}.op96-final input,.op96-final textarea{padding:9px;border:1px solid #dbe5f1;border-radius:9px}.op96-final label{display:grid;gap:4px}@media(max-width:800px){.op96-context,.op96-final{grid-template-columns:1fr}}
+
+/* =====================================================================
+   InsurNex Identity — Operations overrides
+   Appended at the end so it overrides earlier hardcoded colors
+   without changing the existing structure.
+   ===================================================================== */
+
+.op80 {
+  --ink: var(--inx-text, #0a2a5c);
+  --muted: var(--inx-muted, #94a3b8);
+  --line: var(--inx-border, #e3ebf5);
+  --blue: var(--inx-blue, #2563eb);
+  max-width: 1400px;
+  padding: 16px;
+  color: var(--ink);
+}
+
+/* Top header — align with new gradient */
+.op80-top {
+  background: var(--inx-gradient);
+  padding: 22px;
+  border-radius: var(--inx-radius-lg, 18px);
+}
+
+.op80-top span { color: #c7dbfa; }
+.op80-top h1 { color: #fff; font-size: 26px; }
+.op80-top p { color: #dbeafe; }
+
+/* Primary button — use identity */
+.op80-primary {
+  background: var(--inx-blue);
+  border-radius: var(--inx-radius, 14px);
+  padding: 10px 16px;
+  font-weight: 700;
+}
+.op80-top .op80-primary {
+  background: #fff;
+  color: var(--inx-navy);
+}
+
+/* Nav tabs */
+.op80-nav button {
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-sm, 10px);
+  background: var(--inx-surface);
+  color: var(--inx-text-soft);
+}
+.op80-nav button.active {
+  background: var(--inx-navy);
+  border-color: var(--inx-navy);
+  color: #fff;
+}
+
+/* Metrics cards → KPI style */
+.op80-metrics > * {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+}
+.op80-metrics b { color: var(--inx-text); }
+.op80-metrics span { color: var(--inx-muted); }
+
+/* Panels → cards */
+.op80-panel {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+}
+.op80-heading h2 { color: var(--inx-text); }
+.op80-heading p { color: var(--inx-muted); }
+
+/* Flow steps */
+.op80-flow div {
+  background: var(--inx-bg);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+}
+.op80-flow span {
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+}
+.op80-flow strong { color: var(--inx-text); }
+
+/* Actions & client grid */
+.op80-actions > button,
+.op80-client-grid article {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+}
+.op80-actions > button:hover { border-color: var(--inx-blue); }
+.op80-actions svg { color: var(--inx-blue); }
+.op80-actions b, .op80-client-grid b { color: var(--inx-text); }
+.op80-actions small, .op80-client-grid small { color: var(--inx-muted); }
+
+.op80-avatar {
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  border-radius: var(--inx-radius-sm, 10px);
+}
+
+/* Rows */
+.op80-row { border-bottom-color: var(--inx-border); }
+.op80-row small { color: var(--inx-muted); }
+.op80-row a, .op80-client-grid a { color: var(--inx-blue); }
+.op80-row b { color: var(--inx-text); }
+
+/* Search */
+.op80-search {
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  background: var(--inx-surface);
+}
+.op80-search input { color: var(--inx-text); background: transparent; }
+.op80-search svg { color: var(--inx-muted); }
+
+/* Empty & alert */
+.op80-empty { color: var(--inx-muted); }
+.op80-alert {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+  border-radius: var(--inx-radius, 14px);
+}
+
+/* Modal */
+.op80-modal > section {
+  border-radius: var(--inx-radius-lg, 18px);
+  background: var(--inx-surface);
+}
+.op80-modal header {
+  border-bottom-color: var(--inx-border);
+  background: var(--inx-surface);
+}
+.op80-modal header span { color: var(--inx-blue); }
+.op80-modal header h2 { color: var(--inx-text); }
+.op80-modal header button {
+  background: var(--inx-bg);
+  color: var(--inx-text);
+}
+
+.op80-choice button {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+}
+.op80-choice button:hover { border-color: var(--inx-blue); }
+.op80-choice svg { color: var(--inx-blue); }
+.op80-choice b { color: var(--inx-text); }
+.op80-choice small { color: var(--inx-muted); }
+
+/* Picker */
+.op80-picker button {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+}
+.op80-picker button:hover { border-color: var(--inx-blue); }
+.op80-picker b { color: var(--inx-text); }
+.op80-picker small { color: var(--inx-muted); }
+
+/* Forms */
+.op80-type button {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-sm, 10px);
+}
+.op80-type button.active {
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  border-color: var(--inx-blue);
+}
+.op80-form input,
+.op80-form textarea,
+.op80-email-add input {
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-sm, 10px);
+  background: var(--inx-surface);
+  color: var(--inx-text);
+}
+
+.op80-upload {
+  border-color: var(--inx-blue);
+  background: var(--inx-info-bg);
+  border-radius: var(--inx-radius, 14px);
+}
+
+.op80-files span {
+  background: var(--inx-bg);
+  color: var(--inx-text);
+}
+.op80-files button { color: var(--inx-text); }
+
+.op80-modal footer {
+  border-top-color: var(--inx-border);
+  background: var(--inx-surface);
+}
+.op80-modal footer > button:not(.op80-primary) {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius-sm, 10px);
+  color: var(--inx-text);
+}
+
+.op80-email-list > div {
+  border-color: var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  background: var(--inx-surface);
+}
+.op80-email-list small { color: var(--inx-muted); }
+.op80-email-list button {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+}
+
+.op80-note {
+  background: var(--inx-bg);
+  color: var(--inx-muted);
+  border-radius: var(--inx-radius, 14px);
+}
+
+/* Sub-workspaces (op89, op90, op93, op96) — align colors */
+.op89-layout aside,
+.op89-layout main,
+.op90-rfq-picker,
+.op90-execution,
+.op92-grid article,
+.op93-context,
+.op96-workspace {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+}
+
+.op89-layout aside button,
+.op89-layout aside input,
+.op90-rfq-picker label,
+.op90-insurers article,
+.op90-insurers select,
+.op96-final input,
+.op96-final textarea {
+  background: var(--inx-surface);
+  border-color: var(--inx-border);
+  color: var(--inx-text);
+}
+
+.op89-layout aside button.active,
+.op90-rfq-picker label.active {
+  border-color: var(--inx-blue);
+  background: var(--inx-info-bg);
+}
+
+.op89-primary,
+.op90-actions button:first-child,
+.op91-form button,
+.op96-action button,
+.op96-final > button,
+.op96-open {
+  background: var(--inx-blue);
+  color: #fff;
+  border-radius: var(--inx-radius-sm, 10px);
+}
+
+.op89-rfq-meta span,
+.op89-insurers span,
+.op90-docs span,
+.op92-facts span,
+.op93-journey span {
+  background: var(--inx-bg);
+  color: var(--inx-text-soft);
+}
+
+.op93-journey .done { background: var(--inx-success-bg); color: var(--inx-success); }
+.op93-journey .current { background: var(--inx-info-bg); color: var(--inx-blue); }
+.op96-steps .done { background: var(--inx-success-bg); color: var(--inx-success); }
+.op96-steps .current { background: var(--inx-info-bg); color: var(--inx-blue); }
+
+.op90-error {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+}
+
+.op953-issued {
+  background: var(--inx-success-bg);
+  color: var(--inx-success);
+  border-color: var(--inx-success);
+}
+
+@media (max-width: 900px) {
+  .op80 { padding: 12px; }
+}

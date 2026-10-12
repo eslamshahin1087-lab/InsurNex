@@ -1,17 +1,109 @@
 :root {
   font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
-  color: #08234f;
-  background: #f6f9fd;
+  color: #0a2a5c;
+  background: #f4f8fd;
   font-synthesis: none;
-  --inx-navy: #05285f;
-  --inx-blue: #075eea;
-  --inx-cyan: #029fe9;
-  --inx-bg: #f6f9fd;
+
+  /* ===== Core brand colors ===== */
+  --inx-navy: #0a2a5c;
+  --inx-blue: #2563eb;
+  --inx-cyan: #22b8e8;
+  --inx-bg: #f4f8fd;
   --inx-surface: #ffffff;
-  --inx-border: #dbe6f2;
-  --inx-muted: #667b99;
-  --inx-gradient: linear-gradient(135deg, #05285f 0%, #075eea 58%, #029fe9 100%);
+  --inx-border: #e3ebf5;
+  --inx-muted: #94a3b8;
+  --inx-gradient: linear-gradient(135deg, #0a2a5c 0%, #2563eb 55%, #22b8e8 100%);
+
+  /* ===== Text ===== */
+  --inx-text: #0a2a5c;
+  --inx-text-soft: #64748b;
+
+  /* ===== Status colors ===== */
+  --inx-info: #2563eb;
+  --inx-info-bg: #eff6ff;
+  --inx-success: #10b981;
+  --inx-success-bg: #ecfdf5;
+  --inx-warning: #f59e0b;
+  --inx-warning-bg: #fffbeb;
+  --inx-danger: #dc2626;
+  --inx-danger-bg: #fef2f2;
+  --inx-cyan-bg: #e6f7fd;
+  --inx-navy-bg: #e8eef8;
+  --inx-neutral-bg: #f1f5f9;
+  --inx-neutral-text: #475569;
+
+  /* ===== Radii ===== */
+  --inx-radius-sm: 10px;
+  --inx-radius: 14px;
+  --inx-radius-lg: 18px;
+  --inx-radius-pill: 999px;
+
+  /* ===== Shadows ===== */
+  --inx-shadow-sm: 0 1px 2px rgba(10, 42, 92, 0.04);
+  --inx-shadow: 0 4px 16px rgba(10, 42, 92, 0.06);
+  --inx-shadow-lg: 0 12px 40px rgba(10, 42, 92, 0.08);
+
+  /* ===== Spacing ===== */
+  --inx-gap-xs: 6px;
+  --inx-gap-sm: 10px;
+  --inx-gap: 14px;
+  --inx-gap-lg: 20px;
 }
+
+/* ============================================================
+   DARK MODE — TEMPORARILY DISABLED (Phase 6)
+   ------------------------------------------------------------
+   This block is ready and will activate as soon as
+   DARK_MODE_ENABLED is set to true in src/theme/ThemeProvider.tsx
+   and the toggle button is restored in src/layouts/AppLayout.tsx.
+
+   Do NOT delete this block. It is retained on purpose so we
+   don't have to rebuild the dark palette later.
+   ============================================================ */
+/*
+:root[data-theme="dark"] {
+  color: #e2e8f0;
+  background: #0a1628;
+
+  --inx-navy: #93c5fd;
+  --inx-blue: #60a5fa;
+  --inx-cyan: #22d3ee;
+  --inx-bg: #0a1628;
+  --inx-surface: #131f36;
+  --inx-border: #1e3255;
+  --inx-muted: #64748b;
+  --inx-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 55%, #0891b2 100%);
+
+  --inx-text: #e2e8f0;
+  --inx-text-soft: #94a3b8;
+
+  --inx-info: #60a5fa;
+  --inx-info-bg: #1e3a5f;
+  --inx-success: #34d399;
+  --inx-success-bg: #064e3b;
+  --inx-warning: #fbbf24;
+  --inx-warning-bg: #451a03;
+  --inx-danger: #f87171;
+  --inx-danger-bg: #450a0a;
+  --inx-cyan-bg: #0e3a4d;
+  --inx-navy-bg: #1e2f52;
+  --inx-neutral-bg: #1e293b;
+  --inx-neutral-text: #cbd5e1;
+
+  --inx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --inx-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --inx-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+*/
+
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--inx-bg); }
-button, input { font: inherit; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--inx-bg);
+  color: var(--inx-text);
+}
+
+button, input, select, textarea { font: inherit; }

@@ -1,1 +1,138 @@
 .a2{display:grid;gap:16px}.a2-hero{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px;border-radius:24px;background:linear-gradient(135deg,#071d2b,#0e4d5c);color:#fff}.a2-hero h1{margin:4px 0}.a2-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.a2-kpis article,.a2-panel,.a2-ai{border:1px solid var(--border-color,#d9e4e7);border-radius:20px;padding:16px;background:var(--surface,#fff)}.a2-kpis article{display:grid;gap:5px}.a2-kpis b{font-size:1.45rem}.a2-kpis em{font-size:.78rem;opacity:.7;font-style:normal}.a2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.a2-bars{display:grid;gap:11px}.a2-row{display:grid;grid-template-columns:90px 1fr auto;align-items:center;gap:8px}.a2-track{height:10px;border-radius:20px;background:rgba(80,120,130,.13);overflow:hidden}.a2-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#18a1a9,#4bd0b5);transition:width .5s ease}.a2-ai{display:flex;gap:14px;background:linear-gradient(135deg,rgba(24,161,169,.12),rgba(75,208,181,.08))}.a2-ai h2{margin:0 0 5px}.a2-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.a2-types>div{display:grid;gap:4px;padding:12px;border-radius:14px;background:rgba(80,120,130,.08)}.a2-big{font-size:1.6rem;font-weight:700;margin:10px 0}.a2-big small{font-size:.8rem;font-weight:400}@media(max-width:600px){.a2-hero{align-items:flex-start;flex-direction:column}.a2-row{grid-template-columns:72px 1fr auto}}.a2-ai-launch{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:18px 20px;border-radius:22px;text-decoration:none;color:#fff;background:linear-gradient(120deg,#071d2b 0%,#075b65 52%,#14a3a8 100%);box-shadow:0 15px 34px rgba(7,62,71,.18);overflow:hidden;position:relative}.a2-ai-launch:before{content:"";position:absolute;width:180px;height:180px;border:1px solid rgba(255,255,255,.15);border-radius:50%;left:-70px;top:-95px}.a2-ai-launch-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:18px;background:rgba(255,255,255,.13);backdrop-filter:blur(8px)}.a2-ai-launch span:nth-child(2){display:grid;gap:4px}.a2-ai-launch small{letter-spacing:.12em;opacity:.72}.a2-ai-launch strong{font-size:1.2rem}.a2-ai-launch em{font-size:.82rem;line-height:1.7;font-style:normal;opacity:.82}.a2-ai-launch-action{display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:14px;background:#fff;color:#075b65;font-weight:800;white-space:nowrap}@media(max-width:700px){.a2-ai-launch{grid-template-columns:auto 1fr}.a2-ai-launch-action{grid-column:1/-1;justify-content:center}}
+/* =====================================================================
+   InsurNex Identity — Analytics overrides
+   ===================================================================== */
+
+.a2 {
+  color: var(--inx-text);
+}
+
+/* Hero */
+.a2-hero {
+  background: var(--inx-gradient);
+  border-radius: var(--inx-radius-lg, 18px);
+  padding: 22px;
+  color: #fff;
+}
+
+.a2-hero h1,
+.a2-hero p,
+.a2-hero span {
+  color: #fff;
+}
+
+.a2-hero p { opacity: 0.88; }
+
+.a2-hero button {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: var(--inx-radius, 14px);
+  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+/* AI Launch banner */
+.a2-ai-launch {
+  background: var(--inx-gradient);
+  border-radius: var(--inx-radius-lg, 18px);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+}
+
+.a2-ai-launch small,
+.a2-ai-launch strong,
+.a2-ai-launch em {
+  color: #fff;
+}
+
+.a2-ai-launch em { opacity: 0.85; }
+
+.a2-ai-launch-action {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--inx-radius-sm, 10px);
+  color: #fff;
+  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* KPI cards */
+.a2-kpis article {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+  color: var(--inx-text);
+}
+
+.a2-kpis small { color: var(--inx-muted); }
+.a2-kpis b { color: var(--inx-text); }
+.a2-kpis em { color: var(--inx-text-soft); }
+.a2-kpis svg { color: var(--inx-blue); }
+
+/* Panels */
+.a2-panel,
+.a2-grid article {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  box-shadow: var(--inx-shadow-sm);
+}
+
+.a2-panel h2 { color: var(--inx-text); }
+
+/* Bars */
+.a2-row span { color: var(--inx-text-soft); }
+.a2-track {
+  background: var(--inx-bg);
+  border-radius: var(--inx-radius-pill, 999px);
+}
+.a2-track > i {
+  background: var(--inx-gradient);
+  border-radius: var(--inx-radius-pill, 999px);
+}
+.a2-row b { color: var(--inx-text); }
+
+/* Big numbers */
+.a2-big {
+  color: var(--inx-text);
+}
+.a2-big small { color: var(--inx-muted); }
+
+/* AI insight panel */
+.a2-ai {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  color: var(--inx-text);
+}
+.a2-ai svg { color: var(--inx-blue); }
+.a2-ai h2 { color: var(--inx-text); }
+.a2-ai p { color: var(--inx-text-soft); }
+.a2-ai small { color: var(--inx-muted); }
+
+/* Insurance types grid */
+.a2-types > div {
+  background: var(--inx-bg);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  color: var(--inx-text);
+}
+.a2-types b { color: var(--inx-text); }
+.a2-types span { color: var(--inx-text-soft); }
+
+/* Links */
+.a2 a { color: var(--inx-blue); }
+
+/* Error message */
+.a2 .error-message {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+  border-radius: var(--inx-radius, 14px);
+  padding: 12px;
+}

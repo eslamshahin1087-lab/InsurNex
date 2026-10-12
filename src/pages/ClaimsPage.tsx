@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  Bot,
   CheckCircle2,
   CircleDollarSign,
   ClipboardCheck,
@@ -10,27 +11,27 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import ClaimForm from '../features/claims/ClaimForm';
 import { listClaims } from '../features/claims/claim.service';
 import type { Claim } from '../types/claim';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 const STATUS_LABELS: Record<string, string> = {
   new: 'جديدة',
   documents: 'جمع المستندات',
-  submitted: 'تم الإرسال',
+  submitted: 'تم التقديم',
   review: 'قيد المراجعة',
   additional_documents: 'مستندات إضافية',
   approved: 'مقبولة',
-  settled: 'تمت التسوية',
+  settled: 'تم التسوية',
   settlement: 'التسوية',
   rejected: 'مرفوضة',
   closed: 'مغلقة',
 };
 
 type ClaimFilter = 'all' | 'open' | 'approved' | 'rejected' | 'closed';
-
 const FILTER_LABELS: Record<ClaimFilter, string> = {
   all: 'الكل',
   open: 'قيد المتابعة',
@@ -39,48 +40,35 @@ const FILTER_LABELS: Record<ClaimFilter, string> = {
   closed: 'مغلقة',
 };
 
-const OPEN_STATUSES = new Set([
-  'new',
-  'documents',
-  'submitted',
-  'review',
-  'additional_documents',
-  'settlement',
-]);
+const OPEN_STATUSES = new Set(['new', 'documents', 'submitted', 'review', 'additional_documents', 'settlement']);
 
-function statusLabel(status: string) {
-  return STATUS_LABELS[status] || status || 'غير محدد';
+function statusLabel(s: string) { return STATUS_LABELS[s] || s || 'غير محدد'; }
+
+function statusTone(s: string) {
+  if (s === 'approved' || s === 'settled') return 'success';
+  if (s === 'rejected') return 'danger';
+  if (s === 'closed') return 'neutral';
+  if (OPEN_STATUSES.has(s)) return 'warning';
+  return 'primary';
 }
 
-function isOpenClaim(status: string) {
-  return OPEN_STATUSES.has(status);
+function isOpen(status: string) { return OPEN_STATUSES.has(status); }
+
+function money(v: number, c: string) {
+  try { return new Intl.NumberFormat('ar-EG', { style: 'currency', currency: c || 'EGP', maximumFractionDigits: 0 }).format(Number(v || 0)); }
+  catch { return `${new Intl.NumberFormat('ar-EG').format(Number(v || 0))} ${c || 'EGP'}`; }
 }
 
-function money(value: number, currency: string) {
-  try {
-    return new Intl.NumberFormat('ar-EG', {
-      style: 'currency',
-      currency: currency || 'EGP',
-      maximumFractionDigits: 0,
-    }).format(Number(value || 0));
-  } catch {
-    return `${new Intl.NumberFormat('ar-EG').format(Number(value || 0))} ${currency || 'EGP'}`;
-  }
-}
-
-function dateText(value?: string) {
-  if (!value) return 'غير محدد';
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ar-EG', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
+function dateText(v?: string) {
+  if (!v) return 'غير محدد';
+  const d = new Date(`${v}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return v;
+  return new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
 }
 
 export default function ClaimsPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<Claim[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [search, setSearch] = useState('');
@@ -89,19 +77,12 @@ export default function ClaimsPage() {
   const [error, setError] = useState('');
 
   const load = useCallback(async () => {
-    if (!profile) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
+    if (!profile) { setItems([]); setLoading(false); return; }
+    setLoading(true); setError('');
     try {
       setItems(await listClaims(profile.organizationId));
-    } catch (errorValue) {
-      console.error('Failed to load claims', errorValue);
+    } catch (err) {
+      console.error('Failed to load claims', err);
       setItems([]);
       setError('تعذر تحميل المطالبات. حاول مرة أخرى.');
     } finally {
@@ -109,203 +90,185 @@ export default function ClaimsPage() {
     }
   }, [profile]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  const stats = useMemo(() => {
-    const open = items.filter((item) => isOpenClaim(item.status)).length;
-    const approved = items.filter((item) => item.status === 'approved').length;
-    const closed = items.filter((item) => item.status === 'closed').length;
-    const rejected = items.filter((item) => item.status === 'rejected').length;
-    const totalAmount = items.reduce((sum, item) => sum + Number(item.claimAmount || 0), 0);
-    return { total: items.length, open, approved, closed, rejected, totalAmount };
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!items.length) return;
+    setCurrentContext({
+      page: 'claims',
+      claims: items.slice(0, 15).map((c) => ({
+        claimNumber: c.claimNumber,
+        clientName: c.clientName,
+        insurerName: c.insurerName,
+        policyNumber: c.policyNumber,
+        claimAmount: c.claimAmount,
+        currency: c.currency,
+        status: c.status,
+        incidentDate: c.incidentDate,
+      })),
+      notes: `The broker is viewing the claims list (${items.length} total)`,
+    });
   }, [items]);
 
+  const stats = useMemo(() => ({
+    total: items.length,
+    open: items.filter((i) => isOpen(i.status)).length,
+    approved: items.filter((i) => i.status === 'approved').length,
+    closed: items.filter((i) => i.status === 'closed').length,
+    rejected: items.filter((i) => i.status === 'rejected').length,
+    totalAmount: items.reduce((s, i) => s + Number(i.claimAmount || 0), 0),
+  }), [items]);
+
   const visible = useMemo(() => {
-    const text = search.trim().toLowerCase();
-
-    return items.filter((claim) => {
-      const filterMatch =
+    const q = search.trim().toLowerCase();
+    return items.filter((c) => {
+      const ok =
         filter === 'all' ||
-        (filter === 'open' && isOpenClaim(claim.status)) ||
-        (filter === 'approved' && claim.status === 'approved') ||
-        (filter === 'rejected' && claim.status === 'rejected') ||
-        (filter === 'closed' && claim.status === 'closed');
-
-      if (!filterMatch) return false;
-      if (!text) return true;
-
-      return [claim.claimNumber, claim.clientName, claim.policyNumber, claim.insurerName]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(text);
+        (filter === 'open' && isOpen(c.status)) ||
+        (filter === 'approved' && c.status === 'approved') ||
+        (filter === 'rejected' && c.status === 'rejected') ||
+        (filter === 'closed' && c.status === 'closed');
+      if (!ok) return false;
+      if (!q) return true;
+      return [c.claimNumber, c.clientName, c.policyNumber, c.insurerName]
+        .filter(Boolean).join(' ').toLowerCase().includes(q);
     });
   }, [items, search, filter]);
 
   const currency = items[0]?.currency || 'EGP';
 
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'claims',
+          claims: items.slice(0, 15).map((c) => ({
+            claimNumber: c.claimNumber,
+            clientName: c.clientName,
+            insurerName: c.insurerName,
+            policyNumber: c.policyNumber,
+            claimAmount: c.claimAmount,
+            currency: c.currency,
+            status: c.status,
+            incidentDate: c.incidentDate,
+          })),
+          notes: `The broker is viewing the claims list (${items.length} total)`,
+        },
+      },
+    });
+  };
+
   return (
-    <main className="mobile-page claims-v2" dir="rtl">
-      <header className="page-header claims-v2-header">
-        <div>
-          <span className="eyebrow">Claims Management</span>
-          <h1>المطالبات</h1>
-          <p>إدارة دورة المطالبة من الإخطار الأول وحتى المراجعة والتسوية والإغلاق.</p>
-        </div>
-
-        <button
-          type="button"
-          className="floating-add"
-          onClick={() => setShowCreate(true)}
-          aria-label="إضافة مطالبة"
-          title="إضافة مطالبة"
-        >
-          <Plus size={22} aria-hidden="true" />
-        </button>
-      </header>
-
-      <section className="claims-v2-kpis" aria-label="ملخص المطالبات">
-        <article>
-          <span><ClipboardCheck aria-hidden="true" /></span>
-          <small>إجمالي المطالبات</small>
-          <strong>{stats.total}</strong>
-        </article>
-        <article>
-          <span><FileClock aria-hidden="true" /></span>
-          <small>قيد المتابعة</small>
-          <strong>{stats.open}</strong>
-        </article>
-        <article>
-          <span><CheckCircle2 aria-hidden="true" /></span>
-          <small>مقبولة</small>
-          <strong>{stats.approved}</strong>
-        </article>
-        <article>
-          <span><CircleDollarSign aria-hidden="true" /></span>
-          <small>إجمالي قيمة المطالبات</small>
-          <strong>{money(stats.totalAmount, currency)}</strong>
-        </article>
-      </section>
-
-      <section className="claims-v2-tools">
-        <div className="claims-v2-search">
-          <Search size={18} aria-hidden="true" />
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="ابحث برقم المطالبة أو العميل أو الوثيقة أو شركة التأمين"
-            aria-label="البحث في المطالبات"
-          />
-        </div>
-
-        <div className="claims-v2-filters" aria-label="تصفية المطالبات">
-          {(Object.keys(FILTER_LABELS) as ClaimFilter[]).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={filter === item ? 'active' : ''}
-              onClick={() => setFilter(item)}
-            >
-              {FILTER_LABELS[item]}
-              {item === 'all' && <span>{stats.total}</span>}
-              {item === 'open' && <span>{stats.open}</span>}
-              {item === 'approved' && <span>{stats.approved}</span>}
-              {item === 'rejected' && <span>{stats.rejected}</span>}
-              {item === 'closed' && <span>{stats.closed}</span>}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="claims-v2-list-section">
-        <header className="section-heading">
+    <main className="mobile-page" dir="rtl">
+      <div className="inx-container">
+        <header className="inx-section-head" style={{ marginTop: 0 }}>
           <div>
-            <span className="eyebrow">Claim Portfolio</span>
-            <h2>قائمة المطالبات</h2>
-            <p>{visible.length} مطالبة في العرض الحالي</p>
+            <span className="eyebrow">Claims Management</span>
+            <h2>المطالبات</h2>
+            <small style={{ color: 'var(--inx-muted)' }}>إدارة دورة المطالبات حتى التسوية.</small>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button type="button" className="inx-icon-btn filled" onClick={askCopilot} aria-label="اسأل المساعد">
+              <Bot size={18} />
+            </button>
+            <button type="button" className="inx-icon-btn" onClick={() => setShowCreate(true)} aria-label="إضافة مطالبة">
+              <Plus size={20} />
+            </button>
           </div>
         </header>
 
-        {error && (
-          <div className="empty" role="alert">
-            <AlertTriangle size={28} aria-hidden="true" />
-            <strong>{error}</strong>
-            <button type="button" className="secondary-button" onClick={() => void load()}>
-              إعادة المحاولة
-            </button>
-          </div>
-        )}
+        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle"><ClipboardCheck size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.total}</div>
+            <small className="inx-kpi-label">إجمالي المطالبات</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-warning"><FileClock size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.open}</div>
+            <small className="inx-kpi-label">قيد المتابعة</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-success"><CheckCircle2 size={18} /></span></div>
+            <div className="inx-kpi-value">{stats.approved}</div>
+            <small className="inx-kpi-label">مقبولة</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-cyan"><CircleDollarSign size={18} /></span></div>
+            <div className="inx-kpi-value" style={{ fontSize: 16 }}>{money(stats.totalAmount, currency)}</div>
+            <small className="inx-kpi-label">إجمالي قيمة المطالبات</small>
+          </article>
+        </div>
 
-        {!error && loading && (
-          <div className="empty">
-            <ClipboardCheck size={28} aria-hidden="true" />
-            <strong>جارٍ تحميل المطالبات...</strong>
+        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
+            <Search size={18} style={{ color: 'var(--inx-muted)' }} />
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="ابحث برقم المطالبة، العميل، الوثيقة، الشركة"
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
           </div>
-        )}
+          <div className="inx-chips">
+            {(Object.keys(FILTER_LABELS) as ClaimFilter[]).map((item) => (
+              <button key={item} type="button" className={`inx-chip ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)}>
+                {FILTER_LABELS[item]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="inx-section-head">
+          <h2>قائمة المطالبات</h2>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{visible.length} مطالبة</small>
+        </div>
+
+        {error && <div className="inx-empty"><AlertTriangle size={28} /><b>{error}</b>
+          <button type="button" className="inx-btn inx-btn-secondary" onClick={() => void load()}>إعادة المحاولة</button></div>}
+
+        {!error && loading && <div className="inx-empty"><ClipboardCheck size={28} /><b>جاري تحميل المطالبات...</b></div>}
 
         {!error && !loading && visible.length === 0 && (
-          <div className="empty">
-            <ClipboardCheck size={28} aria-hidden="true" />
-            <strong>{items.length === 0 ? 'لا توجد مطالبات حتى الآن' : 'لا توجد مطالبات مطابقة'}</strong>
-            <p>{items.length === 0 ? 'ابدأ بإضافة أول مطالبة وربطها بوثيقة العميل.' : 'جرّب تغيير البحث أو فلتر الحالة.'}</p>
+          <div className="inx-empty">
+            <ClipboardCheck size={28} />
+            <b>{items.length === 0 ? 'لا توجد مطالبات مسجلة' : 'لا توجد نتائج مطابقة'}</b>
             {items.length === 0 && (
-              <button type="button" className="primary-button" onClick={() => setShowCreate(true)}>
-                <Plus size={18} aria-hidden="true" />
-                إضافة مطالبة
+              <button type="button" className="inx-btn inx-btn-primary" onClick={() => setShowCreate(true)} style={{ marginTop: 8 }}>
+                <Plus size={16} /> إضافة مطالبة
               </button>
             )}
           </div>
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <div className="claims-v2-list">
+          <ul className="inx-list">
             {visible.map((claim) => (
-              <Link to={'/claims/' + claim.id} className="claims-v2-card" key={claim.id}>
-                <div className="claims-v2-icon">
-                  <ClipboardCheck size={22} aria-hidden="true" />
-                </div>
-
-                <div className="claims-v2-copy">
-                  <div className="claims-v2-title-row">
-                    <div>
-                      <strong>{claim.claimNumber || 'مطالبة بدون رقم'}</strong>
-                      <span>{claim.clientName || 'عميل غير محدد'}</span>
+              <li key={claim.id}>
+                <Link to={`/claims/${claim.id}`} className="inx-list-item">
+                  <span className={`inx-icon-circle tone-${statusTone(claim.status)}`}>
+                    <ClipboardCheck size={18} />
+                  </span>
+                  <div className="inx-list-copy">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <b style={{ marginBottom: 0 }}>{claim.claimNumber || 'مطالبة'}</b>
+                      <span className={`inx-badge inx-badge-${statusTone(claim.status)}`}>{statusLabel(claim.status)}</span>
                     </div>
-                    <span className={'claim-status status-' + claim.status}>
-                      {statusLabel(claim.status)}
-                    </span>
+                    <small>{claim.clientName || 'عميل غير محدد'} · {claim.policyNumber || 'وثيقة غير محددة'} · {claim.insurerName || 'شركة غير محددة'}</small>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)', marginTop: 4 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ShieldCheck size={12} />{claim.policyNumber || 'وثيقة غير محددة'}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><FileText size={12} />{claim.insurerName || 'شركة غير محددة'}</span>
+                      <span>{dateText(claim.incidentDate)}</span>
+                      <strong style={{ color: 'var(--inx-navy)' }}>{money(claim.claimAmount, claim.currency)}</strong>
+                    </div>
                   </div>
-
-                  <div className="claims-v2-meta">
-                    <span>
-                      <ShieldCheck size={15} aria-hidden="true" />
-                      {claim.policyNumber || 'وثيقة غير محددة'}
-                    </span>
-                    <span>
-                      <FileText size={15} aria-hidden="true" />
-                      {claim.insurerName || 'شركة التأمين غير محددة'}
-                    </span>
-                    <span>{dateText(claim.incidentDate)}</span>
-                    <strong>{money(claim.claimAmount, claim.currency)}</strong>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </section>
+      </div>
 
       {showCreate && (
-        <ClaimForm
-          onCancel={() => setShowCreate(false)}
-          onDone={() => {
-            setShowCreate(false);
-            void load();
-          }}
-        />
+        <ClaimForm onCancel={() => setShowCreate(false)} onDone={() => { setShowCreate(false); void load(); }} />
       )}
     </main>
   );

@@ -1,12 +1,7 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
+  Bot,
   Building2,
   Mail,
   Phone,
@@ -15,20 +10,14 @@ import {
   UserRound,
   Users,
 } from 'lucide-react';
-
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { listClients } from '../features/clients/client.service';
 import ClientForm from '../features/clients/ClientForm';
-
 import type { InsuranceClient } from '../types/client';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
-type ClientFilter =
-  | 'all'
-  | 'active'
-  | 'prospect'
-  | 'inactive';
+type ClientFilter = 'all' | 'active' | 'prospect' | 'inactive';
 
 const filterLabels: Record<ClientFilter, string> = {
   all: 'الكل',
@@ -38,394 +27,219 @@ const filterLabels: Record<ClientFilter, string> = {
 };
 
 function getInitials(name: string) {
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 0) {
-    return 'IN';
-  }
-
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-
-  return (
-    words[0].charAt(0) +
-    words[1].charAt(0)
-  ).toUpperCase();
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 'IN';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
 }
 
 function getClientTypeLabel(type: string) {
-  return type === 'company'
-    ? 'شركة'
-    : 'فرد';
+  return type === 'company' ? 'شركة' : 'فرد';
 }
 
 function getClientStatusLabel(status: string) {
   switch (status) {
-    case 'active':
-      return 'نشط';
+    case 'active': return 'نشط';
+    case 'prospect': return 'محتمل';
+    case 'inactive': return 'غير نشط';
+    default: return status;
+  }
+}
 
-    case 'prospect':
-      return 'محتمل';
-
-    case 'inactive':
-      return 'غير نشط';
-
-    default:
-      return status;
+function statusTone(status: string) {
+  switch (status) {
+    case 'active': return 'success';
+    case 'prospect': return 'primary';
+    case 'inactive': return 'neutral';
+    default: return 'neutral';
   }
 }
 
 export default function ClientsPage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [clients, setClients] = useState<InsuranceClient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<ClientFilter>('all');
 
-  const [clients, setClients] =
-    useState<InsuranceClient[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [showCreate, setShowCreate] =
-    useState(false);
-
-  const [search, setSearch] =
-    useState('');
-
-  const [filter, setFilter] =
-    useState<ClientFilter>('all');
-
-  const loadClients = useCallback(
-    async () => {
-      if (!profile) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const data = await listClients(
-          profile.organizationId,
-        );
-
-        setClients(data);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [profile],
-  );
+  const loadClients = useCallback(async () => {
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await listClients(profile.organizationId);
+      setClients(data);
+    } finally {
+      setLoading(false);
+    }
+  }, [profile]);
 
   useEffect(() => {
     void loadClients();
   }, [loadClients]);
 
+  // ✅ Set context for FAB
+  useEffect(() => {
+    if (!clients.length) return;
+    setCurrentContext({
+      page: 'clients',
+      notes: `The broker is viewing the clients list (${clients.length} clients). Breakdown: ${clients.filter(c => c.status === 'active').length} active, ${clients.filter(c => c.status === 'prospect').length} prospects, ${clients.filter(c => c.status === 'inactive').length} inactive.`,
+      stats: {
+        totalClients: clients.length,
+      },
+    });
+  }, [clients]);
+
   const statistics = useMemo(
     () => ({
       total: clients.length,
-
-      active: clients.filter(
-        (client) =>
-          client.status === 'active',
-      ).length,
-
-      prospect: clients.filter(
-        (client) =>
-          client.status === 'prospect',
-      ).length,
+      active: clients.filter((c) => c.status === 'active').length,
+      prospect: clients.filter((c) => c.status === 'prospect').length,
     }),
     [clients],
   );
 
-  const filteredClients = useMemo(
-    () => {
-      const query = search
-        .trim()
+  const filteredClients = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return clients.filter((client) => {
+      const matchesStatus = filter === 'all' || client.status === filter;
+      const searchableText = [client.name, client.phone, client.email]
+        .filter(Boolean)
+        .join(' ')
         .toLowerCase();
+      const matchesSearch = query === '' || searchableText.includes(query);
+      return matchesStatus && matchesSearch;
+    });
+  }, [clients, filter, search]);
 
-      return clients.filter(
-        (client) => {
-          const matchesStatus =
-            filter === 'all' ||
-            client.status === filter;
-
-          const searchableText = [
-            client.name,
-            client.phone,
-            client.email,
-          ]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-
-          const matchesSearch =
-            query === '' ||
-            searchableText.includes(query);
-
-          return (
-            matchesStatus &&
-            matchesSearch
-          );
+  const askCopilot = () => {
+    navigate('/copilot', {
+      state: {
+        context: {
+          page: 'clients',
+          notes: `The broker is viewing the clients list (${clients.length} clients). Breakdown: ${statistics.active} active, ${statistics.prospect} prospects.`,
+          stats: { totalClients: clients.length },
         },
-      );
-    },
-    [
-      clients,
-      filter,
-      search,
-    ],
-  );
+      },
+    });
+  };
 
   return (
-    <main
-      className="mobile-page s83-clients"
-      dir="rtl"
-    >
-      <header className="s83-clients-header">
-        <div>
-          <span className="eyebrow">
-            Insurance CRM
-          </span>
-
-          <h1>
-            العملاء
-          </h1>
-
-          <p>
-            إدارة علاقات العملاء
-            والملفات التأمينية.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="floating-add"
-          onClick={() =>
-            setShowCreate(true)
-          }
-          aria-label="إضافة عميل"
-          title="إضافة عميل"
-        >
-          <Plus size={22} />
-        </button>
-      </header>
-
-      <section className="s83-client-overview">
-        <article>
-          <span className="s83-stat-icon blue">
-            <Users size={19} />
-          </span>
-
-          <small>
-            إجمالي العملاء
-          </small>
-
-          <strong>
-            {statistics.total}
-          </strong>
-        </article>
-
-        <article>
-          <span className="s83-stat-icon cyan">
-            <UserRound size={19} />
-          </span>
-
-          <small>
-            نشطون
-          </small>
-
-          <strong>
-            {statistics.active}
-          </strong>
-        </article>
-
-        <article>
-          <span className="s83-stat-icon amber">
-            <Building2 size={19} />
-          </span>
-
-          <small>
-            محتملون
-          </small>
-
-          <strong>
-            {statistics.prospect}
-          </strong>
-        </article>
-      </section>
-
-      <section className="s83-client-tools">
-        <div className="s83-client-search">
-          <Search size={19} />
-
-          <input
-            type="search"
-            value={search}
-            onChange={(event) =>
-              setSearch(
-                event.target.value,
-              )
-            }
-            placeholder="ابحث بالاسم أو الهاتف أو البريد"
-            aria-label="البحث في العملاء"
-          />
-        </div>
-
-        <div className="s83-client-filters">
-          {(
-            [
-              'all',
-              'active',
-              'prospect',
-              'inactive',
-            ] as ClientFilter[]
-          ).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={
-                filter === item
-                  ? 'active'
-                  : ''
-              }
-              onClick={() =>
-                setFilter(item)
-              }
-            >
-              {filterLabels[item]}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="s83-client-section">
-        <div className="s83-section-heading">
+    <main className="mobile-page" dir="rtl">
+      <div className="inx-container">
+        <header className="inx-section-head" style={{ marginTop: 0 }}>
           <div>
-            <h2>
-              قائمة العملاء
-            </h2>
-
-            <small>
-              {filteredClients.length} عميل
+            <span className="eyebrow">Insurance CRM</span>
+            <h2>العملاء</h2>
+            <small style={{ color: 'var(--inx-muted)' }}>
+              إدارة عملاء المحفظة والعملاء المحتملين.
             </small>
           </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              className="inx-icon-btn filled"
+              onClick={askCopilot}
+              aria-label="اسأل المساعد"
+            >
+              <Bot size={18} />
+            </button>
+            <button
+              type="button"
+              className="inx-icon-btn"
+              onClick={() => setShowCreate(true)}
+              aria-label="إضافة عميل"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+        </header>
+
+        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle"><Users size={18} /></span></div>
+            <div className="inx-kpi-value">{statistics.total}</div>
+            <small className="inx-kpi-label">إجمالي العملاء</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-success"><UserRound size={18} /></span></div>
+            <div className="inx-kpi-value">{statistics.active}</div>
+            <small className="inx-kpi-label">عملاء نشطون</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head"><span className="inx-icon-circle tone-warning"><Building2 size={18} /></span></div>
+            <div className="inx-kpi-value">{statistics.prospect}</div>
+            <small className="inx-kpi-label">عملاء محتملون</small>
+          </article>
+        </div>
+
+        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
+            <Search size={18} style={{ color: 'var(--inx-muted)' }} />
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="ابحث بالاسم، الهاتف أو البريد"
+              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
+          </div>
+          <div className="inx-chips">
+            {(Object.keys(filterLabels) as ClientFilter[]).map((item) => (
+              <button key={item} type="button" className={`inx-chip ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)}>
+                {filterLabels[item]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="inx-section-head">
+          <h2>قائمة العملاء</h2>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{filteredClients.length} عميل</small>
         </div>
 
         {loading && (
-          <div className="s83-empty-state">
-            <span className="s83-empty-icon">
-              <Users size={24} />
-            </span>
+          <div className="inx-empty"><Users size={28} /><b>جاري تحميل العملاء...</b></div>
+        )}
 
-            <strong>
-              جارٍ تحميل العملاء...
-            </strong>
+        {!loading && filteredClients.length === 0 && (
+          <div className="inx-empty">
+            <Users size={28} />
+            <b>لا توجد نتائج</b>
+            <small>جرّب تغيير الفلاتر أو أضف عميلًا جديدًا.</small>
           </div>
         )}
 
-        {!loading &&
-          filteredClients.length === 0 && (
-            <div className="s83-empty-state">
-              <span className="s83-empty-icon">
-                <Users size={24} />
-              </span>
-
-              <strong>
-                لا توجد نتائج
-              </strong>
-
-              <p>
-                جرّب تغيير البحث أو الفلتر،
-                أو أضف أول عميل.
-              </p>
-
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() =>
-                  setShowCreate(true)
-                }
-              >
-                <Plus size={18} />
-                إضافة عميل
-              </button>
-            </div>
-          )}
-
-        {!loading &&
-          filteredClients.length > 0 && (
-            <div className="s83-client-list">
-              {filteredClients.map(
-                (client) => (
-                  <Link
-                    key={client.id}
-                    to={`/clients/${client.id}`}
-                    className="s83-client-card"
-                  >
-                    <div className="s83-client-avatar">
-                      {getInitials(
-                        client.name,
-                      )}
+        {!loading && filteredClients.length > 0 && (
+          <ul className="inx-list">
+            {filteredClients.map((client) => (
+              <li key={client.id}>
+                <Link to={`/clients/${client.id}`} className="inx-list-item">
+                  <div className="inx-avatar">{getInitials(client.name)}</div>
+                  <div className="inx-list-copy">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <b style={{ marginBottom: 0 }}>{client.name}</b>
+                      <span className={`inx-badge inx-badge-${statusTone(client.status)}`}>
+                        {getClientStatusLabel(client.status)}
+                      </span>
                     </div>
-
-                    <div className="s83-client-main">
-                      <div className="s83-client-name-row">
-                        <div>
-                          <strong>
-                            {client.name}
-                          </strong>
-
-                          <span>
-                            {getClientTypeLabel(
-                              client.type,
-                            )}
-                          </span>
-                        </div>
-
-                        <span
-                          className={`s83-status s83-status-${client.status}`}
-                        >
-                          {getClientStatusLabel(
-                            client.status,
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="s83-client-contact">
-                        {client.phone && (
-                          <span>
-                            <Phone size={13} />
-                            {client.phone}
-                          </span>
-                        )}
-
-                        {client.email && (
-                          <span>
-                            <Mail size={13} />
-                            {client.email}
-                          </span>
-                        )}
-                      </div>
+                    <small style={{ marginBottom: 4 }}>{getClientTypeLabel(client.type)}</small>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)' }}>
+                      {client.phone && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Phone size={12} />{client.phone}</span>)}
+                      {client.email && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Mail size={12} />{client.email}</span>)}
                     </div>
-
-                    <span className="s83-client-arrow">
-                      <ArrowLeft size={18} />
-                    </span>
-                  </Link>
-                ),
-              )}
-            </div>
-          )}
-      </section>
+                  </div>
+                  <ArrowLeft size={16} className="inx-list-chevron" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {showCreate && (
         <ClientForm
-          onCancel={() =>
-            setShowCreate(false)
-          }
+          onCancel={() => setShowCreate(false)}
           onCreated={() => {
             setShowCreate(false);
             void loadClients();

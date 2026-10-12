@@ -50,3 +50,5 @@ apply-*.ps1
 # --- Backups and duplicates ---
 README.txt
 patch/
+# Supabase CLI temp
+supabase/.temp/

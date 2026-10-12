@@ -4,6 +4,7 @@ import { AuthProvider } from './features/auth/AuthProvider';
 import ProtectedRoute from './features/auth/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 import './App.css';
+import './theme/identity.css';
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -28,40 +29,59 @@ const ClientInsuranceAnalysisPage = lazy(() => import('./pages/ClientInsuranceAn
 const MorePage = lazy(() => import('./pages/MorePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
+const CopilotPage = lazy(() => import('./pages/CopilotPage'));
+const FinancePage = lazy(() => import('./pages/FinancePage'));
 
 function AppLoading() {
-  return <main className="suspense-loading" dir="rtl"><section className="suspense-loading-card"><strong>InsurNex</strong><span>جارٍ تحميل مساحة العمل...</span></section></main>;
+  return (
+    <main className="suspense-loading" dir="rtl">
+      <section className="suspense-loading-card">
+        <strong>InsurNex</strong>
+        <span>جاري تحميل النظام...</span>
+      </section>
+    </main>
+  );
 }
 
 export default function App() {
-  return <BrowserRouter><AuthProvider><Suspense fallback={<AppLoading/>}><Routes>
-    <Route path="/login" element={<LoginPage/>}/>
-    <Route path="/register" element={<RegisterPage/>}/>
-    <Route element={<ProtectedRoute/>}>
-      <Route path="/setup" element={<SetupPage/>}/>
-      <Route element={<AppLayout/>}>
-        <Route index element={<DashboardPage/>}/>
-        <Route path="clients" element={<ClientsPage/>}/>
-        <Route path="clients/:id" element={<ClientDetailsPage/>}/>
-        <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage/>}/>
-        <Route path="policies" element={<PoliciesPage/>}/>
-        <Route path="renewals" element={<RenewalsPage/>}/>
-        <Route path="claims" element={<ClaimsPage/>}/>
-        <Route path="claims/:id" element={<ClaimDetailsPage/>}/>
-        <Route path="operations" element={<OperationsPage/>}/>
-        <Route path="tasks" element={<TasksPage/>}/>
-        <Route path="notifications" element={<NotificationsPage/>}/>
-        <Route path="insurers" element={<InsurersPage/>}/>
-        <Route path="leads" element={<LeadsPage/>}/>
-        <Route path="leads/:id" element={<LeadDetailsPage/>}/>
-        <Route path="analytics" element={<AnalyticsPage/>}/>
-        <Route path="analytics/medical" element={<MedicalIntelligencePage/>}/>
-        <Route path="ai/file-analysis" element={<AIFileAnalysisPage/>}/>
-        <Route path="more" element={<MorePage/>}/>
-        <Route path="settings" element={<SettingsPage/>}/>
-        <Route path="documents" element={<ComingSoonPage/>}/>
-      </Route>
-    </Route>
-    <Route path="*" element={<Navigate to="/" replace/>}/>
-  </Routes></Suspense></AuthProvider></BrowserRouter>;
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Suspense fallback={<AppLoading />}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/setup" element={<SetupPage />} />
+              <Route element={<AppLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="clients" element={<ClientsPage />} />
+                <Route path="clients/:id" element={<ClientDetailsPage />} />
+                <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage />} />
+                <Route path="policies" element={<PoliciesPage />} />
+                <Route path="renewals" element={<RenewalsPage />} />
+                <Route path="claims" element={<ClaimsPage />} />
+                <Route path="claims/:id" element={<ClaimDetailsPage />} />
+                <Route path="operations" element={<OperationsPage />} />
+                <Route path="tasks" element={<TasksPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="insurers" element={<InsurersPage />} />
+                <Route path="leads" element={<LeadsPage />} />
+                <Route path="leads/:id" element={<LeadDetailsPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="analytics/medical" element={<MedicalIntelligencePage />} />
+                <Route path="ai/file-analysis" element={<AIFileAnalysisPage />} />
+                <Route path="copilot" element={<CopilotPage />} />
+                <Route path="finance" element={<FinancePage />} />
+                <Route path="more" element={<MorePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="documents" element={<ComingSoonPage />} />
+              </Route>
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }

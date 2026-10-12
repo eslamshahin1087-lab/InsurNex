@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.medicalClaudeAnalysis = void 0;
+exports.copilotChat = exports.medicalClaudeAnalysis = void 0;
 const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
 const https_1 = require("firebase-functions/v2/https");
 const params_1 = require("firebase-functions/params");
@@ -34,3 +34,6 @@ catch (e) {
     console.error('medicalClaudeAnalysis failed', e);
     throw new https_1.HttpsError('unavailable', 'AI analysis is temporarily unavailable. Deterministic analytics remain available.');
 } });
+// InsurNex AI Copilot
+var copilot_1 = require("./copilot");
+Object.defineProperty(exports, "copilotChat", { enumerable: true, get: function () { return copilot_1.copilotChat; } });
