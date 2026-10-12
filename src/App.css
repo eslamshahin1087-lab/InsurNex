@@ -219,3 +219,233 @@
     font-size: 9.5px;
   }
 }
+
+/* =====================================================================
+   Auth Pages — InsurNex Identity (Login/Register/Setup)
+   ===================================================================== */
+
+.auth-mobile,
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 20% 20%, #029fe916, transparent 32%),
+    var(--inx-bg);
+}
+
+.auth-phone-card,
+.auth-panel,
+.setup-card {
+  width: min(460px, 100%);
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  padding: 28px;
+  box-shadow: var(--inx-shadow-lg, 0 12px 40px rgba(10, 42, 92, 0.08));
+}
+
+.auth-brand,
+.setup-brand {
+  width: 180px;
+  display: block;
+  margin: 0 auto 24px;
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.auth-brand-row img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.auth-brand-row span {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--inx-text);
+}
+
+.auth-copy h1,
+.auth-panel h1 {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  color: var(--inx-text);
+  font-weight: 800;
+}
+
+.auth-copy p,
+.auth-panel p {
+  color: var(--inx-muted);
+  line-height: 1.75;
+  font-size: 13.5px;
+  margin-bottom: 18px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.auth-form label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--inx-text);
+}
+
+.input-wrap {
+  margin-top: 6px;
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--inx-muted);
+  background: var(--inx-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-wrap:focus-within {
+  border-color: var(--inx-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.input-wrap input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 12px 0;
+  background: transparent;
+  color: var(--inx-text);
+  font-size: 14px;
+}
+
+.input-wrap .input-action {
+  border: 0;
+  background: transparent;
+  color: var(--inx-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+}
+
+.input-wrap .input-action:hover {
+  color: var(--inx-blue);
+}
+
+.auth-form .primary-button,
+.auth-form .app-cta {
+  border: 0;
+  border-radius: var(--inx-radius, 14px);
+  background: var(--inx-gradient);
+  color: #fff;
+  padding: 13px 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+.auth-form .primary-button:hover:not(:disabled),
+.auth-form .app-cta:hover:not(:disabled) {
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+}
+
+.auth-form .primary-button:disabled,
+.auth-form .app-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-error {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+  border: 1px solid var(--inx-danger);
+  padding: 10px 12px;
+  border-radius: var(--inx-radius-sm, 10px);
+  font-size: 12.5px;
+  margin: 0;
+}
+
+.register-callout,
+.auth-switch {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--inx-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--inx-muted);
+  flex-wrap: wrap;
+}
+
+.register-callout a,
+.auth-switch a {
+  color: var(--inx-blue);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--inx-radius-sm, 10px);
+  background: var(--inx-info-bg);
+  transition: background 0.15s;
+}
+
+.register-callout a:hover,
+.auth-switch a:hover {
+  background: var(--inx-blue);
+  color: #fff;
+}
+
+/* Setup */
+.setup-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: radial-gradient(circle at 10% 10%, #029fe916, transparent 30%),
+    var(--inx-bg);
+}
+
+.setup-card select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  background: var(--inx-surface);
+  color: var(--inx-text);
+  outline: none;
+}
+
+.setup-card select:focus {
+  border-color: var(--inx-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+@media (max-width: 480px) {
+  .auth-phone-card,
+  .auth-panel,
+  .setup-card {
+    padding: 22px;
+  }
+  .auth-copy h1,
+  .auth-panel h1 {
+    font-size: 20px;
+  }
+}
