@@ -31,6 +31,26 @@ export default function LoginPage() {
     }
   }
 
+  const wrapperStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    border: '1px solid var(--inx-border)',
+    borderRadius: 'var(--inx-radius, 14px)',
+    padding: '0 12px',
+    background: 'var(--inx-surface)',
+  } as const;
+
+  const inputStyle = {
+    flex: 1,
+    border: 0,
+    outline: 0,
+    padding: '12px 0',
+    background: 'transparent',
+    color: 'var(--inx-text)',
+    fontSize: 14,
+  } as const;
+
   return (
     <main
       dir="rtl"
@@ -61,12 +81,19 @@ export default function LoginPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img
-              src="/branding/insurnex-brand.png"
+              src="/branding/logo-light.png"
               alt="InsurNex"
-              style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 12 }}
+              style={{
+                width: 48,
+                height: 48,
+                objectFit: 'contain',
+                borderRadius: 12,
+              }}
             />
             <div>
-              <strong style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}>
+              <strong
+                style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}
+              >
                 InsurNex
               </strong>
               <small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>
@@ -113,21 +140,12 @@ export default function LoginPage() {
         {/* FORM */}
         <form onSubmit={submit} style={{ display: 'grid', gap: 14 }}>
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               البريد الإلكتروني
             </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                border: '1px solid var(--inx-border)',
-                borderRadius: 'var(--inx-radius, 14px)',
-                padding: '0 12px',
-                background: 'var(--inx-surface)',
-                transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-            >
+            <div style={wrapperStyle}>
               <Mail size={18} style={{ color: 'var(--inx-muted)' }} />
               <input
                 autoComplete="email"
@@ -136,35 +154,18 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                style={{
-                  flex: 1,
-                  border: 0,
-                  outline: 0,
-                  padding: '12px 0',
-                  background: 'transparent',
-                  color: 'var(--inx-text)',
-                  fontSize: 14,
-                }}
+                style={inputStyle}
               />
             </div>
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               كلمة المرور
             </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                border: '1px solid var(--inx-border)',
-                borderRadius: 'var(--inx-radius, 14px)',
-                padding: '0 12px',
-                background: 'var(--inx-surface)',
-                transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-            >
+            <div style={wrapperStyle}>
               <LockKeyhole size={18} style={{ color: 'var(--inx-muted)' }} />
               <input
                 autoComplete="current-password"
@@ -173,15 +174,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="كلمة المرور"
-                style={{
-                  flex: 1,
-                  border: 0,
-                  outline: 0,
-                  padding: '12px 0',
-                  background: 'transparent',
-                  color: 'var(--inx-text)',
-                  fontSize: 14,
-                }}
+                style={inputStyle}
               />
               <button
                 type="button"

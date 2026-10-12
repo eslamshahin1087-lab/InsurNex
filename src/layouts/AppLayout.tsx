@@ -43,7 +43,7 @@ export default function AppLayout() {
     <div className="mobile-shell" dir="rtl">
       <header className="app-header s8-header">
         <div className="s8-brand">
-          <img src="/branding/insurnex-brand.png" alt="InsurNex" />
+          <img src="/branding/logo-light.png" alt="InsurNex" />
           <div className="s8-hello">
             <strong>أهلاً {firstName}</strong>
             <small>

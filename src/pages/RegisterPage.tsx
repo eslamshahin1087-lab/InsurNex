@@ -50,22 +50,12 @@ export default function RegisterPage() {
       else if (code.includes('invalid-email'))
         setError('عنوان البريد غير صالح.');
       else if (code.includes('weak-password'))
-        setError('كلمة المرور ضعيفة جدًا. اختر كلمة أقوى.');
+        setError('كلمة المرور ضعيفة جداً. اختر كلمة أقوى.');
       else setError('تعذر إنشاء الحساب. حاول مرة أخرى.');
     } finally {
       setBusy(false);
     }
   }
-
-  const inputStyle = {
-    flex: 1,
-    border: 0,
-    outline: 0,
-    padding: '12px 0',
-    background: 'transparent',
-    color: 'var(--inx-text)',
-    fontSize: 14,
-  } as const;
 
   const wrapperStyle = {
     display: 'flex',
@@ -75,6 +65,16 @@ export default function RegisterPage() {
     borderRadius: 'var(--inx-radius, 14px)',
     padding: '0 12px',
     background: 'var(--inx-surface)',
+  } as const;
+
+  const inputStyle = {
+    flex: 1,
+    border: 0,
+    outline: 0,
+    padding: '12px 0',
+    background: 'transparent',
+    color: 'var(--inx-text)',
+    fontSize: 14,
   } as const;
 
   return (
@@ -107,12 +107,19 @@ export default function RegisterPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img
-              src="/branding/insurnex-brand.png"
+              src="/branding/logo-light.png"
               alt="InsurNex"
-              style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 12 }}
+              style={{
+                width: 48,
+                height: 48,
+                objectFit: 'contain',
+                borderRadius: 12,
+              }}
             />
             <div>
-              <strong style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}>
+              <strong
+                style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}
+              >
                 InsurNex
               </strong>
               <small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>
@@ -158,7 +165,9 @@ export default function RegisterPage() {
         {/* FORM */}
         <form onSubmit={submit} style={{ display: 'grid', gap: 14 }}>
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               الاسم الكامل
             </span>
             <div style={wrapperStyle}>
@@ -175,7 +184,9 @@ export default function RegisterPage() {
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               البريد الإلكتروني
             </span>
             <div style={wrapperStyle}>
@@ -193,7 +204,9 @@ export default function RegisterPage() {
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               كلمة المرور
             </span>
             <div style={wrapperStyle}>
@@ -227,7 +240,9 @@ export default function RegisterPage() {
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}>
+            <span
+              style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--inx-text)' }}
+            >
               تأكيد كلمة المرور
             </span>
             <div style={wrapperStyle}>
