@@ -4,8 +4,10 @@ service cloud.firestore {
     function signedIn(){ return request.auth != null; }
     function userPath(){ return /databases/$(database)/documents/users/$(request.auth.uid); }
     function organizationPath(orgId){ return /databases/$(database)/documents/organizations/$(orgId); }
+    function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
     function hasProfile(){ return signedIn() && exists(userPath()); }
     function me(){ return get(userPath()).data; }
+    function isAdmin(){ return signedIn() && exists(adminPath(request.auth.uid)); }
     function sameOrg(orgId){ return hasProfile() && me().status == 'active' && me().organizationId == orgId; }
     function roleIs(roles){ return hasProfile() && me().role in roles; }
     function privileged(){ return roleIs(['owner','admin']); }
@@ -14,10 +16,18 @@ service cloud.firestore {
         && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
     }
 
+    // ============ Admins ============
+    match /admin/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if isAdmin();
+    }
+
+    // ============ Users (brokers) ============
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid
         || (hasProfile() && resource.data.organizationId == me().organizationId && privileged())
+        || isAdmin()
       );
       allow create: if signedIn()
         && request.auth.uid == uid
@@ -33,48 +43,119 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ============ Organizations ============
     match /organizations/{orgId} {
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.name is string
         && request.resource.data.type in ['individual', 'office', 'company'];
-      allow read: if sameOrg(orgId);
-      allow update: if sameOrg(orgId) && privileged()
-        && request.resource.data.ownerId == resource.data.ownerId;
+      allow read: if sameOrg(orgId) || isAdmin();
+      allow update: if (sameOrg(orgId) && privileged()
+        && request.resource.data.ownerId == resource.data.ownerId) || isAdmin();
       allow delete: if false;
 
       match /members/{uid} {
-        // Initial owner membership must be part of the same atomic
-        // onboarding batch and must carry the expected owner role/state.
         allow create: if signedIn()
           && request.auth.uid == uid
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.role == 'owner'
           && request.resource.data.status == 'active'
           && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
-        allow read: if sameOrg(orgId);
-        allow update: if sameOrg(orgId) && privileged();
-        allow delete: if sameOrg(orgId) && privileged() && uid != request.auth.uid;
+        allow read: if sameOrg(orgId) || isAdmin();
+        allow update: if (sameOrg(orgId) && privileged()) || isAdmin();
+        allow delete: if (sameOrg(orgId) && privileged() && uid != request.auth.uid) || isAdmin();
       }
     }
 
-    // Firestore combines overlapping allow rules with OR. Keep identity and
-    // organization documents out of the generic business-record rule.
+    // ============ Subscriptions ============
+    match /organizationSubscriptions/{orgId} {
+      allow read: if sameOrg(orgId) || isAdmin();
+
+      allow create: if signedIn()
+        && request.resource.data.organizationId == orgId
+        && exists(organizationPath(orgId))
+        && get(organizationPath(orgId)).data.ownerId == request.auth.uid
+        && request.resource.data.status in ['trial', 'active'];
+
+      allow update: if isAdmin() || (
+        signedIn()
+        && exists(organizationPath(orgId))
+        && get(organizationPath(orgId)).data.ownerId == request.auth.uid
+        && request.resource.data.organizationId == resource.data.organizationId
+      );
+
+      allow delete: if false;
+    }
+
+    // ============ Subscription Codes ============
+    match /subscriptionCodes/{code} {
+      allow read: if isAdmin() || (
+        signedIn() && resource.data.status in ['unused', 'used']
+      );
+
+      allow create: if isAdmin()
+        && request.resource.data.code == code
+        && request.resource.data.status == 'unused';
+
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.status == 'unused'
+        && request.resource.data.status == 'used'
+        && request.resource.data.usedBy.uid == request.auth.uid
+      );
+
+      allow delete: if isAdmin();
+    }
+    // ============ Onboarding Progress ============
+    match /onboardingProgress/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // ============ Ads ============
+    match /ads/{adId} {
+      allow read: if signedIn() && (
+        resource.data.status == 'active' || isAdmin()
+      );
+      allow write: if isAdmin();
+    }
+
+    // ============ Generic business records ============
     match /{collection}/{docId} {
       allow read: if collection != 'users'
         && collection != 'organizations'
+        && collection != 'admin'
+        && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes'
+        && collection != 'ads'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId);
       allow create: if collection != 'users'
         && collection != 'organizations'
+        && collection != 'admin'
+        && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes'
+        && collection != 'ads'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId);
       allow update: if collection != 'users'
         && collection != 'organizations'
+        && collection != 'admin'
+        && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes'
+        && collection != 'ads'
         && resource.data.organizationId == request.resource.data.organizationId
-        && sameOrg(resource.data.organizationId);
+        && sameOrg(request.resource.data.organizationId);
       allow delete: if collection != 'users'
         && collection != 'organizations'
+        && collection != 'admin'
+        && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes'
+        && collection != 'ads'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker']);

@@ -11,6 +11,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SetupPage = lazy(() => import('./pages/SetupPage'));
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminCodesPage = lazy(() => import('./pages/AdminCodesPage'));
 const AdminSubscriptionsPage = lazy(() => import('./pages/AdminSubscriptionsPage'));
@@ -60,10 +61,14 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               {/* Setup - not gated */}
               <Route path="/setup" element={<SetupPage />} />
-              {/* Subscription page - not gated */}
+
+              {/* Subscription - not gated (accessible when expired) */}
               <Route path="/subscription" element={<SubscriptionPage />} />
 
-              {/* Admin routes - not gated (bypass subscription) */}
+              {/* Onboarding - not gated by subscription, but requires auth */}
+              <Route path="/onboarding" element={<OnboardingPage />} />
+
+              {/* Admin routes - bypass subscription gate */}
               <Route element={<AppLayout />}>
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/admin/codes" element={<AdminCodesPage />} />
@@ -76,7 +81,10 @@ export default function App() {
                   <Route index element={<DashboardPage />} />
                   <Route path="clients" element={<ClientsPage />} />
                   <Route path="clients/:id" element={<ClientDetailsPage />} />
-                  <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage />} />
+                  <Route
+                    path="clients/:id/insurance-analysis"
+                    element={<ClientInsuranceAnalysisPage />}
+                  />
                   <Route path="policies" element={<PoliciesPage />} />
                   <Route path="renewals" element={<RenewalsPage />} />
                   <Route path="claims" element={<ClaimsPage />} />
@@ -88,7 +96,10 @@ export default function App() {
                   <Route path="leads" element={<LeadsPage />} />
                   <Route path="leads/:id" element={<LeadDetailsPage />} />
                   <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route path="analytics/medical" element={<MedicalIntelligencePage />} />
+                  <Route
+                    path="analytics/medical"
+                    element={<MedicalIntelligencePage />}
+                  />
                   <Route path="ai/file-analysis" element={<AIFileAnalysisPage />} />
                   <Route path="copilot" element={<CopilotPage />} />
                   <Route path="finance" element={<FinancePage />} />

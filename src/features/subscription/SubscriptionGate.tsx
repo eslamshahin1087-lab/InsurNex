@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/auth-context';
 import {
   createTrialSubscription,
@@ -7,12 +7,16 @@ import {
   isExpired,
 } from './subscription.service';
 import { useSubscription } from './subscription.hooks';
+import { getOnboardingProgress } from '../onboarding/onboarding.service';
 
 export default function SubscriptionGate() {
   const { user, profile } = useAuth();
+  const location = useLocation();
   const { subscription, loading, refresh } = useSubscription();
   const [adminState, setAdminState] = useState<'loading' | 'admin' | 'user'>('loading');
   const [migrated, setMigrated] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   // Check if current user is admin
   useEffect(() => {
@@ -30,12 +34,34 @@ export default function SubscriptionGate() {
     void createTrialSubscription(profile.organizationId, user.uid).then(refresh);
   }, [loading, subscription, migrated, profile?.organizationId, user?.uid, refresh]);
 
-  if (loading || adminState === 'loading') {
+  // Check onboarding status
+  useEffect(() => {
+    if (!user?.uid) return;
+    if (adminState === 'loading') return;
+    // Admins skip onboarding
+    if (adminState === 'admin') {
+      setOnboardingChecked(true);
+      setNeedsOnboarding(false);
+      return;
+    }
+    (async () => {
+      try {
+        const prog = await getOnboardingProgress(user.uid);
+        setNeedsOnboarding(!prog || !prog.completed);
+      } catch {
+        setNeedsOnboarding(false);
+      } finally {
+        setOnboardingChecked(true);
+      }
+    })();
+  }, [user?.uid, adminState]);
+
+  if (loading || adminState === 'loading' || !onboardingChecked) {
     return (
       <main className="mobile-page" dir="rtl">
         <div className="inx-container">
           <div className="inx-empty">
-            <b>جاري التحقق من الاشتراك...</b>
+            <b>جاري التحقق...</b>
           </div>
         </div>
       </main>
@@ -57,8 +83,15 @@ export default function SubscriptionGate() {
     );
   }
 
+  // Subscription expired → redirect to /subscription
   if (isExpired(subscription)) {
+    if (location.pathname === '/subscription') return <Outlet />;
     return <Navigate to="/subscription" replace />;
+  }
+
+  // Onboarding needed → redirect to /onboarding
+  if (needsOnboarding && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <Outlet />;
