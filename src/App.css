@@ -449,3 +449,28 @@
     font-size: 20px;
   }
 }
+
+/* =====================================================================
+   Auth Pages — label fix (remove weird underline on labels)
+   ===================================================================== */
+
+.auth-form label,
+.auth-form label span,
+.auth-mobile label,
+.auth-phone-card label {
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+  position: relative;
+}
+
+.auth-form label::before,
+.auth-form label::after,
+.auth-mobile label::before,
+.auth-mobile label::after {
+  display: none !important;
+  content: none !important;
+}
+
+.auth-form label > div.input-wrap {
+  margin-top: 8px;
+}
