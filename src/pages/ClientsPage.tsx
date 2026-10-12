@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Bot,
-  Building2,
   Mail,
+  Moon,
   Phone,
   Plus,
   Search,
-  UserRound,
+  Sun,
   Users,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,6 +16,9 @@ import { listClients } from '../features/clients/client.service';
 import ClientForm from '../features/clients/ClientForm';
 import type { InsuranceClient } from '../types/client';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
+import { useTheme } from '../theme/ThemeProvider';
+import MiniDonutChart from '../components/charts/MiniDonutChart';
+import MiniBarChart from '../components/charts/MiniBarChart';
 
 type ClientFilter = 'all' | 'active' | 'prospect' | 'inactive';
 
@@ -57,6 +60,7 @@ function statusTone(status: string) {
 
 export default function ClientsPage() {
   const { profile } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [clients, setClients] = useState<InsuranceClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,12 +86,12 @@ export default function ClientsPage() {
     void loadClients();
   }, [loadClients]);
 
-  // ✅ Set context for FAB
+  // Copilot context
   useEffect(() => {
     if (!clients.length) return;
     setCurrentContext({
       page: 'clients',
-      notes: `The broker is viewing the clients list (${clients.length} clients). Breakdown: ${clients.filter(c => c.status === 'active').length} active, ${clients.filter(c => c.status === 'prospect').length} prospects, ${clients.filter(c => c.status === 'inactive').length} inactive.`,
+      notes: `The broker is viewing the clients list (${clients.length} clients). Breakdown: ${clients.filter((c) => c.status === 'active').length} active, ${clients.filter((c) => c.status === 'prospect').length} prospects, ${clients.filter((c) => c.status === 'inactive').length} inactive.`,
       stats: {
         totalClients: clients.length,
       },
@@ -99,6 +103,9 @@ export default function ClientsPage() {
       total: clients.length,
       active: clients.filter((c) => c.status === 'active').length,
       prospect: clients.filter((c) => c.status === 'prospect').length,
+      inactive: clients.filter((c) => c.status === 'inactive').length,
+      companies: clients.filter((c) => c.type === 'company').length,
+      individuals: clients.filter((c) => c.type === 'individual').length,
     }),
     [clients],
   );
@@ -128,78 +135,238 @@ export default function ClientsPage() {
     });
   };
 
+  // Chart data
+  const statusSegments = [
+    { label: 'نشطون', value: statistics.active, color: '#10b981' },
+    { label: 'محتملون', value: statistics.prospect, color: '#2563eb' },
+    { label: 'غير نشطين', value: statistics.inactive, color: '#94a3b8' },
+  ].filter((s) => s.value > 0);
+
+  const typeBarData = [
+    statistics.companies,
+    statistics.individuals,
+    statistics.active,
+    statistics.prospect,
+  ];
+
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-        <header className="inx-section-head" style={{ marginTop: 0 }}>
+        {/* ============ HEADER ============ */}
+        <header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+            padding: '4px 0 14px',
+            flexWrap: 'wrap',
+          }}
+        >
           <div>
             <span className="eyebrow">Insurance CRM</span>
-            <h2>العملاء</h2>
-            <small style={{ color: 'var(--inx-muted)' }}>
+            <h2 style={{ margin: '2px 0 4px', fontSize: 20, color: 'var(--inx-text)' }}>
+              العملاء
+            </h2>
+            <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
               إدارة عملاء المحفظة والعملاء المحتملين.
             </small>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+
+          <div className="inx-header-circular">
             <button
               type="button"
-              className="inx-icon-btn filled"
-              onClick={askCopilot}
-              aria-label="اسأل المساعد"
+              className="inx-circle-btn"
+              onClick={toggleTheme}
+              title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
             >
-              <Bot size={18} />
+              {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
             <button
               type="button"
-              className="inx-icon-btn"
-              onClick={() => setShowCreate(true)}
-              aria-label="إضافة عميل"
+              className="inx-circle-btn filled"
+              onClick={askCopilot}
+              title="مساعد InsurNex"
             >
-              <Plus size={20} />
+              <Bot size={17} />
+            </button>
+            <button
+              type="button"
+              className="inx-circle-btn"
+              onClick={() => setShowCreate(true)}
+              title="إضافة عميل"
+            >
+              <Plus size={18} />
             </button>
           </div>
         </header>
 
+        {/* ============ KPI GRID ============ */}
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
-            <div className="inx-kpi-head"><span className="inx-icon-circle"><Users size={18} /></span></div>
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-cyan">👥</span>
+            </div>
             <div className="inx-kpi-value">{statistics.total}</div>
             <small className="inx-kpi-label">إجمالي العملاء</small>
           </article>
           <article className="inx-kpi">
-            <div className="inx-kpi-head"><span className="inx-icon-circle tone-success"><UserRound size={18} /></span></div>
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-success">✅</span>
+            </div>
             <div className="inx-kpi-value">{statistics.active}</div>
             <small className="inx-kpi-label">عملاء نشطون</small>
           </article>
           <article className="inx-kpi">
-            <div className="inx-kpi-head"><span className="inx-icon-circle tone-warning"><Building2 size={18} /></span></div>
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-warning">🎯</span>
+            </div>
             <div className="inx-kpi-value">{statistics.prospect}</div>
-            <small className="inx-kpi-label">عملاء محتملون</small>
+            <small className="inx-kpi-label">محتملون</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-purple">🏢</span>
+            </div>
+            <div className="inx-kpi-value">{statistics.companies}</div>
+            <small className="inx-kpi-label">شركات</small>
           </article>
         </div>
 
+        {/* ============ CHARTS ROW ============ */}
+        {clients.length > 0 && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            <article className="inx-chart-card">
+              <div className="chart-head">
+                <span className="label">توزيع العملاء</span>
+                <span className="value">{statistics.total}</span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 14,
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <MiniDonutChart
+                  segments={
+                    statusSegments.length
+                      ? statusSegments
+                      : [{ label: 'لا يوجد', value: 1, color: '#e3ebf5' }]
+                  }
+                  size={110}
+                  thickness={14}
+                  centerValue={String(statistics.total)}
+                  centerLabel="إجمالي"
+                />
+                <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
+                  {statusSegments.map((s) => (
+                    <div className="legend-row" key={s.label}>
+                      <span className="dot" style={{ background: s.color }} />
+                      <span className="legend-label">{s.label}</span>
+                      <span className="legend-value">{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
+
+            <article className="inx-chart-card">
+              <div className="chart-head">
+                <span className="label">نظرة على الأنواع والحالات</span>
+                <span className="delta up">↑ مباشر</span>
+              </div>
+              <div style={{ color: 'var(--inx-blue)' }}>
+                <MiniBarChart
+                  data={typeBarData}
+                  labels={['شركات', 'أفراد', 'نشطون', 'محتملون']}
+                  height={80}
+                  color="var(--inx-blue)"
+                />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 11,
+                  color: 'var(--inx-muted)',
+                }}
+              >
+                <span>شركات</span>
+                <span>أفراد</span>
+                <span>نشطون</span>
+                <span>محتملون</span>
+              </div>
+            </article>
+          </div>
+        )}
+
+        {/* ============ SEARCH + FILTERS ============ */}
         <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--inx-border)', borderRadius: 'var(--inx-radius)', padding: '8px 12px', background: 'var(--inx-bg)', marginBottom: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              border: '1px solid var(--inx-border)',
+              borderRadius: 'var(--inx-radius)',
+              padding: '8px 12px',
+              background: 'var(--inx-bg)',
+              marginBottom: 12,
+            }}
+          >
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
-            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم، الهاتف أو البريد"
-              style={{ flex: 1, border: 0, outline: 0, background: 'transparent', color: 'var(--inx-text)', fontSize: 13.5 }} />
+              style={{
+                flex: 1,
+                border: 0,
+                outline: 0,
+                background: 'transparent',
+                color: 'var(--inx-text)',
+                fontSize: 13.5,
+              }}
+            />
           </div>
           <div className="inx-chips">
             {(Object.keys(filterLabels) as ClientFilter[]).map((item) => (
-              <button key={item} type="button" className={`inx-chip ${filter === item ? 'active' : ''}`} onClick={() => setFilter(item)}>
+              <button
+                key={item}
+                type="button"
+                className={`inx-chip ${filter === item ? 'active' : ''}`}
+                onClick={() => setFilter(item)}
+              >
                 {filterLabels[item]}
               </button>
             ))}
           </div>
         </div>
 
+        {/* ============ CLIENTS LIST ============ */}
         <div className="inx-section-head">
           <h2>قائمة العملاء</h2>
-          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{filteredClients.length} عميل</small>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
+            {filteredClients.length} عميل
+          </small>
         </div>
 
         {loading && (
-          <div className="inx-empty"><Users size={28} /><b>جاري تحميل العملاء...</b></div>
+          <div className="inx-empty">
+            <Users size={28} />
+            <b>جاري تحميل العملاء...</b>
+          </div>
         )}
 
         {!loading && filteredClients.length === 0 && (
@@ -207,6 +374,14 @@ export default function ClientsPage() {
             <Users size={28} />
             <b>لا توجد نتائج</b>
             <small>جرّب تغيير الفلاتر أو أضف عميلًا جديدًا.</small>
+            <button
+              type="button"
+              className="inx-btn inx-btn-primary"
+              onClick={() => setShowCreate(true)}
+              style={{ marginTop: 8 }}
+            >
+              <Plus size={16} /> إضافة عميل
+            </button>
           </div>
         )}
 
@@ -217,16 +392,57 @@ export default function ClientsPage() {
                 <Link to={`/clients/${client.id}`} className="inx-list-item">
                   <div className="inx-avatar">{getInitials(client.name)}</div>
                   <div className="inx-list-copy">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginBottom: 3,
+                      }}
+                    >
                       <b style={{ marginBottom: 0 }}>{client.name}</b>
-                      <span className={`inx-badge inx-badge-${statusTone(client.status)}`}>
+                      <span
+                        className={`inx-badge inx-badge-${statusTone(client.status)}`}
+                      >
                         {getClientStatusLabel(client.status)}
                       </span>
                     </div>
-                    <small style={{ marginBottom: 4 }}>{getClientTypeLabel(client.type)}</small>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)' }}>
-                      {client.phone && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Phone size={12} />{client.phone}</span>)}
-                      {client.email && (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Mail size={12} />{client.email}</span>)}
+                    <small style={{ marginBottom: 4 }}>
+                      {getClientTypeLabel(client.type)}
+                    </small>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 8,
+                        fontSize: 11.5,
+                        color: 'var(--inx-muted)',
+                      }}
+                    >
+                      {client.phone && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}
+                        >
+                          <Phone size={12} />
+                          {client.phone}
+                        </span>
+                      )}
+                      {client.email && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}
+                        >
+                          <Mail size={12} />
+                          {client.email}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <ArrowLeft size={16} className="inx-list-chevron" />
