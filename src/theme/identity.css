@@ -569,3 +569,524 @@
     height: 48px;
   }
 }
+
+/* =====================================================================
+   InsurNex — Header Circular Buttons
+   ===================================================================== */
+
+.inx-header-circular {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inx-header-circular .inx-circle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--inx-border);
+  background: var(--inx-surface);
+  color: var(--inx-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  text-decoration: none;
+}
+
+.inx-header-circular .inx-circle-btn:hover {
+  background: var(--inx-bg);
+  border-color: var(--inx-blue);
+  color: var(--inx-blue);
+}
+
+.inx-header-circular .inx-circle-btn.filled {
+  background: var(--inx-gradient);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+}
+
+.inx-header-circular .inx-circle-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--inx-danger);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+  border: 2px solid var(--inx-surface);
+}
+
+/* =====================================================================
+   InsurNex — Scope Row (dropdown-like + chip)
+   ===================================================================== */
+
+.inx-scope-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inx-scope-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--inx-border);
+  border-radius: 999px;
+  background: var(--inx-surface);
+  color: var(--inx-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.inx-scope-pill:hover {
+  border-color: var(--inx-blue);
+  background: var(--inx-bg);
+}
+
+.inx-scope-pill svg {
+  color: var(--inx-blue);
+}
+
+.inx-chip-emphasis {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+/* =====================================================================
+   InsurNex — Shortcut Row (horizontal scroll)
+   ===================================================================== */
+
+.inx-shortcut-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 0 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.inx-shortcut-row::-webkit-scrollbar {
+  display: none;
+}
+
+.inx-shortcut-card {
+  flex: 0 0 auto;
+  min-width: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px;
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius, 14px);
+  text-decoration: none;
+  color: var(--inx-text);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.inx-shortcut-card:hover {
+  border-color: var(--inx-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--inx-shadow-sm);
+}
+
+.inx-shortcut-card .icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--inx-info-bg);
+  color: var(--inx-blue);
+  display: grid;
+  place-items: center;
+}
+
+.inx-shortcut-card .icon.tone-cyan {
+  background: var(--inx-cyan-bg);
+  color: var(--inx-cyan);
+}
+.inx-shortcut-card .icon.tone-success {
+  background: var(--inx-success-bg);
+  color: var(--inx-success);
+}
+.inx-shortcut-card .icon.tone-warning {
+  background: var(--inx-warning-bg);
+  color: var(--inx-warning);
+}
+.inx-shortcut-card .icon.tone-danger {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+}
+
+.inx-shortcut-card .label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--inx-text);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.inx-shortcut-card .sub {
+  font-size: 10.5px;
+  color: var(--inx-muted);
+  font-weight: 600;
+}
+
+/* =====================================================================
+   InsurNex — Hero Panel
+   ===================================================================== */
+
+.inx-hero-panel {
+  background: var(--inx-gradient);
+  color: #fff;
+  border-radius: var(--inx-radius-lg, 18px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.inx-hero-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.inx-hero-panel .hero-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.inx-hero-panel .hero-head .title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.inx-hero-panel .hero-head .title-group .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
+}
+
+.inx-hero-panel .hero-head .actions {
+  display: flex;
+  gap: 6px;
+}
+
+.inx-hero-panel .hero-head .actions button,
+.inx-hero-panel .hero-head .actions a {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s;
+}
+
+.inx-hero-panel .hero-head .actions button:hover,
+.inx-hero-panel .hero-head .actions a:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.inx-hero-panel .hero-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.inx-hero-panel .hero-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inx-hero-panel .hero-column .metric {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+
+.inx-hero-panel .hero-column .metric small {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-inline-start: 4px;
+}
+
+.inx-hero-panel .hero-column .metric-label {
+  font-size: 11.5px;
+  opacity: 0.8;
+  font-weight: 600;
+}
+
+.inx-hero-panel .hero-column .metric-delta {
+  font-size: 11.5px;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.inx-hero-panel .hero-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.inx-hero-panel .hero-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #fff;
+  transition: width 0.4s;
+}
+
+.inx-hero-panel .hero-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+
+.inx-hero-panel .hero-foot .info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.inx-hero-panel .hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: #fff;
+  color: var(--inx-navy);
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.inx-hero-panel .hero-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 480px) {
+  .inx-hero-panel {
+    padding: 16px;
+  }
+  .inx-hero-panel .hero-column .metric {
+    font-size: 18px;
+  }
+}
+
+/* =====================================================================
+   InsurNex — Section Link (Explore All style)
+   ===================================================================== */
+
+.inx-section-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--inx-blue);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.inx-section-link:hover {
+  background: var(--inx-info-bg);
+}
+
+/* =====================================================================
+   InsurNex — 3D Icons
+   ===================================================================== */
+
+.inx-3d-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  background: var(--inx-3d-blue);
+  box-shadow: var(--inx-shadow-3d);
+  position: relative;
+  transition: transform 0.15s;
+  line-height: 1;
+}
+
+.inx-3d-icon.tone-cyan   { background: var(--inx-3d-cyan); }
+.inx-3d-icon.tone-success{ background: var(--inx-3d-success); }
+.inx-3d-icon.tone-warning{ background: var(--inx-3d-warning); }
+.inx-3d-icon.tone-danger { background: var(--inx-3d-danger); }
+.inx-3d-icon.tone-purple { background: var(--inx-3d-purple); }
+.inx-3d-icon.tone-rose   { background: var(--inx-3d-rose); }
+
+.inx-3d-icon.sm {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  font-size: 20px;
+}
+
+.inx-3d-icon.lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  font-size: 30px;
+}
+
+.inx-3d-icon::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  right: 15%;
+  height: 30%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent);
+  pointer-events: none;
+  filter: blur(1px);
+}
+
+.inx-shortcut-card:hover .inx-3d-icon {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* =====================================================================
+   InsurNex — Chart containers
+   ===================================================================== */
+
+.inx-chart-card {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius-lg, 18px);
+  padding: 16px;
+  box-shadow: var(--inx-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inx-chart-card .chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.inx-chart-card .chart-head .label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--inx-text);
+}
+
+.inx-chart-card .chart-head .value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--inx-text);
+}
+
+.inx-chart-card .chart-head .delta {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inx-chart-card .chart-head .delta.up   { color: var(--inx-success); }
+.inx-chart-card .chart-head .delta.down { color: var(--inx-danger); }
+
+.inx-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.inx-donut-legend .legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inx-donut-legend .legend-row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.inx-donut-legend .legend-row .legend-label {
+  flex: 1;
+  color: var(--inx-text-soft);
+}
+
+.inx-donut-legend .legend-row .legend-value {
+  font-weight: 700;
+  color: var(--inx-text);
+}

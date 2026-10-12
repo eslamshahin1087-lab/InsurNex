@@ -14,15 +14,9 @@ const STORAGE_KEY = 'insurnex-theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /* ============================================================
-   DARK MODE — TEMPORARILY DISABLED
-   ------------------------------------------------------------
-   Dark mode logic is preserved below and ready to re-enable.
-   To activate in Phase 6:
-     1. Set DARK_MODE_ENABLED = true
-     2. Uncomment the toggle button in src/layouts/AppLayout.tsx
-     3. Verify dark tokens in src/theme/tokens.css
+   DARK MODE — NOW ENABLED
    ============================================================ */
-const DARK_MODE_ENABLED = false;
+const DARK_MODE_ENABLED = true;
 
 function systemTheme(): ResolvedTheme {
   if (typeof window === 'undefined') return 'light';

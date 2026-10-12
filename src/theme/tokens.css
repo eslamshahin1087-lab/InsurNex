@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+  font-family: 'IBM Plex Sans Arabic', Inter, 'Segoe UI', Tahoma, Arial, sans-serif;
   color: #0a2a5c;
   background: #f4f8fd;
   font-synthesis: none;
@@ -13,6 +13,7 @@
   --inx-border: #e3ebf5;
   --inx-muted: #94a3b8;
   --inx-gradient: linear-gradient(135deg, #0a2a5c 0%, #2563eb 55%, #22b8e8 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #f0f7ff, #dbeafe);
 
   /* ===== Text ===== */
   --inx-text: #0a2a5c;
@@ -32,6 +33,15 @@
   --inx-neutral-bg: #f1f5f9;
   --inx-neutral-text: #475569;
 
+  /* ===== 3D icon colors ===== */
+  --inx-3d-blue: linear-gradient(145deg, #dbeafe 0%, #93c5fd 50%, #3b82f6 100%);
+  --inx-3d-cyan: linear-gradient(145deg, #cffafe 0%, #67e8f9 50%, #06b6d4 100%);
+  --inx-3d-success: linear-gradient(145deg, #d1fae5 0%, #6ee7b7 50%, #10b981 100%);
+  --inx-3d-warning: linear-gradient(145deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+  --inx-3d-danger: linear-gradient(145deg, #fee2e2 0%, #fca5a5 50%, #ef4444 100%);
+  --inx-3d-purple: linear-gradient(145deg, #ede9fe 0%, #c4b5fd 50%, #8b5cf6 100%);
+  --inx-3d-rose: linear-gradient(145deg, #fce7f3 0%, #f9a8d4 50%, #ec4899 100%);
+
   /* ===== Radii ===== */
   --inx-radius-sm: 10px;
   --inx-radius: 14px;
@@ -42,6 +52,7 @@
   --inx-shadow-sm: 0 1px 2px rgba(10, 42, 92, 0.04);
   --inx-shadow: 0 4px 16px rgba(10, 42, 92, 0.06);
   --inx-shadow-lg: 0 12px 40px rgba(10, 42, 92, 0.08);
+  --inx-shadow-3d: 0 8px 20px rgba(10, 42, 92, 0.18), inset 0 -3px 6px rgba(10, 42, 92, 0.15), inset 0 3px 6px rgba(255, 255, 255, 0.5);
 
   /* ===== Spacing ===== */
   --inx-gap-xs: 6px;
@@ -51,28 +62,21 @@
 }
 
 /* ============================================================
-   DARK MODE — TEMPORARILY DISABLED (Phase 6)
-   ------------------------------------------------------------
-   This block is ready and will activate as soon as
-   DARK_MODE_ENABLED is set to true in src/theme/ThemeProvider.tsx
-   and the toggle button is restored in src/layouts/AppLayout.tsx.
-
-   Do NOT delete this block. It is retained on purpose so we
-   don't have to rebuild the dark palette later.
+   DARK MODE — ACTIVE
    ============================================================ */
-/*
 :root[data-theme="dark"] {
   color: #e2e8f0;
-  background: #0a1628;
+  background: #071325;
 
   --inx-navy: #93c5fd;
   --inx-blue: #60a5fa;
   --inx-cyan: #22d3ee;
-  --inx-bg: #0a1628;
-  --inx-surface: #131f36;
+  --inx-bg: #071325;
+  --inx-surface: #0f1d33;
   --inx-border: #1e3255;
   --inx-muted: #64748b;
   --inx-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 55%, #0891b2 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #0f1d33, #1e3255);
 
   --inx-text: #e2e8f0;
   --inx-text-soft: #94a3b8;
@@ -90,11 +94,19 @@
   --inx-neutral-bg: #1e293b;
   --inx-neutral-text: #cbd5e1;
 
+  --inx-3d-blue: linear-gradient(145deg, #1e3a5f 0%, #1e40af 50%, #3b82f6 100%);
+  --inx-3d-cyan: linear-gradient(145deg, #0e3a4d 0%, #0e7490 50%, #06b6d4 100%);
+  --inx-3d-success: linear-gradient(145deg, #064e3b 0%, #047857 50%, #10b981 100%);
+  --inx-3d-warning: linear-gradient(145deg, #451a03 0%, #b45309 50%, #f59e0b 100%);
+  --inx-3d-danger: linear-gradient(145deg, #450a0a 0%, #991b1b 50%, #ef4444 100%);
+  --inx-3d-purple: linear-gradient(145deg, #1e1b4b 0%, #5b21b6 50%, #8b5cf6 100%);
+  --inx-3d-rose: linear-gradient(145deg, #4c0519 0%, #9d174d 50%, #ec4899 100%);
+
   --inx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --inx-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   --inx-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+  --inx-shadow-3d: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 -3px 6px rgba(0, 0, 0, 0.3), inset 0 3px 6px rgba(255, 255, 255, 0.1);
 }
-*/
 
 * { box-sizing: border-box; }
 
@@ -104,6 +116,7 @@ body {
   min-height: 100vh;
   background: var(--inx-bg);
   color: var(--inx-text);
+  transition: background 0.2s, color 0.2s;
 }
 
 button, input, select, textarea { font: inherit; }

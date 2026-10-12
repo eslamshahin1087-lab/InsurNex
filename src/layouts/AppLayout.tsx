@@ -4,15 +4,18 @@ import {
   Bot,
   Home,
   LogOut,
+  Moon,
   MoreHorizontal,
   Settings2,
   ShieldCheck,
   Sparkles,
+  Sun,
   Users,
 } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
 import { useAuth } from '../features/auth/auth-context';
+import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 
 const navigation = [
@@ -25,6 +28,7 @@ const navigation = [
 
 export default function AppLayout() {
   const { profile } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
   const [floatingOpen, setFloatingOpen] = useState(false);
@@ -50,6 +54,15 @@ export default function AppLayout() {
           </div>
         </div>
         <div className="s8-actions">
+          <button
+            type="button"
+            className="circle-button"
+            onClick={toggleTheme}
+            aria-label="تبديل السمة"
+            title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+          >
+            {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link
             className="circle-button notification-button"
             to="/notifications"
