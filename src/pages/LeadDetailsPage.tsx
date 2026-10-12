@@ -1,4 +1,17 @@
-import { ArrowRight, CheckCircle2, Save, Target, XCircle } from 'lucide-react';
+import {
+  ArrowRight,
+  Bot,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  Mail,
+  Moon,
+  Phone,
+  Save,
+  Sun,
+  Target,
+  XCircle,
+} from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
@@ -19,11 +32,24 @@ import {
   LEAD_SOURCE_LABELS,
   LEAD_STAGE_LABELS,
 } from '../types/lead';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
+import { useTheme } from '../theme/ThemeProvider';
+
+const STAGE_TONES: Record<LeadStage, string> = {
+  new: 'primary',
+  contacted: 'warning',
+  qualified: 'primary',
+  quotation: 'warning',
+  negotiation: 'warning',
+  won: 'success',
+  lost: 'danger',
+};
 
 export default function LeadDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
   const { user, profile } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const [lead, setLead] = useState<Lead | null>(null);
   const [acts, setActs] = useState<LeadActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +90,28 @@ export default function LeadDetailsPage() {
     void load();
   }, [id, profile?.organizationId]);
 
-  const allowed = useMemo(() => (lead ? getAllowedLeadStages(lead.stage) : []), [lead]);
+  // Copilot context
+  useEffect(() => {
+    if (!lead) return;
+    setCurrentContext({
+      page: 'lead-details',
+      leads: [
+        {
+          name: lead.name,
+          companyName: lead.companyName,
+          stage: lead.stage,
+          insuranceType: lead.insuranceType,
+          estimatedValue: lead.estimatedValue,
+        },
+      ],
+      notes: `The broker is viewing lead 360 for: ${lead.name}`,
+    });
+  }, [lead]);
+
+  const allowed = useMemo(
+    () => (lead ? getAllowedLeadStages(lead.stage) : []),
+    [lead],
+  );
 
   async function move(next: LeadStage) {
     if (!lead || !profile || !user) return;
@@ -125,7 +172,12 @@ export default function LeadDetailsPage() {
         profile.organizationId,
         user.uid,
       );
-      await recordLeadTaskActivity(profile.organizationId, lead.id, user.uid, taskTitle.trim());
+      await recordLeadTaskActivity(
+        profile.organizationId,
+        lead.id,
+        user.uid,
+        taskTitle.trim(),
+      );
       setTaskTitle('');
       setTaskDue('');
       await load();
@@ -142,7 +194,11 @@ export default function LeadDetailsPage() {
     try {
       setSaving(true);
       setError('');
-      const clientId = await convertWonLeadToClient(lead.id, profile.organizationId, user.uid);
+      const clientId = await convertWonLeadToClient(
+        lead.id,
+        profile.organizationId,
+        user.uid,
+      );
       nav(`/clients/${clientId}`);
     } catch (e) {
       console.error(e);
@@ -151,6 +207,27 @@ export default function LeadDetailsPage() {
       setSaving(false);
     }
   }
+
+  const askCopilot = () => {
+    if (!lead) return;
+    nav('/copilot', {
+      state: {
+        context: {
+          page: 'lead-details',
+          leads: [
+            {
+              name: lead.name,
+              companyName: lead.companyName,
+              stage: lead.stage,
+              insuranceType: lead.insuranceType,
+              estimatedValue: lead.estimatedValue,
+            },
+          ],
+          notes: `The broker is viewing lead 360 for: ${lead.name}`,
+        },
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -170,7 +247,11 @@ export default function LeadDetailsPage() {
             <Target size={32} />
             <b>لم يتم العثور على العميل المحتمل</b>
             <small>{error}</small>
-            <Link to="/leads" className="inx-btn inx-btn-secondary" style={{ marginTop: 8 }}>
+            <Link
+              to="/leads"
+              className="inx-btn inx-btn-secondary"
+              style={{ marginTop: 8 }}
+            >
               <ArrowRight size={16} /> العودة للعملاء المحتملين
             </Link>
           </div>
@@ -182,20 +263,61 @@ export default function LeadDetailsPage() {
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-        <header className="inx-section-head" style={{ marginTop: 0 }}>
+        {/* HEADER */}
+        <header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+            padding: '4px 0 14px',
+            flexWrap: 'wrap',
+          }}
+        >
           <div>
             <Link
               to="/leads"
               className="inx-link"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 6 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                marginBottom: 6,
+              }}
             >
               <ArrowRight size={16} /> العملاء المحتملون
             </Link>
             <span className="eyebrow">Lead 360</span>
-            <h2>{lead.name}</h2>
-            <small style={{ color: 'var(--inx-muted)' }}>
-              {LEAD_STAGE_LABELS[lead.stage]} · أولوية {LEAD_PRIORITY_LABELS[lead.priority]}
-            </small>
+            <h2 style={{ margin: '2px 0 6px', fontSize: 20, color: 'var(--inx-text)' }}>
+              {lead.name}
+            </h2>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <span className={`inx-badge inx-badge-${STAGE_TONES[lead.stage]}`}>
+                {LEAD_STAGE_LABELS[lead.stage]}
+              </span>
+              <span className="inx-badge inx-badge-neutral">
+                أولوية {LEAD_PRIORITY_LABELS[lead.priority]}
+              </span>
+            </div>
+          </div>
+
+          <div className="inx-header-circular">
+            <button
+              type="button"
+              className="inx-circle-btn"
+              onClick={toggleTheme}
+              title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+            >
+              {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+            <button
+              type="button"
+              className="inx-circle-btn filled"
+              onClick={askCopilot}
+              title="مساعد InsurNex"
+            >
+              <Bot size={17} />
+            </button>
           </div>
         </header>
 
@@ -209,115 +331,173 @@ export default function LeadDetailsPage() {
           </div>
         )}
 
+        {/* KPI summary */}
+        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-cyan">🛡️</span>
+            </div>
+            <div className="inx-kpi-value" style={{ fontSize: 15 }}>
+              {lead.insuranceType || '—'}
+            </div>
+            <small className="inx-kpi-label">نوع التأمين</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-success">💰</span>
+            </div>
+            <div className="inx-kpi-value" style={{ fontSize: 15 }}>
+              {Number(lead.estimatedValue || 0).toLocaleString('ar-EG')} ج.م
+            </div>
+            <small className="inx-kpi-label">القيمة المتوقعة</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-warning">📊</span>
+            </div>
+            <div className="inx-kpi-value">{acts.length}</div>
+            <small className="inx-kpi-label">نشاطات مسجلة</small>
+          </article>
+          <article className="inx-kpi">
+            <div className="inx-kpi-head">
+              <span className="inx-3d-icon sm tone-purple">📌</span>
+            </div>
+            <div className="inx-kpi-value" style={{ fontSize: 15 }}>
+              {LEAD_SOURCE_LABELS[lead.source]}
+            </div>
+            <small className="inx-kpi-label">المصدر</small>
+          </article>
+        </div>
+
+        {/* Details */}
+        <div className="inx-section-head">
+          <h2>بيانات العميل المحتمل</h2>
+        </div>
         <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head"><h3>بيانات العميل المحتمل</h3></div>
           <ul className="inx-list">
+            {lead.companyName && (
+              <li className="inx-list-item">
+                <span className="inx-icon-circle inx-icon-circle-sm">
+                  <Building2 size={14} />
+                </span>
+                <div className="inx-list-copy">
+                  <small>الشركة</small>
+                  <b>{lead.companyName}</b>
+                </div>
+              </li>
+            )}
             <li className="inx-list-item">
-              <div className="inx-list-copy">
-                <small>نوع التأمين</small>
-                <b>{lead.insuranceType}</b>
-              </div>
-            </li>
-            <li className="inx-list-item">
-              <div className="inx-list-copy">
-                <small>المصدر</small>
-                <b>{LEAD_SOURCE_LABELS[lead.source]}</b>
-              </div>
-            </li>
-            <li className="inx-list-item">
+              <span className="inx-icon-circle inx-icon-circle-sm">
+                <Phone size={14} />
+              </span>
               <div className="inx-list-copy">
                 <small>الهاتف</small>
                 <b>{lead.phone}</b>
               </div>
             </li>
             <li className="inx-list-item">
+              <span className="inx-icon-circle inx-icon-circle-sm">
+                <Mail size={14} />
+              </span>
               <div className="inx-list-copy">
                 <small>البريد الإلكتروني</small>
                 <b>{lead.email || 'غير متوفر'}</b>
               </div>
             </li>
             <li className="inx-list-item">
+              <span className="inx-icon-circle inx-icon-circle-sm tone-cyan">
+                <ShieldIcon />
+              </span>
               <div className="inx-list-copy">
                 <small>شركة التأمين المفضلة</small>
                 <b>{lead.preferredInsurerName || 'غير محددة'}</b>
               </div>
             </li>
-            <li className="inx-list-item">
-              <div className="inx-list-copy">
-                <small>القيمة المتوقعة</small>
-                <b>{Number(lead.estimatedValue || 0).toLocaleString('ar-EG')} ج.م</b>
-              </div>
-            </li>
           </ul>
         </div>
 
+        {/* Stage transitions */}
         {lead.stage !== 'won' && lead.stage !== 'lost' && (
-          <div className="inx-card" style={{ marginBottom: 16 }}>
-            <div className="inx-card-head"><h3>تحديث المرحلة</h3></div>
-            {allowed.includes('lost') && (
-              <textarea
-                value={lostReason}
-                onChange={(e) => setLostReason(e.target.value)}
-                placeholder="سبب الخسارة (إذا كانت المرحلة النهائية خسارة)"
-                rows={2}
-                style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  border: '1px solid var(--inx-border)',
-                  borderRadius: 'var(--inx-radius-sm)',
-                  background: 'var(--inx-surface)',
-                  color: 'var(--inx-text)',
-                  marginBottom: 10,
-                }}
-              />
-            )}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {allowed.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void move(s)}
-                  className={`inx-btn inx-btn-sm ${
-                    s === 'won'
-                      ? 'inx-btn-primary'
-                      : s === 'lost'
-                      ? 'inx-btn-danger'
-                      : 'inx-btn-secondary'
-                  }`}
-                >
-                  {s === 'won' && <CheckCircle2 size={14} />}
-                  {s === 'lost' && <XCircle size={14} />}
-                  {s !== 'won' && s !== 'lost' && <ArrowRight size={14} />}
-                  {LEAD_STAGE_LABELS[s]}
-                </button>
-              ))}
+          <>
+            <div className="inx-section-head">
+              <h2>تحديث المرحلة</h2>
             </div>
-          </div>
+            <div className="inx-card" style={{ marginBottom: 16 }}>
+              {allowed.includes('lost') && (
+                <textarea
+                  value={lostReason}
+                  onChange={(e) => setLostReason(e.target.value)}
+                  placeholder="سبب الخسارة (إذا كانت المرحلة النهائية خسارة)"
+                  rows={2}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    border: '1px solid var(--inx-border)',
+                    borderRadius: 'var(--inx-radius-sm)',
+                    background: 'var(--inx-surface)',
+                    color: 'var(--inx-text)',
+                    marginBottom: 10,
+                  }}
+                />
+              )}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {allowed.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled={saving}
+                    onClick={() => void move(s)}
+                    className={`inx-btn inx-btn-sm ${
+                      s === 'won'
+                        ? 'inx-btn-primary'
+                        : s === 'lost'
+                        ? 'inx-btn-danger'
+                        : 'inx-btn-secondary'
+                    }`}
+                  >
+                    {s === 'won' && <CheckCircle2 size={14} />}
+                    {s === 'lost' && <XCircle size={14} />}
+                    {s !== 'won' && s !== 'lost' && <ArrowRight size={14} />}
+                    {LEAD_STAGE_LABELS[s]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         {lead.stage === 'won' && (
-          <div className="inx-card" style={{ marginBottom: 16 }}>
-            <div className="inx-card-head"><h3>الصفقة مغلقة</h3></div>
-            {lead.clientId ? (
-              <Link to={`/clients/${lead.clientId}`} className="inx-btn inx-btn-primary">
-                فتح Client 360
-              </Link>
-            ) : (
-              <button
-                type="button"
-                className="inx-btn inx-btn-primary"
-                disabled={saving}
-                onClick={() => void convert()}
-              >
-                تحويل إلى عميل
-              </button>
-            )}
-          </div>
+          <>
+            <div className="inx-section-head">
+              <h2>الصفقة مغلقة</h2>
+            </div>
+            <div className="inx-card" style={{ marginBottom: 16 }}>
+              {lead.clientId ? (
+                <Link
+                  to={`/clients/${lead.clientId}`}
+                  className="inx-btn inx-btn-primary"
+                >
+                  فتح Client 360
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="inx-btn inx-btn-primary"
+                  disabled={saving}
+                  onClick={() => void convert()}
+                >
+                  تحويل إلى عميل
+                </button>
+              )}
+            </div>
+          </>
         )}
 
+        {/* Add task */}
+        <div className="inx-section-head">
+          <h2>إضافة مهمة متابعة</h2>
+        </div>
         <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head"><h3>إضافة مهمة متابعة</h3></div>
           <form onSubmit={addTask} style={{ display: 'grid', gap: 8 }}>
             <input
               value={taskTitle}
@@ -345,14 +525,21 @@ export default function LeadDetailsPage() {
                 color: 'var(--inx-text)',
               }}
             />
-            <button type="submit" className="inx-btn inx-btn-primary" disabled={saving}>
+            <button
+              type="submit"
+              className="inx-btn inx-btn-primary"
+              disabled={saving}
+            >
               <Save size={14} /> إنشاء المهمة
             </button>
           </form>
         </div>
 
+        {/* Notes */}
+        <div className="inx-section-head">
+          <h2>الملاحظات</h2>
+        </div>
         <div className="inx-card" style={{ marginBottom: 16 }}>
-          <div className="inx-card-head"><h3>الملاحظات</h3></div>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -377,14 +564,25 @@ export default function LeadDetailsPage() {
           </button>
         </div>
 
+        {/* Activity log */}
+        <div className="inx-section-head">
+          <h2>سجل النشاط</h2>
+          <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
+            {acts.length} عنصر
+          </small>
+        </div>
         <div className="inx-card">
-          <div className="inx-card-head"><h3>سجل النشاط</h3></div>
           {acts.length === 0 ? (
-            <div className="inx-empty"><b>لا يوجد نشاط بعد</b></div>
+            <div className="inx-empty">
+              <b>لا يوجد نشاط بعد</b>
+            </div>
           ) : (
             <ul className="inx-list">
               {acts.map((a) => (
                 <li key={a.id} className="inx-list-item">
+                  <span className="inx-icon-circle inx-icon-circle-sm tone-cyan">
+                    <CalendarDays size={14} />
+                  </span>
                   <div className="inx-list-copy">
                     <b style={{ fontWeight: 600, fontSize: 13 }}>{a.message}</b>
                   </div>
@@ -395,5 +593,22 @@ export default function LeadDetailsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
   );
 }
