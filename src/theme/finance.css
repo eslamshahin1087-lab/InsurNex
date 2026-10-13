@@ -29,7 +29,7 @@
 }
 
 .fin-tabs button.active {
-  background: var(--inx-gradient, linear-gradient(135deg, #05285f, #075eea));
+  background: var(--inx-gradient, linear-gradient(135deg, #0A1929, #1E4272));
   color: #fff;
 }
 
@@ -59,7 +59,7 @@
 
 .fin-kpi strong {
   font-size: 18px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 .fin-kpi.tone-good svg { color: #16a34a; }
@@ -78,7 +78,7 @@
 .fin-info h3 {
   margin: 0 0 6px;
   font-size: 15px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 .fin-info p {
@@ -110,7 +110,7 @@
 .fin-panel-head h2 {
   margin: 4px 0;
   font-size: 18px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 .fin-panel-head small {
@@ -125,7 +125,7 @@
   padding: 8px 12px;
   border: none;
   border-radius: 10px;
-  background: var(--inx-gradient, linear-gradient(135deg, #05285f, #075eea));
+  background: var(--inx-gradient, linear-gradient(135deg, #0A1929, #1E4272));
   color: #fff;
   font-weight: 600;
   font-size: 13px;
@@ -164,7 +164,7 @@
   border-radius: 8px;
   background: #fff;
   font-size: 13px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 .fin-full { grid-column: 1 / -1; }
@@ -179,7 +179,7 @@
   padding: 9px 18px;
   border: none;
   border-radius: 10px;
-  background: var(--inx-navy, #05285f);
+  background: var(--inx-navy, #0A1929);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
@@ -195,7 +195,7 @@
   background: #fff;
   border-radius: 8px;
   font-size: 13px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 /* Lists */
@@ -226,7 +226,7 @@
 
 .fin-row-main strong {
   font-size: 15px;
-  color: var(--inx-navy, #05285f);
+  color: var(--inx-navy, #0A1929);
 }
 
 .fin-row-meta {
@@ -268,7 +268,7 @@
   padding: 3px 8px;
   border-radius: 6px;
   background: #e0ecff;
-  color: var(--inx-blue, #075eea);
+  color: var(--inx-blue, #1E4272);
   font-style: normal;
   font-weight: 600;
 }

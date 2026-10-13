@@ -138,7 +138,7 @@ export default function ClientsPage() {
   // Chart data
   const statusSegments = [
     { label: 'نشطون', value: statistics.active, color: '#10b981' },
-    { label: 'محتملون', value: statistics.prospect, color: '#2563eb' },
+    { label: 'محتملون', value: statistics.prospect, color: '#1E4272' },
     { label: 'غير نشطين', value: statistics.inactive, color: '#94a3b8' },
   ].filter((s) => s.value > 0);
 

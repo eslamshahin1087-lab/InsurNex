@@ -270,7 +270,7 @@ export default function LeadsPage() {
           ? '#dc2626'
           : s === 'negotiation'
           ? '#f59e0b'
-          : '#2563eb',
+          : '#1E4272',
     }))
     .filter((s) => s.value > 0);
 

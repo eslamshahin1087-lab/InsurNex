@@ -104,7 +104,7 @@ export default function InsurersPage() {
 
   // Charts
   const categorySegments = [
-    { label: 'عام', value: all.filter((i) => i.category === 'general').length, color: '#2563eb' },
+    { label: 'عام', value: all.filter((i) => i.category === 'general').length, color: '#1E4272' },
     { label: 'حياة', value: all.filter((i) => i.category === 'life').length, color: '#10b981' },
     { label: 'عام وحياة', value: all.filter((i) => i.category === 'general_life').length, color: '#22b8e8' },
     { label: 'تكافل', value: all.filter((i) => i.category === 'takaful').length, color: '#8b5cf6' },

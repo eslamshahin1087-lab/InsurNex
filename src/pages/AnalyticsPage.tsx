@@ -158,7 +158,7 @@ export default function AnalyticsPage() {
           ? '#dc2626'
           : k === 'negotiation'
           ? '#f59e0b'
-          : '#2563eb',
+          : '#1E4272',
     }))
     .filter((s) => s.value > 0);
 
@@ -396,7 +396,7 @@ export default function AnalyticsPage() {
                 data={trend}
                 height={80}
                 color="var(--inx-blue)"
-                fillColor="rgba(37, 99, 235, 0.12)"
+                fillColor="rgba(30, 66, 114, 0.12)"
               />
             </div>
             <div

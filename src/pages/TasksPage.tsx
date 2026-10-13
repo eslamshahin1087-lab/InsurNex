@@ -165,7 +165,7 @@ export default function TasksPage() {
     {
       label: 'متوسطة',
       value: items.filter((x) => x.priority === 'medium').length,
-      color: '#2563eb',
+      color: '#1E4272',
     },
     {
       label: 'منخفضة',

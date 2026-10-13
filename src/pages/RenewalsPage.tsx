@@ -218,7 +218,7 @@ export default function RenewalsPage() {
       overdue: '#dc2626',
       urgent: '#ef4444',
       due30: '#f59e0b',
-      due60: '#2563eb',
+      due60: '#1E4272',
       due90: '#22b8e8',
       later: '#94a3b8',
     };

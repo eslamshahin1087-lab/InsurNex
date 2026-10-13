@@ -169,7 +169,7 @@
   color: #fff;
   border-radius: var(--inx-radius, 14px);
   border: none;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 8px 20px rgba(30, 66, 114, 0.22);
 }
 
 /* Mobile tightening */

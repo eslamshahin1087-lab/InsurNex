@@ -128,7 +128,7 @@ export default function DashboardPage() {
 
   const clientSegments = [
     { label: 'عملاء نشطون', value: Math.max(data.clients - 1, 0), color: '#10b981' },
-    { label: 'عملاء محتملون', value: 1, color: '#2563eb' },
+    { label: 'عملاء محتملون', value: 1, color: '#1E4272' },
   ];
   if (data.clients === 0) {
     clientSegments[0].value = 0;
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 data={renewalTrend}
                 height={80}
                 color="var(--inx-blue)"
-                fillColor="rgba(37, 99, 235, 0.12)"
+                fillColor="rgba(30, 66, 114, 0.12)"
               />
             </div>
             <div

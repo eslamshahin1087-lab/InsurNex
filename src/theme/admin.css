@@ -84,7 +84,7 @@
 .admin-sidebar-nav a.active {
   background: var(--inx-gradient);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 8px 20px rgba(30, 66, 114, 0.22);
 }
 
 .admin-sidebar-footer {
@@ -251,7 +251,7 @@
     height: 100vh;
     transform: translateX(100%);
     transition: transform 0.25s ease-out;
-    box-shadow: -20px 0 60px rgba(10, 42, 92, 0.2);
+    box-shadow: -20px 0 60px rgba(10, 25, 41, 0.2);
   }
 
   .admin-sidebar.is-open {
@@ -262,7 +262,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(10, 42, 92, 0.5);
+    background: rgba(10, 25, 41, 0.5);
     z-index: 40;
     backdrop-filter: blur(2px);
   }

@@ -36,7 +36,7 @@ export default function ChatMessage({ message }: Props) {
           color: isUser ? '#fff' : 'var(--inx-text)',
           border: isUser ? 'none' : '1px solid var(--inx-border)',
           boxShadow: isUser
-            ? '0 8px 20px rgba(37, 99, 235, 0.22)'
+            ? '0 8px 20px rgba(30, 66, 114, 0.22)'
             : 'var(--inx-shadow-sm)',
           fontSize: 14,
           lineHeight: 1.8,

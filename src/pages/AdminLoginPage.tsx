@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
         placeItems: 'center',
         padding: 20,
         background:
-          'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12), transparent 40%), radial-gradient(circle at 20% 80%, rgba(2, 159, 233, 0.08), transparent 32%), var(--inx-bg)',
+          'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12), transparent 40%), radial-gradient(circle at 20% 80%, rgba(58, 107, 159, 0.08), transparent 32%), var(--inx-bg)',
       }}
     >
       <div

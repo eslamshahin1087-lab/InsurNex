@@ -155,7 +155,7 @@ export default function OperationsPage() {
   }
 
   const workflowSegments = [
-    { label: 'نشطة', value: activeOps.length, color: '#2563eb' },
+    { label: 'نشطة', value: activeOps.length, color: '#1E4272' },
     { label: 'مكتملة', value: completed.length, color: '#10b981' },
     { label: 'متأخرة', value: overdue.length, color: '#dc2626' },
   ];

@@ -122,7 +122,7 @@ export default function SubscriptionPage() {
         minHeight: '100vh',
         padding: 20,
         background:
-          'radial-gradient(circle at 20% 20%, rgba(2, 159, 233, 0.08), transparent 32%), var(--inx-bg)',
+          'radial-gradient(circle at 20% 20%, rgba(58, 107, 159, 0.08), transparent 32%), var(--inx-bg)',
       }}
     >
       <div
