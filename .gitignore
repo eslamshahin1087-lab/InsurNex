@@ -51,4 +51,13 @@ apply-*.ps1
 README.txt
 patch/
 # Supabase CLI temp
+supabase/.temp/.env
+.env.local
+.env.*.local
+*.bak
+apply-*.cmd
+rollback-*.cmd
+apply-*.ps1
+README.txt
+patch/
 supabase/.temp/
