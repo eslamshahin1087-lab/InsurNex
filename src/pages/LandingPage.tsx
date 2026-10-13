@@ -75,13 +75,12 @@ const STEPS = [
 export default function LandingPage() {
   const { user, loading } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
-    const [mobileMenu, setMobileMenu] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // If already logged in → go to app
   if (!loading && user) return <Navigate to="/" replace />;
 
   const scrollTo = (id: string) => {
@@ -113,6 +112,14 @@ export default function LandingPage() {
           </nav>
 
           <div className="landing-nav-actions">
+            <Link
+              to="/admin-login"
+              className="inx-icon-btn"
+              title="دخول الأدمن"
+              style={{ color: '#8b5cf6' }}
+            >
+              <ShieldCheck size={17} />
+            </Link>
             <button
               type="button"
               className="inx-icon-btn"
@@ -151,6 +158,12 @@ export default function LandingPage() {
             <Link to="/login">تسجيل الدخول</Link>
             <Link to="/register" className="inx-btn inx-btn-primary">
               ابدأ مجانًا
+            </Link>
+            <Link
+              to="/admin-login"
+              style={{ color: '#8b5cf6', fontWeight: 700 }}
+            >
+              🛡️ دخول المسؤول
             </Link>
           </div>
         )}
@@ -414,6 +427,9 @@ export default function LandingPage() {
             </button>
             <Link to="/login">تسجيل الدخول</Link>
             <Link to="/register">إنشاء حساب</Link>
+            <Link to="/admin-login" style={{ color: '#8b5cf6' }}>
+              🛡️ دخول المسؤول
+            </Link>
           </div>
 
           <div className="landing-footer-copy">
@@ -426,7 +442,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* FLOATING ROBOT */}
       <FloatingRobot />
     </div>
   );

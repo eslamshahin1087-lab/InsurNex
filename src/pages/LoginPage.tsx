@@ -1,6 +1,15 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun } from 'lucide-react';
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  Moon,
+  ShieldCheck,
+  Sun,
+} from 'lucide-react';
 import { useAuth } from '../features/auth/auth-context';
 import { signIn } from '../features/auth/auth.service';
 import { useTheme } from '../theme/ThemeProvider';
@@ -251,6 +260,32 @@ export default function LoginPage() {
             }}
           >
             إنشاء حساب جديد
+          </Link>
+        </div>
+
+        {/* ADMIN LOGIN */}
+        <div
+          style={{
+            marginTop: 12,
+            paddingTop: 12,
+            borderTop: '1px solid var(--inx-border)',
+            textAlign: 'center',
+            fontSize: 12.5,
+          }}
+        >
+          <Link
+            to="/admin-login"
+            style={{
+              color: '#8b5cf6',
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <ShieldCheck size={14} />
+            دخول المسؤول (Admin)
           </Link>
         </div>
       </div>

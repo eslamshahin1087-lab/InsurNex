@@ -351,3 +351,34 @@ export async function isCurrentUserAdmin(uid: string): Promise<boolean> {
     return false;
   }
 }
+
+// ============================================================
+// ADMIN — DELETE USER DATA
+// ============================================================
+
+export async function deleteUserData(uid: string): Promise<void> {
+  // Fetch user to know org
+  const userSnap = await getDoc(doc(db, 'users', uid));
+  if (!userSnap.exists()) throw new Error('USER_NOT_FOUND');
+  const userData = userSnap.data() as { organizationId?: string };
+
+  const orgId = userData.organizationId;
+
+  // Delete org-related docs
+  if (orgId) {
+    try {
+      await deleteDoc(doc(db, 'organizationSubscriptions', orgId));
+    } catch { /* ignore */ }
+    try {
+      await deleteDoc(doc(db, 'organizations', orgId));
+    } catch { /* ignore */ }
+  }
+
+  // Delete user profile
+  await deleteDoc(doc(db, 'users', uid));
+
+  // Delete onboarding progress
+  try {
+    await deleteDoc(doc(db, 'onboardingProgress', uid));
+  } catch { /* ignore */ }
+}
