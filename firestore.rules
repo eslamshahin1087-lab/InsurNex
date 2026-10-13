@@ -106,9 +106,18 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
     }
+
+    // ============ Ads ============
+    match /ads/{adId} {
+      allow read: if isAdmin() || (
+        signedIn() && resource.data.status == 'active'
+      );
+      allow write: if isAdmin();
+    }
+
     // ============ Onboarding Progress ============
     match /onboardingProgress/{uid} {
-      allow read: if signedIn() && request.auth.uid == uid;
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.uid == request.auth.uid;
@@ -116,30 +125,26 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ============ Ads ============
-    match /ads/{adId} {
-      allow read: if signedIn() && (
-        resource.data.status == 'active' || isAdmin()
-      );
-      allow write: if isAdmin();
-    }
-
     // ============ Generic business records ============
     match /{collection}/{docId} {
-      allow read: if collection != 'users'
+      allow read: if isAdmin() || (
+        collection != 'users'
         && collection != 'organizations'
         && collection != 'admin'
         && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes'
         && collection != 'ads'
+        && collection != 'onboardingProgress'
         && resource.data.organizationId is string
-        && sameOrg(resource.data.organizationId);
+        && sameOrg(resource.data.organizationId)
+      );
       allow create: if collection != 'users'
         && collection != 'organizations'
         && collection != 'admin'
         && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes'
         && collection != 'ads'
+        && collection != 'onboardingProgress'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId);
       allow update: if collection != 'users'
@@ -148,6 +153,7 @@ service cloud.firestore {
         && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes'
         && collection != 'ads'
+        && collection != 'onboardingProgress'
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId);
       allow delete: if collection != 'users'
@@ -156,6 +162,7 @@ service cloud.firestore {
         && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes'
         && collection != 'ads'
+        && collection != 'onboardingProgress'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker']);
