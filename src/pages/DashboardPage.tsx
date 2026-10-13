@@ -23,6 +23,7 @@ import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
+import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
 
 const empty: DashboardData = {
   clients: 0,
@@ -47,16 +48,15 @@ const priorityTone: Record<string, string> = {
   urgent: 'tone-danger',
 };
 
-/* ===== Shortcuts with 3D emoji icons ===== */
 const shortcuts = [
-  { to: '/clients',   label: 'العملاء',    emoji: '👥', tone: '' },
-  { to: '/policies',  label: 'الوثائق',    emoji: '🛡️', tone: 'tone-cyan' },
-  { to: '/claims',    label: 'المطالبات',  emoji: '📋', tone: 'tone-success' },
-  { to: '/renewals',  label: 'التجديدات',  emoji: '🔄', tone: 'tone-warning' },
-  { to: '/tasks',     label: 'المهام',     emoji: '✅', tone: '' },
-  { to: '/insurers',  label: 'الشركات',    emoji: '🏢', tone: 'tone-cyan' },
-  { to: '/finance',   label: 'المالية',    emoji: '💰', tone: 'tone-success' },
-  { to: '/more',      label: 'المزيد',     emoji: '⚙️', tone: 'tone-purple' },
+  { to: '/clients', label: 'العملاء', emoji: '👥', tone: '' },
+  { to: '/policies', label: 'الوثائق', emoji: '🛡️', tone: 'tone-cyan' },
+  { to: '/claims', label: 'المطالبات', emoji: '📋', tone: 'tone-success' },
+  { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning' },
+  { to: '/tasks', label: 'المهام', emoji: '✅', tone: '' },
+  { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan' },
+  { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success' },
+  { to: '/more', label: 'المزيد', emoji: '⚙️', tone: 'tone-purple' },
 ] as const;
 
 export default function DashboardPage() {
@@ -112,16 +112,20 @@ export default function DashboardPage() {
       ? 'مسؤول'
       : profile?.role || 'مستخدم';
 
-  // Portfolio percentages
-  const clientsPct = Math.min(100, Math.max(15, (data.clients / Math.max(data.clients, 10)) * 100));
-  const policiesPct = Math.min(100, Math.max(15, (data.activePolicies / Math.max(data.activePolicies, 10)) * 100));
+  const clientsPct = Math.min(
+    100,
+    Math.max(15, (data.clients / Math.max(data.clients, 10)) * 100),
+  );
+  const policiesPct = Math.min(
+    100,
+    Math.max(15, (data.activePolicies / Math.max(data.activePolicies, 10)) * 100),
+  );
 
   const nearestRenewalDays =
     data.renewals.length > 0
       ? Math.min(...data.renewals.map((r) => r.daysLeft))
       : null;
 
-  // Donut segments: clients breakdown
   const clientSegments = [
     { label: 'عملاء نشطون', value: Math.max(data.clients - 1, 0), color: '#10b981' },
     { label: 'عملاء محتملون', value: 1, color: '#2563eb' },
@@ -131,10 +135,10 @@ export default function DashboardPage() {
     clientSegments[1].value = 0;
   }
 
-  // Line chart: renewals by days left (mini trend)
-  const renewalTrend = data.renewals.length > 0
-    ? data.renewals.slice(0, 8).map((r) => Math.max(r.daysLeft, 0))
-    : [4, 6, 5, 8, 7, 9, 11, 10];
+  const renewalTrend =
+    data.renewals.length > 0
+      ? data.renewals.slice(0, 8).map((r) => Math.max(r.daysLeft, 0))
+      : [4, 6, 5, 8, 7, 9, 11, 10];
 
   const askCopilot = () => {
     navigate('/copilot', {
@@ -156,8 +160,7 @@ export default function DashboardPage() {
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-
-        {/* ============ HEADER ============ */}
+        {/* HEADER */}
         <header
           style={{
             display: 'flex',
@@ -173,7 +176,9 @@ export default function DashboardPage() {
             <h2 style={{ margin: '2px 0 4px', fontSize: 20, color: 'var(--inx-text)' }}>
               أهلاً {firstName}
             </h2>
-            <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{roleLabel}</small>
+            <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
+              {roleLabel}
+            </small>
           </div>
 
           <div className="inx-header-circular">
@@ -199,13 +204,15 @@ export default function DashboardPage() {
             <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
               <Bell size={17} />
               {data.notificationCount > 0 && (
-                <span className="badge">{Math.min(data.notificationCount, 99)}</span>
+                <span className="badge">
+                  {Math.min(data.notificationCount, 99)}
+                </span>
               )}
             </Link>
           </div>
         </header>
 
-        {/* ============ SCOPE ROW ============ */}
+        {/* SCOPE ROW */}
         <div className="inx-scope-row" style={{ marginBottom: 14 }}>
           <span className="inx-scope-pill">
             <ShieldCheck size={14} />
@@ -223,7 +230,13 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* ============ SHORTCUTS (3D icons) ============ */}
+        {/* ✅ ONBOARDING CHECKLIST */}
+        <OnboardingChecklist
+          clientsCount={data.clients}
+          policiesCount={data.activePolicies}
+        />
+
+        {/* SHORTCUTS */}
         <div className="inx-shortcut-row" style={{ marginBottom: 18 }}>
           {shortcuts.map(({ to, label, emoji, tone }) => (
             <Link key={to} to={to} className="inx-shortcut-card">
@@ -233,7 +246,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* ============ HERO PANEL ============ */}
+        {/* HERO PANEL */}
         <section className="inx-hero-panel" style={{ marginBottom: 18 }}>
           <div className="hero-head">
             <div className="title-group">
@@ -246,7 +259,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="hero-body">
-            {/* Clients column — right aligned */}
             <div className="hero-column" style={{ textAlign: 'right' }}>
               <div className="metric">
                 {data.clients}
@@ -256,10 +268,11 @@ export default function DashboardPage() {
               <div className="hero-bar">
                 <span style={{ width: `${clientsPct}%` }} />
               </div>
-              <div className="metric-delta">{Math.round(clientsPct)}% من الهدف</div>
+              <div className="metric-delta">
+                {Math.round(clientsPct)}% من الهدف
+              </div>
             </div>
 
-            {/* Policies column — right aligned */}
             <div className="hero-column" style={{ textAlign: 'right' }}>
               <div className="metric">
                 {data.activePolicies}
@@ -269,7 +282,9 @@ export default function DashboardPage() {
               <div className="hero-bar">
                 <span style={{ width: `${policiesPct}%` }} />
               </div>
-              <div className="metric-delta">{Math.round(policiesPct)}% من الهدف</div>
+              <div className="metric-delta">
+                {Math.round(policiesPct)}% من الهدف
+              </div>
             </div>
           </div>
 
@@ -301,7 +316,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* ============ CHARTS ROW ============ */}
+        {/* CHARTS ROW */}
         <div
           style={{
             display: 'grid',
@@ -310,7 +325,6 @@ export default function DashboardPage() {
             marginBottom: 18,
           }}
         >
-          {/* Donut: Clients breakdown */}
           <article className="inx-chart-card">
             <div className="chart-head">
               <span className="label">توزيع العملاء</span>
@@ -344,7 +358,6 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          {/* Line: Renewal trend */}
           <article className="inx-chart-card">
             <div className="chart-head">
               <span className="label">اتجاه التجديدات</span>
@@ -372,10 +385,12 @@ export default function DashboardPage() {
           </article>
         </div>
 
-        {/* ============ TASKS SECTION ============ */}
+        {/* TASKS SECTION */}
         <div className="inx-section-head">
           <h2>مهامك القادمة</h2>
-          <Link to="/tasks" className="inx-section-link">عرض الكل ›</Link>
+          <Link to="/tasks" className="inx-section-link">
+            عرض الكل ›
+          </Link>
         </div>
 
         {loading ? (
@@ -390,7 +405,11 @@ export default function DashboardPage() {
             {data.tasks.slice(0, 5).map((t) => (
               <li key={t.id}>
                 <Link to="/tasks" className="inx-list-item">
-                  <span className={`inx-icon-circle ${priorityTone[t.priority] || 'tone-primary'}`}>
+                  <span
+                    className={`inx-icon-circle ${
+                      priorityTone[t.priority] || 'tone-primary'
+                    }`}
+                  >
                     <ListTodo size={16} />
                   </span>
                   <div className="inx-list-copy">
@@ -407,10 +426,12 @@ export default function DashboardPage() {
           </ul>
         )}
 
-        {/* ============ RENEWALS SECTION ============ */}
+        {/* RENEWALS SECTION */}
         <div className="inx-section-head">
           <h2>أقرب التجديدات</h2>
-          <Link to="/renewals" className="inx-section-link">عرض الكل ›</Link>
+          <Link to="/renewals" className="inx-section-link">
+            عرض الكل ›
+          </Link>
         </div>
 
         {loading ? (
@@ -446,7 +467,7 @@ export default function DashboardPage() {
           </ul>
         )}
 
-        {/* ============ QUICK ACTIONS (3D) ============ */}
+        {/* QUICK ACTIONS */}
         <div className="inx-section-head">
           <h2>إجراءات سريعة</h2>
         </div>
