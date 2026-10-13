@@ -13,6 +13,7 @@ import {
 import { useAuth } from '../features/auth/auth-context';
 import { register } from '../features/auth/auth.service';
 import { useTheme } from '../theme/ThemeProvider';
+import Logo from '../components/Logo';
 
 export default function RegisterPage() {
   const { user, loading } = useAuth();
@@ -106,16 +107,13 @@ export default function RegisterPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/branding/logo-light.png"
-              alt="InsurNex"
+            <Logo alt="InsurNex"
               style={{
                 width: 48,
                 height: 48,
                 objectFit: 'contain',
                 borderRadius: 12,
-              }}
-            />
+              }}/>
             <div>
               <strong
                 style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}

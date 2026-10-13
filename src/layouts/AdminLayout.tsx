@@ -19,6 +19,7 @@ import { useAuth } from '../features/auth/auth-context';
 import { signOut } from '../features/auth/auth.service';
 import { useTheme } from '../theme/ThemeProvider';
 import '../theme/admin.css';
+import Logo from '../components/Logo';
 
 interface NavItem {
   to: string;
@@ -54,7 +55,7 @@ export default function AdminLayout() {
     <div className="admin-shell" dir="rtl">
       <aside className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <div className="admin-sidebar-brand">
-          <img src="/branding/logo-light.png" alt="InsurNex" />
+          <Logo alt="InsurNex"/>
           <div>
             <strong>InsurNex</strong>
             <small>Admin Panel</small>

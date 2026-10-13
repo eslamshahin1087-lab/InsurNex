@@ -20,6 +20,7 @@ import { useAuth } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
 import FloatingRobot from '../features/landing/FloatingRobot';
 import '../theme/landing.css';
+import Logo from '../components/Logo';
 
 const FEATURES = [
   {
@@ -95,7 +96,7 @@ export default function LandingPage() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-brand">
-            <img src="/branding/logo-light.png" alt="InsurNex" />
+            <Logo alt="InsurNex"/>
             <span>InsurNex</span>
           </div>
 
@@ -411,7 +412,7 @@ export default function LandingPage() {
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-footer-brand">
-            <img src="/branding/logo-light.png" alt="InsurNex" />
+            <Logo alt="InsurNex"/>
             <div>
               <b>InsurNex</b>
               <small>منصة إدارة الوساطة التأمينية</small>

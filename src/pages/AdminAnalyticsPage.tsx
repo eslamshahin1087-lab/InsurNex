@@ -14,7 +14,6 @@ import {
   collection,
   getDocs,
   limit,
-  orderBy,
   query,
 } from 'firebase/firestore';
 import { db } from '../firebase/config';

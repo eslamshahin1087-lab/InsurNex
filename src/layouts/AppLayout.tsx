@@ -17,6 +17,7 @@ import { signOut } from '../features/auth/auth.service';
 import { useAuth } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
+import Logo from '../components/Logo';
 
 const navigation = [
   ['/', 'الرئيسية', Home],
@@ -43,7 +44,7 @@ export default function AppLayout() {
     <div className="mobile-shell" dir="rtl">
       <header className="app-header s8-header">
         <div className="s8-brand">
-          <img src="/branding/logo-light.png" alt="InsurNex" />
+          <Logo alt="InsurNex"/>
           <div className="s8-hello">
             <strong>أهلاً {firstName}</strong>
             <small>
