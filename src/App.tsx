@@ -6,7 +6,9 @@ import AppLayout from './layouts/AppLayout';
 import SubscriptionGate from './features/subscription/SubscriptionGate';
 import './App.css';
 import './theme/identity.css';
+import './theme/landing.css';
 
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SetupPage = lazy(() => import('./pages/SetupPage'));
@@ -55,6 +57,7 @@ export default function App() {
       <AuthProvider>
         <Suspense fallback={<AppLoading />}>
           <Routes>
+            <Route path="/welcome" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
@@ -110,7 +113,7 @@ export default function App() {
               </Route>
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/welcome" replace />} />
           </Routes>
         </Suspense>
       </AuthProvider>
