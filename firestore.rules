@@ -40,7 +40,7 @@ service cloud.firestore {
         && request.resource.data.organizationId == resource.data.organizationId
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     // ============ Organizations ============
@@ -82,6 +82,18 @@ service cloud.firestore {
         && exists(organizationPath(orgId))
         && get(organizationPath(orgId)).data.ownerId == request.auth.uid
         && request.resource.data.organizationId == resource.data.organizationId
+        && (
+          request.resource.data.plan == resource.data.plan
+          || (resource.data.plan == 'trial' && request.resource.data.plan == 'monthly')
+        )
+        && (
+          request.resource.data.status == resource.data.status
+          || (resource.data.status == 'trial' && request.resource.data.status == 'active')
+        )
+        && (
+          request.resource.data.endDate == resource.data.endDate
+          || request.resource.data.lastCodeUsed != resource.data.lastCodeUsed
+        )
       );
 
       allow delete: if false;
@@ -90,7 +102,7 @@ service cloud.firestore {
     // ============ Subscription Codes ============
     match /subscriptionCodes/{code} {
       allow read: if isAdmin() || (
-        signedIn() && resource.data.status in ['unused', 'used']
+        signedIn() && resource.data.usedBy.uid == request.auth.uid
       );
 
       allow create: if isAdmin()
@@ -109,9 +121,7 @@ service cloud.firestore {
 
     // ============ Ads ============
     match /ads/{adId} {
-      allow read: if isAdmin() || (
-        signedIn() && resource.data.status == 'active'
-      );
+      allow read: if isAdmin() || (signedIn() && resource.data.status == 'active');
       allow write: if isAdmin();
     }
 
@@ -128,40 +138,28 @@ service cloud.firestore {
     // ============ Generic business records ============
     match /{collection}/{docId} {
       allow read: if isAdmin() || (
-        collection != 'users'
-        && collection != 'organizations'
-        && collection != 'admin'
-        && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes'
-        && collection != 'ads'
+        collection != 'users' && collection != 'organizations'
+        && collection != 'admin' && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
       );
-      allow create: if collection != 'users'
-        && collection != 'organizations'
-        && collection != 'admin'
-        && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes'
-        && collection != 'ads'
+      allow create: if collection != 'users' && collection != 'organizations'
+        && collection != 'admin' && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId);
-      allow update: if collection != 'users'
-        && collection != 'organizations'
-        && collection != 'admin'
-        && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes'
-        && collection != 'ads'
+      allow update: if collection != 'users' && collection != 'organizations'
+        && collection != 'admin' && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress'
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId);
-      allow delete: if collection != 'users'
-        && collection != 'organizations'
-        && collection != 'admin'
-        && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes'
-        && collection != 'ads'
+      allow delete: if collection != 'users' && collection != 'organizations'
+        && collection != 'admin' && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)

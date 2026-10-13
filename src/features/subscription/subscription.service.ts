@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -90,6 +91,13 @@ export async function createTrialSubscription(
 // ============================================================
 // REDEEM CODE
 // ============================================================
+//
+// Security note (see firestore.rules):
+//  - Reading unused codes is blocked (anti-enumeration).
+//  - So we DON'T read first. We go straight to update() — the rules
+//    validate that the code is unused and that we set usedBy.uid to us.
+//  - After the code is marked used, we CAN read it (usedBy.uid == us).
+//  - Extending the subscription is allowed only when lastCodeUsed changes.
 
 export interface RedeemResult {
   success: boolean;
@@ -105,23 +113,49 @@ export async function redeemCode(params: {
   userName?: string;
 }): Promise<RedeemResult> {
   const cleanCode = params.code.trim().toUpperCase();
-
   if (!cleanCode) return { success: false, error: 'EMPTY_CODE' };
 
-  const codeSnap = await getDoc(doc(db, 'subscriptionCodes', cleanCode));
-  if (!codeSnap.exists()) {
+  const codeRef = doc(db, 'subscriptionCodes', cleanCode);
+
+  // Step 1 — claim the code. No read first (rules block reading unused codes).
+  try {
+    await updateDoc(codeRef, {
+      status: 'used',
+      usedBy: {
+        organizationId: params.organizationId,
+        uid: params.uid,
+        userName: params.userName || '',
+        usedAt: serverTimestamp(),
+      },
+      usedAt: serverTimestamp(),
+    });
+  } catch {
+    // Write rejected. Either the code doesn't exist, was revoked,
+    // or was already used by someone else. Try to read it back:
+    // if we can read it, it's ours (already used by us).
+    try {
+      const snap = await getDoc(codeRef);
+      if (snap.exists()) {
+        const data = snap.data() as SubscriptionCode;
+        if (data.usedBy?.uid === params.uid) {
+          return { success: false, error: 'CODE_ALREADY_USED' };
+        }
+      }
+    } catch {
+      // reading also denied — code is not ours
+    }
     return { success: false, error: 'CODE_NOT_FOUND' };
   }
 
+  // Step 2 — read the code back (now allowed) to get its duration.
+  const codeSnap = await getDoc(codeRef);
+  if (!codeSnap.exists()) {
+    return { success: false, error: 'CODE_NOT_FOUND' };
+  }
   const codeData = codeSnap.data() as SubscriptionCode;
+  const duration = codeData.duration || 30;
 
-  if (codeData.status === 'used') {
-    return { success: false, error: 'CODE_ALREADY_USED' };
-  }
-  if (codeData.status === 'revoked') {
-    return { success: false, error: 'CODE_REVOKED' };
-  }
-
+  // Step 3 — compute the new end date.
   const subSnap = await getDoc(
     doc(db, 'organizationSubscriptions', params.organizationId),
   );
@@ -137,20 +171,11 @@ export async function redeemCode(params: {
     }
   }
 
-  const newEndDate = addDays(baseDate, codeData.duration || 30);
+  const newEndDate = addDays(baseDate, duration);
   const newEndIso = isoDate(newEndDate);
 
-  await updateDoc(doc(db, 'subscriptionCodes', cleanCode), {
-    status: 'used',
-    usedBy: {
-      organizationId: params.organizationId,
-      uid: params.uid,
-      userName: params.userName || '',
-      usedAt: serverTimestamp(),
-    },
-    usedAt: serverTimestamp(),
-  });
-
+  // Step 4 — extend the subscription. The rule allows endDate to move
+  // only when lastCodeUsed changes — which is exactly what we do here.
   await setDoc(
     doc(db, 'organizationSubscriptions', params.organizationId),
     {
@@ -168,12 +193,12 @@ export async function redeemCode(params: {
   return {
     success: true,
     newEndDate: newEndIso,
-    daysAdded: codeData.duration || 30,
+    daysAdded: duration,
   };
 }
 
 // ============================================================
-// ADMIN — CODE MANAGEMENT
+// ADMIN - CODE MANAGEMENT
 // ============================================================
 
 function generateCodeString(): string {
@@ -272,7 +297,7 @@ export async function revokeCode(code: string): Promise<void> {
 }
 
 // ============================================================
-// ADMIN — SUBSCRIPTIONS LIST
+// ADMIN - SUBSCRIPTIONS LIST
 // ============================================================
 
 export async function listAllSubscriptions(
@@ -353,18 +378,16 @@ export async function isCurrentUserAdmin(uid: string): Promise<boolean> {
 }
 
 // ============================================================
-// ADMIN — DELETE USER DATA
+// ADMIN - DELETE USER DATA
 // ============================================================
 
 export async function deleteUserData(uid: string): Promise<void> {
-  // Fetch user to know org
   const userSnap = await getDoc(doc(db, 'users', uid));
   if (!userSnap.exists()) throw new Error('USER_NOT_FOUND');
   const userData = userSnap.data() as { organizationId?: string };
 
   const orgId = userData.organizationId;
 
-  // Delete org-related docs
   if (orgId) {
     try {
       await deleteDoc(doc(db, 'organizationSubscriptions', orgId));
@@ -374,10 +397,8 @@ export async function deleteUserData(uid: string): Promise<void> {
     } catch { /* ignore */ }
   }
 
-  // Delete user profile
   await deleteDoc(doc(db, 'users', uid));
 
-  // Delete onboarding progress
   try {
     await deleteDoc(doc(db, 'onboardingProgress', uid));
   } catch { /* ignore */ }
