@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider';
 import ProtectedRoute from './features/auth/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
+import AdminLayout from './layouts/AdminLayout';
+import AdminGuard from './features/admin/AdminGuard';
 import SubscriptionGate from './features/subscription/SubscriptionGate';
 import './App.css';
 import './theme/identity.css';
@@ -10,6 +12,7 @@ import './theme/landing.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SetupPage = lazy(() => import('./pages/SetupPage'));
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
@@ -17,6 +20,10 @@ const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminCodesPage = lazy(() => import('./pages/AdminCodesPage'));
 const AdminSubscriptionsPage = lazy(() => import('./pages/AdminSubscriptionsPage'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminAdsPage = lazy(() => import('./pages/AdminAdsPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ClientsPage = lazy(() => import('./pages/ClientsPage'));
 const ClientDetailsPage = lazy(() => import('./pages/ClientDetailsPage'));
@@ -57,28 +64,62 @@ export default function App() {
       <AuthProvider>
         <Suspense fallback={<AppLoading />}>
           <Routes>
+            {/* PUBLIC */}
             <Route path="/welcome" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin-login" element={<AdminLoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
+            {/* AUTHENTICATED */}
             <Route element={<ProtectedRoute />}>
-              {/* Setup - not gated */}
               <Route path="/setup" element={<SetupPage />} />
-
-              {/* Subscription - not gated (accessible when expired) */}
               <Route path="/subscription" element={<SubscriptionPage />} />
-
-              {/* Onboarding - not gated by subscription, but requires auth */}
               <Route path="/onboarding" element={<OnboardingPage />} />
 
-              {/* Admin routes - bypass subscription gate */}
-              <Route element={<AppLayout />}>
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/codes" element={<AdminCodesPage />} />
-                <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+              {/* ADMIN PANEL */}
+              <Route element={<AdminGuard />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin-panel" element={<AdminPage />} />
+                  <Route path="/admin-panel/codes" element={<AdminCodesPage />} />
+                  <Route
+                    path="/admin-panel/subscriptions"
+                    element={<AdminSubscriptionsPage />}
+                  />
+                  <Route path="/admin-panel/users" element={<AdminUsersPage />} />
+                  <Route path="/admin-panel/ads" element={<AdminAdsPage />} />
+                  <Route
+                    path="/admin-panel/analytics"
+                    element={<AdminAnalyticsPage />}
+                  />
+                  <Route
+                    path="/admin-panel/settings"
+                    element={<AdminSettingsPage />}
+                  />
+                  {/* Legacy redirects */}
+                  <Route
+                    path="/admin"
+                    element={<Navigate to="/admin-panel" replace />}
+                  />
+                  <Route
+                    path="/admin/codes"
+                    element={<Navigate to="/admin-panel/codes" replace />}
+                  />
+                  <Route
+                    path="/admin/subscriptions"
+                    element={<Navigate to="/admin-panel/subscriptions" replace />}
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={<Navigate to="/admin-panel/users" replace />}
+                  />
+                  <Route
+                    path="/admin/ads"
+                    element={<Navigate to="/admin-panel/ads" replace />}
+                  />
+                </Route>
               </Route>
 
-              {/* Main app - gated by subscription */}
+              {/* BROKER APP */}
               <Route element={<SubscriptionGate />}>
                 <Route element={<AppLayout />}>
                   <Route index element={<DashboardPage />} />
@@ -113,6 +154,7 @@ export default function App() {
               </Route>
             </Route>
 
+            {/* FALLBACK */}
             <Route path="*" element={<Navigate to="/welcome" replace />} />
           </Routes>
         </Suspense>
