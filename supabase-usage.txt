@@ -1,0 +1,37 @@
+src\features\copilot\copilot.service.ts:14:import { createClient } from '@supabase/supabase-js';
+src\features\copilot\copilot.service.ts:26:const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+src\features\copilot\copilot.service.ts:27:const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+src\features\copilot\copilot.service.ts:31:let cachedSupabase: ReturnType<typeof createClient> | null = null;
+src\features\copilot\copilot.service.ts:32:function supabaseInstance() {
+src\features\copilot\copilot.service.ts:33:  if (!supabaseUrl || !supabaseAnonKey) {
+src\features\copilot\copilot.service.ts:34:    throw new Error('SUPABASE_NOT_CONFIGURED');
+src\features\copilot\copilot.service.ts:36:  if (!cachedSupabase) {
+src\features\copilot\copilot.service.ts:37:    cachedSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+src\features\copilot\copilot.service.ts:45:  return cachedSupabase;
+src\features\copilot\copilot.service.ts:141:// ---------- Copilot Call (Supabase Edge Function) ----------
+src\features\copilot\copilot.service.ts:151:  const client = supabaseInstance();
+src\features\documents\client-documents-v8.service.ts:4:import { supabaseDocumentStorage } from '../storage/supabase-storage.provider';
+src\features\documents\client-documents-v8.service.ts:30:  supabaseDocumentStorage.validate(input.file);
+src\features\documents\client-documents-v8.service.ts:37:    stored = await supabaseDocumentStorage.upload(input.file, {
+src\features\documents\client-documents-v8.service.ts:63:    if (stored) await supabaseDocumentStorage.remove(stored, firebaseToken, input.organizationId).catch(() => undefined);
+src\features\documents\client-documents-v8.service.ts:69:  if (record.storageProvider === 'supabase' && record.storagePath) {
+src\features\documents\client-documents-v8.service.ts:73:    return supabaseDocumentStorage.getTemporaryUrl({
+src\features\documents\client-documents-v8.service.ts:74:      provider: 'supabase',
+src\features\documents\client-documents-v8.service.ts:87:  if (record.storageProvider === 'supabase' && record.storagePath) {
+src\features\documents\client-documents-v8.service.ts:91:    await supabaseDocumentStorage.remove({
+src\features\documents\client-documents-v8.service.ts:92:      provider: 'supabase',
+src\features\documents\client-documents-v8.service.ts:106:  supabaseDocumentStorage.validate(input.file);
+src\features\documents\client-documents-v8.service.ts:111:    stored=await supabaseDocumentStorage.upload(input.file,{organizationId:input.organizationId,clientId:input.clientId,userToken:firebaseToken,area:'quotation'});
+src\features\documents\client-documents-v8.service.ts:114:  }catch(error){if(stored)await supabaseDocumentStorage.remove(stored,firebaseToken,input.organizationId).catch(()=>undefined);throw error}
+src\features\operations\operations-document.service.ts:3:import { supabaseDocumentStorage } from '../storage/supabase-storage.provider';
+src\features\operations\operations-document.service.ts:15:  for (const item of documents) supabaseDocumentStorage.validate(item.file);
+src\features\operations\operations-document.service.ts:32:      const stored = await supabaseDocumentStorage.upload(pending.file, {
+src\features\operations\operations-document.service.ts:65:    await Promise.allSettled(uploaded.map(item => supabaseDocumentStorage.remove(item.stored, input.firebaseToken, input.organizationId)));
+src\features\storage\storage-provider.ts:2:  provider: 'supabase';
+src\features\storage\supabase-storage.provider.ts:1:import { createClient } from '@supabase/supabase-js';
+src\features\storage\supabase-storage.provider.ts:13:const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+src\features\storage\supabase-storage.provider.ts:14:const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+src\features\storage\supabase-storage.provider.ts:15:const bucket = (import.meta.env.VITE_SUPABASE_DOCUMENT_BUCKET as string | undefined) || 'insurnex-documents';
+src\features\storage\supabase-storage.provider.ts:40:export const supabaseDocumentStorage: DocumentStorageProvider = {
+src\features\storage\supabase-storage.provider.ts:63:    return { provider: 'supabase', bucket, path: payload.path, originalFileName: file.name, contentType: file.type, size: file.size };
+src\types\document.ts:3:export type DocumentRecord={id:string;organizationId:string;name:string;category:DocumentCategory;originalFileName:string;contentType:string;size:number;storagePath:string;downloadUrl:string;storageProvider?:'supabase'|'firebase';storageBucket?:string;relatedType:DocumentRelationType;relatedId:string;uploadedBy:string;notes:string;createdAt?:unknown};
