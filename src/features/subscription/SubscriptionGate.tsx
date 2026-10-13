@@ -9,11 +9,30 @@ import {
 import { useSubscription } from './subscription.hooks';
 import { getOnboardingProgress } from '../onboarding/onboarding.service';
 
+/**
+ * Routes that are accessible even when Onboarding is not complete.
+ * These are the routes the Onboarding Wizard opens during the tutorial.
+ */
+const ONBOARDING_ALLOWED_PREFIXES = [
+  '/onboarding',
+  '/clients',
+  '/policies',
+  '/copilot',
+];
+
+function isAllowedDuringOnboarding(pathname: string): boolean {
+  return ONBOARDING_ALLOWED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 export default function SubscriptionGate() {
   const { user, profile } = useAuth();
   const location = useLocation();
   const { subscription, loading, refresh } = useSubscription();
-  const [adminState, setAdminState] = useState<'loading' | 'admin' | 'user'>('loading');
+  const [adminState, setAdminState] = useState<'loading' | 'admin' | 'user'>(
+    'loading',
+  );
   const [migrated, setMigrated] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -38,12 +57,14 @@ export default function SubscriptionGate() {
   useEffect(() => {
     if (!user?.uid) return;
     if (adminState === 'loading') return;
+
     // Admins skip onboarding
     if (adminState === 'admin') {
       setOnboardingChecked(true);
       setNeedsOnboarding(false);
       return;
     }
+
     (async () => {
       try {
         const prog = await getOnboardingProgress(user.uid);
@@ -89,8 +110,10 @@ export default function SubscriptionGate() {
     return <Navigate to="/subscription" replace />;
   }
 
-  // Onboarding needed → redirect to /onboarding
-  if (needsOnboarding && location.pathname !== '/onboarding') {
+  // Onboarding needed:
+  //   - allow the onboarding-related routes (clients / policies / copilot)
+  //   - otherwise force back to /onboarding
+  if (needsOnboarding && !isAllowedDuringOnboarding(location.pathname)) {
     return <Navigate to="/onboarding" replace />;
   }
 
