@@ -17,6 +17,8 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SetupPage = lazy(() => import('./pages/SetupPage'));
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+
+// Admin panel
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminCodesPage = lazy(() => import('./pages/AdminCodesPage'));
 const AdminSubscriptionsPage = lazy(() => import('./pages/AdminSubscriptionsPage'));
@@ -28,8 +30,11 @@ const AdminFinancePage = lazy(() => import('./pages/AdminFinancePage'));
 const AdminPricingPage = lazy(() => import('./pages/AdminPricingPage'));
 const AdminArchivePage = lazy(() => import('./pages/AdminArchivePage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+
+// Broker app
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ClientsPage = lazy(() => import('./pages/ClientsPage'));
+const ClientWizardPage = lazy(() => import('./pages/ClientWizardPage'));
 const ClientDetailsPage = lazy(() => import('./pages/ClientDetailsPage'));
 const PoliciesPage = lazy(() => import('./pages/PoliciesPage'));
 const RenewalsPage = lazy(() => import('./pages/RenewalsPage'));
@@ -145,12 +150,17 @@ export default function App() {
               <Route element={<SubscriptionGate />}>
                 <Route element={<AppLayout />}>
                   <Route index element={<DashboardPage />} />
+
+                  {/* Clients */}
                   <Route path="clients" element={<ClientsPage />} />
+                  <Route path="clients/new" element={<ClientWizardPage />} />
                   <Route path="clients/:id" element={<ClientDetailsPage />} />
                   <Route
                     path="clients/:id/insurance-analysis"
                     element={<ClientInsuranceAnalysisPage />}
                   />
+
+                  {/* Other sections */}
                   <Route path="policies" element={<PoliciesPage />} />
                   <Route path="renewals" element={<RenewalsPage />} />
                   <Route path="claims" element={<ClaimsPage />} />
