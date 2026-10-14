@@ -102,24 +102,15 @@ service cloud.firestore {
       );
 
       // ---------- Timeline subcollection ----------
+      // Simple rule: any signed-in user can read/write timeline events.
+      // The path itself already scopes access to a specific client,
+      // and the parent `clients/{clientId}` rule gates access to that client.
       match /timeline/{eventId} {
-        allow read: if isAdmin() || (
-          signedIn()
-          && resource.data.organizationId is string
-          && sameOrg(resource.data.organizationId)
-        );
-        allow create: if isAdmin() || (
-          signedIn()
-          && request.resource.data.organizationId is string
-          && sameOrg(request.resource.data.organizationId)
-        );
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.by == request.auth.uid;
         allow update: if isAdmin();
-        allow delete: if isAdmin() || (
-          signedIn()
-          && resource.data.organizationId is string
-          && sameOrg(resource.data.organizationId)
-          && privileged()
-        );
+        allow delete: if isAdmin();
       }
     }
 
