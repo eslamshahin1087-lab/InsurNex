@@ -6,7 +6,6 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 
@@ -41,8 +40,6 @@ export interface TimelineEvent {
   metadata?: Record<string, unknown>;
 }
 
-const COLLECTION = 'timeline';
-
 // ============================================================
 // Add an event
 // ============================================================
@@ -58,7 +55,7 @@ export async function addTimelineEvent(params: {
   metadata?: Record<string, unknown>;
 }): Promise<string> {
   const ref = await addDoc(
-    collection(db, 'clients', params.clientId, COLLECTION),
+    collection(db, 'clients', params.clientId, 'timeline'),
     {
       clientId: params.clientId,
       organizationId: params.organizationId,
@@ -77,22 +74,50 @@ export async function addTimelineEvent(params: {
 // ============================================================
 // List events (newest first)
 // ============================================================
+// NOTE: No `where` clause — the subcollection is already
+// scoped to a single client by its path. Adding a `where`
+// would require a composite index, which we don't need.
 
 export async function listTimelineEvents(
   clientId: string,
   organizationId: string,
   limitCount = 100,
 ): Promise<TimelineEvent[]> {
-  const q = query(
-    collection(db, 'clients', clientId, COLLECTION),
-    where('organizationId', '==', organizationId),
-    orderBy('at', 'desc'),
-    limit(limitCount),
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(
-    (d) => ({ id: d.id, ...d.data() } as TimelineEvent),
-  );
+  try {
+    const q = query(
+      collection(db, 'clients', clientId, 'timeline'),
+      orderBy('at', 'desc'),
+      limit(limitCount),
+    );
+    const snap = await getDocs(q);
+    const events = snap.docs.map(
+      (d) => ({ id: d.id, ...d.data() } as TimelineEvent),
+    );
+    // Safety filter by organizationId (no index needed)
+    return events.filter(
+      (e) => !e.organizationId || e.organizationId === organizationId,
+    );
+  } catch (e) {
+    // Fallback: if orderBy fails (no index), fetch without orderBy
+    console.warn('Timeline orderBy failed, falling back to unordered:', e);
+    const snap = await getDocs(
+      collection(db, 'clients', clientId, 'timeline'),
+    );
+    const events = snap.docs.map(
+      (d) => ({ id: d.id, ...d.data() } as TimelineEvent),
+    );
+    // Sort client-side
+    events.sort((a, b) => {
+      const ta = (a.at as { seconds?: number })?.seconds ?? 0;
+      const tb = (b.at as { seconds?: number })?.seconds ?? 0;
+      return tb - ta;
+    });
+    return events
+      .filter(
+        (e) => !e.organizationId || e.organizationId === organizationId,
+      )
+      .slice(0, limitCount);
+  }
 }
 
 // ============================================================

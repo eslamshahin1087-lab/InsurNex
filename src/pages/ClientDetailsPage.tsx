@@ -25,7 +25,7 @@ import { getClient } from '../features/clients/client.service';
 import ClientEditForm from '../features/clients/ClientEditForm';
 import ClientDocumentsPanel from '../features/documents/ClientDocumentsPanel';
 import ClientTimeline from '../features/clients/ClientTimeline';
-import '../theme/client-timeline.css';
+import PolicyForm from '../features/policies/PolicyForm';
 import {
   getClientRelations,
   type ClientRelations,
@@ -37,6 +37,7 @@ import type { InsuranceClient } from '../types/client';
 import RfqWorkspace from '../features/rfq/RfqWorkspace';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import '../theme/rfq-v81.css';
+import '../theme/client-timeline.css';
 
 const EMPTY_RELATIONS: ClientRelations = { policies: [], claims: [], tasks: [] };
 
@@ -83,7 +84,7 @@ function policyStatusTone(value: string) {
 
 function claimStatusLabel(value: string) {
   if (value === 'open') return 'مفتوحة';
-  if (value === 'pending') return 'قيد المراجعة';
+  if (value === 'pending') return 'قيد المعالجة';
   if (value === 'approved') return 'مقبولة';
   if (value === 'rejected') return 'مرفوضة';
   if (value === 'closed') return 'مغلقة';
@@ -168,6 +169,7 @@ export default function ClientDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showEdit, setShowEdit] = useState(false);
+  const [showPolicyForm, setShowPolicyForm] = useState(false);
 
   const loadClient = useCallback(async () => {
     if (!id || !profile) {
@@ -186,14 +188,14 @@ export default function ClientDetailsPage() {
       if (data.organizationId !== profile.organizationId) {
         setClient(null);
         setRelations(EMPTY_RELATIONS);
-        setError('لا يمكنك الوصول إلى هذا العميل ضمن هذه المؤسسة.');
+        setError('لا يمكن عرض هذا العميل لأنه ينتمي إلى مؤسسة أخرى.');
         return;
       }
       setClient(data);
       setRelations(await getClientRelations(profile.organizationId, id));
     } catch (err) {
       console.error('Failed to load client details', err);
-      setError('تعذر تحميل بيانات العميل. حاول مرة أخرى.');
+      setError('تعذر تحميل تفاصيل العميل. حاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -203,7 +205,7 @@ export default function ClientDetailsPage() {
     void loadClient();
   }, [loadClient]);
 
-  // ✅ Set context for FAB
+  // Set context for FAB
   useEffect(() => {
     if (!client) return;
     setCurrentContext({
@@ -314,7 +316,7 @@ export default function ClientDetailsPage() {
         <div className="inx-container">
           <div className="inx-empty">
             <RefreshCw size={28} />
-            <b>جاري تحميل بيانات العميل...</b>
+            <b>جاري تحميل تفاصيل العميل...</b>
           </div>
         </div>
       </main>
@@ -327,7 +329,7 @@ export default function ClientDetailsPage() {
         <div className="inx-container">
           <div className="inx-empty">
             <UserRound size={32} />
-            <b>لم يتم العثور على العميل</b>
+            <b>لم يتم العثور على هذا العميل</b>
             <small>{error || 'قد يكون العميل غير موجود أو تم حذفه.'}</small>
             <Link to="/clients" className="inx-btn inx-btn-secondary" style={{ marginTop: 8 }}>
               <ArrowLeft size={16} /> العودة إلى العملاء
@@ -353,16 +355,23 @@ export default function ClientDetailsPage() {
             <span className="eyebrow">Client 360</span>
             <h2>{client.name}</h2>
             <small style={{ color: 'var(--inx-muted)' }}>
-              عرض شامل لملف العميل ووثائقه ومطالباته ومهامه.
+              عرض شامل لبيانات العميل ووثائقه ومطالباته ومهامه وتفاعلاته.
             </small>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <button
               type="button"
               className="inx-btn inx-btn-primary"
               onClick={askCopilot}
             >
               <Bot size={16} /> اسأل المساعد
+            </button>
+            <button
+              type="button"
+              className="inx-btn inx-btn-secondary"
+              onClick={() => setShowPolicyForm(true)}
+            >
+              <ShieldCheck size={16} /> إضافة وثيقة
             </button>
             <button
               type="button"
@@ -477,7 +486,7 @@ export default function ClientDetailsPage() {
               {client.industry && (
                 <li className="inx-list-item">
                   <div className="inx-list-copy">
-                    <small>المجال</small>
+                    <small>النشاط</small>
                     <b>{client.industry}</b>
                   </div>
                 </li>
@@ -503,7 +512,7 @@ export default function ClientDetailsPage() {
 
           <article className="inx-card">
             <div className="inx-card-head">
-              <h3>بيانات الاتصال</h3>
+              <h3>بيانات التواصل</h3>
               <Phone size={18} style={{ color: 'var(--inx-muted)' }} />
             </div>
             <ul className="inx-list">
@@ -574,7 +583,7 @@ export default function ClientDetailsPage() {
           <div className="inx-empty">
             <ShieldCheck size={28} />
             <b>لا توجد وثائق</b>
-            <small>لم تُضف أي وثيقة لهذا العميل بعد.</small>
+            <small>لم يتم إضافة وثيقة لهذا العميل بعد.</small>
           </div>
         ) : (
           <ul className="inx-list">
@@ -613,7 +622,7 @@ export default function ClientDetailsPage() {
           <div className="inx-empty">
             <ClipboardCheck size={28} />
             <b>لا توجد مطالبات</b>
-            <small>لم تُسجل أي مطالبة لهذا العميل بعد.</small>
+            <small>لم يتم فتح مطالبة لهذا العميل بعد.</small>
           </div>
         ) : (
           <ul className="inx-list">
@@ -652,7 +661,7 @@ export default function ClientDetailsPage() {
           <div className="inx-empty">
             <ListTodo size={28} />
             <b>لا توجد مهام</b>
-            <small>لم تُسجل أي مهمة مرتبطة بهذا العميل.</small>
+            <small>لم يتم إضافة مهام لهذا العميل بعد.</small>
           </div>
         ) : (
           <ul className="inx-list">
@@ -670,7 +679,7 @@ export default function ClientDetailsPage() {
                     <small>الأولوية: {task.priority || 'عادية'}</small>
                     <div style={{ display: 'flex', gap: 8, fontSize: 11.5, color: 'var(--inx-muted)', marginTop: 4 }}>
                       <CalendarDays size={12} />
-                      <span>الاستحقاق: {formatDate(task.dueDate)}</span>
+                      <span>تاريخ الاستحقاق: {formatDate(task.dueDate)}</span>
                     </div>
                   </div>
                   <ChevronLeft size={16} className="inx-list-chevron" />
@@ -697,7 +706,7 @@ export default function ClientDetailsPage() {
                       <b>{policy.policyNumber || 'وثيقة'}</b>
                       <small>{policy.insurerName || 'شركة غير محددة'}</small>
                       <div style={{ fontSize: 11.5, color: 'var(--inx-muted)', marginTop: 4 }}>
-                        تاريخ الانتهاء: {formatDate(policy.expiryDate)}
+                        تاريخ التجديد: {formatDate(policy.expiryDate)}
                       </div>
                     </div>
                     <ChevronLeft size={16} className="inx-list-chevron" />
@@ -716,9 +725,8 @@ export default function ClientDetailsPage() {
         ) : null}
         {profile?.organizationId ? (
           <ClientTimeline clientId={client.id} organizationId={profile.organizationId} />
-        ) : null}        {profile?.organizationId ? (
-          <ClientTimeline clientId={client.id} organizationId={profile.organizationId} />
-        ) : null}        {profile?.organizationId ? (
+        ) : null}
+        {profile?.organizationId ? (
           <RfqWorkspace
             organizationId={profile.organizationId}
             clientId={client.id}
@@ -753,6 +761,17 @@ export default function ClientDetailsPage() {
             setShowEdit(false);
             void loadClient();
           }}
+        />
+      )}
+
+      {showPolicyForm && (
+        <PolicyForm
+          presetClientId={client.id}
+          onDone={() => {
+            setShowPolicyForm(false);
+            void loadClient();
+          }}
+          onCancel={() => setShowPolicyForm(false)}
         />
       )}
     </main>

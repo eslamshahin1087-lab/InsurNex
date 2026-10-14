@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { DocumentStorageProvider } from './storage-provider';
 
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -11,22 +11,51 @@ const ALLOWED = new Set([
 ]);
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-const bucket = (import.meta.env.VITE_SUPABASE_DOCUMENT_BUCKET as string | undefined) || 'insurnex-documents';
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  | string
+  | undefined;
+const bucket =
+  (import.meta.env.VITE_SUPABASE_DOCUMENT_BUCKET as string | undefined) ||
+  'insurnex-documents';
 
-function configured() {
-  if (!url || !publishableKey) throw new Error('DOCUMENT_STORAGE_NOT_CONFIGURED');
-  return createClient(url, publishableKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+// ============================================================
+// Singleton Supabase client (avoids "Multiple GoTrueClient" warning)
+// ============================================================
+
+let cachedClient: SupabaseClient | null = null;
+
+function configured(): SupabaseClient {
+  if (!url || !publishableKey) {
+    throw new Error('DOCUMENT_STORAGE_NOT_CONFIGURED');
+  }
+  if (!cachedClient) {
+    cachedClient = createClient(url, publishableKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  return cachedClient;
 }
 
 function safeName(name: string) {
   const dot = name.lastIndexOf('.');
-  const ext = dot >= 0 ? name.slice(dot).toLowerCase().replace(/[^a-z0-9.]/g, '') : '';
-  const base = (dot >= 0 ? name.slice(0, dot) : name).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'document';
+  const ext =
+    dot >= 0 ? name.slice(dot).toLowerCase().replace(/[^a-z0-9.]/g, '') : '';
+  const base =
+    (dot >= 0 ? name.slice(0, dot) : name)
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 80) || 'document';
   return `${base}${ext}`;
 }
 
-async function invoke<T>(action: string, body: Record<string, unknown>, token: string): Promise<T> {
+async function invoke<T>(
+  action: string,
+  body: Record<string, unknown>,
+  token: string,
+): Promise<T> {
   const client = configured();
   const { data, error } = await client.functions.invoke('document-storage', {
     body: { action, ...body },
@@ -47,20 +76,43 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
   async upload(file, context) {
     this.validate(file);
     const unique = crypto.randomUUID();
-    const path = `organizations/${context.organizationId}/clients/${context.clientId}/${context.area || 'onboarding'}/${unique}-${safeName(file.name)}`;
-    const payload = await invoke<{ ok: true; token: string; path: string }>('sign-upload', {
-      organizationId: context.organizationId,
-      path,
+    const path = `organizations/${context.organizationId}/clients/${
+      context.clientId
+    }/${context.area || 'onboarding'}/${unique}-${safeName(file.name)}`;
+
+    const payload = await invoke<{
+      ok: true;
+      token: string;
+      path: string;
+    }>(
+      'sign-upload',
+      {
+        organizationId: context.organizationId,
+        path,
+        contentType: file.type,
+        size: file.size,
+      },
+      context.userToken,
+    );
+
+    const client = configured();
+    const { error } = await client.storage
+      .from(bucket)
+      .uploadToSignedUrl(payload.path, payload.token, file, {
+        contentType: file.type,
+        cacheControl: '3600',
+      });
+
+    if (error) throw new Error(`DOCUMENT_UPLOAD_FAILED:${error.message}`);
+
+    return {
+      provider: 'supabase',
+      bucket,
+      path: payload.path,
+      originalFileName: file.name,
       contentType: file.type,
       size: file.size,
-    }, context.userToken);
-    const client = configured();
-    const { error } = await client.storage.from(bucket).uploadToSignedUrl(payload.path, payload.token, file, {
-      contentType: file.type,
-      cacheControl: '3600',
-    });
-    if (error) throw new Error(`DOCUMENT_UPLOAD_FAILED:${error.message}`);
-    return { provider: 'supabase', bucket, path: payload.path, originalFileName: file.name, contentType: file.type, size: file.size };
+    };
   },
 
   async remove(object, userToken, organizationId) {
@@ -68,7 +120,11 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
   },
 
   async getTemporaryUrl(object, userToken, organizationId) {
-    const payload = await invoke<{ ok: true; signedUrl: string }>('sign-download', { organizationId, path: object.path }, userToken);
+    const payload = await invoke<{ ok: true; signedUrl: string }>(
+      'sign-download',
+      { organizationId, path: object.path },
+      userToken,
+    );
     return payload.signedUrl;
   },
 };

@@ -7,6 +7,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -14,6 +15,39 @@ import type { ClientInput, InsuranceClient } from '../../types/client';
 import type { ClientWizardInput, ExtendedClient } from './client.types';
 import { generateClientCode } from './code-generator.service';
 import { calculateCompleteness, assessRisk } from './risk-assessment.service';
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+/**
+ * Recursively remove keys whose value is `undefined`.
+ * Firestore rejects `undefined` values with addDoc/setDoc.
+ */
+function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined) continue;
+    if (v === null) {
+      out[k] = v;
+      continue;
+    }
+    if (Array.isArray(v)) {
+      out[k] = v.map((item) =>
+        item && typeof item === 'object' && !Array.isArray(item)
+          ? stripUndefined(item as Record<string, unknown>)
+          : item,
+      );
+      continue;
+    }
+    if (typeof v === 'object') {
+      out[k] = stripUndefined(v as Record<string, unknown>);
+      continue;
+    }
+    out[k] = v;
+  }
+  return out as T;
+}
 
 // ============================================================
 // LEGACY (kept for backward compatibility)
@@ -24,13 +58,16 @@ export async function createClient(
   organizationId: string,
   uid: string,
 ): Promise<string> {
-  const ref = await addDoc(collection(db, 'clients'), {
-    ...input,
-    organizationId,
-    createdBy: uid,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+  const ref = await addDoc(
+    collection(db, 'clients'),
+    stripUndefined({
+      ...input,
+      organizationId,
+      createdBy: uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }),
+  );
   return ref.id;
 }
 
@@ -76,8 +113,10 @@ export async function activateIssuedClientV978(
  * Create a client from the wizard flow:
  *   1. Generate unique code (CLI-YYYY-NNNN)
  *   2. Calculate completeness + risk assessment
- *   3. Save to Firestore
- *   4. Return the new client id + code
+ *   3. Strip all `undefined` values (Firestore rejects them)
+ *   4. Save to Firestore
+ *   5. Add initial timeline entry
+ *   6. Return the new client id + code
  */
 export async function createExtendedClient(
   input: ClientWizardInput,
@@ -121,16 +160,16 @@ export async function createExtendedClient(
       ? input.individual?.nationalId
       : input.corporate?.authorizedSignatoryNid;
 
-  // 4. Save
-  const docData: Omit<ExtendedClient, 'id'> = {
+  // 4. Build raw docData (may contain `undefined`)
+  const rawDocData = {
     code,
     type: input.type,
-    status: 'active',
+    status: 'active' as const,
     organizationId,
     assignedTo: input.assignedTo || uid,
     leadSource: input.leadSource,
     referredBy: input.referredBy,
-    tags: input.tags,
+    tags: input.tags || [],
 
     individual: input.individual,
     corporate: input.corporate,
@@ -142,9 +181,9 @@ export async function createExtendedClient(
     address,
     nationalId,
 
-    needs: input.needs,
-    riskData: input.riskData,
-    documents: input.documents,
+    needs: input.needs || [],
+    riskData: input.riskData || {},
+    documents: input.documents || [],
 
     riskAssessment,
 
@@ -152,23 +191,32 @@ export async function createExtendedClient(
     lifetimeValue: 0,
     completeness,
     createdBy: uid,
-    notes: input.notes,
+    notes: input.notes || '',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
 
+  // 5. Strip undefined values recursively
+  const docData = stripUndefined(rawDocData as unknown as Record<string, unknown>);
+
+  // 6. Save
   const ref = await addDoc(collection(db, 'clients'), docData);
 
-  // 5. Add initial timeline entry (as subcollection)
+  // 7. Add initial timeline entry
   try {
     await addDoc(collection(db, 'clients', ref.id, 'timeline'), {
+      clientId: ref.id,
+      organizationId,
       type: 'created',
-      note: `تم إنشاء العميل بواسطة النظام — كود: ${code}`,
-      at: serverTimestamp(),
+      title: `تم إنشاء العميل بواسطة النظام — كود: ${code}`,
+      description: '',
       by: uid,
+      byName: '',
+      at: serverTimestamp(),
+      metadata: { code },
     });
-  } catch {
-    /* ignore */
+  } catch (e) {
+    console.warn('Timeline entry failed (non-critical):', e);
   }
 
   return { id: ref.id, code };
@@ -181,9 +229,11 @@ export async function saveClientAiAnalysis(
   clientId: string,
   aiAnalysis: ExtendedClient['aiAnalysis'],
 ): Promise<void> {
-  const { updateDoc } = await import('firebase/firestore');
-  await updateDoc(doc(db, 'clients', clientId), {
-    aiAnalysis,
-    updatedAt: serverTimestamp(),
-  });
+  await updateDoc(
+    doc(db, 'clients', clientId),
+    stripUndefined({
+      aiAnalysis: aiAnalysis as unknown as Record<string, unknown>,
+      updatedAt: serverTimestamp(),
+    }),
+  );
 }

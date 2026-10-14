@@ -16,11 +16,13 @@ service cloud.firestore {
         && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
     }
 
+    // ============ Admins ============
     match /admin/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow write: if isAdmin();
     }
 
+    // ============ Users (brokers) ============
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid
@@ -45,6 +47,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============ Organizations ============
     match /organizations/{orgId} {
       allow create: if isAdmin() || (
         signedIn()
@@ -74,6 +77,53 @@ service cloud.firestore {
       }
     }
 
+    // ============ Clients (top-level + subcollections) ============
+    match /clients/{clientId} {
+      allow read: if isAdmin() || (
+        signedIn()
+        && resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+      );
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId)
+      );
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+      );
+      allow delete: if isAdmin() || (
+        signedIn()
+        && resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+        && roleIs(['owner','admin','broker'])
+      );
+
+      // ---------- Timeline subcollection ----------
+      match /timeline/{eventId} {
+        allow read: if isAdmin() || (
+          signedIn()
+          && resource.data.organizationId is string
+          && sameOrg(resource.data.organizationId)
+        );
+        allow create: if isAdmin() || (
+          signedIn()
+          && request.resource.data.organizationId is string
+          && sameOrg(request.resource.data.organizationId)
+        );
+        allow update: if isAdmin();
+        allow delete: if isAdmin() || (
+          signedIn()
+          && resource.data.organizationId is string
+          && sameOrg(resource.data.organizationId)
+          && privileged()
+        );
+      }
+    }
+
+    // ============ Subscriptions ============
     match /organizationSubscriptions/{orgId} {
       allow read: if sameOrg(orgId) || isAdmin();
       allow create: if isAdmin() || (
@@ -104,6 +154,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============ Subscription Codes ============
     match /subscriptionCodes/{code} {
       allow read: if isAdmin() || (
         signedIn() && resource.data.usedBy.uid == request.auth.uid
@@ -120,16 +171,28 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============ Pricing Plans ============
     match /pricingPlans/{planId} {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
 
+    // ============ Client Counters ============
+    match /clientCounters/{counterId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId);
+      allow delete: if isAdmin();
+    }
+
+    // ============ Ads ============
     match /ads/{adId} {
       allow read: if isAdmin() || (signedIn() && resource.data.status == 'active');
       allow write: if isAdmin();
     }
 
+    // ============ Onboarding Progress ============
     match /onboardingProgress/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow create: if isAdmin() || (
@@ -141,6 +204,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============ Archives ============
     match /archives/{archiveId} {
       allow read: if isAdmin();
       allow create: if isAdmin()
@@ -149,13 +213,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============ Generic business records ============
     match /{collection}/{docId} {
       allow read: if isAdmin() || (
         collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans'
+        && collection != 'pricingPlans' && collection != 'clientCounters'
+        && collection != 'clients'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
       );
@@ -164,7 +230,8 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans'
+        && collection != 'pricingPlans' && collection != 'clientCounters'
+        && collection != 'clients'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
       );
@@ -173,7 +240,8 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans'
+        && collection != 'pricingPlans' && collection != 'clientCounters'
+        && collection != 'clients'
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId)
       );
@@ -182,7 +250,8 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans'
+        && collection != 'pricingPlans' && collection != 'clientCounters'
+        && collection != 'clients'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
