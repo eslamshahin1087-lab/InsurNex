@@ -1,5 +1,5 @@
 export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'suspended';
-export type SubscriptionPlan = 'trial' | 'monthly';
+export type SubscriptionPlan = 'trial' | 'monthly' | 'yearly' | 'yearly_discount';
 
 export interface OrganizationSubscription {
   organizationId: string;
@@ -20,16 +20,21 @@ export interface SubscriptionCodeUsedBy {
   organizationId: string;
   uid: string;
   userName?: string;
+  userEmail?: string;
   usedAt?: unknown;
 }
 
 export interface SubscriptionCode {
   code: string;
   status: CodeStatus;
+  planType: SubscriptionPlan;
+  planName: string;
   duration: number;
-  amount: number;
+  subtotal: number;
+  vatRate: number;
+  vatAmount: number;
+  total: number;
   currency: string;
-  plan: SubscriptionPlan;
   createdAt?: unknown;
   createdBy?: string;
   createdByName?: string;

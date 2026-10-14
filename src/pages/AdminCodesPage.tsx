@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -8,26 +8,33 @@ import {
   Plus,
   RefreshCw,
   Trash2,
-  XCircle,
 } from 'lucide-react';
 import { useAuth } from '../features/auth/auth-context';
 import {
   createBulkCodes,
   createCode,
+  deleteCode,
   isCurrentUserAdmin,
   listCodes,
-  revokeCode,
 } from '../features/subscription/subscription.service';
-import type { SubscriptionCode } from '../features/subscription/subscription.types';
+import type {
+  SubscriptionCode,
+  SubscriptionPlan,
+} from '../features/subscription/subscription.types';
+import {
+  computePricing,
+  formatEGP,
+  getPlan,
+  PRICING_PLANS,
+} from '../features/admin/pricing.config';
 
-type Filter = 'all' | 'unused' | 'used' | 'revoked';
+type Filter = 'all' | 'unused' | 'used';
 
-const FILTERS: Filter[] = ['all', 'unused', 'used', 'revoked'];
+const FILTERS: Filter[] = ['all', 'unused', 'used'];
 const FILTER_LABELS: Record<Filter, string> = {
   all: 'الكل',
   unused: 'غير مستخدمة',
   used: 'مستخدمة',
-  revoked: 'ملغاة',
 };
 
 export default function AdminCodesPage() {
@@ -38,10 +45,16 @@ export default function AdminCodesPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [count, setCount] = useState('5');
-  const [duration, setDuration] = useState('30');
-  const [amount, setAmount] = useState('300');
+  const [planType, setPlanType] = useState<SubscriptionPlan>('monthly');
   const [copied, setCopied] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const selectedPlan = useMemo(() => getPlan(planType), [planType]);
+  const preview = useMemo(
+    () => (selectedPlan ? computePricing(selectedPlan.subtotal) : null),
+    [selectedPlan],
+  );
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -71,13 +84,10 @@ export default function AdminCodesPage() {
     setBusy(true);
     try {
       const n = Math.max(1, Math.min(50, Number(count) || 1));
-      const d = Math.max(1, Math.min(365, Number(duration) || 30));
-      const a = Math.max(1, Number(amount) || 300);
 
       if (n === 1) {
         await createCode({
-          duration: d,
-          amount: a,
+          planType,
           createdBy: user.uid,
           createdByName: profile?.displayName || '',
           notes: 'Single code',
@@ -85,8 +95,7 @@ export default function AdminCodesPage() {
       } else {
         await createBulkCodes({
           count: n,
-          duration: d,
-          amount: a,
+          planType,
           createdBy: user.uid,
           createdByName: profile?.displayName || '',
           notes: `Bulk of ${n}`,
@@ -101,15 +110,31 @@ export default function AdminCodesPage() {
     }
   }
 
-  async function handleRevoke(code: string) {
-    if (!window.confirm('إلغاء هذا الكود؟')) return;
+  async function handleDelete(code: string) {
+    if (!user) return;
+    const ok = window.confirm(
+      `حذف الكود ${code}؟\nسيُحفظ في الأرشيف بشكل دائم ويمكن استعادته لاحقًا.`,
+    );
+    if (!ok) return;
+
+    setDeleting(code);
     try {
-      await revokeCode(code);
-      setCodes((prev) =>
-        prev.map((c) => (c.code === code ? { ...c, status: 'revoked' } : c)),
+      await deleteCode(
+        code,
+        {
+          uid: user.uid,
+          name: profile?.displayName || 'Admin',
+          email: user.email || undefined,
+        },
+        'حذف نهائي من صفحة الأكواد',
       );
+      // Remove from list immediately
+      setCodes((prev) => prev.filter((c) => c.code !== code));
     } catch (e) {
       console.error(e);
+      alert('فشل الحذف: ' + (e as Error).message);
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -165,7 +190,6 @@ export default function AdminCodesPage() {
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-        {/* HEADER */}
         <header
           style={{
             display: 'flex',
@@ -178,7 +202,7 @@ export default function AdminCodesPage() {
         >
           <div>
             <Link
-              to="/admin"
+              to="/admin-panel"
               className="inx-link"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 6 }}
             >
@@ -199,22 +223,22 @@ export default function AdminCodesPage() {
           </button>
         </header>
 
-        {/* GENERATOR */}
         <section className="inx-card inx-card-lg" style={{ marginBottom: 16 }}>
           <div className="inx-card-head">
             <h3>إنشاء أكواد جديدة</h3>
             <KeyRound size={18} style={{ color: 'var(--inx-muted)' }} />
           </div>
+
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 10,
               marginBottom: 12,
             }}
           >
             <label style={{ display: 'grid', gap: 6 }}>
-              <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>العدد</span>
+              <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>عدد الأكواد</span>
               <input
                 type="number"
                 min="1"
@@ -224,28 +248,57 @@ export default function AdminCodesPage() {
                 style={inputStyle}
               />
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
-              <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>المدة (يوم)</span>
-              <input
-                type="number"
-                min="1"
-                max="365"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
+
+            <label style={{ display: 'grid', gap: 6, gridColumn: 'span 2' }}>
+              <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>نوع الخطة</span>
+              <select
+                value={planType}
+                onChange={(e) => setPlanType(e.target.value as SubscriptionPlan)}
                 style={inputStyle}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: 6 }}>
-              <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>السعر (ج.م)</span>
-              <input
-                type="number"
-                min="1"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                style={inputStyle}
-              />
+              >
+                {PRICING_PLANS.filter((p) => p.isActive).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — {formatEGP(p.subtotal)} / {p.duration} يوم
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
+
+          {preview && (
+            <div
+              style={{
+                background: 'var(--inx-navy-bg)',
+                padding: 12,
+                borderRadius: 'var(--inx-radius-sm)',
+                marginBottom: 12,
+                display: 'grid',
+                gap: 4,
+                fontSize: 13,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>السعر قبل الضريبة:</span>
+                <b>{formatEGP(preview.subtotal)}</b>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>ضريبة القيمة المضافة (14%):</span>
+                <b>{formatEGP(preview.vatAmount)}</b>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  borderTop: '1px solid var(--inx-border)',
+                  paddingTop: 4,
+                  marginTop: 4,
+                }}
+              >
+                <span>الإجمالي:</span>
+                <b style={{ color: 'var(--inx-success)' }}>{formatEGP(preview.total)}</b>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div
@@ -276,13 +329,12 @@ export default function AdminCodesPage() {
               className="inx-btn inx-btn-secondary"
               onClick={() => void copyAllUnused()}
             >
-              {copied === 'ALL' ? <Check size={16} /> : <Copy size={16} />}
-              نسخ الأكواد غير المستخدمة
+              {copied === 'ALL' ? <Check size={16} /> : <Copy size={16} />} نسخ الأكواد غير
+              المستخدمة
             </button>
           </div>
         </section>
 
-        {/* FILTERS */}
         <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
           <div className="inx-chips">
             {FILTERS.map((f) => (
@@ -298,7 +350,6 @@ export default function AdminCodesPage() {
           </div>
         </div>
 
-        {/* LIST */}
         <div className="inx-section-head">
           <h2>قائمة الأكواد</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
@@ -319,20 +370,10 @@ export default function AdminCodesPage() {
               <li key={c.code} className="inx-list-item">
                 <span
                   className={`inx-icon-circle ${
-                    c.status === 'unused'
-                      ? 'tone-success'
-                      : c.status === 'used'
-                      ? 'tone-primary'
-                      : 'tone-neutral'
+                    c.status === 'unused' ? 'tone-success' : 'tone-primary'
                   }`}
                 >
-                  {c.status === 'unused' ? (
-                    <KeyRound size={16} />
-                  ) : c.status === 'used' ? (
-                    <Check size={16} />
-                  ) : (
-                    <XCircle size={16} />
-                  )}
+                  {c.status === 'unused' ? <KeyRound size={16} /> : <Check size={16} />}
                 </span>
                 <div className="inx-list-copy">
                   <div
@@ -344,29 +385,23 @@ export default function AdminCodesPage() {
                       flexWrap: 'wrap',
                     }}
                   >
-                    <b
-                      style={{
-                        fontFamily: 'monospace',
-                        fontSize: 14,
-                        letterSpacing: 1,
-                      }}
-                    >
+                    <b style={{ fontFamily: 'monospace', fontSize: 14, letterSpacing: 1 }}>
                       {c.code}
                     </b>
                     <span
                       className={`inx-badge ${
-                        c.status === 'unused'
-                          ? 'inx-badge-success'
-                          : c.status === 'used'
-                          ? 'inx-badge-primary'
-                          : 'inx-badge-neutral'
+                        c.status === 'unused' ? 'inx-badge-success' : 'inx-badge-primary'
                       }`}
                     >
                       {FILTER_LABELS[c.status as Filter] || c.status}
                     </span>
+                    <span className="inx-badge inx-badge-neutral">
+                      {c.planName || c.planType || '—'}
+                    </span>
                   </div>
                   <small>
-                    {c.duration} يوم · {c.amount} {c.currency}
+                    {c.duration} يوم · {formatEGP(c.subtotal)} + ضريبة{' '}
+                    {formatEGP(c.vatAmount)} = <b>{formatEGP(c.total)}</b>
                     {c.usedBy?.userName ? ` · استخدمه: ${c.usedBy.userName}` : ''}
                   </small>
                 </div>
@@ -388,10 +423,17 @@ export default function AdminCodesPage() {
                       <button
                         type="button"
                         className="inx-icon-btn"
-                        onClick={() => void handleRevoke(c.code)}
-                        title="إلغاء"
+                        onClick={() => void handleDelete(c.code)}
+                        title="حذف نهائي (يُحفظ في الأرشيف)"
+                        disabled={deleting === c.code}
                       >
-                        <Trash2 size={15} style={{ color: 'var(--inx-danger)' }} />
+                        <Trash2
+                          size={15}
+                          style={{
+                            color: 'var(--inx-danger)',
+                            opacity: deleting === c.code ? 0.4 : 1,
+                          }}
+                        />
                       </button>
                     </>
                   )}

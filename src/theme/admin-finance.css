@@ -1,0 +1,108 @@
+/* ============================================================
+   Admin Finance Page
+   ============================================================ */
+
+.fin-section {
+  margin-bottom: 24px;
+}
+
+.fin-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--inx-text);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fin-section-title::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: var(--inx-blue);
+  border-radius: 2px;
+}
+
+.fin-kpi-sub {
+  font-size: 11px;
+  color: var(--inx-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.fin-kpi-trend {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.fin-kpi-trend.up {
+  color: var(--inx-success);
+  background: var(--inx-success-bg);
+}
+
+.fin-kpi-trend.down {
+  color: var(--inx-danger);
+  background: var(--inx-danger-bg);
+}
+
+.fin-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.fin-chart-card {
+  background: var(--inx-surface);
+  border: 1px solid var(--inx-border);
+  border-radius: var(--inx-radius);
+  padding: 16px;
+  box-shadow: var(--inx-shadow-sm);
+}
+
+.fin-chart-card h4 {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--inx-text);
+  margin: 0 0 12px;
+}
+
+.fin-empty-chart,
+.fin-empty-table {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--inx-muted);
+  font-size: 13px;
+}
+
+.fin-two-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.fin-days-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--inx-success-bg);
+  color: var(--inx-success);
+}
+
+.fin-days-badge.warn {
+  background: var(--inx-warning-bg);
+  color: var(--inx-warning);
+}
+
+.fin-days-badge.urgent {
+  background: var(--inx-danger-bg);
+  color: var(--inx-danger);
+}

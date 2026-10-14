@@ -16,8 +16,20 @@ import { db } from '../../firebase/config';
 import type {
   OrganizationSubscription,
   SubscriptionCode,
+  SubscriptionPlan,
   SubscriptionStatus,
 } from './subscription.types';
+import {
+  computePricing,
+  CURRENCY,
+  getPlan,
+} from '../admin/pricing.config';
+import { archiveItem } from '../admin/archive.service';
+import type {
+  ArchiveAction,
+  ArchiveSource,
+  ArchiveType,
+} from '../admin/archive.types';
 
 // ============================================================
 // HELPERS
@@ -50,6 +62,41 @@ export function daysRemaining(sub: OrganizationSubscription | null): number {
   if (!sub) return 0;
   const today = isoDate(new Date());
   return Math.max(0, daysBetween(today, sub.endDate));
+}
+
+// ============================================================
+// ARCHIVE HELPER (safe — never throws)
+// ============================================================
+
+export interface AdminContext {
+  uid: string;
+  name: string;
+  email?: string;
+}
+
+async function safeArchive(params: {
+  type: ArchiveType;
+  action: ArchiveAction;
+  source: ArchiveSource;
+  data: Record<string, unknown>;
+  admin: AdminContext;
+  reason?: string;
+}): Promise<void> {
+  try {
+    await archiveItem({
+      type: params.type,
+      action: params.action,
+      source: params.source,
+      data: params.data,
+      deletedBy: params.admin.uid,
+      deletedByName: params.admin.name,
+      deletedByEmail: params.admin.email,
+      reason: params.reason,
+    });
+  } catch (e) {
+    // Archiving must never break the primary action
+    console.warn('Archive failed:', e);
+  }
 }
 
 // ============================================================
@@ -91,13 +138,6 @@ export async function createTrialSubscription(
 // ============================================================
 // REDEEM CODE
 // ============================================================
-//
-// Security note (see firestore.rules):
-//  - Reading unused codes is blocked (anti-enumeration).
-//  - So we DON'T read first. We go straight to update() — the rules
-//    validate that the code is unused and that we set usedBy.uid to us.
-//  - After the code is marked used, we CAN read it (usedBy.uid == us).
-//  - Extending the subscription is allowed only when lastCodeUsed changes.
 
 export interface RedeemResult {
   success: boolean;
@@ -117,7 +157,6 @@ export async function redeemCode(params: {
 
   const codeRef = doc(db, 'subscriptionCodes', cleanCode);
 
-  // Step 1 — claim the code. No read first (rules block reading unused codes).
   try {
     await updateDoc(codeRef, {
       status: 'used',
@@ -130,9 +169,6 @@ export async function redeemCode(params: {
       usedAt: serverTimestamp(),
     });
   } catch {
-    // Write rejected. Either the code doesn't exist, was revoked,
-    // or was already used by someone else. Try to read it back:
-    // if we can read it, it's ours (already used by us).
     try {
       const snap = await getDoc(codeRef);
       if (snap.exists()) {
@@ -142,20 +178,19 @@ export async function redeemCode(params: {
         }
       }
     } catch {
-      // reading also denied — code is not ours
+      /* ignore */
     }
     return { success: false, error: 'CODE_NOT_FOUND' };
   }
 
-  // Step 2 — read the code back (now allowed) to get its duration.
   const codeSnap = await getDoc(codeRef);
   if (!codeSnap.exists()) {
     return { success: false, error: 'CODE_NOT_FOUND' };
   }
   const codeData = codeSnap.data() as SubscriptionCode;
   const duration = codeData.duration || 30;
+  const planType = codeData.planType || 'monthly';
 
-  // Step 3 — compute the new end date.
   const subSnap = await getDoc(
     doc(db, 'organizationSubscriptions', params.organizationId),
   );
@@ -174,14 +209,12 @@ export async function redeemCode(params: {
   const newEndDate = addDays(baseDate, duration);
   const newEndIso = isoDate(newEndDate);
 
-  // Step 4 — extend the subscription. The rule allows endDate to move
-  // only when lastCodeUsed changes — which is exactly what we do here.
   await setDoc(
     doc(db, 'organizationSubscriptions', params.organizationId),
     {
       organizationId: params.organizationId,
       status: 'active' as SubscriptionStatus,
-      plan: 'monthly',
+      plan: planType,
       startDate: todayIso,
       endDate: newEndIso,
       lastCodeUsed: cleanCode,
@@ -218,12 +251,16 @@ function generateCodeString(): string {
 }
 
 export async function createCode(params: {
-  duration: number;
-  amount: number;
+  planType: SubscriptionPlan;
   createdBy: string;
   createdByName?: string;
   notes?: string;
 }): Promise<string> {
+  const plan = getPlan(params.planType);
+  if (!plan) throw new Error('INVALID_PLAN');
+
+  const pricing = computePricing(plan.subtotal);
+
   let attempts = 0;
   while (attempts < 5) {
     const code = generateCodeString();
@@ -232,10 +269,14 @@ export async function createCode(params: {
       await setDoc(doc(db, 'subscriptionCodes', code), {
         code,
         status: 'unused',
-        duration: params.duration,
-        amount: params.amount,
-        currency: 'EGP',
-        plan: 'monthly',
+        planType: plan.id,
+        planName: plan.name,
+        duration: plan.duration,
+        subtotal: pricing.subtotal,
+        vatRate: pricing.vatRate,
+        vatAmount: pricing.vatAmount,
+        total: pricing.total,
+        currency: CURRENCY,
         createdBy: params.createdBy,
         createdByName: params.createdByName || '',
         notes: params.notes || '',
@@ -250,8 +291,7 @@ export async function createCode(params: {
 
 export async function createBulkCodes(params: {
   count: number;
-  duration: number;
-  amount: number;
+  planType: SubscriptionPlan;
   createdBy: string;
   createdByName?: string;
   notes?: string;
@@ -259,8 +299,7 @@ export async function createBulkCodes(params: {
   const codes: string[] = [];
   for (let i = 0; i < params.count; i++) {
     const code = await createCode({
-      duration: params.duration,
-      amount: params.amount,
+      planType: params.planType,
       createdBy: params.createdBy,
       createdByName: params.createdByName,
       notes: params.notes,
@@ -292,8 +331,58 @@ export async function listCodes(params?: {
   return snap.docs.map((d) => ({ code: d.id, ...d.data() } as SubscriptionCode));
 }
 
-export async function revokeCode(code: string): Promise<void> {
+/**
+ * Revoke a subscription code.
+ * Archives the full code doc BEFORE updating status.
+ */
+export async function revokeCode(
+  code: string,
+  admin?: AdminContext,
+  reason?: string,
+): Promise<void> {
+  // Fetch full doc for archiving
+  const snap = await getDoc(doc(db, 'subscriptionCodes', code));
+  const originalData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
+
+  // Archive BEFORE mutation (only if admin context provided)
+  if (admin && originalData) {
+    await safeArchive({
+      type: 'code',
+      action: 'revoked',
+      source: 'admin-codes',
+      data: { ...originalData, code },
+      admin,
+      reason: reason || 'إلغاء كود اشتراك',
+    });
+  }
+
   await updateDoc(doc(db, 'subscriptionCodes', code), { status: 'revoked' });
+}
+
+/**
+ * Permanently delete a code (admin only).
+ * Archives first.
+ */
+export async function deleteCode(
+  code: string,
+  admin?: AdminContext,
+  reason?: string,
+): Promise<void> {
+  const snap = await getDoc(doc(db, 'subscriptionCodes', code));
+  const originalData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
+
+  if (admin && originalData) {
+    await safeArchive({
+      type: 'code',
+      action: 'deleted',
+      source: 'admin-codes',
+      data: { ...originalData, code },
+      admin,
+      reason: reason || 'حذف نهائي لكود اشتراك',
+    });
+  }
+
+  await deleteDoc(doc(db, 'subscriptionCodes', code));
 }
 
 // ============================================================
@@ -340,7 +429,25 @@ export async function extendSubscription(params: {
   return newEndIso;
 }
 
-export async function suspendSubscription(organizationId: string): Promise<void> {
+export async function suspendSubscription(
+  organizationId: string,
+  admin?: AdminContext,
+  reason?: string,
+): Promise<void> {
+  const snap = await getDoc(doc(db, 'organizationSubscriptions', organizationId));
+  const originalData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
+
+  if (admin && originalData) {
+    await safeArchive({
+      type: 'subscription',
+      action: 'suspended',
+      source: 'admin-subscriptions',
+      data: { ...originalData, organizationId },
+      admin,
+      reason: reason || 'إيقاف اشتراك',
+    });
+  }
+
   await setDoc(
     doc(db, 'organizationSubscriptions', organizationId),
     {
@@ -363,7 +470,33 @@ export async function activateSubscription(organizationId: string): Promise<void
     { merge: true },
   );
 }
+/**
+ * Delete a subscription permanently.
+ * Archives the full doc BEFORE deletion.
+ */
+export async function deleteSubscription(
+  organizationId: string,
+  admin?: AdminContext,
+  reason?: string,
+): Promise<void> {
+  const snap = await getDoc(doc(db, 'organizationSubscriptions', organizationId));
+  const originalData = snap.exists()
+    ? (snap.data() as Record<string, unknown>)
+    : null;
 
+  if (admin && originalData) {
+    await safeArchive({
+      type: 'subscription',
+      action: 'deleted',
+      source: 'admin-subscriptions',
+      data: { ...originalData, organizationId },
+      admin,
+      reason: reason || 'حذف نهائي لاشتراك',
+    });
+  }
+
+  await deleteDoc(doc(db, 'organizationSubscriptions', organizationId));
+}
 // ============================================================
 // ADMIN CHECK
 // ============================================================
@@ -381,13 +514,61 @@ export async function isCurrentUserAdmin(uid: string): Promise<boolean> {
 // ADMIN - DELETE USER DATA
 // ============================================================
 
-export async function deleteUserData(uid: string): Promise<void> {
+export async function deleteUserData(
+  uid: string,
+  admin?: AdminContext,
+  reason?: string,
+): Promise<void> {
   const userSnap = await getDoc(doc(db, 'users', uid));
   if (!userSnap.exists()) throw new Error('USER_NOT_FOUND');
-  const userData = userSnap.data() as { organizationId?: string };
+  const userData = userSnap.data() as { organizationId?: string; displayName?: string; email?: string };
 
   const orgId = userData.organizationId;
 
+  // Archive user profile
+  if (admin) {
+    await safeArchive({
+      type: 'user',
+      action: 'deleted',
+      source: 'admin-users',
+      data: { ...userData, uid },
+      admin,
+      reason: reason || 'حذف بيانات مستخدم',
+    });
+
+    // Archive organization if exists
+    if (orgId) {
+      try {
+        const orgSnap = await getDoc(doc(db, 'organizations', orgId));
+        if (orgSnap.exists()) {
+          await safeArchive({
+            type: 'organization',
+            action: 'deleted',
+            source: 'admin-users',
+            data: { ...(orgSnap.data() as Record<string, unknown>), id: orgId },
+            admin,
+            reason: `حذف تلقائي مع المستخدم ${userData.displayName || uid.slice(0, 8)}`,
+          });
+        }
+      } catch { /* ignore */ }
+
+      try {
+        const subSnap = await getDoc(doc(db, 'organizationSubscriptions', orgId));
+        if (subSnap.exists()) {
+          await safeArchive({
+            type: 'subscription',
+            action: 'deleted',
+            source: 'admin-users',
+            data: { ...(subSnap.data() as Record<string, unknown>), organizationId: orgId },
+            admin,
+            reason: `حذف تلقائي مع المستخدم ${userData.displayName || uid.slice(0, 8)}`,
+          });
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
+  // Delete org-related docs
   if (orgId) {
     try {
       await deleteDoc(doc(db, 'organizationSubscriptions', orgId));
@@ -397,8 +578,10 @@ export async function deleteUserData(uid: string): Promise<void> {
     } catch { /* ignore */ }
   }
 
+  // Delete user profile
   await deleteDoc(doc(db, 'users', uid));
 
+  // Delete onboarding progress
   try {
     await deleteDoc(doc(db, 'onboardingProgress', uid));
   } catch { /* ignore */ }

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
+  Archive,
+  Banknote,
   BarChart3,
   Building2,
   CreditCard,
@@ -29,13 +31,15 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/admin-panel', label: 'نظرة عامة', icon: LayoutDashboard, end: true },
+  { to: '/admin-panel', label: 'لوحة التحكم', icon: LayoutDashboard, end: true },
   { to: '/admin-panel/subscriptions', label: 'الاشتراكات', icon: CreditCard },
   { to: '/admin-panel/codes', label: 'الأكواد', icon: KeyRound },
+  { to: '/admin-panel/finance', label: 'الماليات', icon: Banknote },
   { to: '/admin-panel/users', label: 'المستخدمون', icon: Users },
   { to: '/admin-panel/ads', label: 'الإعلانات', icon: Megaphone },
   { to: '/admin-panel/analytics', label: 'التحليلات', icon: BarChart3 },
-  { to: '/admin-panel/settings', label: 'إعدادات المنصة', icon: Settings },
+  { to: '/admin-panel/archive', label: 'الأرشيف', icon: Archive },
+  { to: '/admin-panel/settings', label: 'إعدادات النظام', icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -55,7 +59,7 @@ export default function AdminLayout() {
     <div className="admin-shell" dir="rtl">
       <aside className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <div className="admin-sidebar-brand">
-          <Logo alt="InsurNex"/>
+          <Logo alt="InsurNex" />
           <div>
             <strong>InsurNex</strong>
             <small>Admin Panel</small>
@@ -83,7 +87,7 @@ export default function AdminLayout() {
         <div className="admin-sidebar-footer">
           <Link to="/" className="admin-sidebar-link">
             <ExternalLink size={16} />
-            <span>تطبيق الوسيط</span>
+            <span>العودة للتطبيق</span>
           </Link>
           <button
             type="button"
@@ -91,7 +95,7 @@ export default function AdminLayout() {
             onClick={toggleTheme}
           >
             {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            <span>{resolvedTheme === 'dark' ? 'وضع فاتح' : 'وضع داكن'}</span>
+            <span>{resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}</span>
           </button>
           <button
             type="button"

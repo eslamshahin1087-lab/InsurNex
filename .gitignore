@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .firebase/
-.firebase/
 architecture-audit.txt
 architecture-audit.zip
 architecture.txt

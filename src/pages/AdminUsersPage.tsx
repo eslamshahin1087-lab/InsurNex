@@ -5,11 +5,14 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserRound,
   Users,
 } from 'lucide-react';
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useAuth } from '../features/auth/auth-context';
+import { deleteUserData } from '../features/subscription/subscription.service';
 
 interface BrokerUser {
   uid: string;
@@ -22,9 +25,11 @@ interface BrokerUser {
 }
 
 export default function AdminUsersPage() {
+  const { user: currentUser, profile } = useAuth();
   const [users, setUsers] = useState<BrokerUser[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,12 +77,47 @@ export default function AdminUsersPage() {
     }).format(d);
   }
 
+  async function handleDelete(u: BrokerUser) {
+    if (!currentUser) return;
+
+    const label = u.displayName || u.email || u.uid.slice(0, 8);
+    const ok = window.confirm(
+      `حذف المستخدم "${label}"؟\n\n` +
+        `سيتم:\n` +
+        `• حذف ملف المستخدم\n` +
+        `• حذف المؤسسة المرتبطة (إن وُجدت)\n` +
+        `• حذف الاشتراك المرتبط (إن وُجد)\n\n` +
+        `سيُحفظ كل شيء في الأرشيف ويمكن استعادته.`,
+    );
+    if (!ok) return;
+
+    setDeleting(u.uid);
+    try {
+      await deleteUserData(
+        u.uid,
+        {
+          uid: currentUser.uid,
+          name: profile?.displayName || 'Admin',
+          email: currentUser.email || undefined,
+        },
+        `حذف نهائي من صفحة المستخدمين — ${label}`,
+      );
+      // Remove from list immediately
+      setUsers((prev) => prev.filter((x) => x.uid !== u.uid));
+    } catch (e) {
+      console.error(e);
+      alert('فشل الحذف: ' + (e as Error).message);
+    } finally {
+      setDeleting(null);
+    }
+  }
+
   return (
     <>
       <div className="admin-page-head">
         <span className="eyebrow">Admin · Users</span>
         <h1>المستخدمون</h1>
-        <p>عرض كل حسابات الوسطاء المسجّلين على المنصة.</p>
+        <p>استعراض وإدارة جميع المستخدمين المسجلين في النظام.</p>
       </div>
 
       <div className="admin-kpi-grid">
@@ -93,7 +133,7 @@ export default function AdminUsersPage() {
             <Building2 size={20} />
           </span>
           <div className="admin-kpi-value">{orgs.size}</div>
-          <div className="admin-kpi-label">مؤسسات</div>
+          <div className="admin-kpi-label">المؤسسات</div>
         </article>
         <article className="admin-kpi">
           <span className="admin-kpi-icon tone-success">
@@ -109,7 +149,7 @@ export default function AdminUsersPage() {
           <div className="admin-kpi-value">
             {orgs.size > 0 ? Math.round((users.length / orgs.size) * 10) / 10 : 0}
           </div>
-          <div className="admin-kpi-label">متوسط/مؤسسة</div>
+          <div className="admin-kpi-label">متوسط لكل مؤسسة</div>
         </article>
       </div>
 
@@ -138,7 +178,7 @@ export default function AdminUsersPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ابحث بالاسم، البريد، أو المؤسسة"
+            placeholder="ابحث بالاسم، البريد، المؤسسة، أو الدور..."
             style={{
               flex: 1,
               border: 0,
@@ -176,7 +216,8 @@ export default function AdminUsersPage() {
                 <th>الدور</th>
                 <th>الحالة</th>
                 <th>المؤسسة</th>
-                <th>تاريخ الإنشاء</th>
+                <th>تاريخ التسجيل</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -224,6 +265,23 @@ export default function AdminUsersPage() {
                   </td>
                   <td style={{ color: 'var(--inx-text-soft)' }}>
                     {formatDate(u.createdAt)}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="inx-icon-btn"
+                      onClick={() => void handleDelete(u)}
+                      disabled={deleting === u.uid}
+                      title="حذف نهائي (يُحفظ في الأرشيف)"
+                    >
+                      <Trash2
+                        size={15}
+                        style={{
+                          color: 'var(--inx-danger)',
+                          opacity: deleting === u.uid ? 0.4 : 1,
+                        }}
+                      />
+                    </button>
                   </td>
                 </tr>
               ))}

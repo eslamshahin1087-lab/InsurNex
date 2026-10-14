@@ -8,11 +8,13 @@ import {
   Clock3,
   Plus,
   RefreshCw,
+  Trash2,
   XCircle,
 } from 'lucide-react';
 import { useAuth } from '../features/auth/auth-context';
 import {
   activateSubscription,
+  deleteSubscription,
   extendSubscription,
   isCurrentUserAdmin,
   listAllSubscriptions,
@@ -21,11 +23,12 @@ import {
 import type { OrganizationSubscription } from '../features/subscription/subscription.types';
 
 export default function AdminSubscriptionsPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [subscriptions, setSubscriptions] = useState<OrganizationSubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -50,7 +53,7 @@ export default function AdminSubscriptionsPage() {
   }, [load]);
 
   async function handleExtend(orgId: string, days: number) {
-    if (!window.confirm(`تمديد ${days} يوم لهذه المؤسسة؟`)) return;
+    if (!window.confirm(`تمديد ${days} يوم للاشتراك؟`)) return;
     setBusyId(orgId);
     try {
       await extendSubscription({ organizationId: orgId, days });
@@ -63,10 +66,19 @@ export default function AdminSubscriptionsPage() {
   }
 
   async function handleSuspend(orgId: string) {
+    if (!user) return;
     if (!window.confirm('إيقاف هذا الاشتراك؟')) return;
     setBusyId(orgId);
     try {
-      await suspendSubscription(orgId);
+      await suspendSubscription(
+        orgId,
+        {
+          uid: user.uid,
+          name: profile?.displayName || 'Admin',
+          email: user.email || undefined,
+        },
+        'إيقاف يدوي من صفحة الاشتراكات',
+      );
       await load();
     } catch (e) {
       console.error(e);
@@ -84,6 +96,35 @@ export default function AdminSubscriptionsPage() {
       console.error(e);
     } finally {
       setBusyId(null);
+    }
+  }
+
+  async function handleDelete(orgId: string) {
+    if (!user) return;
+    const ok = window.confirm(
+      `حذف الاشتراك "${orgId.slice(0, 12)}…"؟\n\nسيُحفظ في الأرشيف ويمكن استعادته.`,
+    );
+    if (!ok) return;
+
+    setDeletingId(orgId);
+    try {
+      await deleteSubscription(
+        orgId,
+        {
+          uid: user.uid,
+          name: profile?.displayName || 'Admin',
+          email: user.email || undefined,
+        },
+        'حذف نهائي من صفحة الاشتراكات',
+      );
+      setSubscriptions((prev) =>
+        prev.filter((s) => s.organizationId !== orgId),
+      );
+    } catch (e) {
+      console.error(e);
+      alert('فشل الحذف: ' + (e as Error).message);
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -119,7 +160,7 @@ export default function AdminSubscriptionsPage() {
   function statusOf(sub: OrganizationSubscription) {
     if (sub.status === 'suspended') return { label: 'موقوف', tone: 'danger' };
     if (sub.endDate < now) return { label: 'منتهي', tone: 'danger' };
-    if (sub.status === 'trial') return { label: 'تجربة', tone: 'warning' };
+    if (sub.status === 'trial') return { label: 'تجريبي', tone: 'warning' };
     return { label: 'نشط', tone: 'success' };
   }
 
@@ -138,7 +179,7 @@ export default function AdminSubscriptionsPage() {
         >
           <div>
             <Link
-              to="/admin"
+              to="/admin-panel"
               className="inx-link"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 6 }}
             >
@@ -160,9 +201,9 @@ export default function AdminSubscriptionsPage() {
         </header>
 
         <div className="inx-section-head">
-          <h2>قائمة المؤسسات</h2>
+          <h2>قائمة الاشتراكات</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-            {subscriptions.length} مؤسسة
+            {subscriptions.length} اشتراك
           </small>
         </div>
 
@@ -178,8 +219,13 @@ export default function AdminSubscriptionsPage() {
             {subscriptions.map((sub) => {
               const st = statusOf(sub);
               const isBusy = busyId === sub.organizationId;
+              const isDeleting = deletingId === sub.organizationId;
               return (
-                <li key={sub.organizationId} className="inx-list-item" style={{ flexWrap: 'wrap' }}>
+                <li
+                  key={sub.organizationId}
+                  className="inx-list-item"
+                  style={{ flexWrap: 'wrap' }}
+                >
                   <span className={`inx-icon-circle tone-${st.tone}`}>
                     <Building2 size={16} />
                   </span>
@@ -196,7 +242,12 @@ export default function AdminSubscriptionsPage() {
                       <b style={{ fontFamily: 'monospace', fontSize: 13 }}>
                         {sub.organizationId.slice(0, 12)}…
                       </b>
-                      <span className={`inx-badge inx-badge-${st.tone}`}>{st.label}</span>
+                      <span className={`inx-badge inx-badge-${st.tone}`}>
+                        {st.label}
+                      </span>
+                      <span className="inx-badge inx-badge-neutral">
+                        {sub.plan || 'trial'}
+                      </span>
                     </div>
                     <small style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       <Calendar size={12} /> ينتهي: {sub.endDate}
@@ -208,7 +259,7 @@ export default function AdminSubscriptionsPage() {
                       type="button"
                       className="inx-btn inx-btn-sm inx-btn-secondary"
                       onClick={() => void handleExtend(sub.organizationId, 30)}
-                      disabled={isBusy}
+                      disabled={isBusy || isDeleting}
                       title="تمديد 30 يوم"
                     >
                       <Plus size={13} /> 30 يوم
@@ -217,7 +268,7 @@ export default function AdminSubscriptionsPage() {
                       type="button"
                       className="inx-btn inx-btn-sm inx-btn-secondary"
                       onClick={() => void handleExtend(sub.organizationId, 90)}
-                      disabled={isBusy}
+                      disabled={isBusy || isDeleting}
                       title="تمديد 90 يوم"
                     >
                       <Clock3 size={13} /> 90 يوم
@@ -227,20 +278,33 @@ export default function AdminSubscriptionsPage() {
                         type="button"
                         className="inx-btn inx-btn-sm inx-btn-primary"
                         onClick={() => void handleActivate(sub.organizationId)}
-                        disabled={isBusy}
+                        disabled={isBusy || isDeleting}
                       >
-                        <CheckCircle2 size={13} /> تفعيل
+                        <CheckCircle2 size={13} /> تنشيط
                       </button>
                     ) : (
                       <button
                         type="button"
                         className="inx-btn inx-btn-sm inx-btn-danger"
                         onClick={() => void handleSuspend(sub.organizationId)}
-                        disabled={isBusy}
+                        disabled={isBusy || isDeleting}
                       >
                         <XCircle size={13} /> إيقاف
                       </button>
                     )}
+                    <button
+                      type="button"
+                      className="inx-btn inx-btn-sm inx-btn-secondary"
+                      onClick={() => void handleDelete(sub.organizationId)}
+                      disabled={isBusy || isDeleting}
+                      title="حذف نهائي (يُحفظ في الأرشيف)"
+                      style={{ color: 'var(--inx-danger)' }}
+                    >
+                      <Trash2
+                        size={13}
+                        style={{ opacity: isDeleting ? 0.4 : 1 }}
+                      />
+                    </button>
                   </div>
                 </li>
               );

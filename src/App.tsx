@@ -23,6 +23,8 @@ const AdminSubscriptionsPage = lazy(() => import('./pages/AdminSubscriptionsPage
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminAdsPage = lazy(() => import('./pages/AdminAdsPage'));
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
+const AdminFinancePage = lazy(() => import('./pages/AdminFinancePage'));
+const AdminArchivePage = lazy(() => import('./pages/AdminArchivePage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ClientsPage = lazy(() => import('./pages/ClientsPage'));
@@ -40,7 +42,9 @@ const LeadDetailsPage = lazy(() => import('./pages/LeadDetailsPage'));
 const AIFileAnalysisPage = lazy(() => import('./pages/AIFileAnalysisPage'));
 const MedicalIntelligencePage = lazy(() => import('./pages/MedicalIntelligencePage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const ClientInsuranceAnalysisPage = lazy(() => import('./pages/ClientInsuranceAnalysisPage'));
+const ClientInsuranceAnalysisPage = lazy(
+  () => import('./pages/ClientInsuranceAnalysisPage'),
+);
 const MorePage = lazy(() => import('./pages/MorePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
@@ -90,6 +94,14 @@ export default function App() {
                   <Route
                     path="/admin-panel/analytics"
                     element={<AdminAnalyticsPage />}
+                  />
+                  <Route
+                    path="/admin-panel/finance"
+                    element={<AdminFinancePage />}
+                  />
+                  <Route
+                    path="/admin-panel/archive"
+                    element={<AdminArchivePage />}
                   />
                   <Route
                     path="/admin-panel/settings"
