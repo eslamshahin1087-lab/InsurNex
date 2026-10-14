@@ -24,6 +24,8 @@ import { useAuth } from '../features/auth/auth-context';
 import { getClient } from '../features/clients/client.service';
 import ClientEditForm from '../features/clients/ClientEditForm';
 import ClientDocumentsPanel from '../features/documents/ClientDocumentsPanel';
+import ClientTimeline from '../features/clients/ClientTimeline';
+import '../theme/client-timeline.css';
 import {
   getClientRelations,
   type ClientRelations,
@@ -713,6 +715,10 @@ export default function ClientDetailsPage() {
           <ClientDocumentsPanel clientId={client.id} organizationId={profile.organizationId} />
         ) : null}
         {profile?.organizationId ? (
+          <ClientTimeline clientId={client.id} organizationId={profile.organizationId} />
+        ) : null}        {profile?.organizationId ? (
+          <ClientTimeline clientId={client.id} organizationId={profile.organizationId} />
+        ) : null}        {profile?.organizationId ? (
           <RfqWorkspace
             organizationId={profile.organizationId}
             clientId={client.id}

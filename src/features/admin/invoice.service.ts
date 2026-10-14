@@ -1,6 +1,6 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { renderInvoiceHTML, type InvoiceData } from './invoice.template';
+
+export type { InvoiceData };
 
 /**
  * Generate and download a PDF invoice for a single transaction.
@@ -10,9 +10,17 @@ import { renderInvoiceHTML, type InvoiceData } from './invoice.template';
  *   2. Convert to canvas via html2canvas
  *   3. Embed as image in jsPDF
  *
- * This approach handles Arabic (RTL) perfectly without needing font files.
+ * NOTE: jsPDF and html2canvas are imported dynamically
+ *       so they only load when the user clicks "Download PDF".
+ *       This keeps the initial bundle under 500 KB.
  */
 export async function downloadInvoicePDF(data: InvoiceData): Promise<void> {
+  // Dynamic imports — loaded only when this function is called
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import('jspdf'),
+    import('html2canvas'),
+  ]);
+
   const html = renderInvoiceHTML(data);
 
   // Create a hidden container
