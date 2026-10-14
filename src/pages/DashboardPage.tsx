@@ -24,6 +24,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
 import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
+import AdsSlideshow from '../features/admin/AdsSlideshow';
 
 const empty: DashboardData = {
   clients: 0,
@@ -50,13 +51,13 @@ const priorityTone: Record<string, string> = {
 
 const shortcuts = [
   { to: '/clients', label: 'العملاء', emoji: '👥', tone: '' },
-  { to: '/policies', label: 'الوثائق', emoji: '🛡️', tone: 'tone-cyan' },
-  { to: '/claims', label: 'المطالبات', emoji: '📋', tone: 'tone-success' },
+  { to: '/policies', label: 'الوثائق', emoji: '📄', tone: 'tone-cyan' },
+  { to: '/claims', label: 'المطالبات', emoji: '⚠️', tone: 'tone-success' },
   { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning' },
   { to: '/tasks', label: 'المهام', emoji: '✅', tone: '' },
   { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan' },
   { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success' },
-  { to: '/more', label: 'المزيد', emoji: '⚙️', tone: 'tone-purple' },
+  { to: '/more', label: 'المزيد', emoji: '⋯', tone: 'tone-purple' },
 ] as const;
 
 export default function DashboardPage() {
@@ -104,12 +105,12 @@ export default function DashboardPage() {
     });
   }, [data, profile]);
 
-  const firstName = profile?.displayName?.split(' ')[0] || 'بك';
+  const firstName = profile?.displayName?.split(' ')[0] || 'أهلاً';
   const roleLabel =
     profile?.role === 'owner'
       ? 'مالك المؤسسة'
       : profile?.role === 'admin'
-      ? 'مسؤول'
+      ? 'أدمن'
       : profile?.role || 'مستخدم';
 
   const clientsPct = Math.min(
@@ -128,7 +129,7 @@ export default function DashboardPage() {
 
   const clientSegments = [
     { label: 'عملاء نشطون', value: Math.max(data.clients - 1, 0), color: '#10b981' },
-    { label: 'عملاء محتملون', value: 1, color: '#1E4272' },
+    { label: 'عملاء جدد', value: 1, color: '#1E4272' },
   ];
   if (data.clients === 0) {
     clientSegments[0].value = 0;
@@ -197,7 +198,7 @@ export default function DashboardPage() {
               type="button"
               className="inx-circle-btn filled"
               onClick={askCopilot}
-              title="مساعد InsurNex"
+              title="اسأل InsurNex"
             >
               <Bot size={17} />
             </button>
@@ -212,6 +213,11 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        {/* ADS SLIDESHOW */}
+        <div style={{ marginBottom: 14 }}>
+          <AdsSlideshow />
+        </div>
+
         {/* SCOPE ROW */}
         <div className="inx-scope-row" style={{ marginBottom: 14 }}>
           <span className="inx-scope-pill">
@@ -221,16 +227,16 @@ export default function DashboardPage() {
           <span className="inx-chip-emphasis">
             <Bell size={13} />
             {data.notificationCount > 0
-              ? `${data.notificationCount} تنبيهات`
-              : 'لا تنبيهات'}
+              ? `${data.notificationCount} إشعارات`
+              : 'لا إشعارات'}
           </span>
           <Link to="/tasks" className="inx-scope-pill">
             <ListTodo size={14} />
-            {data.tasks.length} مهمة
+            {data.tasks.length} مهام
           </Link>
         </div>
 
-        {/* ✅ ONBOARDING CHECKLIST */}
+        {/* ONBOARDING CHECKLIST */}
         <OnboardingChecklist
           clientsCount={data.clients}
           policiesCount={data.activePolicies}
@@ -251,10 +257,10 @@ export default function DashboardPage() {
           <div className="hero-head">
             <div className="title-group">
               <span className="dot" />
-              <span>المحفظة اليوم</span>
+              <span>لوحة الأداء</span>
             </div>
             <div className="actions">
-              <Link to="/policies">إدارة</Link>
+              <Link to="/policies">الوثائق</Link>
             </div>
           </div>
 
@@ -298,7 +304,7 @@ export default function DashboardPage() {
               {nearestRenewalDays === null
                 ? 'لا تجديدات قريبة'
                 : nearestRenewalDays < 0
-                ? 'توجد تجديدات متأخرة'
+                ? 'يوجد تجديد متأخر'
                 : `أقرب تجديد: ${nearestRenewalDays} يوم`}
             </span>
           </div>
@@ -306,12 +312,12 @@ export default function DashboardPage() {
           <div className="hero-foot" style={{ borderTop: 'none', paddingTop: 0 }}>
             <span className="info">
               <TrendingUp size={13} />
-              {data.openClaims} مطالبة مفتوحة
+              {data.openClaims} مطالبات مفتوحة
             </span>
             <Link to="/finance" className="hero-cta">
               <Wallet size={14} />
-              الإدارة المالية
-              <span>›</span>
+              المالية
+              <span>←</span>
             </Link>
           </div>
         </section>
@@ -361,7 +367,7 @@ export default function DashboardPage() {
           <article className="inx-chart-card">
             <div className="chart-head">
               <span className="label">اتجاه التجديدات</span>
-              <span className="delta up">↑ نشاط</span>
+              <span className="delta up">↗ صاعد</span>
             </div>
             <div style={{ color: 'var(--inx-blue)' }}>
               <MiniLineChart
@@ -379,17 +385,17 @@ export default function DashboardPage() {
                 color: 'var(--inx-muted)',
               }}
             >
-              <span>أقرب 8 وثائق</span>
-              <span>{data.renewals.length} إجمالي</span>
+              <span>آخر 8 وثائق</span>
+              <span>{data.renewals.length} عميل</span>
             </div>
           </article>
         </div>
 
         {/* TASKS SECTION */}
         <div className="inx-section-head">
-          <h2>مهامك القادمة</h2>
+          <h2>المهام القادمة</h2>
           <Link to="/tasks" className="inx-section-link">
-            عرض الكل ›
+            عرض الكل ←
           </Link>
         </div>
 
@@ -419,7 +425,7 @@ export default function DashboardPage() {
                       {priorityLabels[t.priority] || t.priority}
                     </small>
                   </div>
-                  <span style={{ color: 'var(--inx-muted)', fontSize: 16 }}>›</span>
+                  <span style={{ color: 'var(--inx-muted)', fontSize: 16 }}>←</span>
                 </Link>
               </li>
             ))}
@@ -430,7 +436,7 @@ export default function DashboardPage() {
         <div className="inx-section-head">
           <h2>أقرب التجديدات</h2>
           <Link to="/renewals" className="inx-section-link">
-            عرض الكل ›
+            عرض الكل ←
           </Link>
         </div>
 
@@ -457,10 +463,12 @@ export default function DashboardPage() {
                     <b>{r.clientName}</b>
                     <small>
                       {r.policyNumber} ·{' '}
-                      {r.daysLeft < 0 ? 'منتهية' : `متبقي ${r.daysLeft} يوم`}
+                      {r.daysLeft < 0
+                        ? 'منتهية'
+                        : `متبقي ${r.daysLeft} يوم`}
                     </small>
                   </div>
-                  <span style={{ color: 'var(--inx-muted)', fontSize: 16 }}>›</span>
+                  <span style={{ color: 'var(--inx-muted)', fontSize: 16 }}>←</span>
                 </Link>
               </li>
             ))}
@@ -479,7 +487,7 @@ export default function DashboardPage() {
           }}
         >
           <Link to="/clients" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm">➕</span>
+            <span className="inx-3d-icon sm">👤</span>
             <span className="label">إضافة عميل</span>
           </Link>
           <Link to="/policies" className="inx-shortcut-card">
@@ -487,11 +495,11 @@ export default function DashboardPage() {
             <span className="label">إضافة وثيقة</span>
           </Link>
           <Link to="/claims" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-success">📌</span>
+            <span className="inx-3d-icon sm tone-success">⚠️</span>
             <span className="label">إضافة مطالبة</span>
           </Link>
           <Link to="/tasks" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-warning">✏️</span>
+            <span className="inx-3d-icon sm tone-warning">✅</span>
             <span className="label">إضافة مهمة</span>
           </Link>
         </div>
