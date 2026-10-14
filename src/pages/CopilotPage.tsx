@@ -34,6 +34,14 @@ export default function CopilotPage() {
     return state?.context;
   }, [location.state]);
 
+  /**
+   * Scope logic:
+   *  - Broker: uses organizationId → shared team conversations
+   *  - Admin (no profile): uses uid → private admin conversations
+   */
+  const scope: string | null = profile?.organizationId || user?.uid || null;
+  const isAdminScope = !profile?.organizationId && !!user?.uid;
+
   const [conversations, setConversations] = useState<CopilotConversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<CopilotMessage[]>([]);
@@ -50,14 +58,28 @@ export default function CopilotPage() {
     [conversations, activeId],
   );
 
+  // ============================================================
+  // Diagnostic
+  // ============================================================
+  useEffect(() => {
+    console.log('[Copilot] Auth state:', {
+      uid: user?.uid ?? null,
+      email: user?.email ?? null,
+      hasProfile: !!profile,
+      organizationId: profile?.organizationId ?? null,
+      scope,
+      isAdminScope,
+    });
+  }, [user, profile, scope, isAdminScope]);
+
   const loadConversations = useCallback(async () => {
-    if (!profile?.organizationId || !user?.uid) {
+    if (!scope || !user?.uid) {
       setLoadingConvs(false);
       return;
     }
     setLoadingConvs(true);
     try {
-      const rows = await listConversations(profile.organizationId, user.uid);
+      const rows = await listConversations(scope, user.uid);
       setConversations(rows);
     } catch (e) {
       console.error('Failed to load conversations', e);
@@ -65,14 +87,14 @@ export default function CopilotPage() {
     } finally {
       setLoadingConvs(false);
     }
-  }, [profile?.organizationId, user?.uid]);
+  }, [scope, user?.uid]);
 
   useEffect(() => {
     void loadConversations();
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!activeId || !profile?.organizationId) {
+    if (!activeId || !scope) {
       setMessages([]);
       return;
     }
@@ -80,7 +102,7 @@ export default function CopilotPage() {
     setLoadingMsgs(true);
     (async () => {
       try {
-        const rows = await listMessages(activeId, profile.organizationId);
+        const rows = await listMessages(activeId, scope);
         if (!cancelled) setMessages(rows);
       } catch (e) {
         console.error('Failed to load messages', e);
@@ -92,7 +114,7 @@ export default function CopilotPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeId, profile?.organizationId]);
+  }, [activeId, scope]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -103,23 +125,26 @@ export default function CopilotPage() {
   }, [activeId]);
 
   async function handleNew() {
-    if (!profile?.organizationId || !user?.uid) return;
+    if (!scope || !user?.uid) {
+      setError('لا يمكن إنشاء محادثة جديدة الآن.');
+      return;
+    }
     try {
-      const id = await createConversation(profile.organizationId, user.uid);
+      const id = await createConversation(scope, user.uid);
       setActiveId(id);
       setMessages([]);
       setError('');
       await loadConversations();
     } catch (e) {
       console.error(e);
-      setError('تعذر إنشاء محادثة جديدة.');
+      setError('تعذر بدء محادثة جديدة.');
     }
   }
 
   async function handleDelete(id: string) {
-    if (!profile?.organizationId) return;
+    if (!scope) return;
     try {
-      await deleteConversation(id, profile.organizationId);
+      await deleteConversation(id, scope);
       if (id === activeId) {
         setActiveId(null);
         setMessages([]);
@@ -132,27 +157,44 @@ export default function CopilotPage() {
   }
 
   async function submitText(text: string) {
-    if (!profile?.organizationId || !user?.uid) return;
-    if (!canSendMessage(text) || sending) return;
+    console.log('[Copilot] submitText:', JSON.stringify(text));
+
+    if (!user?.uid) {
+      setError('يجب تسجيل الدخول أولاً.');
+      return;
+    }
+
+    if (!scope) {
+      setError('جاري تحميل بيانات الحساب... أعد المحاولة.');
+      return;
+    }
+
+    if (!canSendMessage(text)) {
+      setError('الرسالة فارغة أو قصيرة جدًا.');
+      return;
+    }
+
+    if (sending) return;
+
+    setError('');
 
     let conversationId = activeId;
     if (!conversationId) {
       try {
         conversationId = await createConversation(
-          profile.organizationId,
+          scope,
           user.uid,
           buildTitleFromFirstMessage(text),
         );
         setActiveId(conversationId);
       } catch (e) {
-        console.error(e);
+        console.error('Failed to create conversation', e);
         setError('تعذر بدء محادثة جديدة.');
         return;
       }
     }
 
     setSending(true);
-    setError('');
     const previousHistory = messages;
     const userText = text.trim();
     setInput('');
@@ -160,7 +202,7 @@ export default function CopilotPage() {
     const optimistic: CopilotMessage = {
       id: `local-${Date.now()}`,
       conversationId,
-      organizationId: profile.organizationId,
+      organizationId: scope,
       userId: user.uid,
       role: 'user',
       content: userText,
@@ -168,16 +210,18 @@ export default function CopilotPage() {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
+      console.log('[Copilot] Calling sendMessage with scope:', scope);
       const response = await sendMessage({
-        organizationId: profile.organizationId,
+        organizationId: scope,
         userId: user.uid,
         conversationId,
         userText,
         history: previousHistory,
         context: incomingContext,
       });
+      console.log('[Copilot] Response received:', response);
 
-      const fresh = await listMessages(conversationId, profile.organizationId);
+      const fresh = await listMessages(conversationId, scope);
       setMessages(fresh);
 
       setConversations((prev) =>
@@ -195,7 +239,10 @@ export default function CopilotPage() {
         ),
       );
 
-      if (activeConversation?.title === 'محادثة جديدة' || !activeConversation) {
+      if (
+        activeConversation?.title === 'محادثة جديدة' ||
+        !activeConversation
+      ) {
         try {
           await updateDoc(doc(db, 'copilotConversations', conversationId), {
             title: buildTitleFromFirstMessage(userText),
@@ -205,8 +252,9 @@ export default function CopilotPage() {
         }
       }
     } catch (e) {
-      console.error('Copilot request failed', e);
-      setError('تعذر الاتصال بالمساعد الذكي. حاول مرة أخرى.');
+      console.error('[Copilot] Request failed:', e);
+      const errMsg = (e as Error).message || 'خطأ غير معروف';
+      setError(`تعذر الاتصال بالمساعد الذكي: ${errMsg}`);
       setMessages(previousHistory);
     } finally {
       setSending(false);
@@ -240,12 +288,15 @@ export default function CopilotPage() {
             <div>
               <h2>InsurNex AI Copilot</h2>
               <small>
-                {activeConversation?.title || 'مساعدك الذكي داخل المنصة'}
+                {activeConversation?.title ||
+                  (isAdminScope
+                    ? 'وضع الأدمن — مساعدك الشخصي'
+                    : 'مساعدك الذكي داخل المنصة')}
               </small>
             </div>
           </div>
           {incomingContext?.page && (
-            <span className="inx-badge inx-badge-primary" title="السياق الحالي">
+            <span className="inx-badge inx-badge-primary" title="سياق الصفحة">
               <Sparkles size={11} /> {incomingContext.page}
             </span>
           )}
@@ -261,12 +312,14 @@ export default function CopilotPage() {
               </span>
               <h3>كيف يمكنني مساعدتك؟</h3>
               <p>
-                اسألني عن عملائك، وثائقك، مطالباتك، تجديداتك، أو أي مفهوم تأميني.
+                {isAdminScope
+                  ? 'أنت في وضع الأدمن. يمكنك السؤال عن أي شيء يخص المنصة أو العملاء أو الاشتراكات.'
+                  : 'اسألني عن عملائك، وثائقك، مطالباتك، تجديداتك، أو أي مفهوم تأميني.'}
                 {incomingContext?.page && (
                   <>
                     <br />
                     <span style={{ fontSize: 12, color: 'var(--inx-blue)' }}>
-                      السياق الحالي: {incomingContext.page}
+                      سياق الصفحة: {incomingContext.page}
                     </span>
                   </>
                 )}
@@ -287,7 +340,7 @@ export default function CopilotPage() {
               <span />
               <span />
               <span />
-              المساعد يفكر...
+              جاري التفكير...
             </div>
           )}
 
