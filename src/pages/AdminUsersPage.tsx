@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Building2,
+  Eye,
   Mail,
   RefreshCw,
   Search,
@@ -26,6 +28,7 @@ interface BrokerUser {
 
 export default function AdminUsersPage() {
   const { user: currentUser, profile } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<BrokerUser[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -102,7 +105,6 @@ export default function AdminUsersPage() {
         },
         `حذف نهائي من صفحة المستخدمين — ${label}`,
       );
-      // Remove from list immediately
       setUsers((prev) => prev.filter((x) => x.uid !== u.uid));
     } catch (e) {
       console.error(e);
@@ -222,7 +224,11 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {filtered.map((u) => (
-                <tr key={u.uid}>
+                <tr
+                  key={u.uid}
+                  onClick={() => navigate(`/admin-panel/users/${u.uid}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span className="admin-kpi-icon" style={{ width: 34, height: 34 }}>
@@ -267,21 +273,34 @@ export default function AdminUsersPage() {
                     {formatDate(u.createdAt)}
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="inx-icon-btn"
-                      onClick={() => void handleDelete(u)}
-                      disabled={deleting === u.uid}
-                      title="حذف نهائي (يُحفظ في الأرشيف)"
+                    <div
+                      style={{ display: 'flex', gap: 4 }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <Trash2
-                        size={15}
-                        style={{
-                          color: 'var(--inx-danger)',
-                          opacity: deleting === u.uid ? 0.4 : 1,
-                        }}
-                      />
-                    </button>
+                      <button
+                        type="button"
+                        className="inx-icon-btn"
+                        onClick={() => navigate(`/admin-panel/users/${u.uid}`)}
+                        title="عرض التفاصيل"
+                      >
+                        <Eye size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className="inx-icon-btn"
+                        onClick={() => void handleDelete(u)}
+                        disabled={deleting === u.uid}
+                        title="حذف نهائي (يُحفظ في الأرشيف)"
+                      >
+                        <Trash2
+                          size={15}
+                          style={{
+                            color: 'var(--inx-danger)',
+                            opacity: deleting === u.uid ? 0.4 : 1,
+                          }}
+                        />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

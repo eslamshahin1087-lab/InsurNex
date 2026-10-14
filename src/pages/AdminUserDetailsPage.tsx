@@ -2,11 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
+  Banknote,
   Building2,
   Calendar,
   CheckCircle2,
   Clock,
+  Copy,
   CreditCard,
+  ExternalLink,
+  FileText,
   Mail,
   RefreshCw,
   ShieldCheck,
@@ -19,16 +23,23 @@ import {
   doc,
   getCountFromServer,
   getDoc,
+  getDocs,
+  limit,
   query,
   where,
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useAuth } from '../features/auth/auth-context';
 import {
   activateSubscription,
   deleteUserData,
   extendSubscription,
   suspendSubscription,
 } from '../features/subscription/subscription.service';
+import type { SubscriptionCode } from '../features/subscription/subscription.types';
+import { formatEGP } from '../features/admin/pricing.config';
+import { downloadInvoicePDF } from '../features/admin/invoice.service';
+import '../theme/admin-finance.css';
 
 interface UserDetail {
   uid: string;
@@ -54,6 +65,7 @@ interface SubDetail {
   endDate: string;
   startDate: string;
   plan: string;
+  lastCodeUsed?: string;
 }
 
 interface Counts {
@@ -66,9 +78,11 @@ interface Counts {
 export default function AdminUserDetailsPage() {
   const { uid } = useParams<{ uid: string }>();
   const navigate = useNavigate();
+  const { user: currentAdmin, profile } = useAuth();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [sub, setSub] = useState<SubDetail | null>(null);
+  const [codes, setCodes] = useState<SubscriptionCode[]>([]);
   const [counts, setCounts] = useState<Counts>({
     clients: 0,
     policies: 0,
@@ -77,6 +91,8 @@ export default function AdminUserDetailsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState<string | null>(null);
+  const [copiedUID, setCopiedUID] = useState(false);
 
   const load = useCallback(async () => {
     if (!uid) return;
@@ -90,6 +106,26 @@ export default function AdminUserDetailsPage() {
       const userData = { uid: userSnap.id, ...userSnap.data() } as UserDetail;
       setUser(userData);
 
+      try {
+        const codesQ = query(
+          collection(db, 'subscriptionCodes'),
+          where('usedBy.uid', '==', uid),
+          limit(200),
+        );
+        const codesSnap = await getDocs(codesQ);
+        const rows = codesSnap.docs.map(
+          (d) => ({ code: d.id, ...d.data() } as SubscriptionCode),
+        );
+        rows.sort((a, b) => {
+          const da = (a.usedAt as { seconds?: number })?.seconds ?? 0;
+          const db_ = (b.usedAt as { seconds?: number })?.seconds ?? 0;
+          return db_ - da;
+        });
+        setCodes(rows);
+      } catch {
+        setCodes([]);
+      }
+
       if (userData.organizationId) {
         const [orgSnap, subSnap] = await Promise.all([
           getDoc(doc(db, 'organizations', userData.organizationId)),
@@ -102,7 +138,6 @@ export default function AdminUserDetailsPage() {
           setSub(subSnap.data() as SubDetail);
         }
 
-        // Counts for this organization
         const [c, p, cl, l] = await Promise.all([
           getCountFromServer(
             query(
@@ -158,6 +193,15 @@ export default function AdminUserDetailsPage() {
     }).format(date);
   }
 
+  function adminContext() {
+    if (!currentAdmin) return undefined;
+    return {
+      uid: currentAdmin.uid,
+      name: profile?.displayName || 'Admin',
+      email: currentAdmin.email || undefined,
+    };
+  }
+
   async function handleExtend(days: number) {
     if (!user?.organizationId) return;
     if (!window.confirm(`تمديد ${days} يوم لهذه المؤسسة؟`)) return;
@@ -175,10 +219,14 @@ export default function AdminUserDetailsPage() {
 
   async function handleSuspend() {
     if (!user?.organizationId) return;
-    if (!window.confirm('إيقاف هذا الاشتراك؟')) return;
+    if (!window.confirm('إيقاف هذا الاشتراك؟ (سيُحفظ في الأرشيف)')) return;
     setBusy(true);
     try {
-      await suspendSubscription(user.organizationId);
+      await suspendSubscription(
+        user.organizationId,
+        adminContext(),
+        'إيقاف اشتراك من صفحة تفاصيل المستخدم',
+      );
       await load();
     } finally {
       setBusy(false);
@@ -198,32 +246,77 @@ export default function AdminUserDetailsPage() {
 
   async function handleDeleteUser() {
     if (!uid) return;
+    const label = user?.displayName || user?.email || uid.slice(0, 8);
     if (
       !window.confirm(
-        'هل أنت متأكد من حذف هذا المستخدم؟\n\nسيتم حذف:\n- ملفه الشخصي\n- مؤسسته\n- اشتراكه\n\nلا يمكن التراجع عن هذه العملية.',
+        `حذف المستخدم "${label}"؟\n\nسيتم حذف:\n• ملفه الشخصي\n• مؤسسته\n• اشتراكه\n\nسيُحفظ كل شيء في الأرشيف ويمكن استعادته.`,
       )
     )
       return;
     setBusy(true);
     try {
-      await deleteUserData(uid);
+      await deleteUserData(
+        uid,
+        adminContext(),
+        `حذف نهائي من صفحة التفاصيل — ${label}`,
+      );
       navigate('/admin-panel/users');
     } catch (e) {
       console.error(e);
-      alert('تعذر حذف المستخدم.');
+      alert('تعذر حذف المستخدم: ' + (e as Error).message);
     } finally {
       setBusy(false);
     }
   }
 
+  async function copyUID() {
+    if (!user) return;
+    try {
+      await navigator.clipboard.writeText(user.uid);
+      setCopiedUID(true);
+      setTimeout(() => setCopiedUID(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function handleInvoice(c: SubscriptionCode) {
+    if (!user) return;
+    setGeneratingPDF(c.code);
+    try {
+      await downloadInvoicePDF({
+        transaction: {
+          code: c.code,
+          planType: c.planType,
+          planName: c.planName,
+          duration: c.duration,
+          subtotal: c.subtotal,
+          vatAmount: c.vatAmount,
+          total: c.total,
+          organizationId: c.usedBy?.organizationId,
+          organizationName: org?.name,
+          userName: c.usedBy?.userName || user.displayName,
+          userEmail: c.usedBy?.userEmail || user.email,
+          usedAt: (c.usedAt as { toDate?: () => Date })?.toDate?.(),
+          usedAtRaw: c.usedAt,
+        },
+        organizationName: org?.name,
+        organizationType: org?.type,
+      });
+    } catch (e) {
+      console.error(e);
+      alert('تعذر إنشاء الفاتورة: ' + (e as Error).message);
+    } finally {
+      setGeneratingPDF(null);
+    }
+  }
+
   if (loading) {
     return (
-      <>
-        <div className="admin-page-head">
-          <span className="eyebrow">Admin · User</span>
-          <h1>جاري التحميل...</h1>
-        </div>
-      </>
+      <div className="admin-page-head">
+        <span className="eyebrow">Admin · User</span>
+        <h1>جاري التحميل...</h1>
+      </div>
     );
   }
 
@@ -245,6 +338,8 @@ export default function AdminUserDetailsPage() {
   const isActive = sub?.status === 'active' && sub.endDate >= today;
   const isTrial = sub?.status === 'trial';
   const isExpired = !sub || sub.endDate < today || sub.status === 'suspended';
+  const totalPaid = codes.reduce((s, c) => s + (c.total || 0), 0);
+  const totalVAT = codes.reduce((s, c) => s + (c.vatAmount || 0), 0);
 
   return (
     <>
@@ -252,12 +347,7 @@ export default function AdminUserDetailsPage() {
         <Link
           to="/admin-panel/users"
           className="inx-link"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            marginBottom: 8,
-          }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 8 }}
         >
           <ArrowLeft size={16} /> المستخدمون
         </Link>
@@ -284,39 +374,42 @@ export default function AdminUserDetailsPage() {
           {(user.displayName || 'U').slice(0, 2).toUpperCase()}
         </div>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div
-            style={{
-              display: 'flex',
-              gap: 8,
-              marginBottom: 6,
-              flexWrap: 'wrap',
-            }}
-          >
-            {user.role && (
-              <span className="inx-badge inx-badge-primary">{user.role}</span>
-            )}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+            {user.role && <span className="inx-badge inx-badge-primary">{user.role}</span>}
             {user.status === 'active' ? (
               <span className="inx-badge inx-badge-success">نشط</span>
             ) : (
-              <span className="inx-badge inx-badge-neutral">
-                {user.status || 'غير نشط'}
-              </span>
+              <span className="inx-badge inx-badge-neutral">{user.status || 'غير نشط'}</span>
             )}
-            {isActive && (
-              <span className="inx-badge inx-badge-success">
-                اشتراك نشط
-              </span>
-            )}
-            {isTrial && (
-              <span className="inx-badge inx-badge-warning">تجربة مجانية</span>
-            )}
-            {isExpired && (
-              <span className="inx-badge inx-badge-danger">اشتراك منتهي</span>
-            )}
+            {isActive && <span className="inx-badge inx-badge-success">اشتراك نشط</span>}
+            {isTrial && <span className="inx-badge inx-badge-warning">تجربة مجانية</span>}
+            {isExpired && <span className="inx-badge inx-badge-danger">اشتراك منتهي</span>}
           </div>
-          <small style={{ color: 'var(--inx-muted)', fontSize: 12.5 }}>
-            UID: <span style={{ fontFamily: 'monospace' }}>{user.uid}</span>
-          </small>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: 'var(--inx-muted)',
+              fontSize: 12.5,
+            }}
+          >
+            <span>UID:</span>
+            <span style={{ fontFamily: 'monospace' }}>{user.uid}</span>
+            <button
+              type="button"
+              className="inx-icon-btn"
+              onClick={() => void copyUID()}
+              title="نسخ UID"
+              style={{ width: 28, height: 28 }}
+            >
+              {copiedUID ? (
+                <CheckCircle2 size={14} style={{ color: 'var(--inx-success)' }} />
+              ) : (
+                <Copy size={14} />
+              )}
+            </button>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <button
@@ -339,7 +432,52 @@ export default function AdminUserDetailsPage() {
         </div>
       </div>
 
-      {/* USER INFO */}
+      {/* FINANCIAL KPIs */}
+      <section className="fin-section">
+        <h3 className="fin-section-title">الملخص المالي</h3>
+        <div className="admin-kpi-grid">
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-success">
+              <Banknote size={20} />
+            </span>
+            <div className="admin-kpi-value">{formatEGP(totalPaid)}</div>
+            <div className="admin-kpi-label">إجمالي المدفوعات</div>
+            <div className="fin-kpi-sub">ضريبة: {formatEGP(totalVAT)}</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-primary">
+              <CreditCard size={20} />
+            </span>
+            <div className="admin-kpi-value">{codes.length}</div>
+            <div className="admin-kpi-label">عدد الأكواد المستخدمة</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-warning">
+              <Clock size={20} />
+            </span>
+            <div className="admin-kpi-value">
+              {sub
+                ? Math.max(
+                    0,
+                    Math.round(
+                      (new Date(sub.endDate).getTime() - Date.now()) / 86400000,
+                    ),
+                  )
+                : 0}
+            </div>
+            <div className="admin-kpi-label">أيام متبقية في الاشتراك</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-purple">
+              <Building2 size={20} />
+            </span>
+            <div className="admin-kpi-value">{org ? '1' : '0'}</div>
+            <div className="admin-kpi-label">مؤسسة مرتبطة</div>
+          </article>
+        </div>
+      </section>
+
+      {/* USER INFO + ORG */}
       <div
         style={{
           display: 'grid',
@@ -401,6 +539,15 @@ export default function AdminUserDetailsPage() {
               <Building2 size={16} style={{ verticalAlign: 'middle', marginInlineEnd: 6 }} />
               المؤسسة
             </h3>
+            {org && (
+              <Link
+                to={`/admin-panel/subscriptions`}
+                className="inx-link"
+                style={{ fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+              >
+                <ExternalLink size={12} /> عرض الاشتراك
+              </Link>
+            )}
           </div>
           {org ? (
             <ul className="inx-list">
@@ -440,9 +587,7 @@ export default function AdminUserDetailsPage() {
               <li className="inx-list-item">
                 <div className="inx-list-copy">
                   <small>Organization ID</small>
-                  <b style={{ fontFamily: 'monospace', fontSize: 12 }}>
-                    {org.id}
-                  </b>
+                  <b style={{ fontFamily: 'monospace', fontSize: 12 }}>{org.id}</b>
                 </div>
               </li>
             </ul>
@@ -476,6 +621,7 @@ export default function AdminUserDetailsPage() {
               <Stat label="الخطة" value={sub.plan} />
               <Stat label="يبدأ" value={sub.startDate} />
               <Stat label="ينتهي" value={sub.endDate} />
+              {sub.lastCodeUsed && <Stat label="آخر كود" value={sub.lastCodeUsed} />}
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button
@@ -522,40 +668,101 @@ export default function AdminUserDetailsPage() {
         )}
       </div>
 
-      {/* COUNTS */}
-      <div className="inx-section-head">
-        <h2>النشاط داخل المؤسسة</h2>
-      </div>
-      <div className="admin-kpi-grid">
-        <article className="admin-kpi">
-          <span className="admin-kpi-icon">
-            <UserRound size={20} />
-          </span>
-          <div className="admin-kpi-value">{counts.clients}</div>
-          <div className="admin-kpi-label">عملاء</div>
-        </article>
-        <article className="admin-kpi">
-          <span className="admin-kpi-icon tone-success">
-            <ShieldCheck size={20} />
-          </span>
-          <div className="admin-kpi-value">{counts.policies}</div>
-          <div className="admin-kpi-label">وثائق</div>
-        </article>
-        <article className="admin-kpi">
-          <span className="admin-kpi-icon tone-warning">
-            <Clock size={20} />
-          </span>
-          <div className="admin-kpi-value">{counts.claims}</div>
-          <div className="admin-kpi-label">مطالبات</div>
-        </article>
-        <article className="admin-kpi">
-          <span className="admin-kpi-icon tone-purple">
-            <CheckCircle2 size={20} />
-          </span>
-          <div className="admin-kpi-value">{counts.leads}</div>
-          <div className="admin-kpi-label">عملاء محتملون</div>
-        </article>
-      </div>
+      {/* ACTIVITY COUNTS */}
+      <section className="fin-section">
+        <h3 className="fin-section-title">النشاط داخل المؤسسة</h3>
+        <div className="admin-kpi-grid">
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon">
+              <UserRound size={20} />
+            </span>
+            <div className="admin-kpi-value">{counts.clients}</div>
+            <div className="admin-kpi-label">عملاء</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-success">
+              <ShieldCheck size={20} />
+            </span>
+            <div className="admin-kpi-value">{counts.policies}</div>
+            <div className="admin-kpi-label">وثائق</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-warning">
+              <Clock size={20} />
+            </span>
+            <div className="admin-kpi-value">{counts.claims}</div>
+            <div className="admin-kpi-label">مطالبات</div>
+          </article>
+          <article className="admin-kpi">
+            <span className="admin-kpi-icon tone-purple">
+              <CheckCircle2 size={20} />
+            </span>
+            <div className="admin-kpi-value">{counts.leads}</div>
+            <div className="admin-kpi-label">عملاء محتملون</div>
+          </article>
+        </div>
+      </section>
+
+      {/* TRANSACTIONS */}
+      <section className="fin-section">
+        <h3 className="fin-section-title">المعاملات المالية ({codes.length})</h3>
+        <div className="admin-table-wrap">
+          {codes.length === 0 ? (
+            <div className="fin-empty-table">لا توجد معاملات بعد</div>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>الكود</th>
+                  <th>الخطة</th>
+                  <th>قبل الضريبة</th>
+                  <th>الضريبة</th>
+                  <th>الإجمالي</th>
+                  <th>التاريخ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {codes.map((c) => (
+                  <tr key={c.code}>
+                    <td
+                      className="mono"
+                      style={{ fontFamily: 'monospace', fontSize: 12 }}
+                    >
+                      {c.code}
+                    </td>
+                    <td>{c.planName || c.planType}</td>
+                    <td>{formatEGP(c.subtotal)}</td>
+                    <td>{formatEGP(c.vatAmount)}</td>
+                    <td>
+                      <b>{formatEGP(c.total)}</b>
+                    </td>
+                    <td style={{ fontSize: 12, color: 'var(--inx-muted)' }}>
+                      {fmt(c.usedAt)}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="inx-icon-btn"
+                        onClick={() => void handleInvoice(c)}
+                        disabled={generatingPDF === c.code}
+                        title="تحميل الفاتورة PDF"
+                      >
+                        <FileText
+                          size={15}
+                          style={{
+                            opacity: generatingPDF === c.code ? 0.4 : 1,
+                          }}
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
     </>
   );
 }

@@ -17,16 +17,13 @@ import {
   isCurrentUserAdmin,
   listCodes,
 } from '../features/subscription/subscription.service';
-import type {
-  SubscriptionCode,
-  SubscriptionPlan,
-} from '../features/subscription/subscription.types';
+import type { SubscriptionCode } from '../features/subscription/subscription.types';
 import {
   computePricing,
   formatEGP,
-  getPlan,
-  PRICING_PLANS,
 } from '../features/admin/pricing.config';
+import { listPlans } from '../features/admin/plans.service';
+import type { PricingPlanDoc } from '../features/admin/plans.types';
 
 type Filter = 'all' | 'unused' | 'used';
 
@@ -41,16 +38,21 @@ export default function AdminCodesPage() {
   const { user, profile } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [codes, setCodes] = useState<SubscriptionCode[]>([]);
+  const [plans, setPlans] = useState<PricingPlanDoc[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [count, setCount] = useState('5');
-  const [planType, setPlanType] = useState<SubscriptionPlan>('monthly');
+  const [planType, setPlanType] = useState<string>('monthly');
   const [copied, setCopied] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const selectedPlan = useMemo(() => getPlan(planType), [planType]);
+  const activePlans = useMemo(() => plans.filter((p) => p.isActive), [plans]);
+  const selectedPlan = useMemo(
+    () => activePlans.find((p) => p.id === planType),
+    [activePlans, planType],
+  );
   const preview = useMemo(
     () => (selectedPlan ? computePricing(selectedPlan.subtotal) : null),
     [selectedPlan],
@@ -60,6 +62,21 @@ export default function AdminCodesPage() {
     if (!user?.uid) return;
     void isCurrentUserAdmin(user.uid).then(setAllowed);
   }, [user?.uid]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const rows = await listPlans();
+        setPlans(rows);
+        if (rows.length > 0 && !rows.some((p) => p.id === planType)) {
+          setPlanType(rows[0].id);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = useCallback(async () => {
     if (allowed !== true) return;
@@ -128,7 +145,6 @@ export default function AdminCodesPage() {
         },
         'حذف نهائي من صفحة الأكواد',
       );
-      // Remove from list immediately
       setCodes((prev) => prev.filter((c) => c.code !== code));
     } catch (e) {
       console.error(e);
@@ -164,9 +180,7 @@ export default function AdminCodesPage() {
     return (
       <main className="mobile-page" dir="rtl">
         <div className="inx-container">
-          <div className="inx-empty">
-            <b>جاري التحقق...</b>
-          </div>
+          <div className="inx-empty"><b>جاري التحقق...</b></div>
         </div>
       </main>
     );
@@ -253,10 +267,10 @@ export default function AdminCodesPage() {
               <span style={{ fontSize: 12, color: 'var(--inx-muted)' }}>نوع الخطة</span>
               <select
                 value={planType}
-                onChange={(e) => setPlanType(e.target.value as SubscriptionPlan)}
+                onChange={(e) => setPlanType(e.target.value)}
                 style={inputStyle}
               >
-                {PRICING_PLANS.filter((p) => p.isActive).map((p) => (
+                {activePlans.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} — {formatEGP(p.subtotal)} / {p.duration} يوم
                   </option>
@@ -320,7 +334,7 @@ export default function AdminCodesPage() {
               type="button"
               className="inx-btn inx-btn-primary"
               onClick={() => void handleGenerate()}
-              disabled={busy}
+              disabled={busy || !selectedPlan}
             >
               <Plus size={16} /> {busy ? 'جاري الإنشاء...' : `إنشاء ${count} كود`}
             </button>

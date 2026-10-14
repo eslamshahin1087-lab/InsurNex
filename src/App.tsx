@@ -21,9 +21,11 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminCodesPage = lazy(() => import('./pages/AdminCodesPage'));
 const AdminSubscriptionsPage = lazy(() => import('./pages/AdminSubscriptionsPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminUserDetailsPage = lazy(() => import('./pages/AdminUserDetailsPage'));
 const AdminAdsPage = lazy(() => import('./pages/AdminAdsPage'));
 const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
 const AdminFinancePage = lazy(() => import('./pages/AdminFinancePage'));
+const AdminPricingPage = lazy(() => import('./pages/AdminPricingPage'));
 const AdminArchivePage = lazy(() => import('./pages/AdminArchivePage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -90,6 +92,10 @@ export default function App() {
                     element={<AdminSubscriptionsPage />}
                   />
                   <Route path="/admin-panel/users" element={<AdminUsersPage />} />
+                  <Route
+                    path="/admin-panel/users/:uid"
+                    element={<AdminUserDetailsPage />}
+                  />
                   <Route path="/admin-panel/ads" element={<AdminAdsPage />} />
                   <Route
                     path="/admin-panel/analytics"
@@ -98,6 +104,10 @@ export default function App() {
                   <Route
                     path="/admin-panel/finance"
                     element={<AdminFinancePage />}
+                  />
+                  <Route
+                    path="/admin-panel/pricing"
+                    element={<AdminPricingPage />}
                   />
                   <Route
                     path="/admin-panel/archive"

@@ -1,10 +1,8 @@
-import type { SubscriptionPlan } from '../subscription/subscription.types';
-
 export const VAT_RATE = 0.14;
 export const CURRENCY = 'EGP';
 
 export interface PricingPlan {
-  id: SubscriptionPlan;
+  id: string;
   name: string;
   duration: number;
   subtotal: number;
@@ -12,9 +10,10 @@ export interface PricingPlan {
   description: string;
   discountNote?: string;
   isActive: boolean;
+  order: number;
 }
 
-export const PRICING_PLANS: PricingPlan[] = [
+export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
   {
     id: 'monthly',
     name: 'شهري',
@@ -23,6 +22,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     currency: 'EGP',
     description: 'اشتراك شهري أساسي',
     isActive: true,
+    order: 1,
   },
   {
     id: 'yearly',
@@ -33,6 +33,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'اشتراك سنوي بخصم 17%',
     discountNote: 'خصم 17%',
     isActive: true,
+    order: 2,
   },
   {
     id: 'yearly_discount',
@@ -43,12 +44,9 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'اشتراك سنوي بخصم خاص',
     discountNote: 'خصم 31%',
     isActive: true,
+    order: 3,
   },
 ];
-
-export function getPlan(id: SubscriptionPlan): PricingPlan | undefined {
-  return PRICING_PLANS.find((p) => p.id === id);
-}
 
 export function computePricing(subtotal: number) {
   const vatAmount = Math.round(subtotal * VAT_RATE * 100) / 100;

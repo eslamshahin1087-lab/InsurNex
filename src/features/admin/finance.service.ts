@@ -107,7 +107,6 @@ async function fetchRawData(): Promise<RawData> {
     (d) => ({ code: d.id, ...d.data() } as SubscriptionCode),
   );
 
-  // Client-side sort (avoids composite index requirement)
   usedCodes.sort((a, b) => tsSeconds(b.usedAt) - tsSeconds(a.usedAt));
 
   const unusedCodes = unusedSnap.docs.map(
@@ -283,6 +282,7 @@ export async function getRecentTransactions(limitCount = 20): Promise<Transactio
       code: c.code,
       planType: c.planType,
       planName: c.planName,
+      duration: c.duration,
       subtotal: c.subtotal || 0,
       vatAmount: c.vatAmount || 0,
       total: c.total || 0,

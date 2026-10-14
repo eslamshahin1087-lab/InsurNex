@@ -16,21 +16,17 @@ service cloud.firestore {
         && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
     }
 
-    // ============ Admins ============
     match /admin/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow write: if isAdmin();
     }
 
-    // ============ Users (brokers) ============
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid
         || (hasProfile() && resource.data.organizationId == me().organizationId && privileged())
         || isAdmin()
       );
-
-      // ADMIN BYPASS: allows restore from archive
       allow create: if isAdmin() || (
         signedIn()
         && request.auth.uid == uid
@@ -39,8 +35,6 @@ service cloud.firestore {
         && request.resource.data.organizationId is string
         && ownsOrganizationAfterWrite(request.resource.data.organizationId)
       );
-
-      // ADMIN BYPASS: allows restore/repair
       allow update: if isAdmin() || (
         signedIn()
         && request.auth.uid == uid
@@ -48,27 +42,21 @@ service cloud.firestore {
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status
       );
-
       allow delete: if isAdmin();
     }
 
-    // ============ Organizations ============
     match /organizations/{orgId} {
-      // ADMIN BYPASS: allows restore from archive
       allow create: if isAdmin() || (
         signedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.name is string
         && request.resource.data.type in ['individual', 'office', 'company']
       );
-
       allow read: if sameOrg(orgId) || isAdmin();
-
       allow update: if isAdmin() || (
         sameOrg(orgId) && privileged()
         && request.resource.data.ownerId == resource.data.ownerId
       );
-
       allow delete: if isAdmin();
 
       match /members/{uid} {
@@ -86,11 +74,8 @@ service cloud.firestore {
       }
     }
 
-    // ============ Subscriptions ============
     match /organizationSubscriptions/{orgId} {
       allow read: if sameOrg(orgId) || isAdmin();
-
-      // ADMIN BYPASS: allows restore from archive
       allow create: if isAdmin() || (
         signedIn()
         && request.resource.data.organizationId == orgId
@@ -98,7 +83,6 @@ service cloud.firestore {
         && get(organizationPath(orgId)).data.ownerId == request.auth.uid
         && request.resource.data.status in ['trial', 'active']
       );
-
       allow update: if isAdmin() || (
         signedIn()
         && exists(organizationPath(orgId))
@@ -117,37 +101,35 @@ service cloud.firestore {
           || request.resource.data.lastCodeUsed != resource.data.lastCodeUsed
         )
       );
-
       allow delete: if isAdmin();
     }
 
-    // ============ Subscription Codes ============
     match /subscriptionCodes/{code} {
       allow read: if isAdmin() || (
         signedIn() && resource.data.usedBy.uid == request.auth.uid
       );
-
       allow create: if isAdmin()
         && request.resource.data.code == code
         && request.resource.data.status == 'unused';
-
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.status == 'unused'
         && request.resource.data.status == 'used'
         && request.resource.data.usedBy.uid == request.auth.uid
       );
-
       allow delete: if isAdmin();
     }
 
-    // ============ Ads ============
+    match /pricingPlans/{planId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
     match /ads/{adId} {
       allow read: if isAdmin() || (signedIn() && resource.data.status == 'active');
       allow write: if isAdmin();
     }
 
-    // ============ Onboarding Progress ============
     match /onboardingProgress/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow create: if isAdmin() || (
@@ -159,7 +141,6 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ============ Archives ============
     match /archives/{archiveId} {
       allow read: if isAdmin();
       allow create: if isAdmin()
@@ -168,13 +149,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ============ Generic business records ============
     match /{collection}/{docId} {
       allow read: if isAdmin() || (
         collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
+        && collection != 'pricingPlans'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
       );
@@ -183,6 +164,7 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
+        && collection != 'pricingPlans'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
       );
@@ -191,6 +173,7 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
+        && collection != 'pricingPlans'
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId)
       );
@@ -199,6 +182,7 @@ service cloud.firestore {
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
+        && collection != 'pricingPlans'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])

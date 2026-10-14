@@ -16,14 +16,13 @@ import { db } from '../../firebase/config';
 import type {
   OrganizationSubscription,
   SubscriptionCode,
-  SubscriptionPlan,
   SubscriptionStatus,
 } from './subscription.types';
 import {
   computePricing,
   CURRENCY,
-  getPlan,
 } from '../admin/pricing.config';
+import { getPlanById } from '../admin/plans.service';
 import { archiveItem } from '../admin/archive.service';
 import type {
   ArchiveAction,
@@ -251,12 +250,12 @@ function generateCodeString(): string {
 }
 
 export async function createCode(params: {
-  planType: SubscriptionPlan;
+  planType: string;
   createdBy: string;
   createdByName?: string;
   notes?: string;
 }): Promise<string> {
-  const plan = getPlan(params.planType);
+  const plan = await getPlanById(params.planType);
   if (!plan) throw new Error('INVALID_PLAN');
 
   const pricing = computePricing(plan.subtotal);
@@ -291,7 +290,7 @@ export async function createCode(params: {
 
 export async function createBulkCodes(params: {
   count: number;
-  planType: SubscriptionPlan;
+  planType: string;
   createdBy: string;
   createdByName?: string;
   notes?: string;
@@ -340,11 +339,9 @@ export async function revokeCode(
   admin?: AdminContext,
   reason?: string,
 ): Promise<void> {
-  // Fetch full doc for archiving
   const snap = await getDoc(doc(db, 'subscriptionCodes', code));
   const originalData = snap.exists() ? (snap.data() as Record<string, unknown>) : null;
 
-  // Archive BEFORE mutation (only if admin context provided)
   if (admin && originalData) {
     await safeArchive({
       type: 'code',
@@ -470,6 +467,7 @@ export async function activateSubscription(organizationId: string): Promise<void
     { merge: true },
   );
 }
+
 /**
  * Delete a subscription permanently.
  * Archives the full doc BEFORE deletion.
@@ -497,6 +495,7 @@ export async function deleteSubscription(
 
   await deleteDoc(doc(db, 'organizationSubscriptions', organizationId));
 }
+
 // ============================================================
 // ADMIN CHECK
 // ============================================================
@@ -521,7 +520,11 @@ export async function deleteUserData(
 ): Promise<void> {
   const userSnap = await getDoc(doc(db, 'users', uid));
   if (!userSnap.exists()) throw new Error('USER_NOT_FOUND');
-  const userData = userSnap.data() as { organizationId?: string; displayName?: string; email?: string };
+  const userData = userSnap.data() as {
+    organizationId?: string;
+    displayName?: string;
+    email?: string;
+  };
 
   const orgId = userData.organizationId;
 
@@ -550,7 +553,9 @@ export async function deleteUserData(
             reason: `حذف تلقائي مع المستخدم ${userData.displayName || uid.slice(0, 8)}`,
           });
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
 
       try {
         const subSnap = await getDoc(doc(db, 'organizationSubscriptions', orgId));
@@ -559,12 +564,17 @@ export async function deleteUserData(
             type: 'subscription',
             action: 'deleted',
             source: 'admin-users',
-            data: { ...(subSnap.data() as Record<string, unknown>), organizationId: orgId },
+            data: {
+              ...(subSnap.data() as Record<string, unknown>),
+              organizationId: orgId,
+            },
             admin,
             reason: `حذف تلقائي مع المستخدم ${userData.displayName || uid.slice(0, 8)}`,
           });
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -572,10 +582,14 @@ export async function deleteUserData(
   if (orgId) {
     try {
       await deleteDoc(doc(db, 'organizationSubscriptions', orgId));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     try {
       await deleteDoc(doc(db, 'organizations', orgId));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   // Delete user profile
@@ -584,5 +598,7 @@ export async function deleteUserData(
   // Delete onboarding progress
   try {
     await deleteDoc(doc(db, 'onboardingProgress', uid));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }

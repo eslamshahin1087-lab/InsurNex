@@ -5,6 +5,7 @@ import {
   Banknote,
   Calendar,
   Download,
+  FileText,
   RefreshCw,
   TrendingDown,
   TrendingUp,
@@ -35,6 +36,7 @@ import {
   getRecentTransactions,
   getTopPayingOrganizations,
 } from '../features/admin/finance.service';
+import { downloadInvoicePDF } from '../features/admin/invoice.service';
 import type {
   ExpiringSubscription,
   FinanceOverview,
@@ -61,6 +63,7 @@ export default function AdminFinancePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [topOrgs, setTopOrgs] = useState<TopPayingOrg[]>([]);
   const [expiring, setExpiring] = useState<ExpiringSubscription[]>([]);
+  const [generatingPDF, setGeneratingPDF] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -94,6 +97,21 @@ export default function AdminFinancePage() {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed]);
+
+  async function handleInvoice(t: Transaction) {
+    setGeneratingPDF(t.code);
+    try {
+      await downloadInvoicePDF({
+        transaction: t,
+        organizationName: t.organizationName,
+      });
+    } catch (e) {
+      console.error(e);
+      alert('تعذر إنشاء الفاتورة: ' + (e as Error).message);
+    } finally {
+      setGeneratingPDF(null);
+    }
+  }
 
   if (allowed === null) {
     return (
@@ -409,6 +427,7 @@ export default function AdminFinancePage() {
                         <th>المؤسسة</th>
                         <th>المستخدم</th>
                         <th>التاريخ</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -430,6 +449,22 @@ export default function AdminFinancePage() {
                           <td>{t.userName || '—'}</td>
                           <td style={{ fontSize: 12, color: 'var(--inx-muted)' }}>
                             {t.usedAt ? t.usedAt.toLocaleDateString('ar-EG') : '—'}
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="inx-icon-btn"
+                              onClick={() => void handleInvoice(t)}
+                              disabled={generatingPDF === t.code}
+                              title="تحميل الفاتورة PDF"
+                            >
+                              <FileText
+                                size={15}
+                                style={{
+                                  opacity: generatingPDF === t.code ? 0.4 : 1,
+                                }}
+                              />
+                            </button>
                           </td>
                         </tr>
                       ))}

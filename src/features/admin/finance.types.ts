@@ -1,5 +1,3 @@
-import type { SubscriptionPlan } from '../subscription/subscription.types';
-
 export interface FinanceOverview {
   totalRevenue: number;
   totalSubtotal: number;
@@ -32,8 +30,9 @@ export interface MonthlyRevenue {
 
 export interface Transaction {
   code: string;
-  planType: SubscriptionPlan;
+  planType: string;
   planName: string;
+  duration?: number;
   subtotal: number;
   vatAmount: number;
   total: number;
@@ -58,7 +57,7 @@ export interface ExpiringSubscription {
   organizationName: string;
   endDate: string;
   daysRemaining: number;
-  plan: SubscriptionPlan;
+  plan: string;
 }
 
 export interface FinanceFilters {
