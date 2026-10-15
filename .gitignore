@@ -59,4 +59,8 @@ rollback-*.cmd
 apply-*.ps1
 README.txt
 patch/
-supabase/.temp/
+supabase/.temp/'@ 
+) 
+npm 
+tsc 
+insurnex@0.0.0 
