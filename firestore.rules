@@ -101,10 +101,6 @@ service cloud.firestore {
         && roleIs(['owner','admin','broker'])
       );
 
-      // ---------- Timeline subcollection ----------
-      // Simple rule: any signed-in user can read/write timeline events.
-      // The path itself already scopes access to a specific client,
-      // and the parent `clients/{clientId}` rule gates access to that client.
       match /timeline/{eventId} {
         allow read: if signedIn();
         allow create: if signedIn()
@@ -178,8 +174,10 @@ service cloud.firestore {
     }
 
     // ============ Ads ============
+    // Ads are visible to any signed-in user (they're marketing content).
+    // Only admins can create/edit/delete.
     match /ads/{adId} {
-      allow read: if isAdmin() || (signedIn() && resource.data.status == 'active');
+      allow read: if signedIn();
       allow write: if isAdmin();
     }
 
