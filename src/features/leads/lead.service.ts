@@ -5,8 +5,10 @@ import type { Lead, LeadInput, LeadStage } from '../../types/lead';
 export type LeadActivityType = 'created'|'stage_changed'|'notes_updated'|'task_created'|'converted';
 export type LeadActivity = { id:string; organizationId:string; leadId:string; type:LeadActivityType; message:string; createdBy:string; createdAt?:unknown };
 const allowed:Record<LeadStage,LeadStage[]>={new:['contacted','lost'],contacted:['qualified','lost'],qualified:['quotation','lost'],quotation:['negotiation','won','lost'],negotiation:['won','lost'],won:[],lost:[]};
-export const canMoveLeadToStage=(a:LeadStage,b:LeadStage)=>a===b||allowed[a].includes(b);
-export const getAllowedLeadStages=(s:LeadStage)=>allowed[s];
+const validLeadStages = new Set<string>(['new','contacted','qualified','quotation','negotiation','won','lost']);
+export const normalizeLeadStage=(value:unknown):LeadStage=>typeof value==='string'&&validLeadStages.has(value)?value as LeadStage:'new';
+export const canMoveLeadToStage=(a:LeadStage,b:LeadStage)=>{const from=normalizeLeadStage(a);const to=normalizeLeadStage(b);return from===to||allowed[from].includes(to);};
+export const getAllowedLeadStages=(s:LeadStage)=>allowed[normalizeLeadStage(s)]??[];
 
 async function activity(organizationId:string,leadId:string,type:LeadActivityType,message:string,uid:string){
  await addDoc(collection(db,'leadActivities'),{organizationId,leadId,type,message,createdBy:uid,createdAt:serverTimestamp()});
@@ -15,8 +17,8 @@ export async function createLead(input:LeadInput,organizationId:string,uid:strin
  const ref=await addDoc(collection(db,'leads'),{...input,name:input.name.trim(),companyName:input.companyName?.trim()||'',phone:input.phone.trim(),email:input.email.trim(),insuranceType:input.insuranceType.trim(),preferredInsurerId:input.preferredInsurerId?.trim()||'',preferredInsurerName:input.preferredInsurerName?.trim()||'',notes:input.notes?.trim()||'',lostReason:input.lostReason?.trim()||'',estimatedValue:Number(input.estimatedValue)||0,organizationId,createdBy:uid,lastActivityAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
  await activity(organizationId,ref.id,'created','ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ ÙØ±ØµØ© Ø§Ù„Ø¨ÙŠØ¹',uid); return ref.id;
 }
-export async function listLeads(org:string){const q=query(collection(db,'leads'),where('organizationId','==',org),orderBy('createdAt','desc'),limit(200));const s=await getDocs(q);return s.docs.map(d=>({id:d.id,...d.data()} as Lead));}
-export async function getLead(id:string,organizationId?:string){const s=await getDoc(doc(db,'leads',id));if(!s.exists())return null;const lead={id:s.id,...s.data()} as Lead;if(organizationId&&lead.organizationId!==organizationId)return null;return lead;}
+export async function listLeads(org:string){const q=query(collection(db,'leads'),where('organizationId','==',org),orderBy('createdAt','desc'),limit(200));const s=await getDocs(q);return s.docs.map(d=>{const data=d.data();return {...data,id:d.id,stage:normalizeLeadStage(data.stage)} as Lead;});}
+export async function getLead(id:string,organizationId?:string){const s=await getDoc(doc(db,'leads',id));if(!s.exists())return null;const data=s.data();const lead={...data,id:s.id,stage:normalizeLeadStage(data.stage)} as Lead;if(organizationId&&lead.organizationId!==organizationId)return null;return lead;}
 export async function listLeadActivities(org:string,leadId:string){const q=query(collection(db,'leadActivities'),where('organizationId','==',org),where('leadId','==',leadId),orderBy('createdAt','desc'),limit(100));const s=await getDocs(q);return s.docs.map(d=>({id:d.id,...d.data()} as LeadActivity));}
 export async function setLeadStage(id:string,current:LeadStage,next:LeadStage,org?:string,uid?:string,lostReason?:string){
  if(!canMoveLeadToStage(current,next))throw new Error('INVALID_STAGE_TRANSITION'); const ref=doc(db,'leads',id); const s=await getDoc(ref); if(!s.exists())throw new Error('LEAD_NOT_FOUND'); const data=s.data() as Lead; if(org&&data.organizationId!==org)throw new Error('LEAD_ORG_MISMATCH');
