@@ -76,7 +76,6 @@ exports.ingestSecurePathLead = (0, https_1.onRequest)({
     const phone = typeof body.phone === "string" ? body.phone.trim() : "";
     const clientType = typeof body.clientType === "string" ? body.clientType.trim().slice(0, 40) : "individual";
     const businessName = typeof body.businessName === "string" ? body.businessName.trim().slice(0, 180) : "";
-    const occupation = typeof body.occupation === "string" ? body.occupation.trim().slice(0, 120) : "";
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(sourceUid) || !name || name.length > 160 ||
         !/^\S+@\S+\.\S+$/.test(email) || email.length > 254 || !phone || phone.length > 40) {
         res.status(400).json({ ok: false, error: "Invalid lead payload." });
@@ -120,7 +119,6 @@ exports.ingestSecurePathLead = (0, https_1.onRequest)({
             "Source: SecurePath",
             "SecurePath account ID: " + sourceUid,
             "Client type: " + (clientType || "individual"),
-            occupation ? "Occupation: " + occupation : "",
         ].filter(Boolean).join("\n");
         const outcome = await db.runTransaction(async (tx) => {
             const existing = await tx.get(leadRef);
