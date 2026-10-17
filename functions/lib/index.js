@@ -37,3 +37,141 @@ catch (e) {
 // InsurNex AI Copilot
 var copilot_1 = require("./copilot");
 Object.defineProperty(exports, "copilotChat", { enumerable: true, get: function () { return copilot_1.copilotChat; } });
+
+
+const securepathCrypto = require("node:crypto");
+const securepathAdminAuth = require("firebase-admin/auth");
+const securepathAdminFirestore = require("firebase-admin/firestore");
+const SECUREPATH_INGEST_SECRET = (0, params_1.defineSecret)("SECUREPATH_INGEST_SECRET");
+const SECUREPATH_RECEIVER_EMAIL = "securepath@nex.com";
+
+/**
+ * Server-to-server ingress for SecurePath account registrations.
+ * Shared secret values are configured separately in Firebase Functions and Cloudflare.
+ */
+exports.ingestSecurePathLead = (0, https_1.onRequest)({
+    region: "europe-west1",
+    secrets: [SECUREPATH_INGEST_SECRET],
+    timeoutSeconds: 20,
+    maxInstances: 5,
+}, async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    if (req.method !== "POST") {
+        res.set("Allow", "POST");
+        res.status(405).json({ ok: false, error: "Method not allowed." });
+        return;
+    }
+    const expected = Buffer.from(SECUREPATH_INGEST_SECRET.value());
+    const authorization = req.get("authorization") || "";
+    const match = /^Bearer\s+(.+)$/i.exec(authorization);
+    const supplied = Buffer.from((match === null || match === void 0 ? void 0 : match[1]) || "");
+    if (expected.length < 32 || supplied.length !== expected.length || !(0, securepathCrypto.timingSafeEqual)(supplied, expected)) {
+        res.status(401).json({ ok: false, error: "Unauthorized." });
+        return;
+    }
+    const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : {};
+    const sourceUid = typeof body.sourceUid === "string" ? body.sourceUid.trim() : "";
+    const name = typeof body.fullName === "string" ? body.fullName.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+    const clientType = typeof body.clientType === "string" ? body.clientType.trim().slice(0, 40) : "individual";
+    const businessName = typeof body.businessName === "string" ? body.businessName.trim().slice(0, 180) : "";
+    const occupation = typeof body.occupation === "string" ? body.occupation.trim().slice(0, 120) : "";
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(sourceUid) || !name || name.length > 160 ||
+        !/^\S+@\S+\.\S+$/.test(email) || email.length > 254 || !phone || phone.length > 40) {
+        res.status(400).json({ ok: false, error: "Invalid lead payload." });
+        return;
+    }
+    try {
+        const db = (0, securepathAdminFirestore.getFirestore)();
+        let receiver;
+        try {
+            receiver = await (0, securepathAdminAuth.getAuth)().getUserByEmail(SECUREPATH_RECEIVER_EMAIL);
+        }
+        catch (e) {
+            if (e && e.code === "auth/user-not-found") {
+                res.status(503).json({ ok: false, error: "InsurNex receiving account does not exist." });
+                return;
+            }
+            throw e;
+        }
+        const receiverProfileSnap = await db.collection("users").doc(receiver.uid).get();
+        if (!receiverProfileSnap.exists) {
+            res.status(503).json({ ok: false, error: "InsurNex receiving account profile is not configured." });
+            return;
+        }
+        const receiverProfile = receiverProfileSnap.data() || {};
+        const organizationId = typeof receiverProfile.organizationId === "string" ? receiverProfile.organizationId : "";
+        if (receiverProfile.status !== "active" || !organizationId) {
+            res.status(503).json({ ok: false, error: "InsurNex receiving account is not active or has no organization." });
+            return;
+        }
+        const organizationSnap = await db.collection("organizations").doc(organizationId).get();
+        if (!organizationSnap.exists) {
+            res.status(503).json({ ok: false, error: "InsurNex receiving organization does not exist." });
+            return;
+        }
+        const sourceHash = securepathCrypto.createHash("sha256").update(sourceUid).digest("hex").slice(0, 32);
+        const leadId = "sp_" + sourceHash;
+        const leadRef = db.collection("leads").doc(leadId);
+        const activityRef = db.collection("leadActivities").doc(leadId + "_created");
+        const assignedToName = String(receiverProfile.displayName || receiver.displayName || "SecurePath").trim();
+        const notes = [
+            "Source: SecurePath",
+            "SecurePath account ID: " + sourceUid,
+            "Client type: " + (clientType || "individual"),
+            occupation ? "Occupation: " + occupation : "",
+        ].filter(Boolean).join("\n");
+        const outcome = await db.runTransaction(async (tx) => {
+            const existing = await tx.get(leadRef);
+            if (existing.exists) {
+                const data = existing.data() || {};
+                if (data.sourceSystem !== "SecurePath" || data.sourceExternalId !== sourceUid) {
+                    throw new Error("LEAD_ID_COLLISION");
+                }
+                return { leadId, alreadyExists: true };
+            }
+            const now = securepathAdminFirestore.FieldValue.serverTimestamp();
+            tx.create(leadRef, {
+                organizationId,
+                name,
+                companyName: clientType === "corporate" ? businessName : "",
+                phone,
+                email,
+                source: "website",
+                priority: "medium",
+                stage: "new",
+                insuranceType: "Not specified",
+                preferredInsurerId: "",
+                preferredInsurerName: "",
+                estimatedValue: 0,
+                assignedTo: receiver.uid,
+                assignedToName,
+                notes,
+                lostReason: "",
+                createdBy: receiver.uid,
+                sourceSystem: "SecurePath",
+                sourceExternalId: sourceUid,
+                lastActivityAt: now,
+                createdAt: now,
+                updatedAt: now,
+            });
+            tx.create(activityRef, {
+                organizationId,
+                leadId,
+                type: "created",
+                message: "تم استلام Lead من SecurePath",
+                createdBy: receiver.uid,
+                createdAt: now,
+            });
+            return { leadId, alreadyExists: false };
+        });
+        res.status(200).json({ ok: true, ...outcome });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        console.error("ingestSecurePathLead failed:", message);
+        res.status(500).json({ ok: false, error: "Unable to import this lead into InsurNex." });
+    }
+});
+
