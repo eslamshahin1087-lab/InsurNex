@@ -1,9 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { onCall,HttpsError } from 'firebase-functions/v2/https';
+import { onCall,HttpsError,onRequest } from 'firebase-functions/v2/https';
 import { defineSecret,defineString } from 'firebase-functions/params';
 import { initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { FieldValue,getFirestore } from 'firebase-admin/firestore';
+import { createHash,timingSafeEqual } from 'node:crypto';
 initializeApp();
 const ANTHROPIC_API_KEY=defineSecret('ANTHROPIC_API_KEY');
+const SECUREPATH_INGEST_SECRET=defineSecret('SECUREPATH_INGEST_SECRET');
+const SECUREPATH_RECEIVER_EMAIL='securepath@nex.com';
 const CLAUDE_MODEL=defineString('CLAUDE_MEDICAL_MODEL',{default:'claude-haiku-4-5'});
 type Metric={name:string;amount:number;share:number};type Signal={level:string;title:string;finding:string;evidence:string[];action:string};
 interface MedicalContext{language:'ar'|'en';records:number;members:number;providers:number;gross:number;copay:number;net:number;copayRate:number;avgTransaction:number;avgMember:number;top10Share:number;top50Share:number;above50k:number;above100k:number;costDrivers:Metric[];providersRanked:Array<{name:string;count:number;members:number;gross:number;share:number;severity:number}>;membersRanked:Array<{name:string;count:number;gross:number;share:number;severity:number}>;activities:Array<{name:string;count:number;gross:number;share:number;severity:number}>;trend:Array<{month:string;count:number;members:number;gross:number;severity:number;partial:boolean}>;signals:Signal[];dataGaps:string[]}
@@ -13,3 +18,136 @@ export const medicalClaudeAnalysis=onCall({region:'europe-west1',secrets:[ANTHRO
 
 // InsurNex AI Copilot
 export { copilotChat } from './copilot';
+
+
+/**
+ * Server-to-server ingress for SecurePath account registrations.
+ * The shared secret is configured separately in Firebase Functions and Cloudflare.
+ * Only minimal lead-contact data is accepted; passwords and authentication tokens
+ * from SecurePath are never transferred into the CRM.
+ */
+export const ingestSecurePathLead=onRequest({
+  region:'europe-west1',
+  secrets:[SECUREPATH_INGEST_SECRET],
+  timeoutSeconds:20,
+  maxInstances:5,
+},async(req,res)=>{
+  res.set('Cache-Control','no-store');
+  if(req.method!=='POST'){
+    res.set('Allow','POST');
+    res.status(405).json({ok:false,error:'Method not allowed.'});
+    return;
+  }
+
+  const expected=Buffer.from(SECUREPATH_INGEST_SECRET.value());
+  const authorization=req.get('authorization')||'';
+  const match=/^Bearer\s+(.+)$/i.exec(authorization);
+  const supplied=Buffer.from(match?.[1]||'');
+  if(expected.length<32||supplied.length!==expected.length||!timingSafeEqual(supplied,expected)){
+    res.status(401).json({ok:false,error:'Unauthorized.'});
+    return;
+  }
+
+  const body=req.body&&typeof req.body==='object'&&!Array.isArray(req.body)?req.body:{};
+  const sourceUid=typeof body.sourceUid==='string'?body.sourceUid.trim():'';
+  const name=typeof body.fullName==='string'?body.fullName.trim():'';
+  const email=typeof body.email==='string'?body.email.trim().toLowerCase():'';
+  const phone=typeof body.phone==='string'?body.phone.trim():'';
+  const clientType=typeof body.clientType==='string'?body.clientType.trim().slice(0,40):'individual';
+  const businessName=typeof body.businessName==='string'?body.businessName.trim().slice(0,180):'';
+
+  if(!/^[A-Za-z0-9_-]{1,128}$/.test(sourceUid)||!name||name.length>160||
+     !/^\S+@\S+\.\S+$/.test(email)||email.length>254||!phone||phone.length>40){
+    res.status(400).json({ok:false,error:'Invalid lead payload.'});
+    return;
+  }
+
+  try{
+    const db=getFirestore();
+    const receiver=await getAuth().getUserByEmail(SECUREPATH_RECEIVER_EMAIL);
+    const receiverProfileSnap=await db.collection('users').doc(receiver.uid).get();
+    if(!receiverProfileSnap.exists){
+      res.status(503).json({ok:false,error:'InsurNex receiving account profile is not configured.'});
+      return;
+    }
+    const receiverProfile=receiverProfileSnap.data()||{};
+    const organizationId=typeof receiverProfile.organizationId==='string'?receiverProfile.organizationId:'';
+    if(receiverProfile.status!=='active'||!organizationId){
+      res.status(503).json({ok:false,error:'InsurNex receiving account is not active or has no organization.'});
+      return;
+    }
+    const organizationSnap=await db.collection('organizations').doc(organizationId).get();
+    if(!organizationSnap.exists){
+      res.status(503).json({ok:false,error:'InsurNex receiving organization does not exist.'});
+      return;
+    }
+
+    // A deterministic document ID makes retries safe and prevents duplicate leads
+    // when the same SecurePath account signs in or retries the integration request.
+    const sourceHash=createHash('sha256').update(sourceUid).digest('hex').slice(0,32);
+    const leadId='sp_'+sourceHash;
+    const leadRef=db.collection('leads').doc(leadId);
+    const activityRef=db.collection('leadActivities').doc(leadId+'_created');
+    const assignedToName=String(receiverProfile.displayName||receiver.displayName||'SecurePath').trim();
+    const notes=[
+      'Source: SecurePath',
+      'SecurePath account ID: '+sourceUid,
+      'Client type: '+(clientType||'individual'),
+    ].filter(Boolean).join('\n');
+
+    const outcome=await db.runTransaction(async(tx)=>{
+      const existing=await tx.get(leadRef);
+      if(existing.exists){
+        const data=existing.data()||{};
+        if(data.sourceSystem!=='SecurePath'||data.sourceExternalId!==sourceUid){
+          throw new Error('LEAD_ID_COLLISION');
+        }
+        return {leadId,alreadyExists:true};
+      }
+      const now=FieldValue.serverTimestamp();
+      tx.create(leadRef,{
+        organizationId,
+        name,
+        companyName:clientType==='corporate'?businessName:'',
+        phone,
+        email,
+        source:'website',
+        priority:'medium',
+        stage:'new',
+        insuranceType:'Not specified',
+        preferredInsurerId:'',
+        preferredInsurerName:'',
+        estimatedValue:0,
+        assignedTo:receiver.uid,
+        assignedToName,
+        notes,
+        lostReason:'',
+        createdBy:receiver.uid,
+        sourceSystem:'SecurePath',
+        sourceExternalId:sourceUid,
+        lastActivityAt:now,
+        createdAt:now,
+        updatedAt:now,
+      });
+      tx.create(activityRef,{
+        organizationId,
+        leadId,
+        type:'created',
+        message:'تم استلام Lead من SecurePath',
+        createdBy:receiver.uid,
+        createdAt:now,
+      });
+      return {leadId,alreadyExists:false};
+    });
+    res.status(200).json({ok:true,...outcome});
+  }catch(error){
+    const message=error instanceof Error?error.message:'Unknown error';
+    console.error('ingestSecurePathLead failed:',message);
+    if(message==='auth/user-not-found'){
+      res.status(503).json({ok:false,error:'InsurNex receiving account does not exist.'});
+      return;
+    }
+    res.status(500).json({ok:false,error:'Unable to import this lead into InsurNex.'});
+  }
+});
+
