@@ -1,20 +1,13 @@
-// ============================================================
 // Supabase Edge Function: document-storage
-// Contract matches src/features/storage/supabase-storage.provider.ts
-// Actions: sign-upload | delete | sign-download | ping
-// ============================================================
+// All document operations require an active InsurNex profile in the requested
+// organization and access to the target client record.
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-// ============================================================
-// CORS
-// ============================================================
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-firebase-token',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-firebase-token',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
@@ -26,21 +19,15 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function errorResponse(error: string, status = 400, extra?: unknown): Response {
-  return jsonResponse({ ok: false, error, ...(extra as object) }, status);
+function errorResponse(error: string, status = 400): Response {
+  return jsonResponse({ ok: false, error }, status);
 }
 
-// ============================================================
-// Env
-// ============================================================
-
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_SERVICE_ROLE_KEY =
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const FIREBASE_API_KEY =
-  Deno.env.get('FIREBASE_API_KEY') ??
-  Deno.env.get('FIREBASE_WEB_API_KEY') ??
-  '';
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const FIREBASE_API_KEY = Deno.env.get('FIREBASE_API_KEY') ?? Deno.env.get('FIREBASE_WEB_API_KEY') ?? '';
+// Must be configured in Supabase Edge Function secrets. Missing config fails closed.
+const FIREBASE_PROJECT_ID = Deno.env.get('FIREBASE_PROJECT_ID') ?? '';
 const DEFAULT_BUCKET = Deno.env.get('DOCUMENT_BUCKET') ?? 'insurnex-documents';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -52,22 +39,12 @@ const ALLOWED_MIME = new Set([
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ]);
 
-// ============================================================
-// Supabase admin client
-// ============================================================
-
 function adminClient() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('SUPABASE_CONFIG_MISSING');
-  }
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error('SUPABASE_CONFIG_MISSING');
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
-
-// ============================================================
-// Firebase token verification
-// ============================================================
 
 interface FirebaseUser {
   uid: string;
@@ -75,26 +52,24 @@ interface FirebaseUser {
   name?: string;
 }
 
+interface FirestoreDocument {
+  fields?: Record<string, { stringValue?: string; booleanValue?: boolean }>;
+}
+
 async function verifyFirebaseToken(token: string): Promise<FirebaseUser> {
-  if (!FIREBASE_API_KEY) {
-    throw new Error('FIREBASE_API_KEY_NOT_CONFIGURED');
-  }
+  if (!FIREBASE_API_KEY) throw new Error('FIREBASE_API_KEY_NOT_CONFIGURED');
   const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(FIREBASE_API_KEY)}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken: token }),
     },
   );
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    console.error('Firebase tokeninfo error:', res.status, errBody);
-    throw new Error('FIREBASE_TOKEN_INVALID');
-  }
+  if (!res.ok) throw new Error('FIREBASE_TOKEN_INVALID');
   const data = await res.json();
   const user = data?.users?.[0];
-  if (!user?.localId) throw new Error('FIREBASE_TOKEN_INVALID');
+  if (!user?.localId || user.disabled === true) throw new Error('FIREBASE_TOKEN_INVALID');
   return { uid: user.localId, email: user.email, name: user.displayName };
 }
 
@@ -106,174 +81,173 @@ function extractToken(req: Request): string | null {
   return null;
 }
 
-// ============================================================
-// Handlers (contract matches client)
-// ============================================================
+function stringField(document: FirestoreDocument | null, field: string): string | null {
+  const value = document?.fields?.[field]?.stringValue;
+  return typeof value === 'string' ? value : null;
+}
 
 /**
- * sign-upload
- * Client sends:
- *   { organizationId, path, contentType, size }
- * Client expects:
- *   { ok: true, token: string, path: string }
+ * Reads Firestore using the caller's ID token so Firestore Security Rules apply.
+ * No service/admin credentials are used for authorization reads.
  */
-async function handleSignUpload(
-  body: {
-    organizationId?: string;
-    path?: string;
-    contentType?: string;
-    size?: number;
-  },
+async function readCallerVisibleDocument(path: string, token: string): Promise<FirestoreDocument | null> {
+  if (!FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID_NOT_CONFIGURED');
+  const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+  const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(FIREBASE_PROJECT_ID)}/databases/(default)/documents/${encodedPath}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (res.status === 404) return null;
+  if (res.status === 401 || res.status === 403) throw new Error('FIRESTORE_ACCESS_DENIED');
+  if (!res.ok) throw new Error('FIRESTORE_LOOKUP_FAILED');
+  return await res.json() as FirestoreDocument;
+}
+
+interface AuthorizedDocument {
+  organizationId: string;
+  clientId: string;
+  path: string;
+}
+
+function parseDocumentPath(path: string, organizationId: string): AuthorizedDocument | null {
+  // Matches the path generated by supabase-storage.provider.ts:
+  // organizations/{org}/clients/{client}/{area}/{filename}
+  const match = /^organizations\/([A-Za-z0-9_-]{1,128})\/clients\/([A-Za-z0-9_-]{1,128})\/([A-Za-z0-9_-]{1,64})\/([A-Za-z0-9._-]{1,220})$/.exec(path);
+  if (!match || match[4] === '.' || match[4] === '..' || match[1] !== organizationId) return null;
+  return { organizationId: match[1], clientId: match[2], path };
+}
+
+/**
+ * The browser-supplied organization/path is not proof of access. Verify an
+ * active profile in that organization and read the target client through
+ * Firestore rules before granting upload/download/delete access.
+ */
+async function authorizeDocumentAccess(
+  organizationId: string,
+  path: string,
   user: FirebaseUser,
-): Promise<Response> {
-  const { organizationId, path, contentType, size = 0 } = body;
-
-  if (!organizationId) return errorResponse('MISSING_ORGANIZATION');
-  if (!path) return errorResponse('MISSING_PATH');
-  if (!contentType) return errorResponse('MISSING_CONTENT_TYPE');
-
-  // Security: ensure the path starts with the organization's folder
-  const expectedPrefix = `organizations/${organizationId}/`;
-  if (!path.startsWith(expectedPrefix)) {
-    return errorResponse('PATH_OUTSIDE_ORGANIZATION', 403, {
-      expectedPrefix,
-      got: path.slice(0, 80),
-    });
+  token: string,
+  action: 'read' | 'write' | 'delete',
+): Promise<{ ok: true; document: AuthorizedDocument } | { ok: false; response: Response }> {
+  if (!organizationId || !/^[A-Za-z0-9_-]{1,128}$/.test(organizationId)) {
+    return { ok: false, response: errorResponse('INVALID_ORGANIZATION', 400) };
   }
+  const document = parseDocumentPath(path, organizationId);
+  if (!document) return { ok: false, response: errorResponse('INVALID_DOCUMENT_PATH', 400) };
 
-  if (size > MAX_FILE_SIZE) return errorResponse('FILE_TOO_LARGE');
-  if (!ALLOWED_MIME.has(contentType)) {
-    return errorResponse('FILE_TYPE_NOT_ALLOWED', 400, { contentType });
+  try {
+    const profile = await readCallerVisibleDocument(`users/${user.uid}`, token);
+    if (!profile) return { ok: false, response: errorResponse('ACTIVE_PROFILE_REQUIRED', 403) };
+
+    const profileOrg = stringField(profile, 'organizationId');
+    const status = stringField(profile, 'status');
+    const role = stringField(profile, 'role') ?? '';
+    if (status !== 'active' || profileOrg !== organizationId) {
+      return { ok: false, response: errorResponse('ORGANIZATION_ACCESS_DENIED', 403) };
+    }
+
+    const client = await readCallerVisibleDocument(`clients/${document.clientId}`, token);
+    if (!client) return { ok: false, response: errorResponse('CLIENT_NOT_FOUND', 404) };
+    if (stringField(client, 'organizationId') !== organizationId) {
+      return { ok: false, response: errorResponse('CLIENT_ACCESS_DENIED', 403) };
+    }
+    if (action === 'delete' && !['owner', 'admin', 'broker'].includes(role)) {
+      return { ok: false, response: errorResponse('DELETE_NOT_ALLOWED', 403) };
+    }
+    return { ok: true, document };
+  } catch (error) {
+    // Do not disclose upstream errors or document metadata to the caller.
+    console.error('Document authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return { ok: false, response: errorResponse('AUTHORIZATION_CHECK_FAILED', 403) };
   }
+}
 
-  const supabase = adminClient();
-  const { data, error } = await supabase.storage
-    .from(DEFAULT_BUCKET)
-    .createSignedUploadUrl(path);
+async function handleSignUpload(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const contentType = typeof body.contentType === 'string' ? body.contentType : '';
+  const size = body.size;
 
-  if (error || !data?.signedUrl) {
-    console.error('Create signed upload URL error:', error);
-    return errorResponse('SIGN_UPLOAD_FAILED', 500, {
-      detail: error?.message,
-    });
+  if (!contentType) return errorResponse('MISSING_CONTENT_TYPE', 400);
+  if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) {
+    return errorResponse('INVALID_FILE_SIZE', 400);
   }
+  if (size > MAX_FILE_SIZE) return errorResponse('FILE_TOO_LARGE', 413);
+  if (!ALLOWED_MIME.has(contentType)) return errorResponse('FILE_TYPE_NOT_ALLOWED', 415);
 
+  const access = await authorizeDocumentAccess(organizationId, path, user, token, 'write');
+  if (!access.ok) return access.response;
+
+  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUploadUrl(access.document.path);
+  if (error || !data?.token || !data?.path) {
+    console.error('Create signed upload URL failed:', error?.message ?? 'NO_URL');
+    return errorResponse('SIGN_UPLOAD_FAILED', 500);
+  }
   return jsonResponse({
     ok: true,
     provider: 'supabase',
     bucket: DEFAULT_BUCKET,
-    path: data.path ?? path,
-    signedUrl: data.signedUrl,
+    path: data.path,
     token: data.token,
     uploadedBy: user.uid,
   });
 }
 
-/**
- * sign-download
- * Client sends: { organizationId, path }
- * Client expects: { ok: true, signedUrl: string }
- */
-async function handleSignDownload(
-  body: { organizationId?: string; path?: string },
-): Promise<Response> {
-  const { organizationId, path } = body;
-  if (!organizationId) return errorResponse('MISSING_ORGANIZATION');
-  if (!path) return errorResponse('MISSING_PATH');
+async function handleSignDownload(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const access = await authorizeDocumentAccess(organizationId, path, user, token, 'read');
+  if (!access.ok) return access.response;
 
-  const expectedPrefix = `organizations/${organizationId}/`;
-  if (!path.startsWith(expectedPrefix)) {
-    return errorResponse('PATH_OUTSIDE_ORGANIZATION', 403, {
-      expectedPrefix,
-    });
-  }
-
-  const supabase = adminClient();
-  const { data, error } = await supabase.storage
-    .from(DEFAULT_BUCKET)
-    .createSignedUrl(path, 60 * 60 * 24); // 24 hours
-
+  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET)
+    .createSignedUrl(access.document.path, 60 * 60); // 1 hour
   if (error || !data?.signedUrl) {
-    console.error('Signed URL error:', error);
-    return errorResponse('SIGNED_URL_FAILED', 500, { detail: error?.message });
+    console.error('Create signed download URL failed:', error?.message ?? 'NO_URL');
+    return errorResponse('SIGNED_URL_FAILED', 500);
   }
-
-  return jsonResponse({
-    ok: true,
-    signedUrl: data.signedUrl,
-    path,
-  });
+  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.document.path });
 }
 
-/**
- * delete
- * Client sends: { organizationId, path }
- * Client expects: { ok: true }
- */
-async function handleDelete(
-  body: { organizationId?: string; path?: string },
-): Promise<Response> {
-  const { organizationId, path } = body;
-  if (!organizationId) return errorResponse('MISSING_ORGANIZATION');
-  if (!path) return errorResponse('MISSING_PATH');
+async function handleDelete(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const access = await authorizeDocumentAccess(organizationId, path, user, token, 'delete');
+  if (!access.ok) return access.response;
 
-  const expectedPrefix = `organizations/${organizationId}/`;
-  if (!path.startsWith(expectedPrefix)) {
-    return errorResponse('PATH_OUTSIDE_ORGANIZATION', 403, {
-      expectedPrefix,
-    });
-  }
-
-  const supabase = adminClient();
-  const { error } = await supabase.storage
-    .from(DEFAULT_BUCKET)
-    .remove([path]);
-
+  const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([access.document.path]);
   if (error) {
-    console.error('Delete error:', error);
-    return errorResponse('DELETE_FAILED', 500, { detail: error.message });
+    console.error('Delete document failed:', error.message);
+    return errorResponse('DELETE_FAILED', 500);
   }
-
   return jsonResponse({ ok: true });
 }
 
-// ============================================================
-// Main handler
-// ============================================================
-
 serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  // Health check
+  // Public liveness endpoint; do not disclose secret/configuration status.
   try {
-    const url = new URL(req.url);
-    if (url.searchParams.get('ping') === '1') {
+    if (new URL(req.url).searchParams.get('ping') === '1') {
       return jsonResponse({
         ok: true,
         service: 'document-storage',
-        method: req.method,
-        hasFirebaseKey: !!FIREBASE_API_KEY,
-        hasServiceRole: !!SUPABASE_SERVICE_ROLE_KEY,
-        bucket: DEFAULT_BUCKET,
         supportedActions: ['sign-upload', 'sign-download', 'delete'],
         timestamp: new Date().toISOString(),
       });
     }
   } catch {
-    /* ignore */
+    // Invalid URL falls through to normal validation.
   }
 
-  if (req.method !== 'POST') {
-    return errorResponse('METHOD_NOT_ALLOWED', 405, { method: req.method });
-  }
+  if (req.method !== 'POST') return errorResponse('METHOD_NOT_ALLOWED', 405);
 
   let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    const parsed: unknown = await req.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return errorResponse('INVALID_JSON', 400);
+    }
+    body = parsed as Record<string, unknown>;
   } catch {
-    return errorResponse('INVALID_JSON');
+    return errorResponse('INVALID_JSON', 400);
   }
 
   const token = extractToken(req);
@@ -282,31 +256,20 @@ serve(async (req: Request) => {
   let user: FirebaseUser;
   try {
     user = await verifyFirebaseToken(token);
-  } catch (e) {
-    console.error('Auth error:', e);
-    const msg = e instanceof Error ? e.message : 'UNKNOWN';
-    return errorResponse('AUTH_INVALID', 401, { detail: msg });
+  } catch (error) {
+    console.error('Firebase token verification failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return errorResponse('AUTH_INVALID', 401);
   }
 
-  const action = String(body.action || '');
-
   try {
-    switch (action) {
-      case 'sign-upload':
-        return await handleSignUpload(body, user);
-      case 'sign-download':
-        return await handleSignDownload(body);
-      case 'delete':
-        return await handleDelete(body);
-      default:
-        return errorResponse('UNKNOWN_ACTION', 400, {
-          action,
-          supported: ['sign-upload', 'sign-download', 'delete'],
-        });
+    switch (body.action) {
+      case 'sign-upload': return await handleSignUpload(body, user, token);
+      case 'sign-download': return await handleSignDownload(body, user, token);
+      case 'delete': return await handleDelete(body, user, token);
+      default: return errorResponse('UNKNOWN_ACTION', 400);
     }
-  } catch (e) {
-    console.error('Handler error:', e);
-    const msg = e instanceof Error ? e.message : 'UNKNOWN';
-    return errorResponse('INTERNAL_ERROR', 500, { detail: msg });
+  } catch (error) {
+    console.error('Document storage operation failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return errorResponse('INTERNAL_ERROR', 500);
   }
 });
