@@ -4,6 +4,13 @@ service cloud.firestore {
     function signedIn(){ return request.auth != null; }
     function userPath(){ return /databases/$(database)/documents/users/$(request.auth.uid); }
     function organizationPath(orgId){ return /databases/$(database)/documents/organizations/$(orgId); }
+    function clientPath(clientId){ return /databases/$(database)/documents/clients/$(clientId); }
+    function canAccessClient(clientId){
+      return signedIn()
+        && exists(clientPath(clientId))
+        && get(clientPath(clientId)).data.organizationId is string
+        && sameOrg(get(clientPath(clientId)).data.organizationId);
+    }
     function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
     function hasProfile(){ return signedIn() && exists(userPath()); }
     function me(){ return get(userPath()).data; }
@@ -102,11 +109,14 @@ service cloud.firestore {
       );
 
       match /timeline/{eventId} {
-        allow read: if signedIn();
-        allow create: if signedIn()
-          && request.resource.data.by == request.auth.uid;
-        allow update: if isAdmin();
-        allow delete: if isAdmin();
+        // Timeline entries inherit access from their parent client. Being signed
+        // in is not sufficient: users must belong to the client's organization.
+        allow read: if isAdmin() || canAccessClient(clientId);
+        allow create: if isAdmin() || (
+          canAccessClient(clientId)
+          && request.resource.data.by == request.auth.uid
+        );
+        allow update, delete: if isAdmin();
       }
     }
 
@@ -154,6 +164,14 @@ service cloud.firestore {
         && resource.data.status == 'unused'
         && request.resource.data.status == 'used'
         && request.resource.data.usedBy.uid == request.auth.uid
+        && request.resource.data.usedBy.organizationId is string
+        && sameOrg(request.resource.data.usedBy.organizationId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'usedBy', 'usedAt'])
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.planType == resource.data.planType
+        && request.resource.data.duration == resource.data.duration
+        && request.resource.data.createdBy == resource.data.createdBy
       );
       allow delete: if isAdmin();
     }
