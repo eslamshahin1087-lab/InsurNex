@@ -25,8 +25,10 @@ service cloud.firestore {
 
     // ============ Admins ============
     match /admin/{uid} {
+      // Admin membership is provisioned out-of-band by a trusted operator.
+      // Client-side writes here could let an existing admin grant privileges to another UID.
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow write: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     // ============ Users (brokers) ============
@@ -118,6 +120,54 @@ service cloud.firestore {
         );
         allow update, delete: if isAdmin();
       }
+    }
+
+    // ============ Platform Settings ============
+    // Authenticated users may read non-sensitive UI preferences. Existing admins alone may write.
+    match /platformSettings/{settingsId} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin()
+        && settingsId == 'global'
+        && request.resource.data.keys().hasOnly(['branding', 'features', 'advertising', 'updatedBy', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['branding', 'features', 'advertising', 'updatedBy', 'updatedAt'])
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.branding is map
+        && request.resource.data.branding.keys().hasOnly(['primaryColor', 'accentColor'])
+        && request.resource.data.branding.keys().hasAll(['primaryColor', 'accentColor'])
+        && request.resource.data.branding.primaryColor is string
+        && request.resource.data.branding.primaryColor.matches('^#[0-9a-fA-F]{6}$')
+        && request.resource.data.branding.accentColor is string
+        && request.resource.data.branding.accentColor.matches('^#[0-9a-fA-F]{6}$')
+        && request.resource.data.features is map
+        && request.resource.data.features.keys().hasOnly([
+          'clients', 'policies', 'claims', 'renewals', 'operations', 'tasks',
+          'insurers', 'leads', 'finance', 'analytics', 'copilot', 'documents', 'notifications'
+        ])
+        && request.resource.data.features.keys().hasAll([
+          'clients', 'policies', 'claims', 'renewals', 'operations', 'tasks',
+          'insurers', 'leads', 'finance', 'analytics', 'copilot', 'documents', 'notifications'
+        ])
+        && request.resource.data.features.clients is bool
+        && request.resource.data.features.policies is bool
+        && request.resource.data.features.claims is bool
+        && request.resource.data.features.renewals is bool
+        && request.resource.data.features.operations is bool
+        && request.resource.data.features.tasks is bool
+        && request.resource.data.features.insurers is bool
+        && request.resource.data.features.leads is bool
+        && request.resource.data.features.finance is bool
+        && request.resource.data.features.analytics is bool
+        && request.resource.data.features.copilot is bool
+        && request.resource.data.features.documents is bool
+        && request.resource.data.features.notifications is bool
+        && request.resource.data.advertising is map
+        && request.resource.data.advertising.keys().hasOnly(['enabled', 'dashboard', 'operations'])
+        && request.resource.data.advertising.keys().hasAll(['enabled', 'dashboard', 'operations'])
+        && request.resource.data.advertising.enabled is bool
+        && request.resource.data.advertising.dashboard is bool
+        && request.resource.data.advertising.operations is bool;
+      allow delete: if false;
     }
 
     // ============ Subscriptions ============
@@ -229,6 +279,7 @@ service cloud.firestore {
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
+        && collection != 'platformSettings'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
       );
@@ -239,6 +290,7 @@ service cloud.firestore {
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
+        && collection != 'platformSettings'
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
       );
@@ -249,6 +301,7 @@ service cloud.firestore {
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
+        && collection != 'platformSettings'
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId)
       );
@@ -259,6 +312,7 @@ service cloud.firestore {
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
+        && collection != 'platformSettings'
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
