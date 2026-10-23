@@ -5,6 +5,8 @@ import ProtectedRoute from './features/auth/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminGuard from './features/admin/AdminGuard';
+import { PlatformSettingsProvider } from './features/admin/PlatformSettingsProvider';
+import PlatformFeatureGate from './features/admin/PlatformFeatureGate';
 import SubscriptionGate from './features/subscription/SubscriptionGate';
 import './App.css';
 import './theme/identity.css';
@@ -148,40 +150,60 @@ export default function App() {
 
               {/* BROKER APP */}
               <Route element={<SubscriptionGate />}>
-                <Route element={<AppLayout />}>
+                <Route element={<PlatformSettingsProvider><AppLayout /></PlatformSettingsProvider>}>
                   <Route index element={<DashboardPage />} />
 
                   {/* Clients */}
-                  <Route path="clients" element={<ClientsPage />} />
-                  <Route path="clients/new" element={<ClientWizardPage />} />
-                  <Route path="clients/:id" element={<ClientDetailsPage />} />
-                  <Route
-                    path="clients/:id/insurance-analysis"
-                    element={<ClientInsuranceAnalysisPage />}
-                  />
+                  <Route element={<PlatformFeatureGate feature="clients" />}>
+                    <Route path="clients" element={<ClientsPage />} />
+                    <Route path="clients/new" element={<ClientWizardPage />} />
+                    <Route path="clients/:id" element={<ClientDetailsPage />} />
+                    <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage />} />
+                  </Route>
 
-                  {/* Other sections */}
-                  <Route path="policies" element={<PoliciesPage />} />
-                  <Route path="renewals" element={<RenewalsPage />} />
-                  <Route path="claims" element={<ClaimsPage />} />
-                  <Route path="claims/:id" element={<ClaimDetailsPage />} />
-                  <Route path="operations" element={<OperationsPage />} />
-                  <Route path="tasks" element={<TasksPage />} />
-                  <Route path="notifications" element={<NotificationsPage />} />
-                  <Route path="insurers" element={<InsurersPage />} />
-                  <Route path="leads" element={<LeadsPage />} />
-                  <Route path="leads/:id" element={<LeadDetailsPage />} />
-                  <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route
-                    path="analytics/medical"
-                    element={<MedicalIntelligencePage />}
-                  />
-                  <Route path="ai/file-analysis" element={<AIFileAnalysisPage />} />
-                  <Route path="copilot" element={<CopilotPage />} />
-                  <Route path="finance" element={<FinancePage />} />
+                  {/* Feature gates also apply when users type a URL directly. */}
+                  <Route element={<PlatformFeatureGate feature="policies" />}>
+                    <Route path="policies" element={<PoliciesPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="renewals" />}>
+                    <Route path="renewals" element={<RenewalsPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="claims" />}>
+                    <Route path="claims" element={<ClaimsPage />} />
+                    <Route path="claims/:id" element={<ClaimDetailsPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="operations" />}>
+                    <Route path="operations" element={<OperationsPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="tasks" />}>
+                    <Route path="tasks" element={<TasksPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="notifications" />}>
+                    <Route path="notifications" element={<NotificationsPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="insurers" />}>
+                    <Route path="insurers" element={<InsurersPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="leads" />}>
+                    <Route path="leads" element={<LeadsPage />} />
+                    <Route path="leads/:id" element={<LeadDetailsPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="analytics" />}>
+                    <Route path="analytics" element={<AnalyticsPage />} />
+                    <Route path="analytics/medical" element={<MedicalIntelligencePage />} />
+                    <Route path="ai/file-analysis" element={<AIFileAnalysisPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="copilot" />}>
+                    <Route path="copilot" element={<CopilotPage />} />
+                  </Route>
+                  <Route element={<PlatformFeatureGate feature="finance" />}>
+                    <Route path="finance" element={<FinancePage />} />
+                  </Route>
                   <Route path="more" element={<MorePage />} />
                   <Route path="settings" element={<SettingsPage />} />
-                  <Route path="documents" element={<ComingSoonPage />} />
+                  <Route element={<PlatformFeatureGate feature="documents" />}>
+                    <Route path="documents" element={<ComingSoonPage />} />
+                  </Route>
                 </Route>
               </Route>
             </Route>
