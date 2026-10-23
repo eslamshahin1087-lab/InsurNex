@@ -18,17 +18,22 @@ import { useAuth } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
+import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
+import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
+import type { LucideIcon } from 'lucide-react';
 
-const navigation = [
-  ['/', 'الرئيسية', Home],
-  ['/clients', 'CRM', Users],
-  ['/policies', 'الوثائق', ShieldCheck],
-  ['/operations', 'العمليات', Settings2],
-  ['/copilot', 'الذكاء', Sparkles],
-] as const;
+const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
+  { to: '/', label: 'الرئيسية', Icon: Home },
+  { to: '/clients', label: 'CRM', Icon: Users, feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', Icon: ShieldCheck, feature: 'policies' },
+  { to: '/operations', label: 'العمليات', Icon: Settings2, feature: 'operations' },
+  { to: '/copilot', label: 'الذكاء', Icon: Sparkles, feature: 'copilot' },
+];
 
 export default function AppLayout() {
   const { profile } = useAuth();
+  const { settings } = usePlatformSettings();
+  const visibleNavigation = navigation.filter((item) => !item.feature || settings.features[item.feature]);
   const { resolvedTheme, toggleTheme } = useTheme();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
@@ -64,14 +69,16 @@ export default function AppLayout() {
           >
             {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Link
-            className="circle-button notification-button"
-            to="/notifications"
-            aria-label="الإشعارات"
-            title="الإشعارات"
-          >
-            <Bell size={18} />
-          </Link>
+{settings.features.notifications && (
+            <Link
+              className="circle-button notification-button"
+              to="/notifications"
+              aria-label="الإشعارات"
+              title="الإشعارات"
+            >
+              <Bell size={18} />
+            </Link>
+          )}
           <button
             type="button"
             className="circle-button"
@@ -108,7 +115,7 @@ export default function AppLayout() {
         className="app-tabbar s8-tabbar inx-tabbar-6"
         aria-label="التنقل الرئيسي"
       >
-        {navigation.map(([to, label, Icon]) => (
+        {visibleNavigation.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to} end={to === '/'}>
             <Icon size={21} />
             <span>{label}</span>
