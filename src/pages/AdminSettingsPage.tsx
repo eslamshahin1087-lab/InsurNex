@@ -74,6 +74,9 @@ export default function AdminSettingsPage() {
       <span className="eyebrow">Admin · Control Center</span>
       <h1>إعدادات المنصة</h1>
       <p>التحكم في هوية التطبيق والوحدات المتاحة للمستخدمين وأماكن ظهور الإعلانات.</p>
+      <small style={{ display: 'block', marginTop: 8, color: 'var(--inx-muted)', lineHeight: 1.8 }}>
+        ملاحظة أمنية: إخفاء وحدة هنا يتحكم في الواجهة ومساراتها فقط، ولا يغيّر أدوار المستخدمين أو صلاحيات الوصول إلى بيانات Firestore.
+      </small>
     </div>
 
     {error && <div className="inx-card" role="alert" style={{ ...sectionStyle, borderColor: 'var(--inx-danger)', color: 'var(--inx-danger)' }}>{error}</div>}
