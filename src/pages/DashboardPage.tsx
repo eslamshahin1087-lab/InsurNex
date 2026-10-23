@@ -25,6 +25,8 @@ import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
 import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
+import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
+import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 
 const empty: DashboardData = {
   clients: 0,
@@ -49,19 +51,21 @@ const priorityTone: Record<string, string> = {
   urgent: 'tone-danger',
 };
 
-const shortcuts = [
-  { to: '/clients', label: 'العملاء', emoji: '👥', tone: '' },
-  { to: '/policies', label: 'الوثائق', emoji: '📄', tone: 'tone-cyan' },
-  { to: '/claims', label: 'المطالبات', emoji: '⚠️', tone: 'tone-success' },
-  { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning' },
-  { to: '/tasks', label: 'المهام', emoji: '✅', tone: '' },
-  { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan' },
-  { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success' },
-  { to: '/more', label: 'المزيد', emoji: '⋯', tone: 'tone-purple' },
-] as const;
+const shortcuts: { to: string; label: string; emoji: string; tone: string; feature: PlatformFeatureKey | null }[] = [
+  { to: '/clients', label: 'العملاء', emoji: '👥', tone: '', feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', emoji: '📄', tone: 'tone-cyan', feature: 'policies' },
+  { to: '/claims', label: 'المطالبات', emoji: '⚠️', tone: 'tone-success', feature: 'claims' },
+  { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning', feature: 'renewals' },
+  { to: '/tasks', label: 'المهام', emoji: '✅', tone: '', feature: 'tasks' },
+  { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan', feature: 'insurers' },
+  { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success', feature: 'finance' },
+  { to: '/more', label: 'المزيد', emoji: '⋯', tone: 'tone-purple', feature: null },
+];
 
 export default function DashboardPage() {
   const { profile } = useAuth();
+  const { settings } = usePlatformSettings();
+  const visibleShortcuts = shortcuts.filter((item) => !item.feature || settings.features[item.feature]);
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [data, setData] = useState(empty);
@@ -191,32 +195,38 @@ export default function DashboardPage() {
             >
               {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
-              <Search size={17} />
-            </Link>
-            <button
-              type="button"
-              className="inx-circle-btn filled"
-              onClick={askCopilot}
-              title="اسأل InsurNex"
-            >
-              <Bot size={17} />
-            </button>
-            <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
-              <Bell size={17} />
-              {data.notificationCount > 0 && (
-                <span className="badge">
-                  {Math.min(data.notificationCount, 99)}
-                </span>
-              )}
-            </Link>
+            {settings.features.policies && (
+              <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
+                <Search size={17} />
+              </Link>
+            )}
+            {settings.features.copilot && (
+              <button
+                type="button"
+                className="inx-circle-btn filled"
+                onClick={askCopilot}
+                title="اسأل InsurNex"
+              >
+                <Bot size={17} />
+              </button>
+            )}
+            {settings.features.notifications && (
+              <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
+                <Bell size={17} />
+                {data.notificationCount > 0 && (
+                  <span className="badge">
+                    {Math.min(data.notificationCount, 99)}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
         </header>
 
-        {/* ADS SLIDESHOW */}
-        <div style={{ marginBottom: 14 }}>
-          <AdsSlideshow />
-        </div>
+        {/* Ads are enabled and placed from the admin control center. */}
+        {settings.advertising.enabled && settings.advertising.dashboard && (
+          <div style={{ marginBottom: 14 }}><AdsSlideshow /></div>
+        )}
 
         {/* SCOPE ROW */}
         <div className="inx-scope-row" style={{ marginBottom: 14 }}>
@@ -224,27 +234,28 @@ export default function DashboardPage() {
             <ShieldCheck size={14} />
             {roleLabel}
           </span>
-          <span className="inx-chip-emphasis">
-            <Bell size={13} />
-            {data.notificationCount > 0
-              ? `${data.notificationCount} إشعارات`
-              : 'لا إشعارات'}
-          </span>
-          <Link to="/tasks" className="inx-scope-pill">
-            <ListTodo size={14} />
-            {data.tasks.length} مهام
-          </Link>
+          {settings.features.notifications && (
+            <span className="inx-chip-emphasis">
+              <Bell size={13} />
+              {data.notificationCount > 0
+                ? `${data.notificationCount} إشعارات`
+                : 'لا إشعارات'}
+            </span>
+          )}
+          {settings.features.tasks && <Link to="/tasks" className="inx-scope-pill"><ListTodo size={14} />{data.tasks.length} مهام</Link>}
         </div>
 
         {/* ONBOARDING CHECKLIST */}
-        <OnboardingChecklist
-          clientsCount={data.clients}
-          policiesCount={data.activePolicies}
-        />
+        {(settings.features.clients || settings.features.policies) && (
+          <OnboardingChecklist
+            clientsCount={settings.features.clients ? data.clients : 0}
+            policiesCount={settings.features.policies ? data.activePolicies : 0}
+          />
+        )}
 
         {/* SHORTCUTS */}
         <div className="inx-shortcut-row" style={{ marginBottom: 18 }}>
-          {shortcuts.map(({ to, label, emoji, tone }) => (
+          {visibleShortcuts.map(({ to, label, emoji, tone }) => (
             <Link key={to} to={to} className="inx-shortcut-card">
               <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
               <span className="label">{label}</span>
@@ -260,38 +271,42 @@ export default function DashboardPage() {
               <span>لوحة الأداء</span>
             </div>
             <div className="actions">
-              <Link to="/policies">الوثائق</Link>
+              {settings.features.policies && <Link to="/policies">الوثائق</Link>}
             </div>
           </div>
 
-          <div className="hero-body">
-            <div className="hero-column" style={{ textAlign: 'right' }}>
-              <div className="metric">
-                {data.clients}
-                <small>عميل</small>
+          <div className="hero-body" style={{ gridTemplateColumns: settings.features.clients && settings.features.policies ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
+            {settings.features.clients && (
+              <div className="hero-column" style={{ textAlign: 'right' }}>
+                <div className="metric">
+                  {data.clients}
+                  <small>عميل</small>
+                </div>
+                <div className="metric-label">إجمالي العملاء</div>
+                <div className="hero-bar">
+                  <span style={{ width: `${clientsPct}%` }} />
+                </div>
+                <div className="metric-delta">
+                  {Math.round(clientsPct)}% من الهدف
+                </div>
               </div>
-              <div className="metric-label">إجمالي العملاء</div>
-              <div className="hero-bar">
-                <span style={{ width: `${clientsPct}%` }} />
-              </div>
-              <div className="metric-delta">
-                {Math.round(clientsPct)}% من الهدف
-              </div>
-            </div>
+            )}
 
-            <div className="hero-column" style={{ textAlign: 'right' }}>
-              <div className="metric">
-                {data.activePolicies}
-                <small>وثيقة</small>
+            {settings.features.policies && (
+              <div className="hero-column" style={{ textAlign: 'right' }}>
+                <div className="metric">
+                  {data.activePolicies}
+                  <small>وثيقة</small>
+                </div>
+                <div className="metric-label">وثائق نشطة</div>
+                <div className="hero-bar">
+                  <span style={{ width: `${policiesPct}%` }} />
+                </div>
+                <div className="metric-delta">
+                  {Math.round(policiesPct)}% من الهدف
+                </div>
               </div>
-              <div className="metric-label">وثائق نشطة</div>
-              <div className="hero-bar">
-                <span style={{ width: `${policiesPct}%` }} />
-              </div>
-              <div className="metric-delta">
-                {Math.round(policiesPct)}% من الهدف
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="hero-foot">
@@ -299,98 +314,106 @@ export default function DashboardPage() {
               <CheckCircle2 size={13} />
               آخر تحديث: {loading ? 'جاري...' : 'الآن'}
             </span>
-            <span className="info">
-              <CalendarDays size={13} />
-              {nearestRenewalDays === null
-                ? 'لا تجديدات قريبة'
-                : nearestRenewalDays < 0
-                ? 'يوجد تجديد متأخر'
-                : `أقرب تجديد: ${nearestRenewalDays} يوم`}
-            </span>
+            {settings.features.renewals && (
+              <span className="info">
+                <CalendarDays size={13} />
+                {nearestRenewalDays === null
+                  ? 'لا تجديدات قريبة'
+                  : nearestRenewalDays < 0
+                  ? 'يوجد تجديد متأخر'
+                  : `أقرب تجديد: ${nearestRenewalDays} يوم`}
+              </span>
+            )}
           </div>
 
           <div className="hero-foot" style={{ borderTop: 'none', paddingTop: 0 }}>
-            <span className="info">
-              <TrendingUp size={13} />
-              {data.openClaims} مطالبات مفتوحة
-            </span>
-            <Link to="/finance" className="hero-cta">
-              <Wallet size={14} />
-              المالية
-              <span>←</span>
-            </Link>
+            {settings.features.claims && (
+              <span className="info">
+                <TrendingUp size={13} />
+                {data.openClaims} مطالبات مفتوحة
+              </span>
+            )}
+            {settings.features.finance && <Link to="/finance" className="hero-cta"><Wallet size={14} />المالية<span>←</span></Link>}
           </div>
         </section>
 
         {/* CHARTS ROW */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 12,
-            marginBottom: 18,
-          }}
-        >
-          <article className="inx-chart-card">
-            <div className="chart-head">
-              <span className="label">توزيع العملاء</span>
-              <span className="value">{data.clients}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: 14,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-              }}
-            >
-              <MiniDonutChart
-                segments={clientSegments}
-                size={110}
-                thickness={14}
-                centerValue={String(data.clients)}
-                centerLabel="إجمالي"
-              />
-              <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
-                {clientSegments.map((s) => (
-                  <div className="legend-row" key={s.label}>
-                    <span className="dot" style={{ background: s.color }} />
-                    <span className="legend-label">{s.label}</span>
-                    <span className="legend-value">{s.value}</span>
+        {(settings.features.clients || settings.features.renewals) && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 12,
+              marginBottom: 18,
+            }}
+          >
+            {settings.features.clients && (
+              <article className="inx-chart-card">
+                <div className="chart-head">
+                  <span className="label">توزيع العملاء</span>
+                  <span className="value">{data.clients}</span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 14,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <MiniDonutChart
+                    segments={clientSegments}
+                    size={110}
+                    thickness={14}
+                    centerValue={String(data.clients)}
+                    centerLabel="إجمالي"
+                  />
+                  <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
+                    {clientSegments.map((s) => (
+                      <div className="legend-row" key={s.label}>
+                        <span className="dot" style={{ background: s.color }} />
+                        <span className="legend-label">{s.label}</span>
+                        <span className="legend-value">{s.value}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </article>
+                </div>
+              </article>
+            )}
 
-          <article className="inx-chart-card">
-            <div className="chart-head">
-              <span className="label">اتجاه التجديدات</span>
-              <span className="delta up">↗ صاعد</span>
-            </div>
-            <div style={{ color: 'var(--inx-blue)' }}>
-              <MiniLineChart
-                data={renewalTrend}
-                height={80}
-                color="var(--inx-blue)"
-                fillColor="rgba(30, 66, 114, 0.12)"
-              />
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 11,
-                color: 'var(--inx-muted)',
-              }}
-            >
-              <span>آخر 8 وثائق</span>
-              <span>{data.renewals.length} عميل</span>
-            </div>
-          </article>
-        </div>
+            {settings.features.renewals && (
+              <article className="inx-chart-card">
+                <div className="chart-head">
+                  <span className="label">اتجاه التجديدات</span>
+                  <span className="delta up">↗ صاعد</span>
+                </div>
+                <div style={{ color: 'var(--inx-blue)' }}>
+                  <MiniLineChart
+                    data={renewalTrend}
+                    height={80}
+                    color="var(--inx-blue)"
+                    fillColor="rgba(30, 66, 114, 0.12)"
+                  />
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: 11,
+                    color: 'var(--inx-muted)',
+                  }}
+                >
+                  <span>آخر 8 وثائق</span>
+                  <span>{data.renewals.length} عميل</span>
+                </div>
+              </article>
+            )}
+          </div>
+        )}
 
+        {settings.features.tasks && (
+          <>
         {/* TASKS SECTION */}
         <div className="inx-section-head">
           <h2>المهام القادمة</h2>
@@ -431,7 +454,11 @@ export default function DashboardPage() {
             ))}
           </ul>
         )}
+          </>
+        )}
 
+        {settings.features.renewals && (
+          <>
         {/* RENEWALS SECTION */}
         <div className="inx-section-head">
           <h2>أقرب التجديدات</h2>
@@ -474,35 +501,29 @@ export default function DashboardPage() {
             ))}
           </ul>
         )}
+          </>
+        )}
 
-        {/* QUICK ACTIONS */}
-        <div className="inx-section-head">
-          <h2>إجراءات سريعة</h2>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: 10,
-          }}
-        >
-          <Link to="/clients" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm">👤</span>
-            <span className="label">إضافة عميل</span>
-          </Link>
-          <Link to="/policies" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-cyan">📄</span>
-            <span className="label">إضافة وثيقة</span>
-          </Link>
-          <Link to="/claims" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-success">⚠️</span>
-            <span className="label">إضافة مطالبة</span>
-          </Link>
-          <Link to="/tasks" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-warning">✅</span>
-            <span className="label">إضافة مهمة</span>
-          </Link>
-        </div>
+        {(settings.features.clients || settings.features.policies || settings.features.claims || settings.features.tasks) && (
+          <>
+          {/* QUICK ACTIONS */}
+          <div className="inx-section-head">
+            <h2>إجراءات سريعة</h2>
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: 10,
+            }}
+          >
+            {settings.features.clients && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
+            {settings.features.policies && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
+            {settings.features.claims && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
+            {settings.features.tasks && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
+          </div>
+          </>
+        )}
       </div>
     </main>
   );

@@ -48,6 +48,8 @@ import type { OperationWorkItem } from '../features/operations/operations-workfl
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniBarChart from '../components/charts/MiniBarChart';
 import '../theme/operations-v80.css';
+import AdsSlideshow from '../features/admin/AdsSlideshow';
+import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 
 type View = 'overview' | 'inbox' | 'new-business' | 'accounts' | 'smart' | 'emails';
 
@@ -71,6 +73,7 @@ const WORKFLOW_STEPS = [
 
 export default function OperationsPage() {
   const { profile, user } = useAuth();
+  const { settings } = usePlatformSettings();
   const [view, setView] = useState<View>('overview');
   const [data, setData] = useState<OperationsSnapshot>(EMPTY);
   const [rfqs, setRfqs] = useState<RfqRecord[]>([]);
@@ -200,6 +203,10 @@ export default function OperationsPage() {
             <Plus size={16} /> طلب جديد
           </button>
         </header>
+
+        {settings.advertising.enabled && settings.advertising.operations && (
+          <div style={{ marginBottom: 14 }}><AdsSlideshow /></div>
+        )}
 
         {error && (
           <div
