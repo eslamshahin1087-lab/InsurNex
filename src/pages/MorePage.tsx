@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
+import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 
 const sections = [
   {
@@ -141,6 +142,13 @@ const sections = [
 
 export default function MorePage() {
   const { profile } = useAuth();
+  const { settings } = usePlatformSettings();
+  const featureByPath: Record<string, keyof typeof settings.features> = {
+    '/notifications': 'notifications', '/operations': 'operations', '/finance': 'finance',
+    '/tasks': 'tasks', '/claims': 'claims', '/leads': 'leads', '/insurers': 'insurers',
+    '/documents': 'documents', '/clients': 'clients', '/analytics': 'analytics',
+    '/copilot': 'copilot', '/ai/file-analysis': 'analytics',
+  };
   const firstName = profile?.displayName?.split(' ')[0] || 'بك';
 
   return (
@@ -162,7 +170,7 @@ export default function MorePage() {
               <h2>{section.title}</h2>
             </div>
             <ul className="inx-list">
-              {section.items.map(({ to, label, desc, icon: Icon, tone }) => (
+              {section.items.filter(({ to }) => !featureByPath[to] || settings.features[featureByPath[to]]).map(({ to, label, desc, icon: Icon, tone }) => (
                 <li key={to}>
                   <Link to={to} className="inx-list-item">
                     <span className={`inx-icon-circle ${tone}`}>
@@ -180,7 +188,7 @@ export default function MorePage() {
           </section>
         ))}
 
-        <div
+        {settings.features.copilot && <div
           className="inx-card"
           style={{ textAlign: 'center', padding: 20, marginTop: 8 }}
         >
@@ -196,7 +204,7 @@ export default function MorePage() {
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             مساعدك الذكي متاح في كل صفحة — اضغط الزر العائم أسفل اليسار.
           </small>
-        </div>
+        </div>}
       </div>
     </main>
   );
