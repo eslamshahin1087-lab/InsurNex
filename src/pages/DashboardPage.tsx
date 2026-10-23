@@ -312,21 +312,25 @@ export default function DashboardPage() {
               <CheckCircle2 size={13} />
               آخر تحديث: {loading ? 'جاري...' : 'الآن'}
             </span>
-            <span className="info">
-              <CalendarDays size={13} />
-              {nearestRenewalDays === null
-                ? 'لا تجديدات قريبة'
-                : nearestRenewalDays < 0
-                ? 'يوجد تجديد متأخر'
-                : `أقرب تجديد: ${nearestRenewalDays} يوم`}
-            </span>
+            {settings.features.renewals && (
+              <span className="info">
+                <CalendarDays size={13} />
+                {nearestRenewalDays === null
+                  ? 'لا تجديدات قريبة'
+                  : nearestRenewalDays < 0
+                  ? 'يوجد تجديد متأخر'
+                  : `أقرب تجديد: ${nearestRenewalDays} يوم`}
+              </span>
+            )}
           </div>
 
           <div className="hero-foot" style={{ borderTop: 'none', paddingTop: 0 }}>
-            <span className="info">
-              <TrendingUp size={13} />
-              {data.openClaims} مطالبات مفتوحة
-            </span>
+            {settings.features.claims && (
+              <span className="info">
+                <TrendingUp size={13} />
+                {data.openClaims} مطالبات مفتوحة
+              </span>
+            )}
             {settings.features.finance && <Link to="/finance" className="hero-cta"><Wallet size={14} />المالية<span>←</span></Link>}
           </div>
         </section>
@@ -498,22 +502,26 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* QUICK ACTIONS */}
-        <div className="inx-section-head">
-          <h2>إجراءات سريعة</h2>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: 10,
-          }}
-        >
-          {settings.features.clients && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
-          {settings.features.policies && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
-          {settings.features.claims && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
-          {settings.features.tasks && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
-        </div>
+        {(settings.features.clients || settings.features.policies || settings.features.claims || settings.features.tasks) && (
+          <>
+          {/* QUICK ACTIONS */}
+          <div className="inx-section-head">
+            <h2>إجراءات سريعة</h2>
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: 10,
+            }}
+          >
+            {settings.features.clients && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
+            {settings.features.policies && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
+            {settings.features.claims && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
+            {settings.features.tasks && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
+          </div>
+          </>
+        )}
       </div>
     </main>
   );
