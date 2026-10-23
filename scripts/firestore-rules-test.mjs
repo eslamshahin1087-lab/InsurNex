@@ -112,6 +112,28 @@ try {
   });
   check((await getDoc(doc(ownerA.db, 'clients', clientA))).exists(), 'owner can create and read a business record in own organization');
 
+  const tenantTask = 'rules-task-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'tasks', tenantTask), {
+    organizationId: orgA,
+    title: 'Allowlisted tenant task',
+    status: 'open',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'tasks', tenantTask))).exists(),
+    'known tenant-scoped business collections remain accessible within the same organization');
+
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'unregisteredPrivateCollection', 'forged-' + randomUUID()), {
+      organizationId: orgA,
+      secret: 'must not be writable through the generic rule',
+    }),
+    'unknown top-level collections are denied even when organizationId matches the user profile'
+  );
+  await expectDenied(
+    () => getDoc(doc(ownerA.db, 'unregisteredPrivateCollection', 'existing-secret-record')),
+    'unknown top-level collections are not readable through the generic rule'
+  );
+
   const ownerB = await makeActor('owner-b');
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');

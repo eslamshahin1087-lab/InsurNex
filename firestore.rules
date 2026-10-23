@@ -270,6 +270,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Only known tenant-scoped business collections are eligible for the generic rule.
+    // Unknown top-level collections default to deny for non-admin users.
+    function isTenantBusinessCollection(collection) {
+      return collection in [
+        'claims', 'claimActivities', 'policies', 'tasks', 'leads', 'leadActivities',
+        'rfqs', 'insurers', 'documents', 'operations', 'operationEvents',
+        'operationsEmailDirectory', 'operationAttachments', 'revenue', 'expenses',
+        'commissions', 'copilotConversations', 'copilotMessages'
+      ];
+    }
+
     // ============ Generic business records ============
     match /{collection}/{docId} {
       allow read: if isAdmin() || (
@@ -280,6 +291,7 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
         && collection != 'platformSettings'
+        && isTenantBusinessCollection(collection)
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
       );
@@ -291,6 +303,7 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
         && collection != 'platformSettings'
+        && isTenantBusinessCollection(collection)
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
       );
@@ -302,6 +315,7 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
         && collection != 'platformSettings'
+        && isTenantBusinessCollection(collection)
         && resource.data.organizationId == request.resource.data.organizationId
         && sameOrg(request.resource.data.organizationId)
       );
@@ -313,6 +327,7 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients'
         && collection != 'platformSettings'
+        && isTenantBusinessCollection(collection)
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
