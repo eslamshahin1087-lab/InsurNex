@@ -195,25 +195,31 @@ export default function DashboardPage() {
             >
               {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
-              <Search size={17} />
-            </Link>
-            <button
-              type="button"
-              className="inx-circle-btn filled"
-              onClick={askCopilot}
-              title="اسأل InsurNex"
-            >
-              <Bot size={17} />
-            </button>
-            <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
-              <Bell size={17} />
-              {data.notificationCount > 0 && (
-                <span className="badge">
-                  {Math.min(data.notificationCount, 99)}
-                </span>
-              )}
-            </Link>
+            {settings.features.policies && (
+              <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
+                <Search size={17} />
+              </Link>
+            )}
+            {settings.features.copilot && (
+              <button
+                type="button"
+                className="inx-circle-btn filled"
+                onClick={askCopilot}
+                title="اسأل InsurNex"
+              >
+                <Bot size={17} />
+              </button>
+            )}
+            {settings.features.notifications && (
+              <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
+                <Bell size={17} />
+                {data.notificationCount > 0 && (
+                  <span className="badge">
+                    {Math.min(data.notificationCount, 99)}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
         </header>
 
@@ -238,10 +244,12 @@ export default function DashboardPage() {
         </div>
 
         {/* ONBOARDING CHECKLIST */}
-        <OnboardingChecklist
-          clientsCount={data.clients}
-          policiesCount={data.activePolicies}
-        />
+        {(settings.features.clients || settings.features.policies) && (
+          <OnboardingChecklist
+            clientsCount={settings.features.clients ? data.clients : 0}
+            policiesCount={settings.features.policies ? data.activePolicies : 0}
+          />
+        )}
 
         {/* SHORTCUTS */}
         <div className="inx-shortcut-row" style={{ marginBottom: 18 }}>
