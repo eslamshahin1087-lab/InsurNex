@@ -273,34 +273,38 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="hero-body">
-            <div className="hero-column" style={{ textAlign: 'right' }}>
-              <div className="metric">
-                {data.clients}
-                <small>عميل</small>
+          <div className="hero-body" style={{ gridTemplateColumns: settings.features.clients && settings.features.policies ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
+            {settings.features.clients && (
+              <div className="hero-column" style={{ textAlign: 'right' }}>
+                <div className="metric">
+                  {data.clients}
+                  <small>عميل</small>
+                </div>
+                <div className="metric-label">إجمالي العملاء</div>
+                <div className="hero-bar">
+                  <span style={{ width: `${clientsPct}%` }} />
+                </div>
+                <div className="metric-delta">
+                  {Math.round(clientsPct)}% من الهدف
+                </div>
               </div>
-              <div className="metric-label">إجمالي العملاء</div>
-              <div className="hero-bar">
-                <span style={{ width: `${clientsPct}%` }} />
-              </div>
-              <div className="metric-delta">
-                {Math.round(clientsPct)}% من الهدف
-              </div>
-            </div>
+            )}
 
-            <div className="hero-column" style={{ textAlign: 'right' }}>
-              <div className="metric">
-                {data.activePolicies}
-                <small>وثيقة</small>
+            {settings.features.policies && (
+              <div className="hero-column" style={{ textAlign: 'right' }}>
+                <div className="metric">
+                  {data.activePolicies}
+                  <small>وثيقة</small>
+                </div>
+                <div className="metric-label">وثائق نشطة</div>
+                <div className="hero-bar">
+                  <span style={{ width: `${policiesPct}%` }} />
+                </div>
+                <div className="metric-delta">
+                  {Math.round(policiesPct)}% من الهدف
+                </div>
               </div>
-              <div className="metric-label">وثائق نشطة</div>
-              <div className="hero-bar">
-                <span style={{ width: `${policiesPct}%` }} />
-              </div>
-              <div className="metric-delta">
-                {Math.round(policiesPct)}% من الهدف
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="hero-foot">
@@ -328,6 +332,7 @@ export default function DashboardPage() {
         </section>
 
         {/* CHARTS ROW */}
+        {(settings.features.clients || settings.features.renewals) && (
         <div
           style={{
             display: 'grid',
@@ -336,38 +341,42 @@ export default function DashboardPage() {
             marginBottom: 18,
           }}
         >
-          <article className="inx-chart-card">
-            <div className="chart-head">
-              <span className="label">توزيع العملاء</span>
-              <span className="value">{data.clients}</span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: 14,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-              }}
-            >
-              <MiniDonutChart
-                segments={clientSegments}
-                size={110}
-                thickness={14}
-                centerValue={String(data.clients)}
-                centerLabel="إجمالي"
-              />
-              <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
-                {clientSegments.map((s) => (
-                  <div className="legend-row" key={s.label}>
-                    <span className="dot" style={{ background: s.color }} />
-                    <span className="legend-label">{s.label}</span>
-                    <span className="legend-value">{s.value}</span>
+          {settings.features.clients && (
+            {settings.features.renewals && (
+            <article className="inx-chart-card">
+                <div className="chart-head">
+                  <span className="label">توزيع العملاء</span>
+                  <span className="value">{data.clients}</span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 14,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <MiniDonutChart
+                    segments={clientSegments}
+                    size={110}
+                    thickness={14}
+                    centerValue={String(data.clients)}
+                    centerLabel="إجمالي"
+                  />
+                  <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
+                    {clientSegments.map((s) => (
+                      <div className="legend-row" key={s.label}>
+                        <span className="dot" style={{ background: s.color }} />
+                        <span className="legend-label">{s.label}</span>
+                        <span className="legend-value">{s.value}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </article>
+                </div>
+              </article>
+          )}
+          )}
 
           <article className="inx-chart-card">
             <div className="chart-head">
