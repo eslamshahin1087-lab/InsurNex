@@ -116,6 +116,28 @@ try {
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
 
+  const settingsBeforeSave = await getDoc(doc(ownerA.db, 'platformSettings', 'global'));
+  check(!settingsBeforeSave.exists(), 'signed-in users can read the shared platform settings document before it is initialized');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'platformSettings', 'global'), {
+      organizationId: orgA,
+      branding: { primaryColor: '#1E4272', accentColor: '#1473E6' },
+      features: {
+        clients: true, policies: true, claims: true, renewals: true, operations: true,
+        tasks: true, insurers: true, leads: true, finance: true, analytics: true,
+        copilot: true, documents: true, notifications: true,
+      },
+      advertising: { enabled: true, dashboard: true, operations: false },
+      updatedBy: ownerA.user.uid,
+      updatedAt: serverTimestamp(),
+    }),
+    'a regular organization owner cannot write global platform settings or bypass the explicit rule by adding organizationId'
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'admin', ownerA.user.uid), { role: 'super_admin' }),
+    'a regular user cannot create an admin membership document'
+  );
+
   // Regression for Firestore's OR semantics across overlapping match blocks.
   // This record can be created under the explicit organization-create rule,
   // but its organizationId must not let the generic business rule bypass
