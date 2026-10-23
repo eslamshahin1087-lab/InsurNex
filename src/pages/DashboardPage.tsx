@@ -234,12 +234,14 @@ export default function DashboardPage() {
             <ShieldCheck size={14} />
             {roleLabel}
           </span>
-          <span className="inx-chip-emphasis">
-            <Bell size={13} />
-            {data.notificationCount > 0
-              ? `${data.notificationCount} إشعارات`
-              : 'لا إشعارات'}
-          </span>
+          {settings.features.notifications && (
+            <span className="inx-chip-emphasis">
+              <Bell size={13} />
+              {data.notificationCount > 0
+                ? `${data.notificationCount} إشعارات`
+                : 'لا إشعارات'}
+            </span>
+          )}
           {settings.features.tasks && <Link to="/tasks" className="inx-scope-pill"><ListTodo size={14} />{data.tasks.length} مهام</Link>}
         </div>
 
