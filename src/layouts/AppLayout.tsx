@@ -43,7 +43,7 @@ export default function AppLayout() {
   const isAuthPage =
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
-  const showFab = !isCopilotPage && !isAuthPage;
+  const showFab = settings.features.copilot && !isCopilotPage && !isAuthPage;
 
   return (
     <div className="mobile-shell" dir="rtl">
@@ -69,7 +69,7 @@ export default function AppLayout() {
           >
             {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-{settings.features.notifications && (
+          {settings.features.notifications && (
             <Link
               className="circle-button notification-button"
               to="/notifications"
