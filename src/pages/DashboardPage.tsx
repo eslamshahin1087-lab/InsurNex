@@ -333,17 +333,16 @@ export default function DashboardPage() {
 
         {/* CHARTS ROW */}
         {(settings.features.clients || settings.features.renewals) && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 12,
-            marginBottom: 18,
-          }}
-        >
-          {settings.features.clients && (
-            {settings.features.renewals && (
-            <article className="inx-chart-card">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 12,
+              marginBottom: 18,
+            }}
+          >
+            {settings.features.clients && (
+              <article className="inx-chart-card">
                 <div className="chart-head">
                   <span className="label">توزيع العملاء</span>
                   <span className="value">{data.clients}</span>
@@ -375,35 +374,37 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </article>
-          )}
-          )}
+            )}
 
-          <article className="inx-chart-card">
-            <div className="chart-head">
-              <span className="label">اتجاه التجديدات</span>
-              <span className="delta up">↗ صاعد</span>
-            </div>
-            <div style={{ color: 'var(--inx-blue)' }}>
-              <MiniLineChart
-                data={renewalTrend}
-                height={80}
-                color="var(--inx-blue)"
-                fillColor="rgba(30, 66, 114, 0.12)"
-              />
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 11,
-                color: 'var(--inx-muted)',
-              }}
-            >
-              <span>آخر 8 وثائق</span>
-              <span>{data.renewals.length} عميل</span>
-            </div>
-          </article>
-        </div>
+            {settings.features.renewals && (
+              <article className="inx-chart-card">
+                <div className="chart-head">
+                  <span className="label">اتجاه التجديدات</span>
+                  <span className="delta up">↗ صاعد</span>
+                </div>
+                <div style={{ color: 'var(--inx-blue)' }}>
+                  <MiniLineChart
+                    data={renewalTrend}
+                    height={80}
+                    color="var(--inx-blue)"
+                    fillColor="rgba(30, 66, 114, 0.12)"
+                  />
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: 11,
+                    color: 'var(--inx-muted)',
+                  }}
+                >
+                  <span>آخر 8 وثائق</span>
+                  <span>{data.renewals.length} عميل</span>
+                </div>
+              </article>
+            )}
+          </div>
+        )}
 
         {settings.features.tasks && (
           <>
