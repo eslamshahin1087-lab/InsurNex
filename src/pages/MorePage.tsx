@@ -18,6 +18,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
+import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 
 const sections = [
   {
@@ -143,6 +144,7 @@ const sections = [
 export default function MorePage() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
+  const { features: planFeatures } = usePlanFeatures();
   const featureByPath: Record<string, keyof typeof settings.features> = {
     '/notifications': 'notifications', '/operations': 'operations', '/finance': 'finance',
     '/tasks': 'tasks', '/claims': 'claims', '/leads': 'leads', '/insurers': 'insurers',
@@ -170,7 +172,7 @@ export default function MorePage() {
               <h2>{section.title}</h2>
             </div>
             <ul className="inx-list">
-              {section.items.filter(({ to }) => !featureByPath[to] || settings.features[featureByPath[to]]).map(({ to, label, desc, icon: Icon, tone }) => (
+              {section.items.filter(({ to }) => !featureByPath[to] || (settings.features[featureByPath[to]] && planFeatures[featureByPath[to]])).map(({ to, label, desc, icon: Icon, tone }) => (
                 <li key={to}>
                   <Link to={to} className="inx-list-item">
                     <span className={`inx-icon-circle ${tone}`}>
@@ -188,7 +190,7 @@ export default function MorePage() {
           </section>
         ))}
 
-        {settings.features.copilot && <div
+        {settings.features.copilot && planFeatures.copilot && <div
           className="inx-card"
           style={{ textAlign: 'center', padding: 20, marginTop: 8 }}
         >
