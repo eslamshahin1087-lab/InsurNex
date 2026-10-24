@@ -130,6 +130,46 @@ try {
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
 
+  // Finance collections must remain tenant-isolated by the generic rules.
+  for (const collectionName of ['revenue', 'expenses', 'commissions']) {
+    const recordId = 'rules-' + collectionName + '-' + randomUUID();
+    await setDoc(doc(ownerA.db, collectionName, recordId), {
+      organizationId: orgA,
+      amount: 1250,
+      status: 'pending',
+      createdBy: ownerA.user.uid,
+      createdAt: serverTimestamp(),
+    });
+    check((await getDoc(doc(ownerA.db, collectionName, recordId))).exists(),
+      'same-organization users can read ' + collectionName + ' records');
+    await expectDenied(
+      () => getDoc(doc(ownerB.db, collectionName, recordId)),
+      'a different organization cannot read ' + collectionName + ' records by ID'
+    );
+    await expectDenied(
+      () => getDocs(query(
+        collection(ownerB.db, collectionName),
+        where('organizationId', '==', orgA),
+      )),
+      'a different organization cannot query ' + collectionName + ' records'
+    );
+    await expectDenied(
+      () => setDoc(doc(ownerB.db, collectionName, 'forged-' + randomUUID()), {
+        organizationId: orgA,
+        amount: 999999,
+        status: 'pending',
+        createdBy: ownerB.user.uid,
+      }),
+      'a user cannot create ' + collectionName + ' records for another organization'
+    );
+    await expectDenied(
+      () => updateDoc(doc(ownerA.db, collectionName, recordId), {
+        organizationId: orgB,
+      }),
+      'a user cannot move an existing ' + collectionName + ' record to another organization'
+    );
+  }
+
   const notificationA = 'rules-notification-' + randomUUID();
   await setDoc(doc(ownerA.db, 'notifications', notificationA), {
     organizationId: orgA,
