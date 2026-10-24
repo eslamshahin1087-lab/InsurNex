@@ -8,6 +8,7 @@ import {
   inMemoryPersistence,
 } from 'firebase/auth';
 import {
+  collection,
   connectFirestoreEmulator,
   deleteDoc,
   doc,
