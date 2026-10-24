@@ -283,4 +283,3 @@ try {
 } finally {
   await Promise.allSettled(apps.map((app) => deleteApp(app)));
 }
-
