@@ -9,13 +9,18 @@ import {
 } from 'firebase/auth';
 import {
   connectFirestoreEmulator,
+  collection,
   deleteDoc,
   doc,
+  getDocs,
   getDoc,
   getFirestore,
+  limit,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
 } from 'firebase/firestore';
 
@@ -122,6 +127,23 @@ try {
   check((await getDoc(doc(ownerA.db, 'tasks', tenantTask))).exists(),
     'known tenant-scoped business collections remain accessible within the same organization');
 
+  const notificationId = 'rules-notification-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'notifications', notificationId), {
+    organizationId: orgA,
+    title: 'Tenant notification',
+    message: 'Visible to this organization only',
+    type: 'task',
+    read: false,
+    createdAt: serverTimestamp(),
+  });
+  const sameOrgNotifications = await getDocs(query(
+    collection(ownerA.db, 'notifications'),
+    where('organizationId', '==', orgA),
+    limit(200),
+  ));
+  check(sameOrgNotifications.docs.some((snapshot) => snapshot.id === notificationId),
+    'a tenant can create and query notifications belonging to its own organization');
+
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'unregisteredPrivateCollection', 'forged-' + randomUUID()), {
       organizationId: orgA,
@@ -137,6 +159,24 @@ try {
   const ownerB = await makeActor('owner-b');
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
+  await expectDenied(
+    () => getDocs(query(
+      collection(ownerB.db, 'notifications'),
+      where('organizationId', '==', orgA),
+      limit(200),
+    )),
+    'a user from another organization cannot query notifications for this organization'
+  );
+
+  const noProfile = await makeActor('no-profile');
+  await expectDenied(
+    () => getDocs(query(
+      collection(noProfile.db, 'notifications'),
+      where('organizationId', '==', orgA),
+      limit(200),
+    )),
+    'a signed-in user without an active organization profile cannot query notifications'
+  );
 
   const settingsBeforeSave = await getDoc(doc(ownerA.db, 'platformSettings', 'global'));
   check(!settingsBeforeSave.exists(), 'signed-in users can read the shared platform settings document before it is initialized');
@@ -243,3 +283,4 @@ try {
 } finally {
   await Promise.allSettled(apps.map((app) => deleteApp(app)));
 }
+

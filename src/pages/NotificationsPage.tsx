@@ -17,6 +17,7 @@ import MiniBarChart from '../components/charts/MiniBarChart';
 
 type Notice = {
   id: string;
+  organizationId: string;
   title?: string;
   message?: string;
   body?: string;
@@ -394,3 +395,4 @@ export default function NotificationsPage() {
     </main>
   );
 }
+
