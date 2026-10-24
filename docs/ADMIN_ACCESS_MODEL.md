@@ -16,7 +16,7 @@
 - Admin authorization is based on the existence of `admin/{uid}`; Firestore rules deny client-side create/update/delete operations on that collection.
 - Ordinary broker routes are protected by authentication, profile/setup, subscription status, and platform feature gates.
 - Platform feature flags default to enabled when the global settings document or an individual feature value is missing.
-- Pricing plans currently store pricing and duration fields, not a per-plan feature matrix. Therefore, the current feature toggles are platform-wide switches, not plan-specific entitlements.
+- Subscription plans now carry a per-plan feature matrix. Built-in plans and legacy records missing the feature field default to all features enabled; platform-wide feature switches remain separate overrides.
 
 ## Important distinction
 
