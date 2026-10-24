@@ -16,6 +16,15 @@ import './theme/sprint8-3.css';
 import App from './App';
 import { ThemeProvider } from './theme/ThemeProvider';
 
+// Register the privacy-safe PWA worker only for production builds.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((error: unknown) => {
+      console.warn('InsurNex service worker registration failed.', error);
+    });
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
@@ -23,5 +32,3 @@ createRoot(document.getElementById('root')!).render(
     </ThemeProvider>
   </StrictMode>,
 );
-
-
