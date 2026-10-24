@@ -1,3 +1,5 @@
+import type { FeatureEntitlements } from './feature-catalog';
+
 export interface PricingPlanDoc {
   id: string;
   name: string;
@@ -8,6 +10,8 @@ export interface PricingPlanDoc {
   discountNote?: string;
   isActive: boolean;
   order: number;
+  /** Missing fields in legacy plan documents normalize to all features enabled. */
+  features: FeatureEntitlements;
   updatedAt?: unknown;
   updatedBy?: string;
 }

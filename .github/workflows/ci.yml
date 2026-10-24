@@ -14,6 +14,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Admin and user access boundary smoke checks
+        run: npm run test:access
+      - name: Plan feature entitlement smoke checks
+        run: npm run test:plans
       - name: PWA installability and privacy smoke checks
         run: npm run test:pwa
       - run: npm run lint

@@ -8,6 +8,7 @@ import {
 } from './subscription.service';
 import { useSubscription } from './subscription.hooks';
 import { getOnboardingProgress } from '../onboarding/onboarding.service';
+import { PlanFeaturesProvider } from './PlanFeaturesProvider';
 
 /**
  * Routes that are accessible even when Onboarding is not complete.
@@ -117,5 +118,5 @@ export default function SubscriptionGate() {
     return <Navigate to="/onboarding" replace />;
   }
 
-  return <Outlet />;
+  return <PlanFeaturesProvider planId={subscription.plan}><Outlet /></PlanFeaturesProvider>;
 }

@@ -9,8 +9,15 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 4. Run `npm run dev`.
 
 ## Quality checks
+- `npm run test:access` — admin/user access boundary smoke checks.
+- `npm run test:plans` — subscription plan feature entitlement smoke checks.
+- `npm run test:pwa` — PWA installability and privacy smoke checks.
 - `npm run lint`
 - `npm run build`
+
+## Access model
+- [Admin and User Access Model](docs/ADMIN_ACCESS_MODEL.md)
+- [Subscription Plan Feature Entitlements](docs/PLAN_FEATURE_ENTITLEMENTS.md)
 
 ## Firebase
 Install the Firebase CLI, authenticate locally, then from the project root run `firebase deploy` when the app is ready for production.

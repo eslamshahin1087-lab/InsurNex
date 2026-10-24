@@ -1,3 +1,5 @@
+import { DEFAULT_FEATURE_ENTITLEMENTS, type FeatureEntitlements } from './feature-catalog';
+
 export const VAT_RATE = 0.14;
 export const CURRENCY = 'EGP';
 
@@ -11,6 +13,7 @@ export interface PricingPlan {
   discountNote?: string;
   isActive: boolean;
   order: number;
+  features: FeatureEntitlements;
 }
 
 export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
@@ -23,6 +26,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
     description: 'اشتراك شهري أساسي',
     isActive: true,
     order: 1,
+    features: DEFAULT_FEATURE_ENTITLEMENTS,
   },
   {
     id: 'yearly',
@@ -34,6 +38,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
     discountNote: 'خصم 17%',
     isActive: true,
     order: 2,
+    features: DEFAULT_FEATURE_ENTITLEMENTS,
   },
   {
     id: 'yearly_discount',
@@ -45,6 +50,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
     discountNote: 'خصم 31%',
     isActive: true,
     order: 3,
+    features: DEFAULT_FEATURE_ENTITLEMENTS,
   },
 ];
 

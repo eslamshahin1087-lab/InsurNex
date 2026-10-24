@@ -21,6 +21,7 @@ import Logo from '../components/Logo';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
+import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
   { to: '/', label: 'الرئيسية', Icon: Home },
@@ -33,7 +34,8 @@ const navigation: { to: string; label: string; Icon: LucideIcon; feature?: Platf
 export default function AppLayout() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
-  const visibleNavigation = navigation.filter((item) => !item.feature || settings.features[item.feature]);
+  const { features: planFeatures } = usePlanFeatures();
+  const visibleNavigation = navigation.filter((item) => !item.feature || (settings.features[item.feature] && planFeatures[item.feature]));
   const { resolvedTheme, toggleTheme } = useTheme();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
@@ -43,7 +45,7 @@ export default function AppLayout() {
   const isAuthPage =
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
-  const showFab = settings.features.copilot && !isCopilotPage && !isAuthPage;
+  const showFab = settings.features.copilot && planFeatures.copilot && !isCopilotPage && !isAuthPage;
 
   return (
     <div className="mobile-shell" dir="rtl">
@@ -69,7 +71,7 @@ export default function AppLayout() {
           >
             {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          {settings.features.notifications && (
+          {settings.features.notifications && planFeatures.notifications && (
             <Link
               className="circle-button notification-button"
               to="/notifications"
