@@ -2,6 +2,12 @@
 
 Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeScript + Vite and Firebase project `insurnex-8a9df`.
 
+## Architecture references
+
+- [Master Architecture](docs/MASTER_ARCHITECTURE.md) — current stack, target boundaries, data flows, security gates and rollout decisions.
+- [Firestore Schema Baseline](docs/FIRESTORE_SCHEMA.md) — current collections, fields, indexes, tenant isolation and proposed future entities.
+- [Web/PWA](docs/PWA.md) — installability, safe offline behavior and mobile validation.
+
 ## Local setup
 1. Use Node.js 22.
 2. Run `npm install`.
@@ -9,6 +15,7 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 4. Run `npm run dev`.
 
 ## Quality checks
+- `npm run test:pwa`
 - `npm run lint`
 - `npm run build`
 
