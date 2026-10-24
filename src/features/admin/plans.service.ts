@@ -10,10 +10,42 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { normalizeFeatureEntitlements } from './feature-catalog';
 import type { PricingPlanDoc } from './plans.types';
 import { DEFAULT_PRICING_PLANS } from './pricing.config';
 
 const COLLECTION = 'pricingPlans';
+
+function normalizePlan(id: string, value: Record<string, unknown>): PricingPlanDoc {
+  return {
+    id,
+    name: typeof value.name === 'string' ? value.name : id,
+    duration: typeof value.duration === 'number' ? value.duration : 30,
+    subtotal: typeof value.subtotal === 'number' ? value.subtotal : 0,
+    currency: typeof value.currency === 'string' ? value.currency : 'EGP',
+    description: typeof value.description === 'string' ? value.description : '',
+    discountNote: typeof value.discountNote === 'string' ? value.discountNote : '',
+    isActive: typeof value.isActive === 'boolean' ? value.isActive : true,
+    order: typeof value.order === 'number' ? value.order : 0,
+    features: normalizeFeatureEntitlements(value.features),
+    updatedAt: value.updatedAt,
+    updatedBy: typeof value.updatedBy === 'string' ? value.updatedBy : undefined,
+  };
+}
+
+function persistedPlan(plan: PricingPlanDoc) {
+  return {
+    name: plan.name,
+    duration: plan.duration,
+    subtotal: plan.subtotal,
+    currency: plan.currency || 'EGP',
+    description: plan.description || '',
+    discountNote: plan.discountNote || '',
+    isActive: plan.isActive,
+    order: plan.order ?? 0,
+    features: normalizeFeatureEntitlements(plan.features),
+  };
+}
 
 export async function listPlans(): Promise<PricingPlanDoc[]> {
   const q = query(collection(db, COLLECTION), orderBy('order', 'asc'));
@@ -25,17 +57,17 @@ export async function listPlans(): Promise<PricingPlanDoc[]> {
     return DEFAULT_PRICING_PLANS.map((p) => ({ ...p, id: p.id }));
   }
 
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PricingPlanDoc));
+  return snap.docs.map((d) => normalizePlan(d.id, d.data()));
 }
 
 export async function getPlanById(id: string): Promise<PricingPlanDoc | null> {
   const snap = await getDoc(doc(db, COLLECTION, id));
   if (!snap.exists()) {
-    // Fallback to default
+    // Legacy/default plans are available even before their documents are seeded.
     const def = DEFAULT_PRICING_PLANS.find((p) => p.id === id);
-    return def ? { ...def } : null;
+    return def ? { ...def, features: normalizeFeatureEntitlements(def.features) } : null;
   }
-  return { id: snap.id, ...snap.data() } as PricingPlanDoc;
+  return normalizePlan(snap.id, snap.data());
 }
 
 export async function savePlan(
@@ -46,14 +78,7 @@ export async function savePlan(
   await setDoc(
     ref,
     {
-      name: plan.name,
-      duration: plan.duration,
-      subtotal: plan.subtotal,
-      currency: plan.currency || 'EGP',
-      description: plan.description || '',
-      discountNote: plan.discountNote || '',
-      isActive: plan.isActive,
-      order: plan.order ?? 0,
+      ...persistedPlan(plan),
       updatedAt: serverTimestamp(),
       updatedBy,
     },
@@ -66,14 +91,7 @@ export async function seedDefaults(): Promise<void> {
   for (const plan of DEFAULT_PRICING_PLANS) {
     const ref = doc(db, COLLECTION, plan.id);
     batch.set(ref, {
-      name: plan.name,
-      duration: plan.duration,
-      subtotal: plan.subtotal,
-      currency: plan.currency,
-      description: plan.description,
-      discountNote: plan.discountNote || '',
-      isActive: plan.isActive,
-      order: plan.order,
+      ...persistedPlan({ ...plan, id: plan.id }),
       updatedAt: serverTimestamp(),
     });
   }
@@ -87,14 +105,7 @@ export async function resetToDefaults(updatedBy: string): Promise<void> {
     batch.set(
       ref,
       {
-        name: plan.name,
-        duration: plan.duration,
-        subtotal: plan.subtotal,
-        currency: plan.currency,
-        description: plan.description,
-        discountNote: plan.discountNote || '',
-        isActive: plan.isActive,
-        order: plan.order,
+        ...persistedPlan({ ...plan, id: plan.id }),
         updatedAt: serverTimestamp(),
         updatedBy,
       },
