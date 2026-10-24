@@ -126,6 +126,10 @@ try {
   check((await getDoc(doc(ownerA.db, 'tasks', tenantTask))).exists(),
     'known tenant-scoped business collections remain accessible within the same organization');
 
+  const ownerB = await makeActor('owner-b');
+  const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
+  check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
+
   const notificationA = 'rules-notification-' + randomUUID();
   await setDoc(doc(ownerA.db, 'notifications', notificationA), {
     organizationId: orgA,
@@ -163,9 +167,6 @@ try {
     'unknown top-level collections are not readable through the generic rule'
   );
 
-  const ownerB = await makeActor('owner-b');
-  const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
-  check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
 
   const settingsBeforeSave = await getDoc(doc(ownerA.db, 'platformSettings', 'global'));
   check(!settingsBeforeSave.exists(), 'signed-in users can read the shared platform settings document before it is initialized');
