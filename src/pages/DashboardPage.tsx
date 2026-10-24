@@ -27,6 +27,7 @@ import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
+import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 
 const empty: DashboardData = {
   clients: 0,
@@ -65,7 +66,8 @@ const shortcuts: { to: string; label: string; emoji: string; tone: string; featu
 export default function DashboardPage() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
-  const visibleShortcuts = shortcuts.filter((item) => !item.feature || settings.features[item.feature]);
+  const { features: planFeatures } = usePlanFeatures();
+  const visibleShortcuts = shortcuts.filter((item) => !item.feature || (settings.features[item.feature] && planFeatures[item.feature]));
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [data, setData] = useState(empty);
@@ -195,12 +197,12 @@ export default function DashboardPage() {
             >
               {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            {settings.features.policies && (
+            {(settings.features.policies && planFeatures.policies) && (
               <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
                 <Search size={17} />
               </Link>
             )}
-            {settings.features.copilot && (
+            {(settings.features.copilot && planFeatures.copilot) && (
               <button
                 type="button"
                 className="inx-circle-btn filled"
@@ -210,7 +212,7 @@ export default function DashboardPage() {
                 <Bot size={17} />
               </button>
             )}
-            {settings.features.notifications && (
+            {(settings.features.notifications && planFeatures.notifications) && (
               <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
                 <Bell size={17} />
                 {data.notificationCount > 0 && (
@@ -234,7 +236,7 @@ export default function DashboardPage() {
             <ShieldCheck size={14} />
             {roleLabel}
           </span>
-          {settings.features.notifications && (
+          {(settings.features.notifications && planFeatures.notifications) && (
             <span className="inx-chip-emphasis">
               <Bell size={13} />
               {data.notificationCount > 0
@@ -242,14 +244,14 @@ export default function DashboardPage() {
                 : 'لا إشعارات'}
             </span>
           )}
-          {settings.features.tasks && <Link to="/tasks" className="inx-scope-pill"><ListTodo size={14} />{data.tasks.length} مهام</Link>}
+          {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-scope-pill"><ListTodo size={14} />{data.tasks.length} مهام</Link>}
         </div>
 
         {/* ONBOARDING CHECKLIST */}
-        {(settings.features.clients || settings.features.policies) && (
+        {((settings.features.clients && planFeatures.clients) || (settings.features.policies && planFeatures.policies)) && (
           <OnboardingChecklist
-            clientsCount={settings.features.clients ? data.clients : 0}
-            policiesCount={settings.features.policies ? data.activePolicies : 0}
+            clientsCount={(settings.features.clients && planFeatures.clients) ? data.clients : 0}
+            policiesCount={(settings.features.policies && planFeatures.policies) ? data.activePolicies : 0}
           />
         )}
 
@@ -271,12 +273,12 @@ export default function DashboardPage() {
               <span>لوحة الأداء</span>
             </div>
             <div className="actions">
-              {settings.features.policies && <Link to="/policies">الوثائق</Link>}
+              {(settings.features.policies && planFeatures.policies) && <Link to="/policies">الوثائق</Link>}
             </div>
           </div>
 
-          <div className="hero-body" style={{ gridTemplateColumns: settings.features.clients && settings.features.policies ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
-            {settings.features.clients && (
+          <div className="hero-body" style={{ gridTemplateColumns: (settings.features.clients && planFeatures.clients) && (settings.features.policies && planFeatures.policies) ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
+            {(settings.features.clients && planFeatures.clients) && (
               <div className="hero-column" style={{ textAlign: 'right' }}>
                 <div className="metric">
                   {data.clients}
@@ -292,7 +294,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {settings.features.policies && (
+            {(settings.features.policies && planFeatures.policies) && (
               <div className="hero-column" style={{ textAlign: 'right' }}>
                 <div className="metric">
                   {data.activePolicies}
@@ -314,7 +316,7 @@ export default function DashboardPage() {
               <CheckCircle2 size={13} />
               آخر تحديث: {loading ? 'جاري...' : 'الآن'}
             </span>
-            {settings.features.renewals && (
+            {(settings.features.renewals && planFeatures.renewals) && (
               <span className="info">
                 <CalendarDays size={13} />
                 {nearestRenewalDays === null
@@ -327,18 +329,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="hero-foot" style={{ borderTop: 'none', paddingTop: 0 }}>
-            {settings.features.claims && (
+            {(settings.features.claims && planFeatures.claims) && (
               <span className="info">
                 <TrendingUp size={13} />
                 {data.openClaims} مطالبات مفتوحة
               </span>
             )}
-            {settings.features.finance && <Link to="/finance" className="hero-cta"><Wallet size={14} />المالية<span>←</span></Link>}
+            {(settings.features.finance && planFeatures.finance) && <Link to="/finance" className="hero-cta"><Wallet size={14} />المالية<span>←</span></Link>}
           </div>
         </section>
 
         {/* CHARTS ROW */}
-        {(settings.features.clients || settings.features.renewals) && (
+        {((settings.features.clients && planFeatures.clients) || (settings.features.renewals && planFeatures.renewals)) && (
           <div
             style={{
               display: 'grid',
@@ -347,7 +349,7 @@ export default function DashboardPage() {
               marginBottom: 18,
             }}
           >
-            {settings.features.clients && (
+            {(settings.features.clients && planFeatures.clients) && (
               <article className="inx-chart-card">
                 <div className="chart-head">
                   <span className="label">توزيع العملاء</span>
@@ -382,7 +384,7 @@ export default function DashboardPage() {
               </article>
             )}
 
-            {settings.features.renewals && (
+            {(settings.features.renewals && planFeatures.renewals) && (
               <article className="inx-chart-card">
                 <div className="chart-head">
                   <span className="label">اتجاه التجديدات</span>
@@ -412,7 +414,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {settings.features.tasks && (
+        {(settings.features.tasks && planFeatures.tasks) && (
           <>
         {/* TASKS SECTION */}
         <div className="inx-section-head">
@@ -457,7 +459,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {settings.features.renewals && (
+        {(settings.features.renewals && planFeatures.renewals) && (
           <>
         {/* RENEWALS SECTION */}
         <div className="inx-section-head">
@@ -504,7 +506,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {(settings.features.clients || settings.features.policies || settings.features.claims || settings.features.tasks) && (
+        {((settings.features.clients && planFeatures.clients) || (settings.features.policies && planFeatures.policies) || (settings.features.claims && planFeatures.claims) || (settings.features.tasks && planFeatures.tasks)) && (
           <>
           {/* QUICK ACTIONS */}
           <div className="inx-section-head">
@@ -517,10 +519,10 @@ export default function DashboardPage() {
               gap: 10,
             }}
           >
-            {settings.features.clients && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
-            {settings.features.policies && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
-            {settings.features.claims && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
-            {settings.features.tasks && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
+            {(settings.features.clients && planFeatures.clients) && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
+            {(settings.features.policies && planFeatures.policies) && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
+            {(settings.features.claims && planFeatures.claims) && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
+            {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
           </div>
           </>
         )}
