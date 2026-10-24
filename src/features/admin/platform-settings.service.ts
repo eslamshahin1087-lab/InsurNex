@@ -1,23 +1,9 @@
 import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, type Unsubscribe } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { PLATFORM_FEATURES, type PlatformFeatureKey } from './feature-catalog';
 
-export const PLATFORM_FEATURES = [
-  { key: 'clients', label: 'العملاء وCRM', description: 'ملفات العملاء وإدارة العلاقات.' },
-  { key: 'policies', label: 'الوثائق', description: 'إدارة الوثائق ومتابعة حالتها.' },
-  { key: 'claims', label: 'المطالبات', description: 'تسجيل المطالبات ومتابعتها.' },
-  { key: 'renewals', label: 'التجديدات', description: 'متابعة مواعيد التجديد.' },
-  { key: 'operations', label: 'مركز العمليات', description: 'طلبات الإصدار ومسارات العمليات.' },
-  { key: 'tasks', label: 'المهام', description: 'المهام والتذكيرات التشغيلية.' },
-  { key: 'insurers', label: 'شركات التأمين', description: 'دليل شركات التأمين.' },
-  { key: 'leads', label: 'العملاء المحتملون', description: 'إدارة فرص البيع والعملاء المحتملين.' },
-  { key: 'finance', label: 'المالية', description: 'البيانات المالية والفواتير.' },
-  { key: 'analytics', label: 'التحليلات والتقارير', description: 'لوحات التحليل والتقارير.' },
-  { key: 'copilot', label: 'المساعد الذكي', description: 'المساعد التفاعلي داخل التطبيق.' },
-  { key: 'documents', label: 'مركز المستندات', description: 'الوصول إلى مركز المستندات.' },
-  { key: 'notifications', label: 'الإشعارات', description: 'مركز إشعارات المستخدم.' },
-] as const;
-
-export type PlatformFeatureKey = (typeof PLATFORM_FEATURES)[number]['key'];
+export { PLATFORM_FEATURES };
+export type { PlatformFeatureKey };
 
 export interface PlatformSettings {
   branding: { primaryColor: string; accentColor: string };
