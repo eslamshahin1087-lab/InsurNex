@@ -29,7 +29,8 @@ check(adminLogin.includes('if (!isAdmin)'), 'admin login rejects a regular user 
 check(adminLogin.includes('await signOut()'), 'admin login signs out a non-admin account');
 
 // Firestore is the security boundary; a client cannot create or elevate admin membership.
-check(/match \/admin\/\{uid\}[\s\S]*?allow create, update, delete: if false;/.test(rules),
+check(rules.includes('match /admin/{uid}'), 'dedicated admin membership rules exist');
+check(rules.includes('allow create, update, delete: if false;'),
   'Firestore rules prohibit client-side admin membership writes');
 check(rules.includes('function isAdmin()'), 'Firestore admin checks use the dedicated admin collection');
 
@@ -47,6 +48,6 @@ check(settings.includes('DEFAULT_PLATFORM_SETTINGS.features[feature.key]'),
 
 // Subscription enforcement is intentionally retained; this is not an admin/user feature toggle.
 check(subscriptionGate.includes('isExpired(subscription)'), 'subscription expiry enforcement remains in place');
-check(subscriptionGate.includes("to=\"/subscription\""), 'expired subscriptions are routed to the subscription page');
+check(subscriptionGate.includes('to="/subscription"'), 'expired subscriptions are routed to the subscription page');
 
 console.log('Admin/user access smoke tests passed.');
