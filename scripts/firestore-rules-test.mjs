@@ -12,10 +12,13 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
+  query,
   writeBatch,
 } from 'firebase/firestore';
 
@@ -121,6 +124,31 @@ try {
   });
   check((await getDoc(doc(ownerA.db, 'tasks', tenantTask))).exists(),
     'known tenant-scoped business collections remain accessible within the same organization');
+
+  const notificationA = 'rules-notification-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'notifications', notificationA), {
+    organizationId: orgA,
+    title: 'Tenant A notification',
+    message: 'Visible only within tenant A',
+    createdAt: serverTimestamp(),
+  });
+  const ownNotifications = await getDocs(query(
+    collection(ownerA.db, 'notifications'),
+    where('organizationId', '==', orgA),
+  ));
+  check(ownNotifications.docs.some((item) => item.id === notificationA),
+    'tenant users can query notifications scoped to their own organization');
+  await expectDenied(
+    () => getDoc(doc(ownerB.db, 'notifications', notificationA)),
+    'tenant users cannot read another organization\'s notification by document ID'
+  );
+  await expectDenied(
+    () => getDocs(query(
+      collection(ownerB.db, 'notifications'),
+      where('organizationId', '==', orgA),
+    )),
+    'tenant users cannot query notifications belonging to another organization'
+  );
 
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'unregisteredPrivateCollection', 'forged-' + randomUUID()), {
