@@ -21,6 +21,7 @@ import {
   computePricing,
   formatEGP,
 } from '../features/admin/pricing.config';
+import { PLATFORM_FEATURES, normalizeFeatureEntitlements, type FeatureEntitlements } from '../features/admin/feature-catalog';
 import '../theme/admin-pricing.css';
 
 interface EditState {
@@ -31,6 +32,7 @@ interface EditState {
   description: string;
   discountNote: string;
   isActive: boolean;
+  features: FeatureEntitlements;
 }
 
 export default function AdminPricingPage() {
@@ -73,6 +75,7 @@ export default function AdminPricingPage() {
       description: plan.description || '',
       discountNote: plan.discountNote || '',
       isActive: plan.isActive,
+      features: normalizeFeatureEntitlements(plan.features),
     });
   }
 
@@ -95,6 +98,7 @@ export default function AdminPricingPage() {
           discountNote: editing.discountNote.trim(),
           isActive: editing.isActive,
           order: plans.find((p) => p.id === editing.id)?.order ?? 0,
+          features: editing.features,
         },
         user.uid,
       );
@@ -369,6 +373,29 @@ export default function AdminPricingPage() {
                         />
                         <span>مفعّلة (تظهر في صفحة إنشاء الأكواد)</span>
                       </label>
+
+                      <section style={{ marginTop: 8, padding: 12, border: '1px solid var(--inx-border)', borderRadius: 12 }} aria-label="مزايا الخطة">
+                        <strong style={{ display: 'block', fontSize: 13, marginBottom: 8 }}>الوحدات المتاحة للمشتركين في هذه الخطة</strong>
+                        <small style={{ display: 'block', color: 'var(--inx-muted)', lineHeight: 1.7, marginBottom: 8 }}>
+                          كل الوحدات مفعّلة افتراضيًا. إلغاء اختيار وحدة يقصر الوصول إليها على هذه الخطة، ما لم يعطلها مسؤول المنصة عالميًا.
+                        </small>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
+                          {PLATFORM_FEATURES.map((feature) => (
+                            <label key={feature.key} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, padding: '6px 0' }}>
+                              <input
+                                type="checkbox"
+                                checked={editing.features[feature.key]}
+                                onChange={(e) => setEditing({
+                                  ...editing,
+                                  features: { ...editing.features, [feature.key]: e.target.checked },
+                                })}
+                                style={{ marginTop: 2, accentColor: 'var(--inx-blue)' }}
+                              />
+                              <span>{feature.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </section>
 
                       <div className="pricing-actions">
                         <button
