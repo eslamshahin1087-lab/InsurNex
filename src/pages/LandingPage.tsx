@@ -96,8 +96,7 @@ export default function LandingPage() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-brand">
-            <Logo alt="InsurNex"/>
-            <span>InsurNex</span>
+            <Logo alt="InsurNex" />
           </div>
 
           <nav className="landing-nav-links">
@@ -414,7 +413,7 @@ export default function LandingPage() {
           <div className="landing-footer-brand">
             <Logo alt="InsurNex"/>
             <div>
-              <b>InsurNex</b>
+              
               <small>منصة إدارة الوساطة التأمينية</small>
             </div>
           </div>

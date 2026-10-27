@@ -92,17 +92,13 @@ export default function LoginPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Logo alt="InsurNex"
               style={{
-                width: 48,
-                height: 48,
+                width: 76,
+                height: 66,
                 objectFit: 'contain',
                 borderRadius: 12,
               }}/>
             <div>
-              <strong
-                style={{ display: 'block', fontSize: 14, color: 'var(--inx-text)' }}
-              >
-                InsurNex
-              </strong>
+              
               <small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>
                 Insurance Brokerage
               </small>

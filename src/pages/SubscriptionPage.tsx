@@ -199,7 +199,7 @@ export default function SubscriptionPage() {
                   إدارة الاشتراك
                 </strong>
                 <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-                  InsurNex · اختر خطتك
+                  اختر الخطة المناسبة لمؤسستك
                 </small>
               </div>
             </div>
