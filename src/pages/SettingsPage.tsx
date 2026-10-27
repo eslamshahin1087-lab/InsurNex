@@ -208,16 +208,13 @@ function MembersTab({
       ]);
       setInvitations(nextInvitations);
       setMembers(nextMembers);
-      setMemberDrafts((current) => {
-        const next = { ...current };
-        for (const member of nextMembers) {
-          if (!next[member.uid]) next[member.uid] = {
-            role: member.role === 'owner' ? 'broker' : member.role,
-            status: member.status === 'disabled' ? 'disabled' : 'active',
-          };
-        }
-        return next;
-      });
+      setMemberDrafts(Object.fromEntries(nextMembers.map((member) => [
+        member.uid,
+        {
+          role: (member.role === 'owner' ? 'broker' : member.role) as InvitableRole,
+          status: member.status === 'disabled' ? 'disabled' as const : 'active' as const,
+        },
+      ])));
     } catch (err) {
       setError('تعذر تحميل الأعضاء أو الدعوات. تحقق من صلاحيات المؤسسة واتصالك.');
       console.error(err);
