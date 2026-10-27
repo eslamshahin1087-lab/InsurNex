@@ -37,7 +37,11 @@ export default function AppLayout() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
   const { features: planFeatures } = usePlanFeatures();
-  const visibleNavigation = navigation.filter((item) => !item.feature || (settings.features[item.feature] && planFeatures[item.feature]));
+  const visibleNavigation = navigation.filter(
+    (item) =>
+      !item.feature ||
+      (settings.features[item.feature] && planFeatures[item.feature]),
+  );
   const { resolvedTheme, toggleTheme } = useTheme();
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
@@ -46,6 +50,7 @@ export default function AppLayout() {
     if (typeof window === 'undefined') return 'mobile';
     return window.matchMedia('(min-width: 760px)').matches ? 'desktop' : 'mobile';
   });
+
   const toggleViewMode = () => {
     setViewMode((current) => (current === 'mobile' ? 'desktop' : 'mobile'));
   };
@@ -54,13 +59,14 @@ export default function AppLayout() {
   const isAuthPage =
     location.pathname.startsWith('/login') ||
     location.pathname.startsWith('/register');
-  const showFab = settings.features.copilot && planFeatures.copilot && !isCopilotPage && !isAuthPage;
+  const showFab =
+    settings.features.copilot && planFeatures.copilot && !isCopilotPage && !isAuthPage;
 
   return (
     <div className={`mobile-shell view-mode-${viewMode}`} dir="rtl">
       <header className="app-header s8-header">
         <div className="s8-brand">
-          <Logo alt="InsurNex"/>
+          <Logo alt="InsurNex" />
           <div className="s8-hello">
             <strong>أهلاً {firstName}</strong>
             <small>
@@ -70,17 +76,27 @@ export default function AppLayout() {
             </small>
           </div>
         </div>
+
         <div className="s8-actions">
           <button
             type="button"
             className="view-mode-toggle"
             onClick={toggleViewMode}
-            aria-label={viewMode === 'mobile' ? 'التبديل إلى عرض سطح المكتب' : 'التبديل إلى عرض الهاتف'}
+            aria-label={
+              viewMode === 'mobile'
+                ? 'التبديل إلى عرض سطح المكتب'
+                : 'التبديل إلى عرض الهاتف'
+            }
             title={viewMode === 'mobile' ? 'عرض سطح المكتب' : 'عرض الهاتف'}
           >
-            {viewMode === 'mobile' ? <Monitor size={16} aria-hidden="true" /> : <Smartphone size={16} aria-hidden="true" />}
+            {viewMode === 'mobile' ? (
+              <Monitor size={16} aria-hidden="true" />
+            ) : (
+              <Smartphone size={16} aria-hidden="true" />
+            )}
             <span>{viewMode === 'mobile' ? 'سطح المكتب' : 'عرض الهاتف'}</span>
           </button>
+
           <button
             type="button"
             className="circle-button"
@@ -90,6 +106,7 @@ export default function AppLayout() {
           >
             {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+
           {settings.features.notifications && planFeatures.notifications && (
             <Link
               className="circle-button notification-button"
@@ -100,6 +117,7 @@ export default function AppLayout() {
               <Bell size={18} />
             </Link>
           )}
+
           <button
             type="button"
             className="circle-button"
@@ -137,7 +155,12 @@ export default function AppLayout() {
         aria-label="التنقل الرئيسي"
       >
         {visibleNavigation.map(({ to, label, Icon }) => (
-          <NavLink key={to} to={to} end={to === '/'}>
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={to === '/copilot' ? 'nav-copilot' : undefined}
+          >
             <Icon size={21} />
             <span>{label}</span>
           </NavLink>
