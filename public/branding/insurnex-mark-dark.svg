@@ -1,13 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="InsurNex emblem">
-<defs>
-  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#FFE6A0"/>
-    <stop offset=".34" stop-color="#F0C35C"/>
-    <stop offset=".68" stop-color="#D9A53A"/>
-    <stop offset="1" stop-color="#B9801D"/>
-  </linearGradient>
-</defs>
-<rect x="3" y="3" width="174" height="174" rx="34" fill="#071B37" stroke="#23486D" stroke-width="2"/>
-<path d="M90 20 145 41V91c0 32-23 55-55 70-32-15-55-38-55-70V41Z" fill="none" stroke="url(#gold)" stroke-width="8" stroke-linejoin="miter"/>
-<path d="M59 119V53L121 120V53" fill="none" stroke="url(#gold)" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="InsurNex shield emblem">
+  <defs>
+    <linearGradient id="inx-gold" x1="18" y1="9" x2="160" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE9AA"/>
+      <stop offset=".28" stop-color="#F7D071"/>
+      <stop offset=".58" stop-color="#E4B34B"/>
+      <stop offset=".82" stop-color="#D09A2F"/>
+      <stop offset="1" stop-color="#F6D982"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="176" height="176" rx="34" fill="#071B37" stroke="#23486D" stroke-width="2"/>
+  <g fill="none" stroke="url(#inx-gold)" stroke-linejoin="miter" stroke-linecap="square">
+    <path d="M90 17 145 39V82c0 32-20 54-55 72-35-18-55-40-55-72V39Z" stroke-width="7"/>
+    <path d="M66 119V53L121 119V53" stroke-width="11"/>
+    <path d="M66 79V119" stroke-width="11"/>
+  </g>
 </svg>
