@@ -86,7 +86,7 @@ service cloud.firestore {
         || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'insurers' && roleIs(['owner','admin','broker']))
         || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
-        || (collection == 'documents' && roleIs(['owner','admin','broker']))
+        || (collection == 'documents' && (roleIs(['owner','admin','broker']) || (roleIs(['claims']) && data.category == 'claim')))
         || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
         || (collection in ['copilotConversations','copilotMessages']
           && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
@@ -192,7 +192,7 @@ service cloud.firestore {
           && getAfter(userDocumentPath(uid)).data.role == 'owner'
           && getAfter(userDocumentPath(uid)).data.status == 'active'
         ) || isInvitationMember(orgId, uid);
-        allow read: if sameOrg(orgId) || isAdmin();
+        allow read: if (sameOrg(orgId) && privileged()) || isAdmin();
         allow update: if isAdmin() || (
           sameOrg(orgId)
           && privileged()
@@ -502,6 +502,8 @@ service cloud.firestore {
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
+        && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && (collection != 'documents' || request.resource.data.category == resource.data.category)
         && canUpdateBusinessCollection(collection, resource.data);
       allow delete: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
