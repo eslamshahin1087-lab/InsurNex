@@ -156,6 +156,7 @@ service cloud.firestore {
         && request.resource.data.email == resource.data.email
         && validOrgRole(request.resource.data.role)
         && request.resource.data.role != 'owner'
+        && (me().role == 'owner' || request.resource.data.role != 'admin' || request.resource.data.role == resource.data.role)
         && request.resource.data.status in ['active','disabled']
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','status','displayName','phone','photoURL','updatedAt'])
         && getAfter(memberPath(resource.data.organizationId, uid)).data.role == request.resource.data.role
@@ -198,6 +199,7 @@ service cloud.firestore {
           && uid != get(organizationPath(orgId)).data.ownerId
           && request.resource.data.uid == uid
           && request.resource.data.role in ['admin','broker','sales','claims','finance','staff']
+          && (me().role == 'owner' || request.resource.data.role != 'admin' || request.resource.data.role == resource.data.role)
           && request.resource.data.status in ['active','disabled']
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','status','displayName','updatedAt'])
           && getAfter(userDocumentPath(uid)).data.organizationId == orgId
