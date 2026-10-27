@@ -947,3 +947,20 @@ body {
   }
 }
 /* END INSURNEX_FOOTER_ALIGNMENT_V40 */
+
+/* INSURNEX_BRAND_LOCKUP_SCALE_V40 */
+#root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+  width: min(126px, 30vw) !important;
+  height: 44px !important;
+  max-width: 126px !important;
+  object-fit: contain !important;
+  flex: 0 1 auto !important;
+}
+@media (max-width: 380px) {
+  #root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+    width: 104px !important;
+    max-width: 104px !important;
+    height: 38px !important;
+  }
+}
+/* END INSURNEX_BRAND_LOCKUP_SCALE_V40 */
