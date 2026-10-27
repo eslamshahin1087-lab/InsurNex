@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="760" viewBox="0 0 800 760" role="img" aria-label="InsurNex insurance next generation CRM platform">
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFE6A0"/>
+    <stop offset=".34" stop-color="#F0C35C"/>
+    <stop offset=".68" stop-color="#D9A53A"/>
+    <stop offset="1" stop-color="#B9801D"/>
+  </linearGradient>
+</defs>
+<g stroke="url(#gold)" stroke-linejoin="miter" stroke-linecap="square" fill="none">
+  <path d="M400 28 521 74V178c0 69-47 115-121 150-74-35-121-81-121-150V74Z" stroke-width="13"/>
+  <path d="M335 246V108L465 246V108" stroke-width="22"/>
+</g>
+<text x="400" y="436" text-anchor="middle" fill="#0A1F3B" font-family="Georgia, 'Times New Roman', serif" font-size="112" font-weight="700" letter-spacing="-1.5">InsurNex</text>
+<g fill="url(#gold)">
+  <path d="M184 473H337V478H184Z"/>
+  <path d="M463 473H616V478H463Z"/>
+  <path d="M400 463 410 475.5 400 488 390 475.5Z"/>
+</g>
+<text x="400" y="535" text-anchor="middle" fill="#314865" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="600" letter-spacing="5.2">INSURANCE NEXT GENERATION</text>
+<text x="400" y="577" text-anchor="middle" fill="#314865" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="8">CRM PLATFORM</text>
+</svg>
