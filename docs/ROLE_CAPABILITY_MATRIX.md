@@ -1,6 +1,6 @@
 # InsurNex — Proposed Role Capability Matrix
 
-**Status:** proposed for product-owner review; not yet enforced by Firestore Rules.  
+**Status:** approved starting matrix; Phase 1 implementation is in the current draft PR and remains subject to emulator/CI acceptance.  
 **Baseline:** repository roles in `src/types/auth.ts`: `owner`, `admin`, `broker`, `sales`, `claims`, `finance`, `staff`. Platform Admin is a separate platform-operator identity and is not an organization role.
 
 ## Security principles
@@ -44,19 +44,16 @@ Use explicit helpers rather than a single broad same-organization allow rule:
 - Unknown collections remain denied to client identities.
 - Copilot conversations/messages are scoped to the owning user unless an explicit shared-conversation feature is implemented.
 
-## Required member provisioning flow before role rules are enabled
+## Member provisioning implementation in Phase 1
 
-Current onboarding writes an owner profile and owner membership. It does not establish a verified invitation/acceptance flow for the other roles.
+The draft implementation now adds a client-side Firestore Rules-constrained invitation flow:
+1. Owner/Admin creates a random, unguessable invitation ID bound to a normalized email, role, organization, creator, and expiry no later than seven days.
+2. The invitee signs in or registers, verifies their Firebase Auth email, and accepts only an invitation addressed to that verified email.
+3. Acceptance updates the invitation and atomically creates `users/{uid}` plus `organizations/{orgId}/members/{uid}`. Firestore `getAfter` checks validate the combined post-write state; role and organization fields cannot be self-edited afterwards.
+4. Owner/Admin can revoke pending invitations. Invitation email delivery is manual/copy-link for the free-only MVP; no paid email provider is assumed.
+5. Owner/Admin can update roles and enable/disable membership by atomically changing both profile and membership records. Owner role transfer is intentionally excluded.
 
-Implement a least-privilege, auditable path before enabling role-specific access:
-1. Owner/Admin creates a time-limited invitation containing organization ID, normalized invitee email, allowed role, inviter UID, expiration, one-time token hash and status.
-2. The invitee signs in with Firebase Authentication and proves ownership of the invited email (where email verification is required).
-3. A trusted endpoint or tightly constrained invite-acceptance transaction validates expiry, token, email, active organization, inviter capability and one-time use.
-4. Provision `users/{uid}` and `organizations/{orgId}/members/{uid}` consistently; never let a user write their own role or organization ID.
-5. Record invitation creation/acceptance/revocation in the organization audit log.
-6. Test expired/replayed invitations, wrong email, cross-organization assignment, role escalation, deactivated members and concurrent acceptance.
-
-Under the currently selected Firebase Spark constraint, any server endpoint for this flow must run on a verified no-cost-capable runtime; Firebase Cloud Functions cannot be assumed deployable on Spark. Do not ship invitation writes before that runtime and token design are reviewed.
+This is deliberately not a claim of complete production security. The team must run the Firebase Emulator tests and review the exact rules before merging. There is no append-only audit-log implementation in this PR yet; invitation and role changes are not considered fully audited until a trusted audit sink is implemented.
 
 ## Required tests
 
@@ -73,3 +70,17 @@ Under the currently selected Firebase Spark constraint, any server endpoint for 
 ## Review decision needed
 
 This matrix is intentionally conservative for sensitive data. Please review the proposed role boundaries before we enforce them. If changed, update this document first, then implement rules + invitation provisioning + emulator tests in the same reviewed phase.
+
+## Implemented capability boundaries and known gaps (draft branch)
+
+The current rule changes enforce organization membership plus action/collection capability on the main business collections. They remove the generic Platform Admin bypass for tenant business records, scope Copilot conversation/message access to the current user, restrict document metadata by role/category, and add a one-time verified-email invitation flow.
+
+Important residual risks before production:
+- The current clients/{clientId} document still contains mixed-sensitivity fields. Firestore Rules cannot hide selected fields in a readable document, so the present rule allows claims users to read the whole client record, including any sensitive attributes stored there. Sales/finance/staff are denied direct client-record reads. Split sensitive identity/family/medical fields into separately authorized documents or an authorized server projection before real sensitive data is used.
+- Current policies/claims/documents remain organization-scoped rather than fully assignment-scoped. A later phase must validate every foreign-key relationship (claim→policy/client, document→client/claim) server/rules-side and add assigned-record restrictions.
+- Platform Admin still has deliberate access to platform-management collections such as users, organization metadata, plans and subscription records. It must not be used as a general tenant-record access role.
+- auditLogs, data export/deletion, retention enforcement, and client-consent flows are not implemented by the current code changes.
+- The legacy general document service still contains direct Firebase Storage upload/download/delete code. It remains incompatible with a strict Spark-only operation model until all call sites are migrated to the canonical private storage gateway and the complete workflow is tested.
+- Firebase Functions/Anthropic AI deployment is not made free-tier compatible by this PR. Sensitive AI calls stay out of scope until a suitable runtime and data-handling posture are approved.
+
+No production rules, hosting, function, or storage deployment is part of this pull request.
