@@ -571,3 +571,274 @@
     right: 8px;
   }
 }
+
+
+
+/* INSURNEX_COPILOT_LAYOUT_V4 */
+.copilot-page,
+.copilot-page * { box-sizing: border-box; }
+.copilot-page {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 auto;
+}
+.copilot-page > *, .copilot-sidebar, .copilot-chat, .copilot-messages { min-width: 0; max-width: 100%; }
+.copilot-sidebar { min-height: 0; overflow: hidden; }
+.copilot-sidebar-list { min-height: 0; overscroll-behavior: contain; }
+.copilot-chat {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: min(720px, calc(100dvh - 155px));
+  min-height: 450px;
+  max-height: none;
+  overflow: hidden;
+  border-radius: 18px;
+}
+.copilot-chat-head { flex: 0 0 auto; flex-wrap: wrap; gap: 8px; }
+.copilot-messages { flex: 1 1 auto; min-height: 0; min-width: 0; overflow-y: auto; overflow-wrap: anywhere; overscroll-behavior: contain; }
+.copilot-input { flex: 0 0 auto; min-width: 0; }
+.copilot-input textarea { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.copilot-sidebar-list::-webkit-scrollbar { height: 3px; }
+.copilot-sidebar-list::-webkit-scrollbar-thumb { background: var(--inx-border); border-radius: 99px; }
+
+/* Responsive to the app column, not the full desktop browser viewport. */
+@container insurnex-shell (max-width: 680px) {
+  .copilot-page {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    padding: 10px 8px calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+  .copilot-page > .copilot-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    max-height: 168px;
+    min-height: 0;
+    padding: 10px;
+    gap: 8px;
+    overflow: hidden;
+    border-radius: 15px;
+  }
+  .copilot-sidebar-head { padding-bottom: 7px; gap: 8px; }
+  .copilot-sidebar-head h3 { font-size: 13px; }
+  .copilot-sidebar-list {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row !important;
+    gap: 7px;
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1px 0 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .copilot-sidebar-list > li { flex: 0 0 min(220px, 65cqw); min-width: 0; max-width: 100%; }
+  .copilot-conv { min-height: 58px; padding: 7px 8px; gap: 6px; }
+  .copilot-conv-icon { width: 26px; height: 26px; border-radius: 8px; }
+  .copilot-conv-copy b { font-size: 12px; }
+  .copilot-conv-copy small { font-size: 10px; }
+  .copilot-conv-del { width: 23px; height: 23px; }
+  .copilot-sidebar-empty { flex-direction: row; justify-content: center; padding: 10px 6px; font-size: 11px; }
+  .copilot-sidebar-empty svg { width: 17px; height: 17px; }
+  .copilot-page > .copilot-chat {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    height: min(520px, calc(100dvh - 230px));
+    min-height: 370px;
+    max-height: 520px;
+    border-radius: 15px;
+  }
+  .copilot-chat-head { padding: 10px 11px; }
+  .copilot-chat-head .title { gap: 8px; }
+  .copilot-chat-head .title h2 { font-size: 13px; }
+  .copilot-chat-head .title small { font-size: 10px; }
+  .copilot-messages { padding: 10px; }
+  .copilot-empty { max-width: 100%; font-size: 12px; }
+  .copilot-input { padding: 8px; gap: 7px; }
+  .copilot-input textarea { width: 100%; font-size: 16px; }
+  .copilot-send { flex: 0 0 36px; width: 36px; height: 36px; }
+  .copilot-page .inx-section-head h2 { font-size: 13px; }
+}
+
+@container insurnex-shell (max-width: 360px) {
+  .copilot-page { padding-inline: 5px; }
+  .copilot-page > .copilot-chat { min-height: 350px; }
+  .copilot-chat-head .title h2 { font-size: 12px; }
+  .copilot-sidebar-list > li { flex-basis: 68cqw; }
+}
+/* END INSURNEX_COPILOT_LAYOUT_V4 */
+/* INSURNEX_COPILOT_COMPOSER_FIX_V5_1 */
+/* Keep all variable-height content in the scroll region and the composer anchored below it. */
+.mobile-shell {
+  container-type: inline-size;
+  container-name: insurnex-shell;
+}
+.copilot-page,
+.copilot-page * { box-sizing: border-box; }
+.copilot-page > .copilot-chat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.copilot-chat-head {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.copilot-messages {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0 !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120,145,175,.38) transparent;
+}
+.copilot-messages::-webkit-scrollbar { width: 4px; height: 4px; }
+.copilot-messages::-webkit-scrollbar-track { background: transparent; }
+.copilot-messages::-webkit-scrollbar-thumb { background: rgba(120,145,175,.38); border-radius: 99px; }
+.copilot-empty {
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 12px 8px 8px;
+  gap: 7px;
+}
+.copilot-empty h3 { font-size: 15px; }
+.copilot-empty p { font-size: 12px; line-height: 1.6; }
+.copilot-suggestions {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+.copilot-suggestions > section { margin-top: 0 !important; }
+.copilot-suggestions .inx-section-head { margin: 0 0 8px !important; }
+.copilot-suggestions .inx-section-head h2 { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.copilot-suggestions > section > div:nth-child(2) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 7px !important;
+}
+.copilot-suggestions .inx-card {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 10px !important;
+  border-radius: 12px !important;
+}
+.copilot-suggestions .inx-card > span:last-child {
+  min-width: 0;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere;
+}
+.copilot-input {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  min-width: 0;
+  background: var(--inx-surface);
+}
+.copilot-input textarea {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40px;
+  max-height: 76px;
+  resize: none;
+}
+
+/* The app itself is narrow inside a desktop-sized browser: query the app container. */
+@container insurnex-shell (max-width: 680px) {
+  .copilot-page {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    padding: 8px 6px calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+  .copilot-page > .copilot-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    max-height: 100px;
+    min-height: 0;
+    padding: 7px 9px;
+    gap: 5px;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+  .copilot-sidebar-head { padding-bottom: 5px; gap: 8px; }
+  .copilot-sidebar-head h3 { font-size: 12px; }
+  .copilot-sidebar-empty {
+    flex-direction: row;
+    justify-content: center;
+    padding: 3px 4px;
+    gap: 6px;
+    font-size: 10px;
+  }
+  .copilot-sidebar-empty svg { width: 15px; height: 15px; }
+  .copilot-sidebar-list {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row !important;
+    gap: 7px;
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1px 0 3px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .copilot-sidebar-list > li { flex: 0 0 min(190px, 68cqw); min-width: 0; max-width: 100%; }
+  .copilot-conv { min-height: 48px; padding: 6px 7px; gap: 5px; }
+  .copilot-conv-icon { width: 23px; height: 23px; border-radius: 7px; }
+  .copilot-conv-copy b { font-size: 11px; }
+  .copilot-conv-copy small { font-size: 9px; }
+  .copilot-conv-copy em { font-size: 9px; }
+  .copilot-conv-del { width: 21px; height: 21px; }
+  .copilot-page > .copilot-chat {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    height: clamp(350px, calc(100dvh - 300px), 520px);
+    min-height: 350px;
+    max-height: 520px;
+    margin: 0;
+    border-radius: 15px;
+  }
+  .copilot-chat-head { padding: 9px 10px; gap: 7px; }
+  .copilot-chat-head .title { gap: 7px; }
+  .copilot-chat-head .title h2 { font-size: 12px; }
+  .copilot-chat-head .title small { font-size: 10px; }
+  .copilot-messages { padding: 8px; gap: 8px; }
+  .copilot-input { padding: 8px; gap: 7px; }
+  .copilot-input textarea { width: 100%; font-size: 16px; }
+  .copilot-send { flex: 0 0 36px; width: 36px; height: 36px; }
+}
+@container insurnex-shell (max-width: 360px) {
+  .copilot-page { padding-inline: 5px; }
+  .copilot-page > .copilot-chat { min-height: 350px; }
+  .copilot-chat-head .title h2 { font-size: 11px; }
+  .copilot-messages { padding: 7px; }
+}
+/* END INSURNEX_COPILOT_COMPOSER_FIX_V5_1 */

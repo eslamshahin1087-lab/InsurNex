@@ -1090,3 +1090,2194 @@
   font-weight: 700;
   color: var(--inx-text);
 }
+/* INSURNEX_NAV_OVERLAP_FIX_V1 */
+.mobile-shell { padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important; }
+.app-body { padding-bottom: 24px; }
+.app-tabbar.s8-tabbar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
+
+
+
+
+/* INSURNEX_UI_POLISH_V4 */
+/* The app may be phone-width inside a desktop browser; use its actual width for responsive descendants. */
+.mobile-shell {
+  container-type: inline-size;
+  container-name: insurnex-shell;
+}
+
+/* Seamless shortcut slideshow: clean viewport, small cards, drag/swipe support. */
+.inx-shortcut-row {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  direction: ltr;
+  padding: 4px 2px 8px;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+  scroll-behavior: auto !important;
+  touch-action: pan-x pan-y;
+  cursor: grab;
+}
+.inx-shortcut-row:active { cursor: grabbing; }
+.inx-shortcut-row::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+.inx-shortcut-track { display: flex; align-items: stretch; width: max-content; min-width: 100%; }
+.inx-shortcut-group { display: flex; flex: 0 0 auto; align-items: stretch; gap: 8px; padding-inline-end: 8px; }
+.inx-shortcut-group > .inx-shortcut-card {
+  flex: 0 0 92px;
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
+  min-height: 82px;
+  padding: 9px 7px;
+  gap: 6px;
+  border-radius: 14px;
+  box-sizing: border-box;
+  direction: rtl;
+  text-align: center;
+}
+.inx-shortcut-group .inx-3d-icon { width: 36px; height: 36px; border-radius: 11px; }
+.inx-shortcut-group .inx-3d-icon svg { width: 16px; height: 16px; }
+.inx-shortcut-group .label { font-size: 11px; line-height: 1.4; white-space: normal; }
+.inx-shortcut-group-clone { pointer-events: none; user-select: none; }
+.inx-shortcut-row:focus-visible { outline: 2px solid var(--inx-blue, #1e4272); outline-offset: 2px; border-radius: 12px; }
+
+/* Smaller Lucide glyphs and soft dimensional surfaces for primary app controls. */
+.inx-3d-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.68), 0 5px 11px rgba(24,55,92,.20);
+  transform: translateZ(0);
+}
+.inx-3d-icon svg { width: 17px; height: 17px; stroke-width: 1.85; filter: drop-shadow(0 1px 0 rgba(255,255,255,.28)); }
+.inx-3d-icon.sm { width: 34px; height: 34px; border-radius: 10px; }
+.inx-3d-icon.sm svg { width: 15px; height: 15px; }
+.inx-3d-icon.lg { width: 50px; height: 50px; border-radius: 15px; }
+.inx-3d-icon.lg svg { width: 21px; height: 21px; }
+.inx-icon-circle { width: 36px; height: 36px; border-radius: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 4px 9px rgba(24,55,92,.12); background-image: linear-gradient(145deg, rgba(255,255,255,.55), rgba(255,255,255,0)); }
+.inx-icon-circle svg { width: 16px; height: 16px; stroke-width: 1.85; }
+.inx-icon-circle-sm { width: 30px; height: 30px; border-radius: 9px; }
+.inx-icon-circle-sm svg { width: 14px; height: 14px; }
+.inx-icon-circle-lg { width: 44px; height: 44px; border-radius: 13px; }
+.inx-icon-circle-lg svg { width: 20px; height: 20px; }
+.inx-icon-btn { width: 34px; height: 34px; box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(24,55,92,.12); }
+.inx-icon-btn svg { width: 15px; height: 15px; stroke-width: 1.85; }
+
+.s8-actions > button,
+.s8-actions > a,
+.s8-actions > div > button {
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #ffffff, #eaf1f8);
+  border: 1px solid rgba(120,145,175,.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 3px 8px rgba(20,47,82,.10);
+}
+.s8-actions svg { width: 16px; height: 16px; stroke-width: 1.85; }
+.s8-actions button:focus:not(:focus-visible) { outline: none !important; }
+.s8-actions button:focus-visible { outline: 2px solid var(--inx-blue, #1e4272); outline-offset: 2px; }
+.app-tabbar svg { width: 17px; height: 17px; stroke-width: 1.8; filter: drop-shadow(0 1px 0 rgba(255,255,255,.32)); }
+.app-tabbar a { transition: background .18s ease, transform .18s ease; }
+.app-tabbar a.active { background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(226,236,248,.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 3px 8px rgba(30,66,114,.10); }
+.copilot-send { width: 38px; height: 38px; border-radius: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 5px 12px rgba(30,66,114,.23); }
+.copilot-send svg { width: 16px; height: 16px; stroke-width: 1.85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .inx-shortcut-row { scroll-behavior: auto !important; }
+  .inx-shortcut-card, .app-tabbar a, .inx-3d-icon { transition: none !important; }
+}
+/* END INSURNEX_UI_POLISH_V4 */
+
+/* INSURNEX_QUICK_ACCESS_SAFE_V11 */
+.inx-shortcut-row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 9px !important;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 4px 2px 9px !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-behavior: auto;
+  touch-action: pan-x;
+}
+.inx-shortcut-row::-webkit-scrollbar { display: none !important; }
+.inx-shortcut-card {
+  flex: 0 0 82px !important;
+  width: 82px;
+  min-width: 82px !important;
+  min-height: 72px;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 5px !important;
+  border-radius: 15px !important;
+  text-align: center;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.inx-shortcut-card .inx-3d-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 5px 12px rgba(15,35,65,.16) !important;
+  transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
+}
+.inx-shortcut-card .inx-3d-icon svg { width: 16px !important; height: 16px !important; }
+.inx-shortcut-card .label { font-size: 11px !important; font-weight: 700; line-height: 1.35; white-space: nowrap; }
+.inx-shortcut-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(15,35,65,.12); }
+.inx-shortcut-card:hover .inx-3d-icon { transform: translateY(-1px) scale(1.04); filter: saturate(1.12); }
+.inx-shortcut-row.inx-carousel-running .inx-shortcut-card .inx-3d-icon { animation: insurnex-icon-float-v11 3.8s ease-in-out infinite; }
+.inx-shortcut-row.inx-carousel-running .inx-shortcut-card:nth-child(4n+2) .inx-3d-icon { animation-delay: -.7s; }
+.inx-shortcut-row.inx-carousel-running .inx-shortcut-card:nth-child(4n+3) .inx-3d-icon { animation-delay: -1.4s; }
+.inx-shortcut-row.inx-carousel-running .inx-shortcut-card:nth-child(4n+4) .inx-3d-icon { animation-delay: -2.1s; }
+.inx-shortcut-card:focus-visible { outline: 2px solid #4f8dd6; outline-offset: 2px; }
+@keyframes insurnex-icon-float-v11 { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .inx-shortcut-row.inx-carousel-running .inx-shortcut-card .inx-3d-icon { animation: none !important; }
+  .inx-shortcut-card { transition: none !important; }
+}
+/* END INSURNEX_QUICK_ACCESS_SAFE_V11 */
+
+
+
+
+
+
+
+/* INSURNEX_REFERENCE_UI_V19 */
+/* Reference palette: insurance-navy, cobalt blue, ice-blue surfaces, subtle borders. */
+:root {
+  --inx-ref-navy: #12345a;
+  --inx-ref-blue: #1769c2;
+  --inx-ref-blue-deep: #0c4f9e;
+  --inx-ref-ice: #edf5ff;
+  --inx-ref-border: #d8e6f6;
+  --inx-ref-muted: #7187a3;
+  --inx-ref-shadow: 0 4px 13px rgba(18,52,90,.055);
+}
+
+/* Continuous carousel. A paired sequence is retained; CSS only, no route or handler changes. */
+.inx-shortcut-row.inx-shortcut-carousel {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 82px !important;
+  min-height: 82px !important;
+  max-height: 82px !important;
+  margin: 2px 0 14px !important;
+  padding: 4px 0 7px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  direction: rtl !important;
+  scroll-snap-type: none !important;
+  scrollbar-width: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+.inx-shortcut-row.inx-shortcut-carousel::-webkit-scrollbar { display: none !important; }
+.inx-shortcut-carousel .inx-shortcut-track {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  height: 72px !important;
+  direction: rtl !important;
+  transform: translate3d(0,0,0);
+  will-change: transform;
+  animation-name: insurnex-reference-carousel-v19 !important;
+  animation-duration: 9.6s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+}
+.inx-shortcut-carousel .inx-shortcut-sequence {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding-inline-end: 8px !important;
+  box-sizing: content-box !important;
+  direction: rtl !important;
+}
+.inx-shortcut-carousel .inx-shortcut-card {
+  flex: 0 0 78px !important;
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  height: 70px !important;
+  min-height: 70px !important;
+  margin: 0 !important;
+  padding: 7px 4px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border: 1px solid var(--inx-ref-border) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg,#fff 0%,#f8fbff 100%) !important;
+  box-shadow: 0 3px 9px rgba(18,52,90,.045) !important;
+  color: var(--inx-ref-navy) !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease !important;
+}
+.inx-shortcut-carousel .inx-3d-icon,
+.inx-shortcut-carousel .inx-3d-icon.tone-cyan,
+.inx-shortcut-carousel .inx-3d-icon.tone-success,
+.inx-shortcut-carousel .inx-3d-icon.tone-warning,
+.inx-shortcut-carousel .inx-3d-icon.tone-danger,
+.inx-shortcut-carousel .inx-3d-icon.tone-purple,
+.inx-shortcut-carousel .inx-3d-icon.tone-rose {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9px !important;
+  border: 1px solid #d5e5f7 !important;
+  background: #edf5ff !important;
+  color: #1c5eaa !important;
+  box-shadow: 0 2px 5px rgba(23,62,105,.06) !important;
+  filter: none !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+.inx-shortcut-carousel .inx-3d-icon::after { display: none !important; }
+.inx-shortcut-carousel .inx-3d-icon svg {
+  display: block !important;
+  width: 17px !important;
+  height: 17px !important;
+  stroke: currentColor !important;
+  stroke-width: 1.85 !important;
+}
+.inx-shortcut-carousel .inx-shortcut-card .label {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: #244565 !important;
+  font-size: 10.5px !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+}
+.inx-shortcut-carousel .inx-shortcut-card:hover {
+  transform: translateY(-1px) !important;
+  border-color: #b9d1ee !important;
+  box-shadow: 0 5px 12px rgba(20,48,83,.085) !important;
+}
+@keyframes insurnex-reference-carousel-v19 {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(50%,0,0); }
+}
+@media (min-width: 760px) {
+  .inx-shortcut-carousel .inx-shortcut-track { animation-duration: 9.6s !important; }
+  .inx-shortcut-carousel .inx-shortcut-card { flex-basis: 82px !important; width: 82px !important; min-width: 82px !important; max-width: 82px !important; }
+}
+@media (max-width: 520px) {
+  .inx-shortcut-carousel .inx-shortcut-track { animation-duration: 8.9s !important; }
+  .inx-shortcut-carousel .inx-shortcut-card { flex-basis: 76px !important; width: 76px !important; min-width: 76px !important; max-width: 76px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inx-shortcut-carousel .inx-shortcut-track { animation: none !important; transform: none !important; }
+  .inx-shortcut-carousel .inx-shortcut-sequence[aria-hidden="true"] { display: none !important; }
+  .inx-shortcut-carousel .inx-shortcut-card,
+  .inx-shortcut-carousel .inx-3d-icon { transition: none !important; }
+}
+
+/* Quick actions: true equal-width tiles, with the same quiet icon treatment. */
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 76px !important;
+  height: auto !important;
+  padding: 11px 8px !important;
+  gap: 7px !important;
+  box-sizing: border-box !important;
+  border: 1px solid var(--inx-ref-border) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(180deg,#fff 0%,#f8fbff 100%) !important;
+  box-shadow: var(--inx-ref-shadow) !important;
+}
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon,
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-cyan,
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-success,
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-warning,
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-danger,
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-purple {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border: 1px solid #d5e5f7 !important;
+  border-radius: 10px !important;
+  background: #edf5ff !important;
+  color: #1c5eaa !important;
+  box-shadow: 0 2px 5px rgba(23,62,105,.06) !important;
+}
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon::after { display: none !important; }
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon svg { width: 17px !important; height: 17px !important; stroke-width: 1.85 !important; }
+.mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .label {
+  color: #244565 !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+  font-weight: 750 !important;
+  white-space: normal !important;
+}
+
+/* Home page: match the reference's white cards, navy heading hierarchy and cobalt links. */
+.inx-scope-row { gap: 8px !important; margin-bottom: 14px !important; }
+.inx-scope-pill {
+  min-height: 38px;
+  padding: 8px 12px !important;
+  border-color: var(--inx-ref-border) !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: var(--inx-ref-navy) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+.inx-chip-emphasis {
+  min-height: 38px;
+  padding: 8px 12px !important;
+  border: 1px solid #dbe9f9 !important;
+  border-radius: 999px !important;
+  background: #edf5ff !important;
+  color: #155eae !important;
+  font-size: 12px !important;
+}
+.inx-hero-panel {
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 18px !important;
+  padding: 17px !important;
+  gap: 14px !important;
+  box-shadow: 0 9px 24px rgba(18,52,90,.16) !important;
+}
+.inx-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 18px 0 10px !important;
+}
+.inx-section-head h2 {
+  margin: 0 !important;
+  color: var(--inx-ref-navy) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+.inx-section-link {
+  min-height: 32px;
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  color: var(--inx-ref-blue) !important;
+  font-size: 12px !important;
+}
+.inx-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 10px !important;
+}
+.inx-kpi {
+  min-width: 0 !important;
+  border: 1px solid var(--inx-ref-border) !important;
+  border-radius: 15px !important;
+  background: #fff !important;
+  box-shadow: var(--inx-ref-shadow) !important;
+  padding: 13px !important;
+}
+.inx-kpi-value { color: var(--inx-ref-navy) !important; font-weight: 800 !important; }
+.inx-kpi-label { color: var(--inx-ref-muted) !important; }
+.inx-kpi .inx-3d-icon,
+.inx-kpi .inx-3d-icon.tone-cyan,
+.inx-kpi .inx-3d-icon.tone-success,
+.inx-kpi .inx-3d-icon.tone-warning,
+.inx-kpi .inx-3d-icon.tone-danger,
+.inx-kpi .inx-3d-icon.tone-purple {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: #edf5ff !important;
+  color: #1c5eaa !important;
+  border: 1px solid #d5e5f7 !important;
+  box-shadow: none !important;
+}
+.inx-kpi .inx-3d-icon::after { display: none !important; }
+.inx-kpi .inx-3d-icon svg { width: 18px !important; height: 18px !important; stroke-width: 1.85 !important; }
+
+/* The bottom navigation keeps every existing NavLink and its behavior. */
+.app-tabbar.s8-tabbar {
+  padding: 7px 8px !important;
+  gap: 3px !important;
+  border: 1px solid #e1eaf5 !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 8px 24px rgba(18,52,90,.12) !important;
+  backdrop-filter: blur(16px);
+}
+.app-tabbar.s8-tabbar > a {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  padding: 6px 2px !important;
+  border-radius: 14px !important;
+  gap: 4px !important;
+  color: #7187a3 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+.app-tabbar.s8-tabbar > a svg { width: 18px !important; height: 18px !important; stroke-width: 1.8 !important; }
+.app-tabbar.s8-tabbar > a[aria-current="page"] {
+  background: #eaf3ff !important;
+  color: #155eae !important;
+  box-shadow: inset 0 0 0 1px #d6e7fb !important;
+}
+.mobile-shell .app-body { padding-bottom: 24px !important; }
+@media (max-width: 520px) {
+  .inx-hero-panel .hero-body { gap: 12px !important; }
+  .inx-hero-panel .hero-column .metric { font-size: 19px !important; }
+  .mobile-shell .app-body [style*="grid-template-columns"] { gap: 10px !important; }
+}
+/* END INSURNEX_REFERENCE_UI_V19 */
+/* INSURNEX_BOTTOM_LAYOUT_AD_SLOT_V20 */
+/* Predictable mobile shell sizing: reserve clearance for the fixed bottom navigation, not a second oversized blank footer. */
+.mobile-shell {
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.mobile-shell > .app-header { flex: 0 0 auto !important; }
+.mobile-shell > .app-body {
+  width: min(1120px, 100%) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  margin: 0 auto !important;
+  padding-bottom: 12px !important;
+  box-sizing: border-box !important;
+}
+/* Common ad zone uses the existing admin-managed AdsSlideshow. If no campaign is active,
+   show a low-emphasis reserved placeholder instead of leaving a visually broken hole. */
+.inx-global-ad-slot {
+  width: 100% !important;
+  max-width: 620px !important;
+  margin: auto auto 0 !important;
+  padding: 7px 14px 9px !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  align-self: center !important;
+  position: relative;
+  z-index: 4;
+}
+.inx-global-ad-slot-inner {
+  position: relative;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 66px;
+  max-height: 92px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  border: 1px solid #dbe7f5;
+  border-radius: 14px;
+  background: linear-gradient(135deg,#f8fbff 0%,#edf5ff 100%);
+  box-shadow: 0 3px 10px rgba(18,52,90,.035);
+}
+.inx-global-ad-slot-inner:empty {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-style: dashed !important;
+  background: rgba(255,255,255,.48) !important;
+}
+.inx-global-ad-slot-inner:empty::before {
+  content: "\0645\0633\0627\062D\0629 \0625\0639\0644\0627\0646\064A\0629";
+  color: #8aa0ba;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.inx-global-ad-slot-inner > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 92px !important;
+  box-sizing: border-box !important;
+}
+.inx-global-ad-slot-inner img,
+.inx-global-ad-slot-inner video {
+  display: block;
+  width: 100% !important;
+  max-height: 88px !important;
+  object-fit: contain !important;
+  border-radius: 12px;
+}
+.inx-global-ad-slot-inner a { display: block; max-width: 100%; }
+@media (max-width: 520px) {
+  .mobile-shell { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
+  .inx-global-ad-slot { padding: 6px 12px 8px !important; }
+  .inx-global-ad-slot-inner { min-height: 62px; max-height: 82px !important; border-radius: 12px; }
+  .inx-global-ad-slot-inner > * { max-height: 82px !important; }
+  .inx-global-ad-slot-inner img,
+  .inx-global-ad-slot-inner video { max-height: 78px !important; }
+}
+/* END INSURNEX_BOTTOM_LAYOUT_AD_SLOT_V20 */
+
+/* INSURNEX_DARK_SURFACE_CONTRAST_V22 */
+/* Dark theme must override legacy light-only !important surfaces. */
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi:not(.inx-kpi-featured),
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-card,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-list-item {
+  background: var(--inx-surface) !important;
+  color: var(--inx-text) !important;
+  border-color: var(--inx-border) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-kpi-value,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card .chart-head .value,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card .chart-head .label,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-section-head h2 {
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-kpi-label,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-kpi-value small,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card .chart-head small,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card .legend-label,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-chart-card .legend-value {
+  color: #B7C9DD !important;
+}
+
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-3d-icon,
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi [data-insurnex-operations-icon] {
+  background: var(--inx-info-bg) !important;
+  color: var(--inx-blue) !important;
+  border-color: var(--inx-border) !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-3d-icon.tone-success {
+  background: var(--inx-success-bg) !important;
+  color: var(--inx-success) !important;
+}
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-3d-icon.tone-warning {
+  background: var(--inx-warning-bg) !important;
+  color: var(--inx-warning) !important;
+}
+:root[data-theme="dark"] .mobile-shell main.mobile-page .inx-kpi .inx-3d-icon.tone-danger {
+  background: var(--inx-danger-bg) !important;
+  color: var(--inx-danger) !important;
+}
+
+/* Increase contrast of operation-specific body copy on navy surfaces. */
+:root[data-theme="dark"] .mobile-shell main.mobile-page:has(nav.inx-chips) {
+  color: var(--inx-text);
+  --inx-muted: #B7C9DD;
+  --inx-app-muted: #B7C9DD;
+}
+
+:root[data-theme="dark"] .mobile-shell main.mobile-page:has(nav.inx-chips) .inx-container,
+:root[data-theme="dark"] .mobile-shell main.mobile-page:has(nav.inx-chips) .inx-container p,
+:root[data-theme="dark"] .mobile-shell main.mobile-page:has(nav.inx-chips) .inx-container small {
+  color: var(--inx-text-soft);
+}
+/* END INSURNEX_DARK_SURFACE_CONTRAST_V22 */
+
+/* INSURNEX_DARK_MODE_FINISH_V23 */
+/* The shortcut track includes an aria-hidden duplicate for marquee animation.
+   Use one static, scrollable sequence to avoid repeated shortcut tiles. */
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x proximity !important;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-sequence[aria-hidden="true"] {
+  display: none !important;
+}
+.mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-sequence:not([aria-hidden="true"]) {
+  flex: 0 0 auto !important;
+}
+
+/* Re-map legacy reference variables when dark mode is active. */
+:root[data-theme="dark"] {
+  --inx-ref-navy: #E7EEF8;
+  --inx-ref-blue: #83B9F2;
+  --inx-ref-blue-deep: #A5D0FF;
+  --inx-ref-ice: #142F50;
+  --inx-ref-border: #28486A;
+  --inx-ref-muted: #B7C9DD;
+  --inx-ref-shadow: 0 4px 13px rgba(0, 0, 0, .24);
+}
+
+/* Dashboard scope pills and notification badges. */
+:root[data-theme="dark"] .mobile-shell .app-body .inx-scope-pill,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chip-emphasis {
+  background: var(--inx-surface) !important;
+  border: 1px solid var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chip-emphasis {
+  background: var(--inx-info-bg) !important;
+  color: var(--inx-text) !important;
+}
+
+/* Shortcuts: replace light-only white tiles with calm navy surfaces. */
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card {
+  background: linear-gradient(180deg, var(--inx-surface) 0%, var(--inx-surface-2) 100%) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card .label,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .label {
+  color: var(--inx-text-soft) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon {
+  background: var(--inx-info-bg) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-blue) !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon.tone-success,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-success {
+  background: var(--inx-success-bg) !important;
+  color: var(--inx-success) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon.tone-warning,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-warning {
+  background: var(--inx-warning-bg) !important;
+  color: var(--inx-warning) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon.tone-danger,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-danger {
+  background: var(--inx-danger-bg) !important;
+  color: var(--inx-danger) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon.tone-purple,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon.tone-purple {
+  background: #29204B !important;
+  color: #C4B5FD !important;
+}
+
+/* KPI and chart surfaces: no white cards on a dark workspace. */
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-card,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-card-lg {
+  background: var(--inx-surface) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi-value,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .chart-head .value,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .chart-head .label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-section-head h2 {
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi-label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi-value small,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card small,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .legend-label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .legend-value,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-section-link {
+  color: var(--inx-text-soft) !important;
+}
+
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi .inx-3d-icon {
+  background: var(--inx-info-bg) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-blue) !important;
+  box-shadow: none !important;
+}
+
+/* Bottom navigation uses dark tokens too, including its selected item. */
+:root[data-theme="dark"] .app-tabbar.s8-tabbar {
+  background: rgba(16, 42, 78, .97) !important;
+  border-color: var(--inx-border) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .32) !important;
+}
+
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a {
+  color: #B7C9DD !important;
+}
+
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a[aria-current="page"],
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a.active {
+  background: var(--inx-blue-soft) !important;
+  color: #E7F1FF !important;
+  box-shadow: inset 0 0 0 1px var(--inx-border) !important;
+}
+
+/* Ad placeholder should not flash a bright rectangle in dark mode. */
+:root[data-theme="dark"] .inx-global-ad-slot-inner {
+  background: linear-gradient(135deg, var(--inx-surface) 0%, var(--inx-surface-2) 100%) !important;
+  border-color: var(--inx-border) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+:root[data-theme="dark"] .inx-global-ad-slot-inner:empty {
+  background: var(--inx-surface-2) !important;
+  border-color: var(--inx-border) !important;
+}
+:root[data-theme="dark"] .inx-global-ad-slot-inner:empty::before {
+  color: var(--inx-text-soft) !important;
+}
+/* END INSURNEX_DARK_MODE_FINISH_V23 */
+
+/* INSURNEX_CORPORATE_DARK_V27 */
+:root {
+  --inx-font-sans: 'Inter', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+html, body, #root, button, input, select, textarea, option,
+.mobile-shell, .mobile-shell * {
+  font-family: var(--inx-font-sans) !important;
+  font-synthesis: none;
+}
+
+html { text-rendering: optimizeLegibility; }
+.mobile-shell { font-size: 14px; line-height: 1.55; }
+.mobile-shell .app-body h1 { font-size: clamp(21px, 2.4vw, 26px); line-height: 1.3; font-weight: 700; }
+.mobile-shell .app-body h2 { font-size: clamp(17px, 2vw, 20px); line-height: 1.4; font-weight: 700; }
+.mobile-shell .app-body h3 { font-size: 15px; line-height: 1.45; font-weight: 700; }
+.mobile-shell .app-body p { line-height: 1.65; }
+.mobile-shell .app-body small { line-height: 1.5; }
+
+/* Stronger dark palette and readable muted text. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --inx-bg: #081522;
+  --inx-surface: #0E2237;
+  --inx-surface-2: #142D46;
+  --inx-elevated: #1A3854;
+  --inx-border: #2B4A67;
+  --inx-text: #F4F7FB;
+  --inx-text-soft: #CBD8E6;
+  --inx-muted: #B4C4D6;
+  --inx-app-muted: #B4C4D6;
+  --inx-blue: #83B9F2;
+  --inx-blue-soft: #173C61;
+  --inx-info-bg: #193A5E;
+  --inx-success-bg: #103D35;
+  --inx-warning-bg: #493912;
+  --inx-danger-bg: #4A2028;
+  --inx-nav: rgba(11, 28, 47, .98);
+  --inx-shadow-sm: 0 1px 3px rgba(0,0,0,.28);
+  --inx-shadow: 0 5px 18px rgba(0,0,0,.30);
+  --inx-shadow-lg: 0 14px 36px rgba(0,0,0,.36);
+}
+
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] .mobile-shell {
+  background: var(--inx-bg) !important;
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme='dark'] .app-header,
+:root[data-theme='dark'] .app-tabbar.s8-tabbar {
+  background: var(--inx-nav) !important;
+  border-color: var(--inx-border) !important;
+}
+
+:root[data-theme='dark'] .app-tabbar.s8-tabbar > a {
+  color: #C4D3E3 !important;
+}
+:root[data-theme='dark'] .app-tabbar.s8-tabbar > a[aria-current='page'],
+:root[data-theme='dark'] .app-tabbar.s8-tabbar > a.active {
+  background: #183A5B !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 0 0 1px #355B80 !important;
+}
+
+/* Override legacy white KPI/card/icon declarations in dark mode. */
+:root[data-theme='dark'] .mobile-shell .inx-kpi:not(.inx-kpi-featured),
+:root[data-theme='dark'] .mobile-shell .inx-chart-card,
+:root[data-theme='dark'] .mobile-shell .inx-shortcut-card,
+:root[data-theme='dark'] .mobile-shell .inx-card,
+:root[data-theme='dark'] .mobile-shell .inx-card-lg,
+:root[data-theme='dark'] .mobile-shell .inx-empty {
+  background: linear-gradient(180deg, var(--inx-surface-2), var(--inx-surface)) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme='dark'] .mobile-shell .inx-kpi-value,
+:root[data-theme='dark'] .mobile-shell .inx-chart-card .chart-head,
+:root[data-theme='dark'] .mobile-shell .inx-shortcut-card .label,
+:root[data-theme='dark'] .mobile-shell .inx-card h2,
+:root[data-theme='dark'] .mobile-shell .inx-card h3 {
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme='dark'] .mobile-shell .inx-kpi-label,
+:root[data-theme='dark'] .mobile-shell .inx-chart-card small,
+:root[data-theme='dark'] .mobile-shell .inx-chart-card .legend-label,
+:root[data-theme='dark'] .mobile-shell .inx-chart-card .legend-value,
+:root[data-theme='dark'] .mobile-shell .inx-shortcut-card .sub,
+:root[data-theme='dark'] .mobile-shell .inx-empty {
+  color: #C0D0E2 !important;
+}
+
+:root[data-theme='dark'] .mobile-shell .inx-3d-icon,
+:root[data-theme='dark'] .mobile-shell .inx-kpi .inx-3d-icon,
+:root[data-theme='dark'] .mobile-shell .inx-shortcut-card .inx-3d-icon {
+  background: #1A3A5C !important;
+  color: #C3DDFC !important;
+  border-color: #315678 !important;
+  box-shadow: none !important;
+}
+:root[data-theme='dark'] .mobile-shell .inx-3d-icon.tone-success { background: #103D35 !important; color: #6EE7BF !important; border-color: #256556 !important; }
+:root[data-theme='dark'] .mobile-shell .inx-3d-icon.tone-warning { background: #493912 !important; color: #F6D477 !important; border-color: #786026 !important; }
+:root[data-theme='dark'] .mobile-shell .inx-3d-icon.tone-danger { background: #4A2028 !important; color: #FDA4AF !important; border-color: #75404A !important; }
+:root[data-theme='dark'] .mobile-shell .inx-3d-icon.tone-purple { background: #302753 !important; color: #D2C4FF !important; border-color: #51437F !important; }
+
+:root[data-theme='dark'] .inx-global-ad-slot-inner,
+:root[data-theme='dark'] .inx-global-ad-slot-inner:empty {
+  background: #102A43 !important;
+  border-color: #35516C !important;
+  color: #D4E1EF !important;
+  box-shadow: none !important;
+}
+:root[data-theme='dark'] .inx-global-ad-slot-inner:empty::before { color: #B6C9DC !important; }
+
+:root[data-theme='dark'] .view-mode-toggle {
+  background: var(--inx-surface) !important;
+  color: var(--inx-text) !important;
+  border-color: var(--inx-border) !important;
+}
+/* END INSURNEX_CORPORATE_DARK_V27 */
+
+/* INSURNEX_DARK_MODE_NOTIFICATION_COPILOT_FIX_V28 */
+
+/* Improve dark-theme readability using the existing design tokens. */
+:root[data-theme="dark"] {
+  --inx-muted: #A8BBD1;
+  --inx-app-muted: #A8BBD1;
+  --inx-text-soft: #B8C8DA;
+  --inx-border: #2A496B;
+  --inx-surface-2: #142F50;
+  --inx-elevated: #18375D;
+  --inx-blue-soft: #1B3C63;
+}
+
+/* Notification bell: avoid a white control and low-contrast glyph in dark mode. */
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > button[aria-label="Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª"] {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+  background: var(--inx-surface) !important;
+  color: var(--inx-text) !important;
+  border: 1px solid var(--inx-border) !important;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .22) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > button[aria-label="Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª"] svg {
+  color: var(--inx-text) !important;
+  stroke: currentColor !important;
+}
+
+/* Fix the notification popover's missing vertical anchor. It must open below the bell,
+   not at the top of the header where it collides with the brand and controls. */
+.s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  top: calc(100% + 12px) !important;
+  left: 0 !important;
+  right: auto !important;
+  margin-top: 0 !important;
+  box-sizing: border-box !important;
+  width: min(406px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(600px, calc(100dvh - 110px)) !important;
+  z-index: 1000 !important;
+  overflow: hidden !important;
+}
+
+/* In mobile-preview mode, anchor the menu to the centered phone viewport. */
+.mobile-shell.view-mode-mobile .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  position: fixed !important;
+  top: 90px !important;
+  left: max(12px, calc((100vw - 430px) / 2 + 12px)) !important;
+  right: auto !important;
+  width: min(406px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(600px, calc(100dvh - 110px)) !important;
+}
+
+/* Dark mode for the Tailwind-classed notification popover and its contents. */
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  background: var(--inx-elevated) !important;
+  color: var(--inx-text) !important;
+  border: 1px solid var(--inx-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .42) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .border-gray-100,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .border-gray-200 {
+  border-color: var(--inx-border) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-900,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-700 {
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-600,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-500 {
+  color: var(--inx-text-soft) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-400,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-300 {
+  color: #9FB4CC !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-white {
+  background: var(--inx-elevated) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-gray-100 {
+  background: var(--inx-surface-2) !important;
+  color: var(--inx-text-soft) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 button.bg-gray-100:hover {
+  background: #21456C !important;
+  color: #F2F7FC !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 button.bg-blue-500 {
+  background: #285D92 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #4A80B6 !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-red-50 {
+  background: #3B1D2A !important;
+  border-color: #864052 !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-orange-50 {
+  background: #3A2A17 !important;
+  border-color: #79572A !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-blue-50 {
+  background: #183958 !important;
+  border-color: #315F8D !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-gray-50 {
+  background: #1A304A !important;
+  border-color: var(--inx-border) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .overflow-y-auto {
+  background: var(--inx-elevated) !important;
+  overscroll-behavior: contain;
+}
+
+/* Remove the overly glossy light highlight from Copilot icon tiles in dark mode. */
+:root[data-theme="dark"] .copilot-page .inx-icon-circle {
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 1px solid var(--inx-border) !important;
+}
+
+:root[data-theme="dark"] .copilot-page .inx-icon-circle.tone-cyan,
+:root[data-theme="dark"] .copilot-page .inx-icon-circle.tone-primary {
+  background: var(--inx-info-bg) !important;
+  color: #A9D1F5 !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-sidebar,
+:root[data-theme="dark"] .copilot-page .copilot-chat,
+:root[data-theme="dark"] .copilot-page .copilot-chat-head,
+:root[data-theme="dark"] .copilot-page .copilot-input {
+  background: var(--inx-surface) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-messages {
+  background: var(--inx-bg) !important;
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-empty p,
+:root[data-theme="dark"] .copilot-page .copilot-chat-head .title small,
+:root[data-theme="dark"] .copilot-page .copilot-sidebar-empty,
+:root[data-theme="dark"] .copilot-page .copilot-conv-copy small,
+:root[data-theme="dark"] .copilot-page .copilot-conv-copy em {
+  color: var(--inx-text-soft) !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-suggestions .inx-card {
+  background: var(--inx-surface) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18) !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-input textarea::placeholder {
+  color: #9FB4CC !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme="dark"] .copilot-page .copilot-messages::-webkit-scrollbar-thumb {
+  background: #45678B !important;
+}
+
+@media (max-width: 480px) {
+  .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+/* END INSURNEX_DARK_MODE_NOTIFICATION_COPILOT_FIX_V28 */
+
+/* INSURNEX_CAROUSEL_ICON_MOTION_DARK_POLISH_V29 */
+/* Stronger dark-theme tokens for common, legacy and current UI components. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --inx-bg: #081522;
+  --inx-surface: #10263D;
+  --inx-surface-2: #16334F;
+  --inx-elevated: #1A3B5A;
+  --inx-border: #31516F;
+  --inx-text: #F3F7FC;
+  --inx-text-soft: #C2D1E0;
+  --inx-muted: #B8C9DA;
+  --inx-app-muted: #B8C9DA;
+  --inx-blue: #91C5FF;
+  --inx-blue-soft: #1A3C5E;
+  --inx-info-bg: #193A5A;
+  --inx-success-bg: #123F36;
+  --inx-warning-bg: #4A3914;
+  --inx-danger-bg: #4B222B;
+  --inx-nav: rgba(10, 27, 45, .98);
+  --inx-shadow-sm: 0 2px 6px rgba(0, 0, 0, .24);
+  --inx-shadow: 0 6px 20px rgba(0, 0, 0, .28);
+  --inx-shadow-lg: 0 14px 38px rgba(0, 0, 0, .34);
+  --inx-ref-navy: #F0F6FF;
+  --inx-ref-blue: #9ACBFF;
+  --inx-ref-blue-deep: #B8DAFF;
+  --inx-ref-ice: #173653;
+  --inx-ref-border: #315472;
+  --inx-ref-muted: #BED0E1;
+  --inx-ref-shadow: 0 5px 16px rgba(0, 0, 0, .24);
+  --app-bg: #081522;
+  --app-card: #10263D;
+  --app-text: #F3F7FC;
+  --app-muted: #B8C9DA;
+  --app-line: #31516F;
+  --app-blue: #91C5FF;
+  --app-cyan: #9BD4E8;
+  --app-shadow: 0 8px 24px rgba(0, 0, 0, .26);
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .mobile-shell {
+  background: var(--inx-bg) !important;
+  color: var(--inx-text) !important;
+}
+
+:root[data-theme="dark"] .app-header,
+:root[data-theme="dark"] .app-tabbar.s8-tabbar {
+  background: var(--inx-nav) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .24) !important;
+}
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a {
+  color: #C6D6E6 !important;
+}
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a[aria-current="page"],
+:root[data-theme="dark"] .app-tabbar.s8-tabbar > a.active {
+  background: #1A3D60 !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 0 0 1px #41688D !important;
+}
+
+/* Replace hard-coded light surfaces in dashboard tiles and legacy cards. */
+:root[data-theme="dark"] .mobile-shell .app-body .inx-scope-pill,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chip-emphasis,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-card,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-card-lg,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-empty,
+:root[data-theme="dark"] .mobile-shell .app-body .home-kpis > a,
+:root[data-theme="dark"] .mobile-shell .app-body .quick-actions > a,
+:root[data-theme="dark"] .mobile-shell .app-body .home-feed > a,
+:root[data-theme="dark"] .mobile-shell .app-body .home-empty,
+:root[data-theme="dark"] .mobile-shell .app-body .app-list > a,
+:root[data-theme="dark"] .mobile-shell .app-body .notification-card {
+  background: linear-gradient(180deg, var(--inx-surface-2) 0%, var(--inx-surface) 100%) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-scope-pill,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chip-emphasis {
+  color: var(--inx-text) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-card .label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi-label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card small,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .legend-label,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .legend-value,
+:root[data-theme="dark"] .mobile-shell .app-body .home-kpis small,
+:root[data-theme="dark"] .mobile-shell .app-body .home-feed small,
+:root[data-theme="dark"] .mobile-shell .app-body .home-empty,
+:root[data-theme="dark"] .mobile-shell .app-body .app-list,
+:root[data-theme="dark"] .mobile-shell .app-body .notification-card {
+  color: var(--inx-text-soft) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-section-head h2,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi-value,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-chart-card .chart-head,
+:root[data-theme="dark"] .mobile-shell .app-body .home-hero h1,
+:root[data-theme="dark"] .mobile-shell .app-body .home-kpis b,
+:root[data-theme="dark"] .mobile-shell .app-body .home-feed b {
+  color: var(--inx-text) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-carousel .inx-3d-icon,
+:root[data-theme="dark"] .mobile-shell .app-body [style*="grid-template-columns"] > .inx-shortcut-card .inx-3d-icon,
+:root[data-theme="dark"] .mobile-shell .app-body .inx-kpi .inx-3d-icon {
+  background: var(--inx-info-bg) !important;
+  color: #BBD9FF !important;
+  border-color: var(--inx-border) !important;
+  box-shadow: none !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body .inx-3d-icon.tone-success { background: var(--inx-success-bg) !important; color: #79E6BE !important; border-color: #286657 !important; }
+:root[data-theme="dark"] .mobile-shell .app-body .inx-3d-icon.tone-warning { background: var(--inx-warning-bg) !important; color: #F8D879 !important; border-color: #80652B !important; }
+:root[data-theme="dark"] .mobile-shell .app-body .inx-3d-icon.tone-danger { background: var(--inx-danger-bg) !important; color: #FFA9B4 !important; border-color: #7B414C !important; }
+:root[data-theme="dark"] .mobile-shell .app-body .inx-3d-icon.tone-purple { background: #302653 !important; color: #D7C9FF !important; border-color: #554783 !important; }
+:root[data-theme="dark"] .mobile-shell .app-body .inx-shortcut-card .label { color: #D3E0EE !important; }
+
+:root[data-theme="dark"] .mobile-shell .app-body .home-hero,
+:root[data-theme="dark"] .mobile-shell .app-body .home-empty,
+:root[data-theme="dark"] .mobile-shell .app-body .register-callout {
+  background: linear-gradient(145deg, var(--inx-surface), var(--inx-surface-2)) !important;
+  color: var(--inx-text) !important;
+  border-color: var(--inx-border) !important;
+}
+:root[data-theme="dark"] .mobile-shell .app-body input,
+:root[data-theme="dark"] .mobile-shell .app-body select,
+:root[data-theme="dark"] .mobile-shell .app-body textarea {
+  background-color: #0B1D2E;
+  color: #F3F7FC;
+  border-color: var(--inx-border);
+  caret-color: #9ACBFF;
+}
+:root[data-theme="dark"] .mobile-shell .app-body input::placeholder,
+:root[data-theme="dark"] .mobile-shell .app-body textarea::placeholder {
+  color: #AFC2D6 !important;
+  opacity: 1;
+}
+:root[data-theme="dark"] .inx-global-ad-slot-inner,
+:root[data-theme="dark"] .inx-global-ad-slot-inner:empty {
+  background: linear-gradient(135deg, var(--inx-surface) 0%, var(--inx-surface-2) 100%) !important;
+  border-color: var(--inx-border) !important;
+  color: var(--inx-text-soft) !important;
+  box-shadow: none !important;
+}
+
+/* Continuous carousel: two equal sequences move together for a seamless loop.
+   This selector intentionally outranks the old mobile/static overrides. */
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 82px !important;
+  min-height: 82px !important;
+  max-height: 82px !important;
+  overflow: hidden !important;
+  direction: rtl !important;
+  scroll-snap-type: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  height: 72px !important;
+  direction: rtl !important;
+  transform-origin: center center;
+  will-change: transform;
+  animation: insurnex-shortcut-marquee-v29 19s linear infinite !important;
+  animation-play-state: running !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence[aria-hidden="true"] {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+@keyframes insurnex-shortcut-marquee-v29 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(50%, 0, 0); }
+}
+@media (min-width: 760px) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation-duration: 25s !important;
+  }
+}
+@media (max-width: 520px) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation-duration: 19s !important;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel:hover .inx-shortcut-track {
+    animation-play-state: paused !important;
+  }
+}
+
+/* Subtle application-wide Lucide motion: 1.5px lift and 1deg tilt, staggered gently. */
+@keyframes insurnex-lucide-drift-v29 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -1.5px, 0) rotate(-1deg); }
+}
+#root svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
+  transform-origin: center center;
+  animation: insurnex-lucide-drift-v29 3.4s ease-in-out infinite;
+  will-change: transform;
+}
+#root a:nth-of-type(3n) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin),
+#root button:nth-of-type(3n) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
+  animation-delay: -1.1s;
+}
+#root a:nth-of-type(3n + 1) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin),
+#root button:nth-of-type(3n + 1) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
+  animation-delay: -2.2s;
+}
+#root .app-tabbar.s8-tabbar > a > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
+  animation-duration: 3.8s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence[aria-hidden="true"] {
+    display: none !important;
+  }
+  #root svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
+    animation: none !important;
+    will-change: auto !important;
+  }
+}
+/* END INSURNEX_CAROUSEL_ICON_MOTION_DARK_POLISH_V29 */
+
+/* INSURNEX_CAROUSEL_NOTIFICATION_DARK_V30 */
+
+/* Keep the auto-carousel moving when a desktop pointer hovers it.
+   Reduced-motion users still retain the static/accessible presentation. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel:hover .inx-shortcut-track {
+    animation-play-state: running !important;
+  }
+}
+
+/* Make the notification anchor a stable, intrinsic-size header control.
+   The dropdown is removed from document flow so opening it cannot enlarge the header. */
+.s8-header .s8-actions > div.relative[dir="rtl"] {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+.s8-header .s8-actions > div.relative[dir="rtl"] > button {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  flex: 0 0 38px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease !important;
+}
+
+.s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  position: absolute !important;
+  top: calc(100% + 10px) !important;
+  right: 0 !important;
+  left: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: 0 !important;
+  transform: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  width: min(366px, calc(100vw - 24px)) !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(560px, calc(100dvh - 110px)) !important;
+  z-index: 1200 !important;
+  overflow: hidden !important;
+}
+
+/* In phone-preview mode, keep the panel within the centered phone frame and below its header. */
+.mobile-shell.view-mode-mobile .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  position: fixed !important;
+  top: 84px !important;
+  right: max(12px, calc((100vw - min(480px, 100vw)) / 2 + 12px)) !important;
+  left: auto !important;
+  inset-inline-end: max(12px, calc((100vw - min(480px, 100vw)) / 2 + 12px)) !important;
+  inset-inline-start: auto !important;
+  width: min(406px, calc(100vw - 24px)) !important;
+  max-width: min(406px, calc(100vw - 24px)) !important;
+  max-height: min(560px, calc(100dvh - 100px)) !important;
+}
+
+/* A refined dark surface system for notification controls and their dropdown. */
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > button {
+  background: var(--inx-surface-2, #16334F) !important;
+  color: var(--inx-text, #F3F7FC) !important;
+  border: 1px solid var(--inx-border, #31516F) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .26) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > button:hover {
+  background: var(--inx-elevated, #1A3B5A) !important;
+  border-color: #4A7095 !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > button svg {
+  color: #D8E8F8 !important;
+  stroke: currentColor !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 {
+  background: var(--inx-elevated, #1A3B5A) !important;
+  color: var(--inx-text, #F3F7FC) !important;
+  border: 1px solid var(--inx-border, #31516F) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, .44) !important;
+  backdrop-filter: blur(16px);
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .border-gray-100,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .border-gray-200 {
+  border-color: var(--inx-border, #31516F) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-900,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-700 {
+  color: var(--inx-text, #F3F7FC) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-600,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-500 {
+  color: var(--inx-text-soft, #C2D1E0) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-400,
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .text-gray-300 {
+  color: #AFC4DA !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-white {
+  background: var(--inx-elevated, #1A3B5A) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-gray-100 {
+  background: var(--inx-surface-2, #16334F) !important;
+  color: var(--inx-text-soft, #C2D1E0) !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 button.bg-gray-100:hover {
+  background: #24496D !important;
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 button.bg-blue-500 {
+  background: #285D92 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #4A80B6 !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-red-50 {
+  background: #3B1D2A !important;
+  border-color: #864052 !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-orange-50 {
+  background: #3A2A17 !important;
+  border-color: #79572A !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-blue-50 {
+  background: #183958 !important;
+  border-color: #315F8D !important;
+}
+
+:root[data-theme="dark"] .s8-header .s8-actions > div.relative[dir="rtl"] > div.absolute.w-96 .bg-gray-50 {
+  background: #1A304A !important;
+  border-color: var(--inx-border, #31516F) !important;
+}
+
+/* Typography finishing: preserve the V27 font pairing, improve compact Arabic labels. */
+:root {
+  --inx-font-sans: 'Inter', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+html, body, button, input, select, textarea, option, .mobile-shell, .mobile-shell * {
+  font-family: var(--inx-font-sans) !important;
+  font-synthesis: none;
+}
+
+.mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card .label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+.mobile-shell .s8-header .s8-hello strong {
+  font-size: 12.5px !important;
+  line-height: 1.4 !important;
+  font-weight: 700 !important;
+}
+
+.mobile-shell .s8-header .s8-hello small {
+  font-size: 10.5px !important;
+  line-height: 1.45 !important;
+  color: var(--inx-text-soft, #C2D1E0) !important;
+}
+
+/* END INSURNEX_CAROUSEL_NOTIFICATION_DARK_V30 */
+
+/* INSURNEX_NOTIFICATION_POPOVER_CAROUSEL_V31 */
+/* Explicitly position the notification popover relative to its trigger. */
+.s8-header {
+  position: sticky !important;
+  z-index: 1300 !important;
+  overflow: visible !important;
+}
+.s8-header .s8-actions {
+  position: relative !important;
+  overflow: visible !important;
+}
+.s8-header .s8-actions > .inx-notification-anchor {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  align-self: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  z-index: 1310 !important;
+}
+.s8-header .inx-notification-trigger {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  flex: 0 0 38px !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid var(--inx-border, #d8e3ef) !important;
+  border-radius: 12px !important;
+  background: var(--inx-surface, #ffffff) !important;
+  color: var(--inx-text, #0A1929) !important;
+  box-shadow: 0 2px 8px rgba(10, 25, 41, .08) !important;
+  cursor: pointer !important;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease !important;
+}
+.s8-header .inx-notification-trigger:hover {
+  background: var(--inx-info-bg, #EAF0F7) !important;
+  border-color: var(--inx-blue, #1E4272) !important;
+}
+.s8-header .inx-notification-trigger-icon {
+  display: block !important;
+  width: 19px !important;
+  height: 19px !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Do not let the dropdown participate in header/page layout flow. */
+.s8-header .inx-notification-anchor > .inx-notification-popover {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  top: calc(100% + 10px) !important;
+  left: 0 !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  width: min(366px, calc(100vw - 24px)) !important;
+  min-width: min(280px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(560px, calc(100dvh - 100px)) !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  z-index: 1400 !important;
+  border: 1px solid var(--inx-border, #d8e3ef) !important;
+  border-radius: 16px !important;
+  background: var(--inx-surface, #ffffff) !important;
+  color: var(--inx-text, #0A1929) !important;
+  box-shadow: 0 18px 46px rgba(10, 25, 41, .20) !important;
+  font-family: 'Inter', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+.mobile-shell.view-mode-mobile .s8-header .inx-notification-anchor > .inx-notification-popover {
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 76px) !important;
+  left: max(12px, calc((100vw - min(480px, 100vw)) / 2 + 12px)) !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+  width: min(366px, calc(min(480px, 100vw) - 24px)) !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: calc(100dvh - 96px) !important;
+}
+.s8-header .inx-notification-popover-header {
+  flex: 0 0 auto !important;
+  padding: 14px !important;
+  background: var(--inx-surface-2, #F5F8FC) !important;
+  border-bottom: 1px solid var(--inx-border, #d8e3ef) !important;
+}
+.s8-header .inx-notification-popover-title {
+  margin: 0 !important;
+  color: var(--inx-text, #0A1929) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+}
+.s8-header .inx-notification-filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+.s8-header .inx-notification-filter {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 30px !important;
+  padding: 6px 11px !important;
+  border: 1px solid var(--inx-border, #d8e3ef) !important;
+  border-radius: 999px !important;
+  background: var(--inx-surface-2, #F5F8FC) !important;
+  color: var(--inx-text-soft, #566A82) !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+.s8-header .inx-notification-filter.bg-blue-500 {
+  background: var(--inx-blue, #1E4272) !important;
+  border-color: var(--inx-blue, #1E4272) !important;
+  color: #ffffff !important;
+}
+.s8-header .inx-notification-filter.bg-gray-100 {
+  background: var(--inx-surface-2, #F5F8FC) !important;
+  color: var(--inx-text-soft, #566A82) !important;
+}
+.s8-header .inx-notification-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: auto !important;
+  background: var(--inx-surface, #ffffff) !important;
+}
+.s8-header .inx-notification-empty {
+  padding: 28px 18px !important;
+  color: var(--inx-text-soft, #566A82) !important;
+  text-align: center !important;
+  font-size: 13px !important;
+}
+.s8-header .inx-notification-empty svg {
+  color: var(--inx-muted, #8DA0B8) !important;
+  stroke: currentColor !important;
+}
+.s8-header .inx-notification-item {
+  padding: 13px !important;
+  border-bottom: 1px solid var(--inx-border, #d8e3ef) !important;
+  color: var(--inx-text, #0A1929) !important;
+  background: var(--inx-surface, #ffffff) !important;
+  font-size: 12px !important;
+}
+.s8-header .inx-notification-item h4 { color: var(--inx-text, #0A1929) !important; font-size: 13px !important; }
+.s8-header .inx-notification-item p { color: var(--inx-text-soft, #566A82) !important; line-height: 1.6 !important; }
+.s8-header .inx-notification-footer {
+  flex: 0 0 auto !important;
+  background: var(--inx-surface-2, #F5F8FC) !important;
+  border-top: 1px solid var(--inx-border, #d8e3ef) !important;
+}
+
+/* Dark mode: make the bell, filter chips, empty state, and list use one palette. */
+:root[data-theme='dark'] .s8-header .inx-notification-trigger {
+  background: #142D46 !important;
+  border-color: #31516F !important;
+  color: #EAF2FA !important;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, .28) !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-trigger:hover {
+  background: #1A3B5A !important;
+  border-color: #4A7095 !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-trigger-icon { color: #EAF2FA !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-anchor > .inx-notification-popover {
+  background: #0E2237 !important;
+  color: #F4F7FB !important;
+  border-color: #31516F !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .48) !important;
+  color-scheme: dark;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-popover-header,
+:root[data-theme='dark'] .s8-header .inx-notification-footer {
+  background: #142D46 !important;
+  border-color: #31516F !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-popover-title,
+:root[data-theme='dark'] .s8-header .inx-notification-popover-title .text-gray-500 {
+  color: #F4F7FB !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-filter {
+  background: #142D46 !important;
+  color: #CBD8E6 !important;
+  border-color: #31516F !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-filter.bg-blue-500 {
+  background: #285D92 !important;
+  border-color: #4A80B6 !important;
+  color: #FFFFFF !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-filter.bg-gray-100 {
+  background: #142D46 !important;
+  color: #CBD8E6 !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-scroll,
+:root[data-theme='dark'] .s8-header .inx-notification-item {
+  background: #0E2237 !important;
+  color: #F4F7FB !important;
+  border-color: #31516F !important;
+}
+:root[data-theme='dark'] .s8-header .inx-notification-item.bg-red-50 { background: #3A1D2B !important; border-color: #754052 !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-item.bg-orange-50 { background: #392A18 !important; border-color: #76572D !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-item.bg-blue-50\/30 { background: #183650 !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-item h4 { color: #F4F7FB !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-item p,
+:root[data-theme='dark'] .s8-header .inx-notification-empty { color: #CBD8E6 !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-empty svg { color: #9FB6CE !important; }
+:root[data-theme='dark'] .s8-header .inx-notification-popover a { color: #8DC2FF !important; }
+
+/* Keep the shortcut carousel moving unless the user explicitly requests reduced motion. */
+@keyframes insurnex-shortcut-loop-v31 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(50%, 0, 0); }
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 82px !important;
+  min-height: 82px !important;
+  max-height: 82px !important;
+  overflow: hidden !important;
+  direction: rtl !important;
+  scroll-snap-type: none !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  height: 72px !important;
+  direction: rtl !important;
+  transform-origin: center center !important;
+  will-change: transform !important;
+  animation: insurnex-shortcut-loop-v31 22s linear infinite !important;
+  animation-play-state: running !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel:hover .inx-shortcut-track {
+    animation-play-state: running !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence[aria-hidden='true'] {
+    display: none !important;
+  }
+}
+
+/* Corporate font and legibility for the notification surface. */
+:root { --inx-corporate-font: 'Inter', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif; }
+.s8-header .inx-notification-anchor,
+.s8-header .inx-notification-anchor * {
+  font-family: var(--inx-corporate-font) !important;
+  font-synthesis: none;
+}
+/* END INSURNEX_NOTIFICATION_POPOVER_CAROUSEL_V31 */
+
+/* INSURNEX_CAROUSEL_SEARCH_FONTS_POLISH_V32 */
+/* Corporate typography: Inter for Latin glyphs with Alexandria as the modern Arabic fallback. */
+:root {
+  --inx-font-sans: 'Inter', 'Alexandria', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-font-arabic: 'Alexandria', 'Inter', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-search-surface: #F7FAFE;
+  --inx-search-border: #D3E1F0;
+  --inx-search-text: #102B49;
+  --inx-search-placeholder: #7187A0;
+  --inx-search-focus: #347CC7;
+}
+
+html, body, #root, .mobile-shell {
+  font-family: var(--inx-font-sans) !important;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+#root :is(button, input, select, textarea, option, label) {
+  font-family: var(--inx-font-sans) !important;
+}
+.mobile-shell {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.mobile-shell :is(h1, h2, h3, h4) {
+  font-family: var(--inx-font-sans) !important;
+  font-kerning: normal;
+}
+
+/* Dark surfaces for search containers across client, policy, lead, document,
+   archive and operations pages, including inline-styled search wrappers. */
+:root[data-theme='dark'] {
+  --inx-search-surface: #0D2033;
+  --inx-search-border: #3A5C7A;
+  --inx-search-text: #F3F7FC;
+  --inx-search-placeholder: #B0C2D5;
+  --inx-search-focus: #83BEFF;
+}
+:root[data-theme='dark'] #root :is(
+  .docs-search,
+  .arc-search,
+  .op80-search,
+  .search,
+  .search-bar,
+  .search-box,
+  .inx-search,
+  [class*='search-wrap'],
+  [class*='search-container'],
+  [class*='searchbox']
+) {
+  background: var(--inx-search-surface) !important;
+  background-image: none !important;
+  color: var(--inx-search-text) !important;
+  border: 1px solid var(--inx-search-border) !important;
+  border-radius: 13px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+/* Client / policy / lead pages render the search wrapper with inline styles. */
+:root[data-theme='dark'] #root .inx-card div:has(> input[type='search']),
+:root[data-theme='dark'] #root .panel div:has(> input[type='search']),
+:root[data-theme='dark'] #root .toolbar div:has(> input[type='search']) {
+  background: var(--inx-search-surface) !important;
+  background-image: none !important;
+  border-color: var(--inx-search-border) !important;
+  color: var(--inx-search-text) !important;
+  border-radius: 13px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+:root[data-theme='dark'] #root :is(input[type='search'], [class*='search'] input, [class*='Search'] input) {
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--inx-search-text) !important;
+  border-color: transparent !important;
+  font-family: var(--inx-font-sans) !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+  outline: none;
+  box-shadow: none !important;
+  caret-color: var(--inx-search-focus);
+}
+:root[data-theme='dark'] #root :is(input, textarea)::placeholder {
+  color: var(--inx-search-placeholder) !important;
+  opacity: 1 !important;
+}
+:root[data-theme='dark'] #root :is(.docs-search, .arc-search, .op80-search, .search, .search-bar, .search-box, .inx-search, [class*='search-wrap'], [class*='search-container']):focus-within,
+:root[data-theme='dark'] #root .inx-card div:has(> input[type='search']):focus-within,
+:root[data-theme='dark'] #root .panel div:has(> input[type='search']):focus-within {
+  border-color: var(--inx-search-focus) !important;
+  box-shadow: 0 0 0 3px rgba(105, 174, 245, .15) !important;
+}
+:root[data-theme='dark'] #root :is(.docs-search, .arc-search, .op80-search, .search, .search-bar, .search-box, .inx-search) > svg,
+:root[data-theme='dark'] #root .inx-card div:has(> input[type='search']) > svg {
+  color: var(--inx-search-placeholder) !important;
+  stroke: currentColor !important;
+  flex: 0 0 auto;
+}
+
+:root[data-theme='dark'] .mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card {
+  background: linear-gradient(180deg, #173653 0%, #10263D 100%) !important;
+  border-color: #315574 !important;
+  color: #EDF5FD !important;
+  box-shadow: 0 3px 9px rgba(0,0,0,.18) !important;
+}
+:root[data-theme='dark'] .mobile-shell .app-body .inx-shortcut-carousel .inx-shortcut-card .label {
+  color: #DCE9F6 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+    scroll-behavior: auto !important;
+    animation: none !important;
+  }
+}
+/* END INSURNEX_CAROUSEL_SEARCH_FONTS_POLISH_V32 */
+
+/* INSURNEX_CAROUSEL_AUTOPLAY_V35 */
+/* One motion engine: CSS transforms the duplicated track. No RTL scrollLeft loop. */
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  max-height: 84px !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  direction: rtl !important;
+  padding: 4px 2px 8px !important;
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overscroll-behavior-x: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x pan-y !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  height: 72px !important;
+  direction: rtl !important;
+  transform: translate3d(0, 0, 0);
+  animation-name: insurnex-carousel-loop-v35 !important;
+  animation-duration: 26s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+  animation-play-state: running !important;
+  animation-fill-mode: both !important;
+  will-change: transform;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding-inline-end: 8px !important;
+  box-sizing: content-box !important;
+  direction: rtl !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track > .inx-shortcut-sequence[aria-hidden='true'] {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+  flex: 0 0 82px !important;
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+  min-height: 72px !important;
+  box-sizing: border-box !important;
+}
+.mobile-shell.view-mode-mobile .app-body .inx-shortcut-row.inx-shortcut-carousel:hover .inx-shortcut-track,
+.mobile-shell.view-mode-desktop .app-body .inx-shortcut-row.inx-shortcut-carousel:hover .inx-shortcut-track {
+  animation-play-state: running !important;
+}
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel:active .inx-shortcut-track {
+  animation-play-state: paused !important;
+}
+@keyframes insurnex-carousel-loop-v35 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(50%, 0, 0); }
+}
+@media (max-width: 520px) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation-duration: 22s !important;
+  }
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    flex-basis: 76px !important;
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+  }
+}
+/* Honor reduced-motion intent by slowing down rather than making the requested
+   carousel entirely static. Transitions on cards remain disabled. */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+    animation-duration: 42s !important;
+  }
+  .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    transition: none !important;
+  }
+}
+/* END INSURNEX_CAROUSEL_AUTOPLAY_V35 */
+
+/* INSURNEX_CAROUSEL_TRANSLATE_ENGINE_V37 */
+/* Root-cause fix: V35 is running but computed transform remains `none` because
+   legacy transform:none!important rules block transform animations. Animate
+   the independent CSS `translate` property instead, so those legacy transform
+   declarations cannot suppress the track motion. */
+.mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  max-height: 84px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: none !important;
+  isolation: isolate;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  height: 72px !important;
+  direction: rtl !important;
+  /* Do not rely on transform: old V32 rules set it to none!important. */
+  translate: 0 0;
+  animation-name: insurnex-carousel-translate-loop-v37 !important;
+  animation-duration: 24s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+  animation-play-state: running !important;
+  animation-fill-mode: both !important;
+  transition: none !important;
+  will-change: translate !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track > .inx-shortcut-sequence {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding-inline-end: 8px !important;
+  box-sizing: content-box !important;
+  direction: rtl !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track > .inx-shortcut-sequence[aria-hidden='true'] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+  flex: 0 0 78px !important;
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  min-height: 70px !important;
+  box-sizing: border-box !important;
+}
+
+@keyframes insurnex-carousel-translate-loop-v37 {
+  from { translate: 0 0; }
+  to   { translate: 50% 0; }
+}
+
+@media (max-width: 520px) {
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track {
+    animation-duration: 22s !important;
+  }
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    flex-basis: 76px !important;
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+  }
+}
+
+@media (min-width: 760px) {
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track {
+    animation-duration: 28s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel > .inx-shortcut-track {
+    animation-duration: 48s !important;
+  }
+}
+/* END INSURNEX_CAROUSEL_TRANSLATE_ENGINE_V37 */

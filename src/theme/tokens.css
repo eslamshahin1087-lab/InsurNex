@@ -53,6 +53,16 @@
   --inx-gap-sm: 10px;
   --inx-gap: 14px;
   --inx-gap-lg: 20px;
+  --inx-surface-2: #F8FAFD;
+  --inx-elevated: #ffffff;
+  --inx-app-muted: #6B7F97;
+  --inx-blue-soft: #EAF0F7;
+  --inx-nav: rgba(255,255,255,.94);
+  --inx-shadow-app: 0 14px 40px rgba(10,25,41,.09);
+  --inx-shadow-app-strong: 0 22px 60px rgba(10,25,41,.14);
+  --inx-radius-app-sm: 14px;
+  --inx-radius-app-md: 20px;
+  --inx-radius-app-lg: 28px;
 }
 
 :root[data-theme="dark"] {
@@ -64,6 +74,16 @@
   --inx-cyan: #6EA0C9;
   --inx-bg: #0A1929;
   --inx-surface: #102A4E;
+  --inx-surface-2: #143257;
+  --inx-elevated: #16355C;
+  --inx-app-muted: #8DA0B8;
+  --inx-blue-soft: #16355C;
+  --inx-nav: rgba(16,42,78,.95);
+  --inx-shadow-app: 0 14px 42px rgba(0,0,0,.24);
+  --inx-shadow-app-strong: 0 22px 64px rgba(0,0,0,.34);
+  --inx-radius-app-sm: 14px;
+  --inx-radius-app-md: 20px;
+  --inx-radius-app-lg: 28px;
   --inx-border: #1E3A5F;
   --inx-muted: #64748b;
   --inx-gradient: linear-gradient(135deg, #0F2A4A 0%, #1E4272 55%, #3A6B9F 100%);
@@ -111,3 +131,20 @@ body {
 }
 
 button, input, select, textarea { font: inherit; }
+
+/* INSURNEX_DARK_CONTRAST_FIX_V21 */
+:root[data-theme="dark"] {
+  /* Raise muted text contrast on dark navy surfaces, especially small labels. */
+  --inx-muted: #A9BDD4;
+  --inx-app-muted: #A9BDD4;
+  --inx-text-soft: #C4D3E4;
+}
+/* END INSURNEX_DARK_CONTRAST_FIX_V21 */
+
+/* INSURNEX_DARK_TOKEN_CONTRAST_V22 */
+:root[data-theme="dark"] {
+  --inx-muted: #B7C9DD;
+  --inx-app-muted: #B7C9DD;
+  --inx-text-soft: #C4D3E4;
+}
+/* END INSURNEX_DARK_TOKEN_CONTRAST_V22 */

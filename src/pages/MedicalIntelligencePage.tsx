@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Activity, BrainCircuit, CheckCircle2, Download, LoaderCircle, UploadCloud } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { parseInsuranceFile, type ParsedTabularFile } from '../features/ai/file-parser.service';
+import { getFileParserErrorMessage, parseInsuranceFile, type ParsedTabularFile } from '../features/ai/file-parser.service';
 import { detectMedical42Mapping } from '../features/medical-intelligence/medical42.schema';
 import { analyze42, normalize42 } from '../features/medical-intelligence/medical42.engine';
 import type { Medical42Mapping, Medical42Result } from '../features/medical-intelligence/medical42.types';
@@ -28,6 +28,7 @@ export default function MedicalIntelligencePage() {
   const [r, setR] = useState<Medical42Result | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [geminiBusy, setGeminiBusy] = useState(false);
   const [geminiError, setGeminiError] = useState('');
   const [gemini, setGemini] = useState<GeminiMedicalAnalysis | null>(null);
@@ -51,6 +52,7 @@ export default function MedicalIntelligencePage() {
     setSheet(selected);
     setMap(detectMedical42Mapping(row ? Object.keys(row) : []));
     setR(null);
+    setUploadError('');
     window.history.replaceState({}, document.title, window.location.href);
   }, [location.state]);
 
@@ -58,6 +60,7 @@ export default function MedicalIntelligencePage() {
     if (!file) return;
     setBusy(true);
     setName(file.name);
+    setUploadError('');
     setGemini(null);
     setGeminiError('');
     setGeminiProgress(null);
@@ -69,6 +72,13 @@ export default function MedicalIntelligencePage() {
       setSheet(selectedSheet);
       setMap(detectMedical42Mapping(columns));
       setR(null);
+    } catch (error) {
+      console.error(error);
+      setP(null);
+      setSheet('');
+      setMap(null);
+      setR(null);
+      setUploadError(getFileParserErrorMessage(error, lang));
     } finally {
       setBusy(false);
     }
@@ -140,6 +150,8 @@ export default function MedicalIntelligencePage() {
       <input hidden type="file" accept=".xlsx,.xls,.csv" onChange={(event) => void pick(event.target.files?.[0])} />
     </label>
 
+    {uploadError && <div className="gemini50-error" role="alert" aria-live="polite">{uploadError}</div>}
+
     {p && map && <section className="med42-controls">
       <label>
         Sheet
@@ -191,7 +203,6 @@ export default function MedicalIntelligencePage() {
         <h2>{tr('المؤشرات التأمينية الذكية', 'Insurance Intelligence')}</h2>
         {r.signals.map((item) => <article className={`is-${item.level}`} key={item.title}><b>{item.title}</b><p>{item.finding}</p><small>{item.evidence.join(' · ')}</small><strong>{tr('الإجراء المقترح: ', 'Recommended action: ')}{item.action}</strong></article>)}
       </section>
-
 
       <Medical54Advanced result={r} lang={lang} />
 

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
+  getFileParserErrorMessage,
   parseInsuranceFile,
   type ParsedTabularFile,
 } from '../features/ai/file-parser.service';
@@ -87,7 +88,7 @@ export default function AIFileAnalysisPage() {
       setMapping(pv[0]?.mapping || []);
     } catch (e) {
       console.error(e);
-      setError(tr('تعذر قراءة الملف.', 'Unable to read this file.'));
+      setError(getFileParserErrorMessage(e, lang));
     } finally {
       setBusy(false);
     }

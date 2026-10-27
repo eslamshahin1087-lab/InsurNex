@@ -21,6 +21,7 @@ import {
 import { useAuth } from '../features/auth/auth-context';
 import { signOut } from '../features/auth/auth.service';
 import { useTheme } from '../theme/ThemeProvider';
+import { NotificationBell } from '../features/notifications';
 import '../theme/admin.css';
 import Logo from '../components/Logo';
 
@@ -132,6 +133,9 @@ export default function AdminLayout() {
             <Building2 size={16} />
             <span>لوحة تحكم المنصة</span>
           </div>
+
+          {/* ✅ جرس الإشعارات */}
+          <NotificationBell onNavigate={(link) => navigate(link)} />
 
           <div className="admin-header-user">
             <span className="admin-header-badge">Admin</span>

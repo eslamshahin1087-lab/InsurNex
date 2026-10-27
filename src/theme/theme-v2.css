@@ -1,36 +1,36 @@
 :root {
-  --app-bg: #F4F6FA;
-  --app-surface: #ffffff;
-  --app-surface-2: #F8FAFD;
-  --app-elevated: #ffffff;
-  --app-text: #0A1929;
-  --app-muted: #6B7F97;
-  --app-line: #E2E8F0;
-  --app-blue: #1E4272;
-  --app-cyan: #3A6B9F;
-  --app-blue-soft: #EAF0F7;
-  --app-nav: rgba(255,255,255,.94);
-  --app-shadow: 0 14px 40px rgba(10,25,41,.09);
-  --app-shadow-strong: 0 22px 60px rgba(10,25,41,.14);
-  --app-radius-sm: 14px;
-  --app-radius-md: 20px;
-  --app-radius-lg: 28px;
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-blue-soft);
+  --app-nav: var(--inx-nav);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
+  --app-radius-sm: var(--inx-radius-app-sm);
+  --app-radius-md: var(--inx-radius-app-md);
+  --app-radius-lg: var(--inx-radius-app-lg);
 }
 
 :root[data-theme='dark'] {
-  --app-bg: #0A1929;
-  --app-surface: #102A4E;
-  --app-surface-2: #143257;
-  --app-elevated: #16355C;
-  --app-text: #E2E8F0;
-  --app-muted: #8DA0B8;
-  --app-line: #1E3A5F;
-  --app-blue: #5B84B8;
-  --app-cyan: #6EA0C9;
-  --app-blue-soft: #16355C;
-  --app-nav: rgba(16,42,78,.95);
-  --app-shadow: 0 14px 42px rgba(0,0,0,.24);
-  --app-shadow-strong: 0 22px 64px rgba(0,0,0,.34);
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-blue-soft);
+  --app-nav: var(--inx-nav);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
 }
 
 html, body, #root { min-height: 100%; }

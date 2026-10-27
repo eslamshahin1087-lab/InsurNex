@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import {
   AlertTriangle,
   BriefcaseBusiness,
+  Bot,
   Building2,
   CheckCircle2,
   ChevronLeft,
@@ -18,6 +19,9 @@ import {
   UserRound,
   Users,
   X,
+  CalendarDays,
+  Zap,
+  Target
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
@@ -61,14 +65,14 @@ const EMPTY: OperationsSnapshot = {
 };
 
 const WORKFLOW_STEPS = [
-  'إنشاء العميل',
-  'طلب عرض سعر',
-  'استلام العروض',
-  'المقارنة',
-  'موافقة العميل',
-  'طلب الإصدار',
-  'استلام الوثيقة',
-  'تفعيل الحساب',
+  { title: 'إنشاء العميل', description: 'تسجيل بيانات العميل ووسائل التواصل وتحديد نوع التأمين المطلوب.' },
+  { title: 'طلب عرض سعر', description: 'تجهيز بيانات الطلب وإرسالها إلى شركات التأمين المناسبة.' },
+  { title: 'استلام العروض', description: 'جمع عروض الأسعار والتغطيات والشروط الواردة من الشركات.' },
+  { title: 'المقارنة', description: 'مقارنة الأقساط وحدود التغطية والاستثناءات والتحملات.' },
+  { title: 'موافقة العميل', description: 'توثيق اختيار العميل وموافقته على العرض والشروط.' },
+  { title: 'طلب الإصدار', description: 'إرسال طلب الإصدار والمستندات المطلوبة ومتابعة حالته.' },
+  { title: 'استلام الوثيقة', description: 'مراجعة الوثيقة الصادرة والتأكد من البيانات والتغطيات والتواريخ.' },
+  { title: 'تفعيل الحساب', description: 'ربط الوثيقة بملف العميل وجدولة التجديد والمتابعة.' },
 ];
 
 export default function OperationsPage() {
@@ -85,6 +89,7 @@ export default function OperationsPage() {
   const [showRequest, setShowRequest] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedOperation, setSelectedOperation] = useState<OperationWorkItem | null>(null);
+  const [workflowGuideOpen, setWorkflowGuideOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!profile?.organizationId) {
@@ -249,28 +254,28 @@ export default function OperationsPage() {
             <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
               <article className="inx-kpi">
                 <div className="inx-kpi-head">
-                  <span className="inx-3d-icon sm tone-cyan">⚡</span>
+                  <span className="inx-3d-icon sm tone-cyan" data-insurnex-operations-icon="v16"><Zap size={18} strokeWidth={1.9} aria-hidden="true" /></span>
                 </div>
                 <div className="inx-kpi-value">{activeOps.length}</div>
                 <small className="inx-kpi-label">عمليات نشطة</small>
               </article>
               <article className="inx-kpi">
                 <div className="inx-kpi-head">
-                  <span className="inx-3d-icon sm">📅</span>
+                  <span className="inx-3d-icon sm" data-insurnex-operations-icon="v16"><CalendarDays size={18} strokeWidth={1.9} aria-hidden="true" /></span>
                 </div>
                 <div className="inx-kpi-value">{today.length}</div>
                 <small className="inx-kpi-label">مطلوب اليوم</small>
               </article>
               <article className="inx-kpi">
                 <div className="inx-kpi-head">
-                  <span className="inx-3d-icon sm tone-danger">⚠️</span>
+                  <span className="inx-3d-icon sm tone-danger" data-insurnex-operations-icon="v16"><AlertTriangle size={18} strokeWidth={1.9} aria-hidden="true" />️</span>
                 </div>
                 <div className="inx-kpi-value">{overdue.length}</div>
                 <small className="inx-kpi-label">متأخرة</small>
               </article>
               <article className="inx-kpi">
                 <div className="inx-kpi-head">
-                  <span className="inx-3d-icon sm tone-warning">🎯</span>
+                  <span className="inx-3d-icon sm tone-warning" data-insurnex-operations-icon="v16"><Target size={18} strokeWidth={1.9} aria-hidden="true" /></span>
                 </div>
                 <div className="inx-kpi-value">{prospect.length}</div>
                 <small className="inx-kpi-label">عملاء محتملون</small>
@@ -347,64 +352,9 @@ export default function OperationsPage() {
                 </div>
               </article>
             </div>
+            {/* Workflow steps moved to the fixed robot guide. */}
 
-            <div className="inx-section-head">
-              <h2>مسار العمل</h2>
-              <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-                8 خطوات موحدة
-              </small>
-            </div>
-            <div className="inx-card inx-card-lg" style={{ marginBottom: 16 }}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                  gap: 10,
-                }}
-              >
-                {WORKFLOW_STEPS.map((step, i) => (
-                  <div
-                    key={step}
-                    className="inx-card"
-                    style={{
-                      padding: 12,
-                      textAlign: 'center',
-                      background: 'var(--inx-bg)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        background: 'var(--inx-gradient)',
-                        color: '#fff',
-                        display: 'grid',
-                        placeItems: 'center',
-                        fontSize: 12,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {i + 1}
-                    </span>
-                    <strong
-                      style={{
-                        fontSize: 12.5,
-                        fontWeight: 700,
-                        color: 'var(--inx-text)',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {step}
-                    </strong>
-                  </div>
-                ))}
-              </div>
-            </div>
+
 
             <div className="inx-section-head">
               <h2>ابدأ من هنا</h2>
@@ -522,6 +472,57 @@ export default function OperationsPage() {
           onChanged={load}
         />
       )}
+        <aside className="inx-workflow-assistant" dir="rtl">
+          {workflowGuideOpen && (
+            <section
+              id="inx-workflow-assistant-panel"
+              className="inx-workflow-assistant-panel"
+              role="dialog"
+              aria-label="مساعد مسار العمل"
+            >
+              <header className="inx-workflow-assistant-header">
+                <span className="inx-workflow-assistant-brand"><Bot size={20} aria-hidden="true" /></span>
+                <span className="inx-workflow-assistant-heading">
+                  <strong>مساعد مسار العمل</strong>
+                  <small>رحلة العملية في 8 خطوات</small>
+                </span>
+                <button
+                  type="button"
+                  className="inx-workflow-assistant-close"
+                  onClick={() => setWorkflowGuideOpen(false)}
+                  aria-label="إغلاق دليل مسار العمل"
+                >
+                  <X size={18} aria-hidden="true" />
+                </button>
+              </header>
+              <ol className="inx-workflow-assistant-steps">
+                {WORKFLOW_STEPS.map((step, i) => (
+                  <li key={step.title} className="inx-workflow-assistant-step">
+                    <span className="inx-workflow-assistant-number">{i + 1}</span>
+                    <span className="inx-workflow-assistant-copy">
+                      <strong>{step.title}</strong>
+                      <small>{step.description}</small>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <footer className="inx-workflow-assistant-footer">
+                يمكنك الرجوع إلى هذا الدليل في أي وقت من أيقونة الروبوت.
+              </footer>
+            </section>
+          )}
+          <button
+            type="button"
+            className="inx-workflow-assistant-launcher"
+            onClick={() => setWorkflowGuideOpen((open) => !open)}
+            aria-expanded={workflowGuideOpen}
+            aria-controls="inx-workflow-assistant-panel"
+            aria-label={workflowGuideOpen ? 'إغلاق دليل مسار العمل' : 'فتح دليل مسار العمل'}
+            title="دليل مسار العمل"
+          >
+            {workflowGuideOpen ? <X size={23} aria-hidden="true" /> : <Bot size={25} aria-hidden="true" />}
+          </button>
+        </aside>
     </main>
   );
 }

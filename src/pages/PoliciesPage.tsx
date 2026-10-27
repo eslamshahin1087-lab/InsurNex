@@ -10,7 +10,7 @@ import {
   Sun,
   UserRound,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import PolicyForm from '../features/policies/PolicyForm';
 import {
@@ -39,7 +39,7 @@ const LINE_LABELS: Record<string, string> = {
   property: 'ممتلكات',
   marine: 'بحري',
   life: 'حياة',
-  liability: 'مسؤولية',
+  liability: 'مسؤوليات',
   other: 'أخرى',
 };
 
@@ -70,7 +70,7 @@ function statusTone(status: string) {
 }
 
 function lineLabel(line: string) {
-  return LINE_LABELS[line] || line || 'نوع غير محدد';
+  return LINE_LABELS[line] || line || 'غير محدد';
 }
 
 function formatDate(value: string) {
@@ -266,7 +266,7 @@ export default function PoliciesPage() {
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">🛡️</span>
+              <span className="inx-3d-icon sm tone-cyan">📋</span>
             </div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي الوثائق</small>
@@ -306,7 +306,7 @@ export default function PoliciesPage() {
           >
             <article className="inx-chart-card">
               <div className="chart-head">
-                <span className="label">حالات الوثائق</span>
+                <span className="label">حالة الوثائق</span>
                 <span className="value">
                   {formatMoney(stats.totalPremium, currency)}
                 </span>
@@ -472,7 +472,12 @@ export default function PoliciesPage() {
           <ul className="inx-list">
             {visible.map((policy) => (
               <li key={policy.id}>
-                <div className="inx-list-item">
+                {/* ✅ العنصر الآن قابل للنقر — ينقل إلى صفحة التفاصيل */}
+                <Link
+                  to={`/policies/${policy.id}`}
+                  className="inx-list-item"
+                  style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+                >
                   <span className="inx-icon-circle tone-cyan">
                     <ShieldCheck size={18} />
                   </span>
@@ -540,7 +545,7 @@ export default function PoliciesPage() {
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>

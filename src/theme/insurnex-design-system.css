@@ -1,0 +1,840 @@
+/* =====================================================================
+   InsurNex Design System — reference-aligned responsive shell
+   Shared tokens and components only; feature workflows remain unchanged.
+   ===================================================================== */
+
+:root {
+  font-family: var(--inx-font-family);
+  --inx-font-family: 'Cairo', 'IBM Plex Sans Arabic', Inter, 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-type-page: 26px;
+  --inx-type-section: 20px;
+  --inx-type-card: 15px;
+  --inx-type-body: 13.5px;
+  --inx-type-meta: 11.5px;
+  --inx-control-height: 38px;
+  --inx-control-radius: 11px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--inx-font-family);
+}
+
+body {
+  font-size: 14px;
+  line-height: 1.55;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.mobile-shell {
+  font-family: var(--inx-font-family) !important;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--app-text, var(--inx-text));
+  background: var(--app-bg, var(--inx-bg));
+}
+
+.mobile-shell,
+.mobile-shell * {
+  box-sizing: border-box;
+}
+
+/* PHONE CANVAS — the compact width is intentional only in Mobile View. */
+.mobile-shell.view-mode-mobile {
+  display: flex !important;
+  flex-direction: column !important;
+  width: min(100%, 480px) !important;
+  max-width: 480px !important;
+  min-width: 0 !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-inline: auto !important;
+  position: relative;
+  overflow-x: clip;
+  background: var(--app-bg, var(--inx-bg)) !important;
+  border-inline: 1px solid var(--app-line, var(--inx-border));
+  box-shadow: 0 12px 42px rgba(10, 25, 41, .08);
+  padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 700px) {
+  body:has(.mobile-shell.view-mode-mobile) {
+    background: #e9eef5;
+  }
+}
+
+/* DESKTOP CANVAS — wide workspace and a real side navigation. */
+.mobile-shell.view-mode-desktop {
+  display: grid !important;
+  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: start;
+  width: 100% !important;
+  max-width: 1680px !important;
+  min-width: 0 !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-inline: auto !important;
+  padding: 0 0 20px !important;
+  overflow-x: clip;
+  background: var(--app-bg, var(--inx-bg)) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.mobile-shell.view-mode-desktop > .app-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 74px !important;
+  height: auto !important;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  gap: 16px;
+  padding: 13px clamp(22px, 2.8vw, 42px) !important;
+  border-bottom: 1px solid var(--app-line, var(--inx-border)) !important;
+  background: var(--app-nav, rgba(255,255,255,.96)) !important;
+  box-shadow: 0 2px 12px rgba(10, 25, 41, .035);
+  backdrop-filter: blur(16px);
+}
+
+.mobile-shell.view-mode-desktop > .app-body {
+  grid-column: 2;
+  grid-row: 2;
+  width: min(1360px, 100%) !important;
+  max-width: 1360px !important;
+  min-width: 0 !important;
+  margin-inline: auto !important;
+  padding: 26px clamp(18px, 2.2vw, 34px) 30px !important;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.mobile-shell.view-mode-desktop > .inx-global-ad-slot {
+  grid-column: 2;
+  grid-row: 3;
+  width: min(1360px, 100%);
+  max-width: 1360px !important;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding-inline: clamp(18px, 2.2vw, 34px);
+}
+
+/* Header: balanced brand and actions, without squeezing the view toggle. */
+.s8-header {
+  min-width: 0;
+  gap: 12px;
+}
+
+.s8-brand {
+  min-width: 0;
+  flex: 0 1 auto;
+  gap: 9px;
+}
+
+.s8-brand img {
+  width: 96px;
+  height: 40px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.s8-hello {
+  min-width: 0;
+  gap: 2px;
+}
+
+.s8-hello strong {
+  max-width: 142px;
+  color: var(--app-text, var(--inx-text));
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.s8-hello small {
+  color: var(--app-muted, var(--inx-app-muted));
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.s8-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: 0;
+  margin-inline-start: auto;
+}
+
+.s8-actions > button.view-mode-toggle {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto !important;
+  min-width: 106px !important;
+  max-width: 132px;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 11px !important;
+  background: var(--app-surface, var(--inx-surface)) !important;
+  color: var(--app-text, var(--inx-text)) !important;
+  box-shadow: none !important;
+  font-family: var(--inx-font-family) !important;
+  font-size: 11.5px !important;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.s8-actions > button.view-mode-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.view-mode-toggle:hover {
+  border-color: var(--app-blue, var(--inx-blue)) !important;
+  background: var(--app-blue-soft, var(--inx-info-bg)) !important;
+}
+
+.view-mode-toggle:focus-visible {
+  outline: 2px solid var(--app-blue, var(--inx-blue));
+  outline-offset: 3px;
+}
+
+.mobile-shell.view-mode-mobile .s8-actions > button.view-mode-toggle {
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+}
+
+.mobile-shell.view-mode-mobile .view-mode-toggle span {
+  display: none !important;
+}
+
+/* MOBILE PRIMARY NAV: five touch-friendly destinations, matching the reference. */
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  grid-column: auto;
+  grid-row: auto;
+  position: fixed !important;
+  z-index: 100 !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+  transform: translateX(-50%) !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 3px !important;
+  width: min(456px, calc(100% - 20px)) !important;
+  max-width: 456px !important;
+  min-width: 0;
+  height: 68px !important;
+  min-height: 68px !important;
+  margin: 0 !important;
+  padding: 6px !important;
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 22px !important;
+  background: var(--app-nav, rgba(255,255,255,.97)) !important;
+  box-shadow: 0 8px 26px rgba(10,25,41,.12) !important;
+  backdrop-filter: blur(18px);
+}
+
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+  display: flex !important;
+  flex: 0 1 auto !important;
+  flex-direction: column !important;
+  align-items: center;
+  justify-content: center;
+  gap: 4px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 5px 2px !important;
+  border-radius: 13px !important;
+  color: var(--app-muted, var(--inx-app-muted)) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  line-height: 1.2;
+  font-weight: 700 !important;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a svg {
+  display: block;
+  flex: 0 0 auto;
+  width: 18px !important;
+  height: 18px !important;
+  stroke-width: 1.8 !important;
+}
+
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a span {
+  display: block;
+  max-width: 100%;
+  font-size: 10px !important;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current='page'] {
+  color: var(--app-blue, var(--inx-blue)) !important;
+  background: var(--app-blue-soft, var(--inx-info-bg)) !important;
+  box-shadow: inset 0 0 0 1px rgba(30, 66, 114, .08) !important;
+}
+
+/* The full Copilot page remains in More/Floating AI on phone; desktop keeps the direct link. */
+.mobile-shell.view-mode-mobile > .app-tabbar .nav-copilot,
+.app-tabbar.inx-tabbar-primary > .nav-copilot {
+  display: none !important;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  grid-column: 1;
+  grid-row: 2 / span 2;
+  position: sticky !important;
+  top: 90px !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  align-self: stretch;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  width: 232px !important;
+  max-width: 232px !important;
+  min-width: 0;
+  height: auto !important;
+  min-height: calc(100dvh - 90px);
+  margin: 0 !important;
+  padding: 18px 12px !important;
+  box-sizing: border-box;
+  border: 0 !important;
+  border-inline-start: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-inline-end: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--app-nav, #fff) !important;
+  z-index: 30;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 11px !important;
+  color: var(--app-muted, var(--inx-app-muted)) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+  text-align: start;
+  text-decoration: none;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a svg {
+  flex: 0 0 auto;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a span {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current='page'] {
+  color: var(--app-blue, var(--inx-blue)) !important;
+  background: var(--app-blue-soft, var(--inx-info-bg)) !important;
+  box-shadow: inset 0 0 0 1px rgba(30,66,114,.08) !important;
+}
+
+.mobile-shell.view-mode-desktop > .app-tabbar .nav-copilot {
+  display: flex !important;
+}
+
+.mobile-shell.view-mode-desktop > .copilot-fab {
+  left: auto !important;
+  right: 24px !important;
+  bottom: 24px !important;
+}
+
+/* Compact and consistent type scale across application pages. */
+.mobile-shell .app-body h1 {
+  font-size: var(--inx-type-page) !important;
+  line-height: 1.28 !important;
+  letter-spacing: -.025em;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.mobile-shell .app-body h2 {
+  font-size: var(--inx-type-section) !important;
+  line-height: 1.35 !important;
+  letter-spacing: -.015em;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.mobile-shell .app-body h3 {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+  font-weight: 750;
+}
+
+.mobile-shell .app-body h4 {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  font-weight: 700;
+}
+
+.mobile-shell .app-body p:not([class]) {
+  font-size: var(--inx-type-body);
+  line-height: 1.65;
+}
+
+.mobile-shell .app-body small {
+  line-height: 1.5;
+}
+
+.mobile-shell .app-body label {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.mobile-shell .app-body input,
+.mobile-shell .app-body select,
+.mobile-shell .app-body textarea {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mobile-shell .app-body .page-heading h1,
+.mobile-shell .app-body .mobile-page-heading h1,
+.mobile-shell .app-body .client-hero h1 {
+  font-size: var(--inx-type-page) !important;
+}
+
+.mobile-shell .app-body .inx-section-head h2,
+.mobile-shell .app-body .inx-card-head h2,
+.mobile-shell .app-body .op80-heading h2,
+.mobile-shell .app-body .chart-head .label {
+  font-size: var(--inx-type-card) !important;
+  line-height: 1.4;
+}
+
+.mobile-shell .app-body .inx-kpi-value,
+.mobile-shell .app-body .kpi strong {
+  font-size: 26px !important;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.mobile-shell .app-body .inx-kpi-label,
+.mobile-shell .app-body .legend-label,
+.mobile-shell .app-body .legend-value {
+  font-size: 11.5px !important;
+  line-height: 1.4;
+}
+
+.mobile-shell .app-body .eyebrow {
+  font-size: 10px !important;
+  line-height: 1.4;
+  letter-spacing: .045em;
+  font-weight: 800;
+}
+
+.mobile-shell .app-body .inx-btn,
+.mobile-shell .app-body .inx-chip,
+.mobile-shell .app-body .op80-primary,
+.mobile-shell .app-body .op96-open {
+  min-height: var(--inx-control-height);
+  border-radius: var(--inx-control-radius);
+  font-family: var(--inx-font-family);
+  font-size: 12.5px !important;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.mobile-shell .app-body .inx-card,
+.mobile-shell .app-body .inx-chart-card,
+.mobile-shell .app-body .inx-kpi,
+.mobile-shell .app-body .op80-panel,
+.mobile-shell .app-body .panel,
+.mobile-shell .app-body .kpi,
+.mobile-shell .app-body .task-card,
+.mobile-shell .app-body .notification-card,
+.mobile-shell .app-body .home-hero {
+  border-color: var(--app-line, var(--inx-border));
+  border-radius: 16px;
+  background: var(--app-surface, var(--inx-surface));
+  box-shadow: var(--app-shadow, var(--inx-shadow-sm));
+}
+
+.mobile-shell .app-body .inx-card-head,
+.mobile-shell .app-body .chart-head {
+  gap: 10px;
+}
+
+.mobile-shell .app-body table {
+  width: 100%;
+  font-size: 12.5px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.mobile-shell .app-body th {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--app-muted, var(--inx-app-muted));
+}
+
+.mobile-shell .app-body td {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.mobile-shell .app-body :is(button, a, input, select, textarea):focus-visible {
+  outline-color: var(--app-blue, var(--inx-blue));
+  outline-offset: 2px;
+}
+
+/* Breakpoint follows the viewport, not just the selected visual mode. */
+@media (max-width: 760px) {
+  .mobile-shell.view-mode-desktop {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .app-header {
+    position: sticky;
+    width: 100%;
+    padding-inline: 14px !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .app-body {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 14px 0 22px !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .inx-global-ad-slot {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
+  .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: translateX(-50%) !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+    flex-direction: row !important;
+    width: min(456px, calc(100% - 20px)) !important;
+    max-width: 456px !important;
+    min-height: 68px !important;
+    height: 68px !important;
+    padding: 6px !important;
+    border: 1px solid var(--app-line, var(--inx-border)) !important;
+    border-radius: 22px !important;
+    background: var(--app-nav, #fff) !important;
+    box-shadow: 0 8px 26px rgba(10,25,41,.12) !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+    flex: 0 1 auto !important;
+    flex-direction: column !important;
+    justify-content: center;
+    min-height: 0 !important;
+    padding: 5px 2px !important;
+    font-size: 10px !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .app-tabbar .nav-copilot {
+    display: none !important;
+  }
+
+  .mobile-shell.view-mode-desktop .s8-actions > button.view-mode-toggle {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  .mobile-shell.view-mode-desktop .view-mode-toggle span {
+    display: none !important;
+  }
+
+  .mobile-shell .app-body h1,
+  .mobile-shell .app-body .page-heading h1,
+  .mobile-shell .app-body .mobile-page-heading h1,
+  .mobile-shell .app-body .client-hero h1 {
+    font-size: 22px !important;
+  }
+
+  .mobile-shell .app-body h2 {
+    font-size: 18px !important;
+  }
+
+  .mobile-shell .app-body h3 {
+    font-size: 15.5px !important;
+  }
+
+  .mobile-shell .app-body .inx-kpi-value,
+  .mobile-shell .app-body .kpi strong {
+    font-size: 24px !important;
+  }
+
+  .mobile-shell.view-mode-desktop > .copilot-fab {
+    right: auto !important;
+    left: 14px !important;
+    bottom: 90px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-shell.view-mode-mobile .s8-brand img {
+    width: 78px;
+  }
+
+  .mobile-shell.view-mode-mobile .s8-hello strong {
+    max-width: 88px;
+  }
+
+  .mobile-shell.view-mode-mobile .s8-actions {
+    gap: 5px;
+  }
+
+  .mobile-shell.view-mode-mobile > .app-body .mobile-page {
+    padding-inline: 10px;
+  }
+}
+
+/* Standalone subscription and authentication screens share the same type ramp. */
+.mobile-page h1,
+.mobile-page .page-heading h1,
+.auth-page .auth-panel h1,
+.auth-mobile .auth-copy h1,
+.setup-card h1 {
+  font-size: 26px !important;
+  line-height: 1.28 !important;
+  letter-spacing: -.02em;
+  font-weight: 800;
+}
+
+.mobile-page h2 {
+  font-size: 20px !important;
+  line-height: 1.35 !important;
+  letter-spacing: -.015em;
+}
+
+.mobile-page h3 {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.auth-page .auth-form label,
+.auth-mobile .auth-form label,
+.setup-card label {
+  font-size: 12.5px;
+}
+
+.auth-page .auth-form input,
+.auth-page .auth-form select,
+.auth-page .auth-form textarea,
+.auth-mobile .auth-form input,
+.auth-mobile .auth-form select,
+.auth-mobile .auth-form textarea,
+.setup-card input,
+.setup-card select,
+.setup-card textarea {
+  font-size: 13px;
+}
+
+.app-tabbar.s8-tabbar.inx-tabbar-primary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 760px) {
+  .mobile-page h1,
+  .mobile-page .page-heading h1,
+  .auth-page .auth-panel h1,
+  .auth-mobile .auth-copy h1,
+  .setup-card h1 {
+    font-size: 22px !important;
+  }
+
+  .mobile-page h2 {
+    font-size: 18px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell,
+  .mobile-shell * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* INSURNEX_MOBILE_VIEW_REFINEMENT_V2 */
+
+/* MOBILE NAVIGATION — apply when Mobile View is selected,
+   regardless of the browser viewport width. */
+.mobile-shell.view-mode-mobile
+  > nav.app-tabbar.s8-tabbar.inx-tabbar-primary {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  grid-auto-flow: row !important;
+  align-items: stretch !important;
+  gap: 3px !important;
+  overflow: hidden !important;
+}
+
+.mobile-shell.view-mode-mobile
+  > nav.app-tabbar.s8-tabbar.inx-tabbar-primary
+  > a.nav-copilot {
+  display: none !important;
+}
+
+.mobile-shell.view-mode-mobile
+  > nav.app-tabbar.s8-tabbar.inx-tabbar-primary
+  > a:not(.nav-copilot) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 4px 2px !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+.mobile-shell.view-mode-mobile
+  > nav.app-tabbar.s8-tabbar.inx-tabbar-primary
+  > a:not(.nav-copilot) > span {
+  display: block !important;
+  position: static !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  text-indent: 0 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+/* MOBILE SHORTCUTS — stop the auto-moving carousel from clipping
+   the shortcut cards; retain horizontal touch scrolling instead. */
+.mobile-shell.view-mode-mobile
+  .inx-shortcut-row.inx-shortcut-carousel {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 82px !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 4px 2px 8px !important;
+  scroll-behavior: auto !important;
+  scroll-snap-type: x proximity !important;
+  touch-action: pan-x pan-y !important;
+  overscroll-behavior-x: contain !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-shell.view-mode-mobile
+  .inx-shortcut-carousel .inx-shortcut-track {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  transform: none !important;
+  animation: none !important;
+  animation-name: none !important;
+  animation-duration: 0s !important;
+  will-change: auto !important;
+}
+
+.mobile-shell.view-mode-mobile
+  .inx-shortcut-carousel .inx-shortcut-sequence[aria-hidden="true"] {
+  display: none !important;
+}
+
+.mobile-shell.view-mode-mobile
+  .inx-shortcut-carousel .inx-shortcut-card {
+  scroll-snap-align: start;
+}
+
+/* END INSURNEX_MOBILE_VIEW_REFINEMENT_V2 */

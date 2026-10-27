@@ -59,8 +59,10 @@ rollback-*.cmd
 apply-*.ps1
 README.txt
 patch/
-supabase/.temp/'@ 
-) 
-npm 
-tsc 
-insurnex@0.0.0 
+supabase/.temp/'@
+)
+npm
+tsc
+insurnex@0.0.0
+*firebase-adminsdk*.json
+path-1a672-firebase-adminsdk-fbsvc-ddb42ec528.json

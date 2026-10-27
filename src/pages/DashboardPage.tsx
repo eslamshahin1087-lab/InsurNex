@@ -256,13 +256,30 @@ export default function DashboardPage() {
         )}
 
         {/* SHORTCUTS */}
-        <div className="inx-shortcut-row" style={{ marginBottom: 18 }}>
-          {visibleShortcuts.map(({ to, label, emoji, tone }) => (
-            <Link key={to} to={to} className="inx-shortcut-card">
-              <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
-              <span className="label">{label}</span>
-            </Link>
-          ))}
+        <div className="inx-shortcut-row inx-shortcut-carousel" style={{ marginBottom: 18 }}>
+          <div className="inx-shortcut-track">
+            <div className="inx-shortcut-sequence">
+              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
+                <Link key={to} to={to} className="inx-shortcut-card">
+                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
+                  <span className="label">{label}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="inx-shortcut-sequence" aria-hidden="true">
+              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
+                <Link
+                  key={`inx-carousel-copy-${to}`}
+                  to={to}
+                  className="inx-shortcut-card"
+                  tabIndex={-1}
+                >
+                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
+                  <span className="label">{label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* HERO PANEL */}

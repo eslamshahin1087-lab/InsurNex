@@ -5,9 +5,7 @@ import type { DocumentCategory, DocumentRecord } from '../../types/document';
 import {deleteClientDocumentV8, getClientDocumentUrl, listClientDocuments, uploadClientDocumentV8 } from './client-documents-v8.service';
 
 type Props = { clientId: string; organizationId: string };
-const categoryLabel: Record<DocumentCategory, string> = {
-  policy: 'وثيقة تأمين', claim: 'مطالبة', client: 'ملف عميل', identity: 'هوية', proposal: 'عرض', correspondence: 'مراسلات', other: 'أخرى',
-};
+import { DOCUMENT_CATEGORY_LABELS as categoryLabel } from '../../types/document';
 function sizeLabel(value: number) { return value < 1024 * 1024 ? `${Math.max(1, Math.ceil(value / 1024))} KB` : `${(value / 1024 / 1024).toFixed(1)} MB`; }
 function errorLabel(error: unknown) {
   const value = error instanceof Error ? error.message : '';
@@ -60,7 +58,7 @@ export default function ClientDocumentsPanel({ clientId, organizationId }: Props
     <div className="client-documents-v804-health"><span><FileCheck2 size={16}/>إجمالي {health.total}</span><span>ملف عميل {health.client}</span><span>هوية {health.identity}</span></div>
     {error && <div className="client-documents-v804-error">{error}</div>}
     {loading ? <div className="empty"><RefreshCw size={22}/><strong>جارٍ تحميل المستندات...</strong></div> : items.length === 0 ? <div className="empty"><FileText size={24}/><strong>لا توجد مستندات</strong><p>أضف مستندات العميل لتكون متاحة لاحقًا في طلبات عروض الأسعار والإصدار.</p></div> : <div className="client-documents-v804-list">{items.map(record => <article key={record.id}><span className="client-documents-v804-icon"><FileText/></span><div className="client-documents-v804-main"><strong>{record.name}</strong><small>{record.originalFileName} · {sizeLabel(record.size)} · {categoryLabel[record.category]}</small>{record.notes && <p>{record.notes}</p>}</div><div className="client-documents-v804-row-actions"><button disabled={busyId === record.id} onClick={() => void open(record)} title="عرض"><ExternalLink size={17}/></button><button disabled={busyId === record.id} onClick={() => void open(record, true)} title="تنزيل"><Download size={17}/></button><button disabled={busyId === record.id} onClick={() => void remove(record)} title="حذف" className="danger"><Trash2 size={17}/></button></div></article>)}</div>}
-    {showUpload && user && <ClientDocumentUpload clientId={clientId} organizationId={organizationId} userId={user.uid} onClose={() => setShowUpload(false)} onUploaded={async () => { setShowUpload(false); await load(); }}/>} 
+    {showUpload && user && <ClientDocumentUpload clientId={clientId} organizationId={organizationId} userId={user.uid} onClose={() => setShowUpload(false)} onUploaded={async () => { setShowUpload(false); await load(); }}/>}
   </section>;
 }
 

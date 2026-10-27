@@ -616,11 +616,16 @@ export default function SubscriptionPage() {
 
       {/* SAME TABBAR AS AppLayout */}
       <nav
-        className="app-tabbar s8-tabbar inx-tabbar-6"
+        className="app-tabbar s8-tabbar inx-tabbar-primary"
         aria-label="التنقل السريع"
       >
         {navigation.map(([to, label, Icon]) => (
-          <NavLink key={to} to={to} end={to === '/'}>
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={to === '/copilot' ? 'nav-copilot' : undefined}
+          >
             <Icon size={21} />
             <span>{label}</span>
           </NavLink>

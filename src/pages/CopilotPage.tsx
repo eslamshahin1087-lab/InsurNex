@@ -344,17 +344,18 @@ export default function CopilotPage() {
             </div>
           )}
 
+          {messages.length === 0 && !loadingMsgs && (
+            <div className="copilot-suggestions">
+              <SuggestedPrompts
+                onPick={(prompt) => void submitText(prompt)}
+                disabled={sending}
+              />
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
-        {messages.length === 0 && !loadingMsgs && (
-          <div style={{ padding: '0 16px' }}>
-            <SuggestedPrompts
-              onPick={(prompt) => void submitText(prompt)}
-              disabled={sending}
-            />
-          </div>
-        )}
+
 
         <div className="copilot-input">
           <textarea
