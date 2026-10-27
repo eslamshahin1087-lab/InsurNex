@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase/app';
 import {
+  applyActionCode,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   initializeAuth,
   inMemoryPersistence,
 } from 'firebase/auth';
@@ -17,6 +19,7 @@ import {
   getFirestore,
   serverTimestamp,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
   query,
@@ -101,6 +104,76 @@ async function createOwnerWorkspace(actor, organizationName) {
   return organizationId;
 }
 
+
+async function acceptMemberViaInvitation(owner, organizationId, label, role) {
+  const invitee = await makeActor(label);
+  const email = String(invitee.user.email || '').toLowerCase();
+  const invitationId = 'invite-' + randomUUID().replace(/-/g, '');
+  const expiresAt = Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
+  const invitationRef = doc(owner.db, 'organizations', organizationId, 'invitations', invitationId);
+
+  await setDoc(invitationRef, {
+    organizationId,
+    invitedEmail: email,
+    role,
+    status: 'pending',
+    createdBy: owner.user.uid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    expiresAt,
+  });
+  await expectDenied(
+    () => getDoc(doc(invitee.db, 'organizations', organizationId, 'invitations', invitationId)),
+    label + ' cannot read an invitation until email verification',
+  );
+
+  await sendEmailVerification(invitee.user);
+  const oobResponse = await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-insurnex/oobCodes');
+  assert.equal(oobResponse.ok, true, 'Auth emulator exposes the verification-code endpoint');
+  const oobPayload = await oobResponse.json();
+  const verification = (oobPayload.oobCodes || []).find((item) =>
+    String(item.email || '').toLowerCase() === email
+    && String(item.requestType || '').toUpperCase().includes('VERIFY_EMAIL')
+  );
+  assert.ok(verification?.oobCode, 'Auth emulator generated a verification code for ' + label);
+  await applyActionCode(invitee.auth, verification.oobCode);
+  await invitee.user.reload();
+  await invitee.user.getIdToken(true);
+  assert.equal(invitee.user.emailVerified, true, label + ' email is verified in the Auth emulator');
+
+  const batch = writeBatch(invitee.db);
+  batch.update(doc(invitee.db, 'organizations', organizationId, 'invitations', invitationId), {
+    status: 'accepted',
+    acceptedBy: invitee.user.uid,
+    acceptedAt: serverTimestamp(),
+  });
+  batch.set(doc(invitee.db, 'users', invitee.user.uid), {
+    email: invitee.user.email,
+    displayName: label + ' Member',
+    organizationId,
+    role,
+    status: 'active',
+    acceptedInvitationId: invitationId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  batch.set(doc(invitee.db, 'organizations', organizationId, 'members', invitee.user.uid), {
+    uid: invitee.user.uid,
+    email: invitee.user.email,
+    displayName: label + ' Member',
+    role,
+    status: 'active',
+    invitedBy: owner.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await batch.commit();
+
+  const profile = await getDoc(doc(invitee.db, 'users', invitee.user.uid));
+  check(profile.exists() && profile.data().role === role && profile.data().organizationId === organizationId,
+    label + ' accepts the invitation with the assigned role and organization');
+  return { actor: invitee, invitationId, organizationId };
+}
+
 try {
   const ownerA = await makeActor('owner-a');
   const orgA = await createOwnerWorkspace(ownerA, 'InsurNex Rules Test A');
@@ -169,6 +242,122 @@ try {
       'a user cannot move an existing ' + collectionName + ' record to another organization'
     );
   }
+
+
+  // Verified invite acceptance is an atomic three-document operation: invitation,
+  // user profile and organization membership. Test several roles against the real Rules engine.
+  const brokerMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-broker', 'broker');
+  const salesMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-sales', 'sales');
+  const claimsMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-claims', 'claims');
+  const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
+  const staffMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-staff', 'staff');
+
+  const protectedClientId = 'rbac-client-' + randomUUID();
+  const protectedPolicyId = 'rbac-policy-' + randomUUID();
+  const protectedClaimId = 'rbac-claim-' + randomUUID();
+  const protectedLeadId = 'rbac-lead-' + randomUUID();
+  const protectedTaskId = 'rbac-task-' + randomUUID();
+  const protectedRevenueId = 'rbac-revenue-' + randomUUID();
+  const protectedClaimDocumentId = 'rbac-claim-document-' + randomUUID();
+  const protectedIdentityDocumentId = 'rbac-identity-document-' + randomUUID();
+
+  await setDoc(doc(ownerA.db, 'clients', protectedClientId), {
+    organizationId: orgA, name: 'RBAC fixture client', phone: '01000000000',
+    nationalId: 'TEST-NATIONAL-ID', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'policies', protectedPolicyId), {
+    organizationId: orgA, clientId: protectedClientId, policyNumber: 'RBAC-POLICY',
+    status: 'active', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'claims', protectedClaimId), {
+    organizationId: orgA, clientId: protectedClientId, policyId: protectedPolicyId,
+    claimNumber: 'RBAC-CLAIM', status: 'review', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'leads', protectedLeadId), {
+    organizationId: orgA, name: 'RBAC lead', stage: 'new',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'tasks', protectedTaskId), {
+    organizationId: orgA, title: 'RBAC task', status: 'open',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'revenue', protectedRevenueId), {
+    organizationId: orgA, amount: 1000, type: 'commission', status: 'confirmed',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'documents', protectedClaimDocumentId), {
+    organizationId: orgA, category: 'claim', relatedType: 'claim', relatedId: protectedClaimId,
+    name: 'Claim evidence', uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+  });
+  await setDoc(doc(ownerA.db, 'documents', protectedIdentityDocumentId), {
+    organizationId: orgA, category: 'identity', relatedType: 'client', relatedId: protectedClientId,
+    name: 'Identity evidence', uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+  });
+
+  check((await getDoc(doc(brokerMember.actor.db, 'clients', protectedClientId))).exists(),
+    'broker can read the organization client record');
+  await expectDenied(
+    () => getDoc(doc(salesMember.actor.db, 'clients', protectedClientId)),
+    'sales cannot read full Client 360 records containing sensitive identity fields',
+  );
+  check((await getDoc(doc(salesMember.actor.db, 'leads', protectedLeadId))).exists(),
+    'sales can read leads in its own organization');
+  await expectDenied(
+    () => getDoc(doc(salesMember.actor.db, 'claims', protectedClaimId)),
+    'sales cannot read claims',
+  );
+  check((await getDoc(doc(claimsMember.actor.db, 'claims', protectedClaimId))).exists(),
+    'claims role can read claim records in its own organization');
+  check((await getDoc(doc(claimsMember.actor.db, 'policies', protectedPolicyId))).exists(),
+    'claims role can read linked policy metadata within its organization');
+  check((await getDoc(doc(claimsMember.actor.db, 'documents', protectedClaimDocumentId))).exists(),
+    'claims role can read claim-category document metadata');
+  await expectDenied(
+    () => getDoc(doc(claimsMember.actor.db, 'documents', protectedIdentityDocumentId)),
+    'claims role cannot read identity-category document metadata',
+  );
+  await expectDenied(
+    () => getDoc(doc(claimsMember.actor.db, 'revenue', protectedRevenueId)),
+    'claims role cannot read brokerage revenue',
+  );
+  await expectDenied(
+    () => setDoc(doc(salesMember.actor.db, 'leads', 'sales-forged-' + randomUUID()), {
+      organizationId: orgB, name: 'cross-org lead', createdBy: salesMember.actor.user.uid,
+    }),
+    'sales cannot create a lead in another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(claimsMember.actor.db, 'leads', 'claims-forged-' + randomUUID()), {
+      organizationId: orgA, name: 'unauthorized lead', createdBy: claimsMember.actor.user.uid,
+    }),
+    'claims role cannot create leads',
+  );
+  check((await getDoc(doc(financeMember.actor.db, 'revenue', protectedRevenueId))).exists(),
+    'finance role can read revenue for its own organization');
+  await expectDenied(
+    () => getDoc(doc(financeMember.actor.db, 'clients', protectedClientId)),
+    'finance role cannot read full client profiles',
+  );
+  await expectDenied(
+    () => getDoc(doc(financeMember.actor.db, 'claims', protectedClaimId)),
+    'finance role cannot read claim narratives',
+  );
+  check((await getDoc(doc(staffMember.actor.db, 'tasks', protectedTaskId))).exists(),
+    'staff can read task records within its organization');
+  await expectDenied(
+    () => getDoc(doc(staffMember.actor.db, 'revenue', protectedRevenueId)),
+    'staff cannot read financial records',
+  );
+
+  const privateConversationId = 'rbac-conversation-' + randomUUID();
+  await setDoc(doc(claimsMember.actor.db, 'copilotConversations', privateConversationId), {
+    organizationId: orgA, userId: claimsMember.actor.user.uid,
+    title: 'Private claims conversation', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => getDoc(doc(ownerA.db, 'copilotConversations', privateConversationId)),
+    'organization owner cannot directly read another member private Copilot conversation',
+  );
 
   const notificationA = 'rules-notification-' + randomUUID();
   await setDoc(doc(ownerA.db, 'notifications', notificationA), {
