@@ -30,9 +30,12 @@ import {
 import {
   createOrganizationInvitation,
   listOrganizationInvitations,
+  listOrganizationMembers,
   revokeOrganizationInvitation,
+  updateOrganizationMember,
   type InvitableRole,
   type OrganizationInvitation,
+  type OrganizationMember,
 } from '../features/settings/organization-members.service';
 
 type Tab = 'profile' | 'organization' | 'members' | 'security' | 'appearance';
@@ -187,6 +190,8 @@ function MembersTab({
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<InvitableRole>('broker');
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
+  const [members, setMembers] = useState<OrganizationMember[]>([]);
+  const [memberDrafts, setMemberDrafts] = useState<Record<string, { role: InvitableRole; status: 'active' | 'disabled' }>>({});
   const [inviteUrl, setInviteUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -197,9 +202,24 @@ function MembersTab({
   async function reload() {
     setLoading(true);
     try {
-      setInvitations(await listOrganizationInvitations(organizationId));
+      const [nextInvitations, nextMembers] = await Promise.all([
+        listOrganizationInvitations(organizationId),
+        listOrganizationMembers(organizationId),
+      ]);
+      setInvitations(nextInvitations);
+      setMembers(nextMembers);
+      setMemberDrafts((current) => {
+        const next = { ...current };
+        for (const member of nextMembers) {
+          if (!next[member.uid]) next[member.uid] = {
+            role: member.role === 'owner' ? 'broker' : member.role,
+            status: member.status === 'disabled' ? 'disabled' : 'active',
+          };
+        }
+        return next;
+      });
     } catch (err) {
-      setError('تعذر تحميل الدعوات. تحقق من صلاحيات المؤسسة واتصالك.');
+      setError('تعذر تحميل الأعضاء أو الدعوات. تحقق من صلاحيات المؤسسة واتصالك.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -242,6 +262,30 @@ function MembersTab({
       setMessage('تم نسخ رابط الدعوة.');
     } catch {
       setError('تعذر نسخ الرابط تلقائيًا. حدّد الرابط وانسخه يدويًا.');
+    }
+  }
+
+  async function saveMember(member: OrganizationMember) {
+    const draft = memberDrafts[member.uid];
+    if (!draft || member.role === 'owner' || member.uid === inviterUid) return;
+    setBusyId(member.uid);
+    setError('');
+    setMessage('');
+    try {
+      await updateOrganizationMember({
+        organizationId,
+        uid: member.uid,
+        role: draft.role,
+        status: draft.status,
+        actorUid: inviterUid,
+      });
+      setMessage('تم تحديث صلاحيات العضو وحالة حسابه.');
+      await reload();
+    } catch (err) {
+      console.error(err);
+      setError('تعذر تحديث العضو. تأكد من عدم تعديل دور المالك وأن التغيير مسموح لدورك.');
+    } finally {
+      setBusyId('');
     }
   }
 
@@ -298,6 +342,52 @@ function MembersTab({
         )}
         {error && <div role="alert" style={errorBoxStyle}>{error}</div>}
         {message && <div role="status" style={successBoxStyle}><Check size={14} /> {message}</div>}
+      </div>
+
+      <div className="inx-card inx-card-lg">
+        <div className="inx-card-head">
+          <h3>أعضاء المؤسسة</h3>
+          <span style={{ color: 'var(--inx-muted)', fontSize: 12 }}>{members.length} عضو</span>
+        </div>
+        {loading ? <div className="inx-empty">جارٍ تحميل الأعضاء...</div> : members.length === 0 ? (
+          <div className="inx-empty">لم يتم العثور على أعضاء.</div>
+        ) : (
+          <div style={{ display: 'grid', gap: 10 }}>
+            {members.map((member) => {
+              const draft = memberDrafts[member.uid] || { role: member.role === 'owner' ? 'broker' as InvitableRole : member.role as InvitableRole, status: member.status === 'disabled' ? 'disabled' as const : 'active' as const };
+              const canEdit = member.role !== 'owner' && member.uid !== inviterUid;
+              const memberRoleOptions = inviterRole === 'owner'
+                ? ROLE_OPTIONS
+                : ROLE_OPTIONS.filter((item) => item.value !== 'admin' || item.value === member.role);
+              return (
+                <article key={member.uid} style={{ border: '1px solid var(--inx-border)', borderRadius: 14, padding: 12, display: 'grid', gap: 8 }}>
+                  <strong style={{ overflowWrap: 'anywhere' }}>{member.displayName || member.email || member.uid}</strong>
+                  <small style={{ color: 'var(--inx-muted)', overflowWrap: 'anywhere' }}>{member.email || member.uid}</small>
+                  {canEdit ? (
+                    <>
+                      <Field label="الدور">
+                        <select value={draft.role} onChange={(e) => setMemberDrafts((old) => ({ ...old, [member.uid]: { ...draft, role: e.target.value as InvitableRole } }))} style={inputStyle}>
+                          {memberRoleOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                        </select>
+                      </Field>
+                      <Field label="حالة الحساب">
+                        <select value={draft.status} onChange={(e) => setMemberDrafts((old) => ({ ...old, [member.uid]: { ...draft, status: e.target.value as 'active' | 'disabled' } }))} style={inputStyle}>
+                          <option value="active">نشط</option>
+                          <option value="disabled">معطّل</option>
+                        </select>
+                      </Field>
+                      <button type="button" className="inx-btn inx-btn-secondary" style={{ justifySelf: 'start' }} disabled={busyId === member.uid || (draft.role === member.role && draft.status === member.status)} onClick={() => void saveMember(member)}>
+                        {busyId === member.uid ? 'جارٍ الحفظ...' : 'حفظ صلاحيات العضو'}
+                      </button>
+                    </>
+                  ) : (
+                    <div style={{ color: 'var(--inx-text-soft)', fontSize: 12 }}>{ROLE_LABELS[member.role] || member.role} · {member.status === 'disabled' ? 'معطّل' : 'نشط'}{member.role === 'owner' ? ' · لا يمكن تغيير المالك من هذه الشاشة' : ' · عضويتك الحالية'}</div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="inx-card inx-card-lg">
