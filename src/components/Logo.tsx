@@ -1,7 +1,27 @@
 import type { ImgHTMLAttributes } from 'react';
+import { useTheme } from '../theme/ThemeProvider';
 
-type LogoProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'>;
+export type LogoVariant = 'lockup' | 'mark' | 'stacked';
 
-export default function Logo({ alt = 'InsurNex', ...rest }: LogoProps) {
-  return <img src="/branding/logo-light.png" alt={alt} {...rest} />;
+type LogoProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
+  variant?: LogoVariant;
+};
+
+export default function Logo({
+  alt = 'InsurNex',
+  variant = 'lockup',
+  ...rest
+}: LogoProps) {
+  const { resolvedTheme } = useTheme();
+  const suffix = resolvedTheme === 'dark' ? 'dark' : 'light';
+  const src =
+    variant === 'mark'
+      ? `/branding/insurnex-mark-${suffix}.svg`
+      : variant === 'stacked'
+        ? suffix === 'dark'
+          ? '/branding/insurnex-brand-dark.svg'
+          : '/branding/insurnex-brand.svg'
+        : `/branding/logo-${suffix}.svg`;
+
+  return <img src={src} alt={alt} data-logo-variant={variant} {...rest} />;
 }
