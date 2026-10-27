@@ -192,7 +192,7 @@ export default function SubscriptionPage() {
               <Logo
                 variant="mark"
                 alt="InsurNex"
-                style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 12 }}
+                style={{ width: 80, height: 69, objectFit: 'contain', borderRadius: 12 }}
               />
               <div>
                 <strong style={{ display: 'block', fontSize: 15, color: 'var(--inx-text)' }}>

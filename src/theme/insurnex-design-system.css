@@ -964,3 +964,46 @@ body {
   }
 }
 /* END INSURNEX_BRAND_LOCKUP_SCALE_V40 */
+
+/* INSURNEX_EXACT_SUPPLIED_LOGO_V41 â€” original PNG is used without alteration */
+#root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+  width: min(74px, 19vw) !important;
+  height: auto !important;
+  max-width: 74px !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  flex: 0 0 auto !important;
+}
+#root .auth-panel img[data-logo-variant='lockup'] {
+  width: 80px !important;
+  height: auto !important;
+  max-width: 80px !important;
+  object-fit: contain !important;
+}
+#root .landing-brand img[data-logo-variant='lockup'] {
+  width: 82px !important;
+  height: auto !important;
+  max-width: 82px !important;
+  object-fit: contain !important;
+}
+#root .landing-footer-brand img[data-logo-variant='lockup'] {
+  width: 72px !important;
+  height: auto !important;
+  max-width: 72px !important;
+  object-fit: contain !important;
+}
+#root .setup-card img[data-logo-variant='stacked'] {
+  width: min(200px, 68vw) !important;
+  height: auto !important;
+  max-width: 200px !important;
+  object-fit: contain !important;
+}
+@media (max-width: 380px) {
+  #root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+    width: min(58px, 19vw) !important;
+    max-width: 58px !important;
+    max-height: 50px !important;
+  }
+}
+/* END INSURNEX_EXACT_SUPPLIED_LOGO_V41 */
