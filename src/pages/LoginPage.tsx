@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Eye,
@@ -19,13 +19,16 @@ export default function LoginPage() {
   const { user, loading } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const requestedNext = new URLSearchParams(location.search).get('next');
+  const nextPath = requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (!loading && user) return <Navigate to="/" replace />;
+  if (!loading && user) return <Navigate to={nextPath || '/'} replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -33,7 +36,7 @@ export default function LoginPage() {
     setError('');
     try {
       await signIn(email.trim(), password);
-      navigate('/');
+      navigate(nextPath || '/');
     } catch {
       setError('تعذر تسجيل الدخول. تحقق من بياناتك.');
     } finally {

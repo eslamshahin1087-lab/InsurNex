@@ -104,6 +104,7 @@ async function readCallerVisibleDocument(path: string, token: string): Promise<F
 interface AuthorizedDocument {
   organizationId: string;
   clientId: string;
+  area: string;
   path: string;
 }
 
@@ -112,7 +113,7 @@ function parseDocumentPath(path: string, organizationId: string): AuthorizedDocu
   // organizations/{org}/clients/{client}/{area}/{filename}
   const match = /^organizations\/([A-Za-z0-9_-]{1,128})\/clients\/([A-Za-z0-9_-]{1,128})\/([A-Za-z0-9_-]{1,64})\/([A-Za-z0-9._-]{1,220})$/.exec(path);
   if (!match || match[4] === '.' || match[4] === '..' || match[1] !== organizationId) return null;
-  return { organizationId: match[1], clientId: match[2], path };
+  return { organizationId: match[1], clientId: match[2], area: match[3], path };
 }
 
 /**
@@ -144,13 +145,19 @@ async function authorizeDocumentAccess(
       return { ok: false, response: errorResponse('ORGANIZATION_ACCESS_DENIED', 403) };
     }
 
+    const canAccessAllClientDocuments = ['owner', 'admin', 'broker'].includes(role);
+    const canAccessClaimDocument = role === 'claims' && document.area === 'claim';
+    if (!canAccessAllClientDocuments && !canAccessClaimDocument) {
+      return { ok: false, response: errorResponse('DOCUMENT_ROLE_ACCESS_DENIED', 403) };
+    }
+    if (action === 'delete' && !canAccessAllClientDocuments) {
+      return { ok: false, response: errorResponse('DELETE_NOT_ALLOWED', 403) };
+    }
+
     const client = await readCallerVisibleDocument(`clients/${document.clientId}`, token);
     if (!client) return { ok: false, response: errorResponse('CLIENT_NOT_FOUND', 404) };
     if (stringField(client, 'organizationId') !== organizationId) {
       return { ok: false, response: errorResponse('CLIENT_ACCESS_DENIED', 403) };
-    }
-    if (action === 'delete' && !['owner', 'admin', 'broker'].includes(role)) {
-      return { ok: false, response: errorResponse('DELETE_NOT_ALLOWED', 403) };
     }
     return { ok: true, document };
   } catch (error) {

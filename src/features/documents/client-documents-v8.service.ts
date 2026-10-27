@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, limit, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, query, serverTimestamp, where } from 'firebase/firestore';
 import { auth, db } from '../../firebase/config';
 import type { DocumentCategory, DocumentRecord } from '../../types/document';
 import { supabaseDocumentStorage } from '../storage/supabase-storage.provider';
@@ -7,11 +7,18 @@ import type { StoredObject } from '../storage/storage-provider';
 export const CLIENT_DOCUMENT_MAX_SIZE = 10 * 1024 * 1024;
 
 export async function listClientDocuments(organizationId: string, clientId: string): Promise<DocumentRecord[]> {
-  const snapshot = await getDocs(query(
-    collection(db, 'documents'),
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('AUTH_REQUIRED');
+  const profile = await getDoc(doc(db, 'users', currentUser.uid));
+  if (!profile.exists()) throw new Error('ACTIVE_PROFILE_REQUIRED');
+  const role = String(profile.data().role || '');
+  if (!['owner', 'admin', 'broker', 'claims'].includes(role)) return [];
+  const constraints = [
     where('organizationId', '==', organizationId),
+    ...(role === 'claims' ? [where('category', '==', 'claim')] : []),
     limit(300),
-  ));
+  ];
+  const snapshot = await getDocs(query(collection(db, 'documents'), ...constraints));
 
   return snapshot.docs
     .map(item => ({ id: item.id, ...item.data() } as DocumentRecord))
@@ -38,7 +45,13 @@ export async function uploadClientDocumentV8(input: {
       organizationId: input.organizationId,
       clientId: input.clientId,
       userToken: firebaseToken,
-      area: 'onboarding',
+      area: input.category === 'claim'
+        ? 'claim'
+        : input.category === 'policy'
+          ? 'policy'
+          : input.category === 'proposal'
+            ? 'quotation'
+            : 'onboarding',
     });
 
     const metadata = await addDoc(collection(db, 'documents'), {

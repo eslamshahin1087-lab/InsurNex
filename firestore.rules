@@ -12,15 +12,107 @@ service cloud.firestore {
         && sameOrg(get(clientPath(clientId)).data.organizationId);
     }
     function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
+    function userDocumentPath(uid){ return /databases/$(database)/documents/users/$(uid); }
+    function memberPath(orgId, uid){ return /databases/$(database)/documents/organizations/$(orgId)/members/$(uid); }
+    function invitationPath(orgId, invitationId){ return /databases/$(database)/documents/organizations/$(orgId)/invitations/$(invitationId); }
     function hasProfile(){ return signedIn() && exists(userPath()); }
     function me(){ return get(userPath()).data; }
     function isAdmin(){ return signedIn() && exists(adminPath(request.auth.uid)); }
     function sameOrg(orgId){ return hasProfile() && me().status == 'active' && me().organizationId == orgId; }
-    function roleIs(roles){ return hasProfile() && me().role in roles; }
+    function roleIs(roles){ return hasProfile() && me().status == 'active' && me().role in roles; }
     function privileged(){ return roleIs(['owner','admin']); }
+    function validOrgRole(role){ return role in ['owner','admin','broker','sales','claims','finance','staff']; }
+    function canInviteRole(role){
+      return (roleIs(['owner']) && role in ['admin','broker','sales','claims','finance','staff'])
+        || (roleIs(['admin']) && role in ['broker','sales','claims','finance','staff']);
+    }
     function ownsOrganizationAfterWrite(orgId){
       return existsAfter(organizationPath(orgId))
         && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid;
+    }
+    function acceptsInvitation(uid){
+      return signedIn()
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.organizationId is string
+        && request.resource.data.acceptedInvitationId is string
+        && existsAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId))
+        && getAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId)).data.status == 'accepted'
+        && getAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId)).data.acceptedBy == uid
+        && getAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId)).data.invitedEmail == request.auth.token.email
+        && getAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId)).data.role == request.resource.data.role
+        && getAfter(invitationPath(request.resource.data.organizationId, request.resource.data.acceptedInvitationId)).data.expiresAt > request.time
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'active'
+        && validOrgRole(request.resource.data.role)
+        && getAfter(organizationPath(request.resource.data.organizationId)).data.ownerId is string;
+    }
+    function isInvitationMember(orgId, uid){
+      return signedIn()
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.uid == uid
+        && request.resource.data.role in ['admin','broker','sales','claims','finance','staff']
+        && request.resource.data.status == 'active'
+        && getAfter(userDocumentPath(uid)).data.organizationId == orgId
+        && getAfter(userDocumentPath(uid)).data.role == request.resource.data.role
+        && getAfter(userDocumentPath(uid)).data.status == 'active'
+        && getAfter(userDocumentPath(uid)).data.acceptedInvitationId is string
+        && getAfter(invitationPath(orgId, getAfter(userDocumentPath(uid)).data.acceptedInvitationId)).data.status == 'accepted'
+        && getAfter(invitationPath(orgId, getAfter(userDocumentPath(uid)).data.acceptedInvitationId)).data.acceptedBy == uid
+        && getAfter(invitationPath(orgId, getAfter(userDocumentPath(uid)).data.acceptedInvitationId)).data.invitedEmail == request.auth.token.email;
+    }
+    function canReadBusinessCollection(collection, data){
+      return (collection == 'clients' && roleIs(['owner','admin','broker','claims']))
+        || (collection == 'policies' && roleIs(['owner','admin','broker','claims']))
+        || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
+        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'insurers' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
+        || (collection == 'documents' && (roleIs(['owner','admin','broker']) || (roleIs(['claims']) && data.category == 'claim')))
+        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['copilotConversations','copilotMessages']
+          && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
+          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
+    }
+    function canCreateBusinessCollection(collection, data){
+      return (collection == 'clients' && roleIs(['owner','admin','broker']))
+        || (collection == 'policies' && roleIs(['owner','admin','broker']))
+        || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
+        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'insurers' && roleIs(['owner','admin','broker']))
+        || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
+        || (collection == 'documents' && (roleIs(['owner','admin','broker']) || (roleIs(['claims']) && data.category == 'claim')))
+        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['copilotConversations','copilotMessages']
+          && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
+          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
+    }
+    function canUpdateBusinessCollection(collection, data){
+      return (collection == 'clients' && roleIs(['owner','admin','broker']))
+        || (collection == 'policies' && roleIs(['owner','admin','broker']))
+        || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
+        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
+        || (collection == 'insurers' && roleIs(['owner','admin','broker']))
+        || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
+        || (collection == 'documents' && roleIs(['owner','admin','broker']))
+        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['copilotConversations','copilotMessages']
+          && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
+          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
+    }
+    function canDeleteBusinessCollection(collection, data){
+      return (collection in ['clients','policies','leads','leadActivities','rfqs','tasks','documents'] && roleIs(['owner','admin','broker']))
+        || (collection in ['claims','claimActivities','insurers','operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin']))
+        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['copilotConversations','copilotMessages'] && roleIs(['owner','admin','broker','sales','claims','finance','staff']) && data.keys().hasAny(['userId']) && data.userId == request.auth.uid)
+        || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']));
     }
 
     // ============ Admins ============
@@ -31,7 +123,7 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
-    // ============ Users (brokers) ============
+    // ============ Users (organization members) ============
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid
@@ -45,13 +137,30 @@ service cloud.firestore {
         && request.resource.data.status == 'active'
         && request.resource.data.organizationId is string
         && ownsOrganizationAfterWrite(request.resource.data.organizationId)
-      );
+        && getAfter(memberPath(request.resource.data.organizationId, uid)).data.role == 'owner'
+        && getAfter(memberPath(request.resource.data.organizationId, uid)).data.status == 'active'
+      ) || acceptsInvitation(uid);
       allow update: if isAdmin() || (
         signedIn()
         && request.auth.uid == uid
         && request.resource.data.organizationId == resource.data.organizationId
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','phone','photoURL','updatedAt'])
+      ) || (
+        sameOrg(resource.data.organizationId)
+        && privileged()
+        && uid != request.auth.uid
+        && get(organizationPath(resource.data.organizationId)).data.ownerId != uid
+        && request.resource.data.organizationId == resource.data.organizationId
+        && request.resource.data.email == resource.data.email
+        && validOrgRole(request.resource.data.role)
+        && request.resource.data.role != 'owner'
+        && (me().role == 'owner' || request.resource.data.role != 'admin' || request.resource.data.role == resource.data.role)
+        && request.resource.data.status in ['active','disabled']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','status','displayName','phone','photoURL','updatedAt'])
+        && getAfter(memberPath(resource.data.organizationId, uid)).data.role == request.resource.data.role
+        && getAfter(memberPath(resource.data.organizationId, uid)).data.status == request.resource.data.status
       );
       allow delete: if isAdmin();
     }
@@ -79,46 +188,113 @@ service cloud.firestore {
           && request.resource.data.role == 'owner'
           && request.resource.data.status == 'active'
           && getAfter(organizationPath(orgId)).data.ownerId == request.auth.uid
+          && getAfter(userDocumentPath(uid)).data.organizationId == orgId
+          && getAfter(userDocumentPath(uid)).data.role == 'owner'
+          && getAfter(userDocumentPath(uid)).data.status == 'active'
+        ) || isInvitationMember(orgId, uid);
+        allow read: if ((sameOrg(orgId) && privileged()) || (sameOrg(orgId) && request.auth.uid == uid)) || isAdmin();
+        allow update: if isAdmin() || (
+          sameOrg(orgId)
+          && privileged()
+          && uid != get(organizationPath(orgId)).data.ownerId
+          && request.resource.data.uid == uid
+          && request.resource.data.role in ['admin','broker','sales','claims','finance','staff']
+          && (me().role == 'owner' || request.resource.data.role != 'admin' || request.resource.data.role == resource.data.role)
+          && request.resource.data.status in ['active','disabled']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role','status','displayName','updatedAt'])
+          && getAfter(userDocumentPath(uid)).data.organizationId == orgId
+          && getAfter(userDocumentPath(uid)).data.role == request.resource.data.role
+          && getAfter(userDocumentPath(uid)).data.status == request.resource.data.status
         );
-        allow read: if sameOrg(orgId) || isAdmin();
-        allow update: if (sameOrg(orgId) && privileged()) || isAdmin();
-        allow delete: if (sameOrg(orgId) && privileged() && uid != request.auth.uid) || isAdmin();
+        allow delete: if isAdmin();
       }
+
+      match /invitations/{invitationId} {
+        allow read: if (sameOrg(orgId) && privileged()) || (
+          signedIn()
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == resource.data.invitedEmail
+          && resource.data.organizationId == orgId
+          && resource.data.status == 'pending'
+          && resource.data.expiresAt is timestamp
+          && resource.data.expiresAt > request.time
+        );
+        allow create: if sameOrg(orgId)
+          && privileged()
+          && canInviteRole(request.resource.data.role)
+          && invitationId.matches('^[A-Za-z0-9_-]{24,64}$')
+          && request.resource.data.keys().hasOnly(['organizationId','invitedEmail','role','status','createdBy','createdAt','updatedAt','expiresAt'])
+          && request.resource.data.organizationId == orgId
+          && request.resource.data.invitedEmail is string
+          && request.resource.data.invitedEmail.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$')
+          && request.resource.data.status == 'pending'
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.expiresAt is timestamp
+          && request.resource.data.expiresAt > request.time
+          && request.resource.data.expiresAt <= request.time + duration.value(7, 'd');
+        allow update: if (
+          sameOrg(orgId)
+          && privileged()
+          && resource.data.status == 'pending'
+          && request.resource.data.status == 'revoked'
+          && request.resource.data.revokedBy == request.auth.uid
+          && request.resource.data.revokedAt == request.time
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','revokedBy','revokedAt','updatedAt'])
+        ) || (
+          signedIn()
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == resource.data.invitedEmail
+          && resource.data.organizationId == orgId
+          && resource.data.status == 'pending'
+          && resource.data.expiresAt is timestamp
+          && resource.data.expiresAt > request.time
+          && request.resource.data.status == 'accepted'
+          && request.resource.data.acceptedBy == request.auth.uid
+          && request.resource.data.acceptedAt == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','acceptedBy','acceptedAt'])
+          && getAfter(userPath()).data.organizationId == orgId
+          && getAfter(userPath()).data.status == 'active'
+          && getAfter(userPath()).data.email == resource.data.invitedEmail
+          && getAfter(userPath()).data.role == resource.data.role
+          && getAfter(userPath()).data.acceptedInvitationId == invitationId
+          && getAfter(memberPath(orgId, request.auth.uid)).data.uid == request.auth.uid
+          && getAfter(memberPath(orgId, request.auth.uid)).data.role == resource.data.role
+          && getAfter(memberPath(orgId, request.auth.uid)).data.status == 'active'
+        );
+        allow delete: if false;
+      }
+
     }
 
     // ============ Clients (top-level + subcollections) ============
     match /clients/{clientId} {
-      allow read: if isAdmin() || (
-        signedIn()
-        && resource.data.organizationId is string
+      // Sales is intentionally excluded from the full Client 360 record until
+      // sensitive identity/family fields are separated into independently secured documents.
+      allow read: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
-      );
-      allow create: if isAdmin() || (
-        signedIn()
-        && request.resource.data.organizationId is string
+        && roleIs(['owner','admin','broker','claims']);
+      allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
-      );
-      allow update: if isAdmin() || (
-        signedIn()
-        && resource.data.organizationId is string
-        && sameOrg(resource.data.organizationId)
-      );
-      allow delete: if isAdmin() || (
-        signedIn()
-        && resource.data.organizationId is string
+        && roleIs(['owner','admin','broker'])
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
-      );
+        && request.resource.data.organizationId == resource.data.organizationId
+        && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy);
+      allow delete: if resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+        && roleIs(['owner','admin','broker']);
 
       match /timeline/{eventId} {
-        // Timeline entries inherit access from their parent client. Being signed
-        // in is not sufficient: users must belong to the client's organization.
-        allow read: if isAdmin() || canAccessClient(clientId);
-        allow create: if isAdmin() || (
-          canAccessClient(clientId)
-          && request.resource.data.by == request.auth.uid
-        );
-        allow update, delete: if isAdmin();
+        allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker','claims']);
+        allow create: if canAccessClient(clientId)
+          && roleIs(['owner','admin','broker'])
+          && request.resource.data.by == request.auth.uid;
+        allow update, delete: if false;
       }
     }
 
@@ -234,11 +410,21 @@ service cloud.firestore {
 
     // ============ Client Counters ============
     match /clientCounters/{counterId} {
-      allow read: if signedIn();
-      allow create, update: if signedIn()
-        && request.resource.data.organizationId is string
-        && sameOrg(request.resource.data.organizationId);
-      allow delete: if isAdmin();
+      // The owning org can read its missing counter on initialization; other orgs cannot.
+      allow read: if (resource != null && sameOrg(resource.data.organizationId))
+        || (hasProfile() && counterId.matches('^' + me().organizationId + '-[0-9]{4}$'));
+      allow create: if request.resource.data.organizationId is string
+        && sameOrg(request.resource.data.organizationId)
+        && counterId.matches('^' + me().organizationId + '-[0-9]{4}$')
+        && request.resource.data.count is int
+        && request.resource.data.count >= 1;
+      allow update: if resource.data.organizationId is string
+        && sameOrg(resource.data.organizationId)
+        && request.resource.data.organizationId == resource.data.organizationId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count','updatedAt'])
+        && request.resource.data.count is int
+        && request.resource.data.count >= resource.data.count;
+      allow delete: if false;
     }
 
     // ============ Ads ============
@@ -282,56 +468,54 @@ service cloud.firestore {
     }
 
     // ============ Generic business records ============
+    // Platform Admin does not receive blanket access to organization business records.
     match /{collection}/{docId} {
-      allow read: if isAdmin() || (
-        collection != 'users' && collection != 'organizations'
+      allow read: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients'
-        && collection != 'platformSettings'
+        && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
-      );
-      allow create: if isAdmin() || (
-        collection != 'users' && collection != 'organizations'
+        && canReadBusinessCollection(collection, resource.data);
+      allow create: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients'
-        && collection != 'platformSettings'
+        && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
-      );
-      allow update: if isAdmin() || (
-        collection != 'users' && collection != 'organizations'
+        && (!request.resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == request.auth.uid)
+        && canCreateBusinessCollection(collection, request.resource.data);
+      allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients'
-        && collection != 'platformSettings'
+        && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
-        && resource.data.organizationId == request.resource.data.organizationId
-        && sameOrg(request.resource.data.organizationId)
-      );
-      allow delete: if isAdmin() || (
-        collection != 'users' && collection != 'organizations'
+        && resource.data.organizationId is string
+        && request.resource.data.organizationId == resource.data.organizationId
+        && sameOrg(resource.data.organizationId)
+        && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
+        && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && (collection != 'documents' || request.resource.data.category == resource.data.category)
+        && canUpdateBusinessCollection(collection, resource.data);
+      allow delete: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients'
-        && collection != 'platformSettings'
+        && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
         && resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
-        && roleIs(['owner','admin','broker'])
-      );
+        && canDeleteBusinessCollection(collection, resource.data);
     }
+
   }
 }
