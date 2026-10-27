@@ -19,6 +19,9 @@ export default function RegisterPage() {
   const { user, loading } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const requestedNext = new URLSearchParams(location.search).get('next');
+  const nextPath = requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : null;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +30,7 @@ export default function RegisterPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  if (!loading && user) return <Navigate to="/setup" replace />;
+  if (!loading && user) return <Navigate to={nextPath || '/setup'} replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -40,7 +43,7 @@ export default function RegisterPage() {
     setBusy(true);
     try {
       await register(name, email, password);
-      navigate('/setup', { replace: true });
+      navigate(nextPath || '/setup', { replace: true });
     } catch (err: unknown) {
       const code =
         typeof err === 'object' && err && 'code' in err
