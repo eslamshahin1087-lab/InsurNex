@@ -35,28 +35,37 @@ export default function AcceptInvitationPage() {
   const navigate = useNavigate();
   const { user, profile, loading: authLoading } = useAuth();
   const [invitation, setInvitation] = useState<OrganizationInvitation | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadedInvitationKey, setLoadedInvitationKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [refresh, setRefresh] = useState(0);
 
+  const invitationKey = `${orgId}/${invitationId}`;
+  const shouldLoadInvitation = Boolean(
+    !authLoading && user && user.emailVerified && !profile && orgId && invitationId,
+  );
+  const loading = authLoading || (shouldLoadInvitation && loadedInvitationKey !== invitationKey);
+  const currentInvitation = loadedInvitationKey === invitationKey ? invitation : null;
+
   useEffect(() => {
+    if (authLoading || !user || !user.emailVerified || !orgId || !invitationId || profile) return;
     let alive = true;
-    if (authLoading) return;
-    if (!user || !user.emailVerified || !orgId || !invitationId || profile) {
-      setInvitation(null);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError('');
     void getInvitationForCurrentUser(orgId, invitationId)
-      .then((item) => { if (alive) setInvitation(item); })
-      .catch((err: unknown) => { if (alive) setError(errorLabel(String((err as Error)?.message || err))); })
-      .finally(() => { if (alive) setLoading(false); });
+      .then((item) => {
+        if (!alive) return;
+        setInvitation(item);
+        setError('');
+        setLoadedInvitationKey(invitationKey);
+      })
+      .catch((err: unknown) => {
+        if (!alive) return;
+        setInvitation(null);
+        setError(errorLabel(String((err as Error)?.message || err)));
+        setLoadedInvitationKey(invitationKey);
+      });
     return () => { alive = false; };
-  }, [orgId, invitationId, user?.uid, user?.emailVerified, profile, authLoading, refresh]);
+  }, [orgId, invitationId, invitationKey, user, profile, authLoading, refresh]);
 
   async function sendVerification() {
     const currentUser = auth.currentUser;
@@ -86,6 +95,8 @@ export default function AcceptInvitationPage() {
       if (!currentUser.emailVerified) {
         setError('لم يؤكد Firebase التحقق بعد. افتح رابط التحقق في بريدك ثم أعد المحاولة.');
       } else {
+        setInvitation(null);
+        setLoadedInvitationKey(null);
         setRefresh((value) => value + 1);
       }
     } catch {
@@ -150,13 +161,13 @@ export default function AcceptInvitationPage() {
             <button className="inx-btn inx-btn-primary inx-btn-block" type="button" disabled={busy} onClick={sendVerification}>{busy ? 'جارٍ الإرسال...' : 'إرسال رسالة التحقق'}</button>
             <button className="inx-btn inx-btn-secondary inx-btn-block" type="button" disabled={busy} onClick={refreshVerification}>تحققت من البريد — إعادة الفحص</button>
           </>
-        ) : invitation ? (
+        ) : currentInvitation ? (
           <>
             <div style={{ border: '1px solid var(--inx-border)', borderRadius: 14, padding: 16, display: 'grid', gap: 9 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--inx-text)' }}><CheckCircle2 size={18} style={{ color: 'var(--inx-success)' }} /> تمت مطابقة البريد الإلكتروني</div>
-              <div><small style={{ color: 'var(--inx-muted)' }}>البريد المدعو</small><div style={{ fontWeight: 700, overflowWrap: 'anywhere' }}>{invitation.invitedEmail}</div></div>
-              <div><small style={{ color: 'var(--inx-muted)' }}>الدور داخل المؤسسة</small><div style={{ fontWeight: 700 }}>{ROLE_LABELS[invitation.role] || invitation.role}</div></div>
-              <div><small style={{ color: 'var(--inx-muted)' }}>صلاحية الدعوة حتى</small><div>{invitation.expiresAt.toDate().toLocaleString('ar-EG')}</div></div>
+              <div><small style={{ color: 'var(--inx-muted)' }}>البريد المدعو</small><div style={{ fontWeight: 700, overflowWrap: 'anywhere' }}>{currentInvitation.invitedEmail}</div></div>
+              <div><small style={{ color: 'var(--inx-muted)' }}>الدور داخل المؤسسة</small><div style={{ fontWeight: 700 }}>{ROLE_LABELS[currentInvitation.role] || currentInvitation.role}</div></div>
+              <div><small style={{ color: 'var(--inx-muted)' }}>صلاحية الدعوة حتى</small><div>{currentInvitation.expiresAt.toDate().toLocaleString('ar-EG')}</div></div>
             </div>
             <p style={{ margin: 0, color: 'var(--inx-text-soft)', lineHeight: 1.8 }}>بقبول الدعوة سيتم إنشاء ملف عضوية للمؤسسة بهذا الدور. لا تمنح الدعوة صلاحيات مسؤول المنصة.</p>
             {message && <div role="status" style={{ color: 'var(--inx-success)' }}>{message}</div>}
