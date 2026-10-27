@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -199,8 +199,7 @@ function MembersTab({
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  async function reload() {
-    setLoading(true);
+  const reload = useCallback(async () => {
     try {
       const [nextInvitations, nextMembers] = await Promise.all([
         listOrganizationInvitations(organizationId),
@@ -221,11 +220,11 @@ function MembersTab({
     } finally {
       setLoading(false);
     }
-  }
+  }, [organizationId]);
 
   useEffect(() => {
     void reload();
-  }, [organizationId]);
+  }, [reload]);
 
   async function submitInvitation(e: FormEvent) {
     e.preventDefault();
@@ -390,7 +389,7 @@ function MembersTab({
       <div className="inx-card inx-card-lg">
         <div className="inx-card-head">
           <h3>سجل الدعوات</h3>
-          <button type="button" className="inx-icon-btn" onClick={() => void reload()} title="تحديث القائمة"><Copy size={15} /></button>
+          <button type="button" className="inx-icon-btn" onClick={() => { setLoading(true); void reload(); }} title="تحديث القائمة"><Copy size={15} /></button>
         </div>
         {loading ? <div className="inx-empty">جارٍ تحميل الدعوات...</div> : invitations.length === 0 ? (
           <div className="inx-empty">لا توجد دعوات مسجلة للمؤسسة.</div>
