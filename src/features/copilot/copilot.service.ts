@@ -83,11 +83,14 @@ export async function deleteConversation(
   conversationId: string,
   organizationId: string,
 ): Promise<void> {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('NOT_AUTHENTICATED');
   const msgs = await getDocs(
     query(
       collection(db, 'copilotMessages'),
       where('organizationId', '==', organizationId),
       where('conversationId', '==', conversationId),
+      where('userId', '==', currentUser.uid),
     ),
   );
   await Promise.all(msgs.docs.map((d) => deleteDoc(d.ref)));
@@ -110,10 +113,13 @@ export async function listMessages(
   conversationId: string,
   organizationId: string,
 ): Promise<CopilotMessage[]> {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('NOT_AUTHENTICATED');
   const q = query(
     collection(db, 'copilotMessages'),
     where('organizationId', '==', organizationId),
     where('conversationId', '==', conversationId),
+    where('userId', '==', currentUser.uid),
     orderBy('createdAt', 'asc'),
     limit(200),
   );
