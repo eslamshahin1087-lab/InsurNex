@@ -192,7 +192,7 @@ service cloud.firestore {
           && getAfter(userDocumentPath(uid)).data.role == 'owner'
           && getAfter(userDocumentPath(uid)).data.status == 'active'
         ) || isInvitationMember(orgId, uid);
-        allow read: if (sameOrg(orgId) && privileged()) || isAdmin();
+        allow read: if ((sameOrg(orgId) && privileged()) || (sameOrg(orgId) && request.auth.uid == uid)) || isAdmin();
         allow update: if isAdmin() || (
           sameOrg(orgId)
           && privileged()
