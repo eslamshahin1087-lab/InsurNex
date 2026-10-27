@@ -1007,3 +1007,71 @@ body {
   }
 }
 /* END INSURNEX_EXACT_SUPPLIED_LOGO_V41 */
+
+/* INSURNEX_LOGO_PRESENTATION_CONSISTENCY_V44 */
+/* The supplied PNG includes its own navy/gold artwork. Keep its pixels, shape and colors untouched in both themes. */
+#root img[data-logo-variant] {
+  display: block;
+  object-fit: contain !important;
+  object-position: center !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  filter: none !important;
+  box-shadow: 0 3px 13px rgba(4, 18, 37, .14);
+  flex-shrink: 0;
+}
+#root .mobile-shell .s8-brand > img[data-logo-variant="lockup"] {
+  width: 74px !important;
+  height: auto !important;
+  max-width: 74px !important;
+  max-height: 64px !important;
+}
+#root .landing-brand {
+  gap: 0 !important;
+  align-items: center !important;
+}
+#root .landing-brand > img[data-logo-variant="lockup"] {
+  width: 82px !important;
+  height: auto !important;
+  max-width: 82px !important;
+  max-height: 72px !important;
+}
+#root .landing-footer-brand > img[data-logo-variant="lockup"] {
+  width: 72px !important;
+  height: auto !important;
+  max-width: 72px !important;
+  max-height: 63px !important;
+}
+#root .landing-footer-brand > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+#root .landing-footer-brand > div small {
+  color: var(--inx-muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+#root .auth-panel img[data-logo-variant="lockup"] {
+  width: 80px !important;
+  height: auto !important;
+  max-width: 80px !important;
+}
+#root .setup-card > img[data-logo-variant="stacked"] {
+  width: min(200px, 68vw) !important;
+  height: auto !important;
+  max-width: 200px !important;
+}
+@media (max-width: 380px) {
+  #root .mobile-shell .s8-brand > img[data-logo-variant="lockup"] {
+    width: 58px !important;
+    max-width: 58px !important;
+    max-height: 50px !important;
+  }
+  #root .landing-brand > img[data-logo-variant="lockup"] {
+    width: 68px !important;
+    max-width: 68px !important;
+  }
+}
+/* END INSURNEX_LOGO_PRESENTATION_CONSISTENCY_V44 */
