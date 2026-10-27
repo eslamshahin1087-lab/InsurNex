@@ -1121,3 +1121,198 @@
   .inx-workflow-assistant-panel { transition: none !important; animation: none !important; }
 }
 /* END INSURNEX_WORKFLOW_ROBOT_CAROUSEL_V34 */
+
+/* INSURNEX_OPERATIONS_ROBOT_MOTION_V40 — gold/navy workflow mascot */
+.inx-workflow-assistant {
+  isolation: isolate;
+}
+
+.inx-workflow-assistant-launcher {
+  position: relative !important;
+  isolation: isolate;
+  overflow: visible !important;
+  background:
+    radial-gradient(circle at 34% 22%, rgba(112, 182, 242, .26), transparent 42%),
+    linear-gradient(145deg, #06172B 0%, #123B68 57%, #1E4272 100%) !important;
+  border-color: rgba(241, 197, 91, .82) !important;
+  box-shadow:
+    0 9px 24px rgba(3, 15, 30, .34),
+    inset 0 1px 0 rgba(255, 255, 255, .25),
+    inset 0 -3px 0 rgba(2, 13, 26, .22) !important;
+}
+
+.inx-workflow-assistant-launcher::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -5px;
+  border: 1px solid rgba(241, 197, 91, .68);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: inx-ops-robot-ripple-v40 3.2s ease-out infinite;
+}
+
+.inx-workflow-assistant-launcher::after {
+  content: "✦";
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  color: #F8D985;
+  font-size: 14px;
+  line-height: 1;
+  text-shadow: 0 1px 8px rgba(248, 217, 133, .65);
+  pointer-events: none;
+  animation: inx-ops-robot-spark-v40 2.4s ease-in-out infinite;
+}
+
+.inx-ops-robot-mark {
+  display: block;
+  width: 31px !important;
+  height: 31px !important;
+  max-width: none !important;
+  overflow: visible;
+  transform-origin: 50% 58%;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .24));
+}
+
+.inx-ops-robot-shell {
+  fill: #0A2441;
+  stroke: #F1C55B;
+  stroke-width: 2.6;
+}
+
+.inx-ops-robot-screen {
+  fill: #173F67;
+  stroke: #72B8F2;
+  stroke-width: 1.5;
+}
+
+.inx-ops-robot-antenna,
+.inx-ops-robot-side {
+  stroke: #F1C55B;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.inx-ops-robot-antenna-tip {
+  fill: #F8D985;
+  stroke: #F1C55B;
+  stroke-width: 1.4;
+}
+
+.inx-ops-robot-eye {
+  fill: #7EF0D0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: inx-ops-robot-blink-v40 4.8s ease-in-out infinite;
+}
+
+.inx-ops-robot-mouth {
+  stroke: #F8D985;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.inx-ops-robot-detail {
+  stroke: #F8D985;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  opacity: .9;
+}
+
+.inx-ops-robot-spark {
+  fill: #F8D985;
+  stroke: #0A2441;
+  stroke-width: .8;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: inx-ops-robot-twinkle-v40 2.2s ease-in-out infinite;
+}
+
+.inx-workflow-assistant:not(.is-open) .inx-workflow-assistant-launcher .inx-ops-robot-mark {
+  animation: inx-ops-robot-float-v40 3.1s ease-in-out infinite;
+}
+
+.inx-workflow-assistant-launcher .inx-ops-robot-mark {
+  position: relative;
+  z-index: 1;
+}
+
+.inx-workflow-assistant-launcher:hover .inx-ops-robot-mark {
+  animation: inx-ops-robot-pop-v40 .5s cubic-bezier(.2, .8, .25, 1.2) both !important;
+}
+
+.inx-workflow-assistant.is-open .inx-workflow-assistant-launcher::before,
+.inx-workflow-assistant.is-open .inx-workflow-assistant-launcher::after {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+.inx-workflow-assistant-header .inx-workflow-assistant-brand .inx-ops-robot-mark {
+  width: 30px !important;
+  height: 30px !important;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .18));
+}
+
+.inx-workflow-assistant.is-open .inx-workflow-assistant-panel {
+  animation: inx-ops-guide-emerge-v40 .46s cubic-bezier(.18, .88, .25, 1.08) both !important;
+  transform-origin: bottom left;
+}
+
+.inx-workflow-assistant.is-open .inx-workflow-assistant-header .inx-ops-robot-mark {
+  animation: inx-ops-robot-emerge-v40 .68s cubic-bezier(.18, .92, .25, 1.16) both !important;
+}
+
+@keyframes inx-ops-robot-float-v40 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  28% { transform: translateY(-3px) rotate(-4deg); }
+  58% { transform: translateY(-1px) rotate(3deg); }
+  78% { transform: translateY(-2px) rotate(0deg); }
+}
+@keyframes inx-ops-robot-blink-v40 {
+  0%, 43%, 47%, 100% { transform: scaleY(1); }
+  45% { transform: scaleY(.14); }
+}
+@keyframes inx-ops-robot-twinkle-v40 {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: 1; }
+  50% { transform: rotate(16deg) scale(1.16); opacity: .75; }
+}
+@keyframes inx-ops-robot-ripple-v40 {
+  0% { transform: scale(.94); opacity: .62; }
+  78%, 100% { transform: scale(1.28); opacity: 0; }
+}
+@keyframes inx-ops-robot-spark-v40 {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); opacity: .78; }
+  50% { transform: translateY(-4px) rotate(22deg) scale(1.2); opacity: 1; }
+}
+@keyframes inx-ops-robot-pop-v40 {
+  0% { transform: translateY(4px) scale(.82) rotate(-8deg); }
+  65% { transform: translateY(-4px) scale(1.12) rotate(5deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+@keyframes inx-ops-robot-emerge-v40 {
+  0% { transform: translateY(15px) scale(.58) rotate(-20deg); opacity: 0; }
+  65% { transform: translateY(-3px) scale(1.08) rotate(6deg); opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes inx-ops-guide-emerge-v40 {
+  0% { transform: translateY(22px) scale(.9); opacity: 0; }
+  72% { transform: translateY(-3px) scale(1.012); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inx-workflow-assistant-launcher,
+  .inx-workflow-assistant-launcher::before,
+  .inx-workflow-assistant-launcher::after,
+  .inx-ops-robot-mark,
+  .inx-ops-robot-eye,
+  .inx-ops-robot-spark,
+  .inx-workflow-assistant-panel {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* END INSURNEX_OPERATIONS_ROBOT_MOTION_V40 */
