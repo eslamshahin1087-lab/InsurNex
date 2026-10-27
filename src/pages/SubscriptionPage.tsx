@@ -26,6 +26,7 @@ import { redeemCode } from '../features/subscription/subscription.service';
 import { listPlans } from '../features/admin/plans.service';
 import type { PricingPlanDoc } from '../features/admin/plans.types';
 import { computePricing, formatEGP } from '../features/admin/pricing.config';
+import Logo from '../components/Logo';
 import '../theme/admin-pricing.css';
 
 const INSTAPAY = 'islamib2810@instapay';
@@ -188,8 +189,8 @@ export default function SubscriptionPage() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img
-                src="/branding/logo-light.png"
+              <Logo
+                variant="mark"
                 alt="InsurNex"
                 style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 12 }}
               />

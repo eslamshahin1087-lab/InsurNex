@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="28" fill="#0b2545"/>
-  <path d="M96 22 151 40v43c0 38-25 65-55 81-30-16-55-43-55-81V40Z" fill="none" stroke="#f5d97a" stroke-width="7" stroke-linejoin="round"/>
-  <path d="M69 64v67M69 64h14M69 131h14" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-  <path d="M94 130V64l30 67V64" fill="none" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs><linearGradient id="gold" x1="25" y1="14" x2="167" y2="178" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE6A0"/><stop offset=".5" stop-color="#F0C35C"/><stop offset="1" stop-color="#B9801D"/></linearGradient><linearGradient id="bg" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse"><stop stop-color="#071B37"/><stop offset="1" stop-color="#102F57"/></linearGradient></defs>
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+  <path d="M96 17 154 39V82C154 119 130 148 96 169 62 148 38 119 38 82V39L96 17Z" stroke="url(#gold)" stroke-width="8" stroke-linejoin="miter" fill="none"/>
+  <path d="M67 126V62L125 126V62" stroke="url(#gold)" stroke-width="11" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <path d="M143 51 151 58M41 58 49 51" stroke="#F8D985" stroke-width="3" stroke-linecap="round" opacity=".7"/>
 </svg>

@@ -3,7 +3,6 @@ import type { FormEvent } from 'react';
 import {
   AlertTriangle,
   BriefcaseBusiness,
-  Bot,
   Building2,
   CheckCircle2,
   ChevronLeft,
@@ -74,6 +73,29 @@ const WORKFLOW_STEPS = [
   { title: 'استلام الوثيقة', description: 'مراجعة الوثيقة الصادرة والتأكد من البيانات والتغطيات والتواريخ.' },
   { title: 'تفعيل الحساب', description: 'ربط الوثيقة بملف العميل وجدولة التجديد والمتابعة.' },
 ];
+
+function OperationsRobot() {
+  return (
+    <svg
+      className="inx-ops-robot-mark"
+      viewBox="0 0 64 64"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path className="inx-ops-robot-antenna" d="M32 12V7" />
+      <circle className="inx-ops-robot-antenna-tip" cx="32" cy="5.5" r="3.5" />
+      <path className="inx-ops-robot-side" d="M9 29H5v12h5M55 29h4v12h-4" />
+      <rect className="inx-ops-robot-shell" x="10" y="15" width="44" height="40" rx="13" />
+      <rect className="inx-ops-robot-screen" x="16" y="22" width="32" height="20" rx="8" />
+      <circle className="inx-ops-robot-eye" cx="24" cy="32" r="3.2" />
+      <circle className="inx-ops-robot-eye" cx="40" cy="32" r="3.2" />
+      <path className="inx-ops-robot-mouth" d="M23 46c2.6 3.2 5.6 4.7 9 4.7s6.4-1.5 9-4.7" />
+      <path className="inx-ops-robot-detail" d="M27 18.5h10" />
+      <path className="inx-ops-robot-spark" d="M50 9l1.8 3.8L56 14.5l-4.2 1.7L50 20l-1.7-3.8-4.3-1.7 4.3-1.7L50 9z" />
+    </svg>
+  );
+}
 
 export default function OperationsPage() {
   const { profile, user } = useAuth();
@@ -472,7 +494,7 @@ export default function OperationsPage() {
           onChanged={load}
         />
       )}
-        <aside className="inx-workflow-assistant" dir="rtl">
+        <aside className={`inx-workflow-assistant${workflowGuideOpen ? " is-open" : ""}`} dir="rtl">
           {workflowGuideOpen && (
             <section
               id="inx-workflow-assistant-panel"
@@ -481,7 +503,7 @@ export default function OperationsPage() {
               aria-label="مساعد مسار العمل"
             >
               <header className="inx-workflow-assistant-header">
-                <span className="inx-workflow-assistant-brand"><Bot size={20} aria-hidden="true" /></span>
+                <span className="inx-workflow-assistant-brand"><OperationsRobot /></span>
                 <span className="inx-workflow-assistant-heading">
                   <strong>مساعد مسار العمل</strong>
                   <small>رحلة العملية في 8 خطوات</small>
@@ -520,7 +542,7 @@ export default function OperationsPage() {
             aria-label={workflowGuideOpen ? 'إغلاق دليل مسار العمل' : 'فتح دليل مسار العمل'}
             title="دليل مسار العمل"
           >
-            {workflowGuideOpen ? <X size={23} aria-hidden="true" /> : <Bot size={25} aria-hidden="true" />}
+            {workflowGuideOpen ? <X size={23} aria-hidden="true" /> : <OperationsRobot />}
           </button>
         </aside>
     </main>

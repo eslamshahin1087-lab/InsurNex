@@ -838,3 +838,129 @@ body {
 }
 
 /* END INSURNEX_MOBILE_VIEW_REFINEMENT_V2 */
+
+/* INSURNEX_FOOTER_ALIGNMENT_V40
+   Normalize the five-item phone navigation even when previewed on desktop. */
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 {
+  position: fixed !important;
+  z-index: 120 !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+  transform: translateX(-50%) !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  grid-auto-flow: column !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  gap: 4px !important;
+  width: min(456px, calc(100vw - 24px)) !important;
+  max-width: 456px !important;
+  min-width: 0 !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
+  margin: 0 !important;
+  padding: 5px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 22px !important;
+  background: var(--app-nav, var(--inx-surface)) !important;
+  box-shadow: 0 9px 28px rgba(7, 25, 49, .16) !important;
+  backdrop-filter: blur(18px);
+}
+
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a:not(.nav-copilot) {
+  position: relative !important;
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 4px 2px !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  border-radius: 13px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a:not(.nav-copilot) > svg {
+  display: block !important;
+  flex: 0 0 19px !important;
+  width: 19px !important;
+  height: 19px !important;
+  max-width: 19px !important;
+  margin: 0 !important;
+  filter: none !important;
+}
+
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a:not(.nav-copilot) > span {
+  display: block !important;
+  position: static !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: inherit !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  text-indent: 0 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a.nav-copilot,
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a.nav-copilot * {
+  display: none !important;
+}
+
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a[aria-current='page'],
+#root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a.active {
+  background: var(--app-blue-soft, var(--inx-info-bg)) !important;
+  color: var(--app-blue, var(--inx-blue)) !important;
+  box-shadow: inset 0 0 0 1px rgba(212, 160, 23, .18) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile > nav.app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 > a {
+    transition: none !important;
+  }
+}
+/* END INSURNEX_FOOTER_ALIGNMENT_V40 */
+
+/* INSURNEX_BRAND_LOCKUP_SCALE_V40 */
+#root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+  width: min(126px, 30vw) !important;
+  height: 44px !important;
+  max-width: 126px !important;
+  object-fit: contain !important;
+  flex: 0 1 auto !important;
+}
+@media (max-width: 380px) {
+  #root .mobile-shell .s8-brand > img[data-logo-variant='lockup'] {
+    width: 104px !important;
+    max-width: 104px !important;
+    height: 38px !important;
+  }
+}
+/* END INSURNEX_BRAND_LOCKUP_SCALE_V40 */

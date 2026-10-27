@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="InsurNex emblem">
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFE6A0"/>
+    <stop offset=".34" stop-color="#F0C35C"/>
+    <stop offset=".68" stop-color="#D9A53A"/>
+    <stop offset="1" stop-color="#B9801D"/>
+  </linearGradient>
+</defs>
+<rect x="3" y="3" width="174" height="174" rx="34" fill="#F1F5FB" stroke="#D8E2EF" stroke-width="2"/>
+<path d="M90 20 145 41V91c0 32-23 55-55 70-32-15-55-38-55-70V41Z" fill="none" stroke="url(#gold)" stroke-width="8" stroke-linejoin="miter"/>
+<path d="M59 119V53L121 120V53" fill="none" stroke="url(#gold)" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
