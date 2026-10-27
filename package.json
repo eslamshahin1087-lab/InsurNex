@@ -10,7 +10,8 @@
     "test:pwa": "node scripts/pwa-smoke-test.mjs",
     "test:access": "node scripts/admin-access-smoke-test.mjs",
     "test:plans": "node scripts/plan-feature-entitlements-smoke-test.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:rules": "node scripts/firestore-rules-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
