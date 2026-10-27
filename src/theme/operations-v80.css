@@ -1206,7 +1206,7 @@
   fill: #7EF0D0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: inx-ops-robot-blink-v40 4.8s ease-in-out infinite;
+  animation: inx-ops-robot-blink-v40 4.8s ease-in-out infinite !important;
 }
 
 .inx-ops-robot-mouth {
@@ -1228,11 +1228,11 @@
   stroke-width: .8;
   transform-box: fill-box;
   transform-origin: center;
-  animation: inx-ops-robot-twinkle-v40 2.2s ease-in-out infinite;
+  animation: inx-ops-robot-twinkle-v40 2.2s ease-in-out infinite !important;
 }
 
 .inx-workflow-assistant:not(.is-open) .inx-workflow-assistant-launcher .inx-ops-robot-mark {
-  animation: inx-ops-robot-float-v40 3.1s ease-in-out infinite;
+  animation: inx-ops-robot-float-v40 3.1s ease-in-out infinite !important;
 }
 
 .inx-workflow-assistant-launcher .inx-ops-robot-mark {
@@ -1304,13 +1304,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inx-workflow-assistant-launcher,
-  .inx-workflow-assistant-launcher::before,
-  .inx-workflow-assistant-launcher::after,
-  .inx-ops-robot-mark,
-  .inx-ops-robot-eye,
-  .inx-ops-robot-spark,
-  .inx-workflow-assistant-panel {
+  #root .inx-workflow-assistant .inx-workflow-assistant-launcher,
+  #root .inx-workflow-assistant .inx-workflow-assistant-launcher::before,
+  #root .inx-workflow-assistant .inx-workflow-assistant-launcher::after,
+  #root .inx-workflow-assistant .inx-ops-robot-mark,
+  #root .inx-workflow-assistant .inx-ops-robot-eye,
+  #root .inx-workflow-assistant .inx-ops-robot-spark,
+  #root .inx-workflow-assistant .inx-workflow-assistant-panel {
     animation: none !important;
     transition: none !important;
   }
