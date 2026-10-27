@@ -4,11 +4,15 @@ import {
   AlertTriangle,
   Building2,
   Check,
+  Copy,
   LogOut,
+  Mail,
   Palette,
   Save,
   ShieldCheck,
+  UserPlus,
   UserRound,
+  XCircle,
 } from 'lucide-react';
 import { useAuth } from '../features/auth/auth-context';
 import { signOut } from '../features/auth/auth.service';
@@ -23,12 +27,20 @@ import {
   updateOrganization,
   type OrganizationProfile,
 } from '../features/settings/organization.service';
+import {
+  createOrganizationInvitation,
+  listOrganizationInvitations,
+  revokeOrganizationInvitation,
+  type InvitableRole,
+  type OrganizationInvitation,
+} from '../features/settings/organization-members.service';
 
-type Tab = 'profile' | 'organization' | 'security' | 'appearance';
+type Tab = 'profile' | 'organization' | 'members' | 'security' | 'appearance';
 
 const TABS: { id: Tab; label: string; icon: typeof UserRound }[] = [
   { id: 'profile', label: 'الملف الشخصي', icon: UserRound },
   { id: 'organization', label: 'المؤسسة', icon: Building2 },
+  { id: 'members', label: 'أعضاء المؤسسة', icon: UserPlus },
   { id: 'security', label: 'الأمان', icon: ShieldCheck },
   { id: 'appearance', label: 'المظهر', icon: Palette },
 ];
@@ -74,7 +86,7 @@ export default function SettingsPage() {
             overflowX: 'auto',
           }}
         >
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.filter(({ id }) => id !== 'members' || ['owner', 'admin'].includes(profile.role)).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
@@ -110,6 +122,9 @@ export default function SettingsPage() {
             isOwner={profile.role === 'owner' || profile.role === 'admin'}
           />
         )}
+        {tab === 'members' && (
+          <MembersTab organizationId={profile.organizationId} inviterUid={user.uid} inviterRole={profile.role} />
+        )}
         {tab === 'security' && (
           <SecurityTab
             onSignOutAll={async () => {
@@ -128,6 +143,193 @@ export default function SettingsPage() {
         )}
       </div>
     </main>
+  );
+}
+
+// ============================================================
+// Organization Members Tab
+// ============================================================
+
+const ROLE_OPTIONS: { value: InvitableRole; label: string }[] = [
+  { value: 'admin', label: 'مدير المؤسسة' },
+  { value: 'broker', label: 'وسيط تأمين' },
+  { value: 'sales', label: 'المبيعات' },
+  { value: 'claims', label: 'المطالبات' },
+  { value: 'finance', label: 'المالية' },
+  { value: 'staff', label: 'موظف' },
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  owner: 'مالك المؤسسة',
+  admin: 'مدير المؤسسة',
+  broker: 'وسيط تأمين',
+  sales: 'المبيعات',
+  claims: 'المطالبات',
+  finance: 'المالية',
+  staff: 'موظف',
+};
+
+const INVITATION_STATUS_LABELS: Record<string, string> = {
+  pending: 'معلّقة',
+  accepted: 'مقبولة',
+  revoked: 'ملغاة',
+};
+
+function MembersTab({
+  organizationId,
+  inviterUid,
+  inviterRole,
+}: {
+  organizationId: string;
+  inviterUid: string;
+  inviterRole: string;
+}) {
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<InvitableRole>('broker');
+  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState('');
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  async function reload() {
+    setLoading(true);
+    try {
+      setInvitations(await listOrganizationInvitations(organizationId));
+    } catch (err) {
+      setError('تعذر تحميل الدعوات. تحقق من صلاحيات المؤسسة واتصالك.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void reload();
+  }, [organizationId]);
+
+  async function submitInvitation(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setInviteUrl('');
+    setSaving(true);
+    try {
+      const result = await createOrganizationInvitation({
+        organizationId,
+        invitedEmail: email,
+        role: inviterRole === 'admin' && role === 'admin' ? 'broker' : role,
+        inviterUid,
+      });
+      setInviteUrl(result.url);
+      setEmail('');
+      setMessage('تم إنشاء الدعوة. انسخ الرابط وأرسله إلى البريد المدعو من خلال قناة موثوقة. لا يرسل التطبيق البريد تلقائيًا.');
+      await reload();
+    } catch (err) {
+      console.error(err);
+      setError('تعذر إنشاء الدعوة. تحقق من البريد والدور وأن حسابك مالك أو مدير المؤسسة.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function copyInvitation() {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setMessage('تم نسخ رابط الدعوة.');
+    } catch {
+      setError('تعذر نسخ الرابط تلقائيًا. حدّد الرابط وانسخه يدويًا.');
+    }
+  }
+
+  async function revoke(invitationId: string) {
+    setBusyId(invitationId);
+    setError('');
+    setMessage('');
+    try {
+      await revokeOrganizationInvitation(organizationId, invitationId, inviterUid);
+      setMessage('تم إلغاء الدعوة.');
+      await reload();
+    } catch (err) {
+      console.error(err);
+      setError('تعذر إلغاء الدعوة.');
+    } finally {
+      setBusyId('');
+    }
+  }
+
+  const roleOptions = inviterRole === 'owner'
+    ? ROLE_OPTIONS
+    : ROLE_OPTIONS.filter((item) => item.value !== 'admin');
+
+  return (
+    <section style={{ display: 'grid', gap: 16 }}>
+      <div className="inx-card inx-card-lg">
+        <div className="inx-card-head">
+          <h3>دعوة عضو جديد</h3>
+          <UserPlus size={18} style={{ color: 'var(--inx-muted)' }} />
+        </div>
+        <p style={{ color: 'var(--inx-text-soft)', fontSize: 13, lineHeight: 1.8, marginTop: 0 }}>
+          الدعوة صالحة لمدة 7 أيام، ولا تُفعّل العضوية إلا بعد تسجيل الدخول والتحقق من البريد المدعو.
+          الإرسال يتم يدويًا لتجنب اعتماد خدمة بريد مدفوعة.
+        </p>
+        <form onSubmit={submitInvitation} style={{ display: 'grid', gap: 12 }}>
+          <Field label="البريد الإلكتروني للعضو">
+            <input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" style={inputStyle} />
+          </Field>
+          <Field label="الدور داخل المؤسسة">
+            <select value={role} onChange={(e) => setRole(e.target.value as InvitableRole)} style={inputStyle}>
+              {roleOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+          </Field>
+          <button className="inx-btn inx-btn-primary" type="submit" disabled={saving}>
+            <Mail size={15} /> {saving ? 'جارٍ إنشاء الدعوة...' : 'إنشاء رابط الدعوة'}
+          </button>
+        </form>
+        {inviteUrl && (
+          <div style={{ display: 'grid', gap: 8, marginTop: 14 }}>
+            <label style={{ fontSize: 12, color: 'var(--inx-muted)' }}>رابط الدعوة — لا ترسله إلا إلى البريد المحدد</label>
+            <input readOnly value={inviteUrl} onFocus={(e) => e.currentTarget.select()} style={inputStyle} />
+            <button type="button" className="inx-btn inx-btn-secondary" onClick={copyInvitation}><Copy size={15} /> نسخ الرابط</button>
+          </div>
+        )}
+        {error && <div role="alert" style={errorBoxStyle}>{error}</div>}
+        {message && <div role="status" style={successBoxStyle}><Check size={14} /> {message}</div>}
+      </div>
+
+      <div className="inx-card inx-card-lg">
+        <div className="inx-card-head">
+          <h3>سجل الدعوات</h3>
+          <button type="button" className="inx-icon-btn" onClick={() => void reload()} title="تحديث القائمة"><Copy size={15} /></button>
+        </div>
+        {loading ? <div className="inx-empty">جارٍ تحميل الدعوات...</div> : invitations.length === 0 ? (
+          <div className="inx-empty">لا توجد دعوات مسجلة للمؤسسة.</div>
+        ) : (
+          <div style={{ display: 'grid', gap: 10 }}>
+            {invitations.map((item) => (
+              <article key={item.id} style={{ border: '1px solid var(--inx-border)', borderRadius: 14, padding: 12, display: 'grid', gap: 7 }}>
+                <strong style={{ overflowWrap: 'anywhere' }}>{item.invitedEmail}</strong>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, color: 'var(--inx-text-soft)', fontSize: 12 }}>
+                  <span>{ROLE_LABELS[item.role] || item.role}</span>
+                  <span>•</span>
+                  <span>{INVITATION_STATUS_LABELS[item.status] || item.status}</span>
+                  <span>•</span>
+                  <span>تنتهي: {item.expiresAt?.toDate ? item.expiresAt.toDate().toLocaleDateString('ar-EG') : '—'}</span>
+                </div>
+                {item.status === 'pending' && (
+                  <button type="button" className="inx-btn inx-btn-secondary" style={{ justifySelf: 'start' }} disabled={busyId === item.id} onClick={() => void revoke(item.id)}>
+                    <XCircle size={15} /> {busyId === item.id ? 'جارٍ الإلغاء...' : 'إلغاء الدعوة'}
+                  </button>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
