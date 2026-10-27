@@ -6,6 +6,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  writeBatch,
   orderBy,
   query,
   runTransaction,
@@ -56,6 +57,57 @@ export async function listOrganizationInvitations(
     id: item.id,
     ...item.data(),
   }) as OrganizationInvitation);
+}
+
+
+export interface OrganizationMember {
+  uid: string;
+  email?: string;
+  displayName?: string;
+  role: UserRole;
+  status: 'active' | 'disabled' | 'invited';
+  createdAt?: unknown;
+}
+
+export async function listOrganizationMembers(
+  organizationId: string,
+): Promise<OrganizationMember[]> {
+  const snapshot = await getDocs(query(
+    collection(db, 'organizations', organizationId, 'members'),
+    orderBy('createdAt', 'desc'),
+    limit(200),
+  ));
+  return snapshot.docs.map((item) => ({
+    uid: item.id,
+    ...item.data(),
+  }) as OrganizationMember);
+}
+
+export async function updateOrganizationMember(input: {
+  organizationId: string;
+  uid: string;
+  role: InvitableRole;
+  status: 'active' | 'disabled';
+  actorUid: string;
+}): Promise<void> {
+  const currentUser = auth.currentUser;
+  if (!currentUser || currentUser.uid !== input.actorUid) throw new Error('NOT_AUTHENTICATED');
+  if (!roleIsInvitable(input.role)) throw new Error('INVALID_ROLE');
+
+  // Firestore Rules require the profile and membership role/status to change
+  // atomically so a partially-updated RBAC identity cannot be created.
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'users', input.uid), {
+    role: input.role,
+    status: input.status,
+    updatedAt: serverTimestamp(),
+  });
+  batch.update(doc(db, 'organizations', input.organizationId, 'members', input.uid), {
+    role: input.role,
+    status: input.status,
+    updatedAt: serverTimestamp(),
+  });
+  await batch.commit();
 }
 
 export async function getInvitationForCurrentUser(
