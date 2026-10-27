@@ -1,15 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <defs>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F5D97A"/>
-      <stop offset="50%" stop-color="#D4A017"/>
-      <stop offset="100%" stop-color="#8B6914"/>
-    </linearGradient>
-  </defs>
-  <path d="M32 4 L56 12 V30 C56 44 44 56 32 60 C20 56 8 44 8 30 V12 Z"
-        stroke="url(#gold)" stroke-width="4" fill="none" stroke-linejoin="round"/>
-  <rect x="19" y="19" width="6" height="6" rx="1" fill="url(#gold)"/>
-  <rect x="19" y="30" width="6" height="18" rx="1" fill="url(#gold)"/>
-  <path d="M33 19 V48 M33 19 L45 48 M45 48 V19"
-        stroke="url(#gold)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs><linearGradient id="gold" x1="10" y1="6" x2="54" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE6A0"/><stop offset=".5" stop-color="#F0C35C"/><stop offset="1" stop-color="#B9801D"/></linearGradient></defs>
+  <rect width="64" height="64" rx="14" fill="#071B37"/>
+  <path d="M32 5 55 14V31C55 44 46 54 32 60 18 54 9 44 9 31V14L32 5Z" stroke="url(#gold)" stroke-width="3.4" stroke-linejoin="miter"/>
+  <path d="M21 44V20L43 44V20" stroke="url(#gold)" stroke-width="4.6" stroke-linecap="square" stroke-linejoin="miter"/>
 </svg>
