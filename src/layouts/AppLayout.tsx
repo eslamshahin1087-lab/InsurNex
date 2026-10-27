@@ -155,16 +155,16 @@ export default function AppLayout() {
         aria-label="التنقل الرئيسي"
       >
         {visibleNavigation.map(({ to, label, Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={to === '/copilot' ? 'nav-copilot' : undefined}
-          >
-            <Icon size={21} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
+  <NavLink
+    key={to}
+    to={to}
+    end={to === '/'}
+    className={to === '/copilot' ? 'nav-copilot' : undefined}
+  >
+    <Icon size={21} />
+    <span>{label}</span>
+  </NavLink>
+))}
         <NavLink to="/more">
           <MoreHorizontal size={22} />
           <span>المزيد</span>
