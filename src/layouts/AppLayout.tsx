@@ -6,9 +6,11 @@ import {
   LogOut,
   Moon,
   MoreHorizontal,
+  Monitor,
   Settings2,
   ShieldCheck,
   Sparkles,
+  Smartphone,
   Sun,
   Users,
 } from 'lucide-react';
@@ -40,6 +42,13 @@ export default function AppLayout() {
   const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
   const location = useLocation();
   const [floatingOpen, setFloatingOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>(() => {
+    if (typeof window === 'undefined') return 'mobile';
+    return window.matchMedia('(min-width: 760px)').matches ? 'desktop' : 'mobile';
+  });
+  const toggleViewMode = () => {
+    setViewMode((current) => (current === 'mobile' ? 'desktop' : 'mobile'));
+  };
 
   const isCopilotPage = location.pathname === '/copilot';
   const isAuthPage =
@@ -48,7 +57,7 @@ export default function AppLayout() {
   const showFab = settings.features.copilot && planFeatures.copilot && !isCopilotPage && !isAuthPage;
 
   return (
-    <div className="mobile-shell" dir="rtl">
+    <div className={`mobile-shell view-mode-${viewMode}`} dir="rtl">
       <header className="app-header s8-header">
         <div className="s8-brand">
           <Logo alt="InsurNex"/>
@@ -62,6 +71,16 @@ export default function AppLayout() {
           </div>
         </div>
         <div className="s8-actions">
+          <button
+            type="button"
+            className="view-mode-toggle"
+            onClick={toggleViewMode}
+            aria-label={viewMode === 'mobile' ? 'التبديل إلى عرض سطح المكتب' : 'التبديل إلى عرض الهاتف'}
+            title={viewMode === 'mobile' ? 'عرض سطح المكتب' : 'عرض الهاتف'}
+          >
+            {viewMode === 'mobile' ? <Monitor size={16} aria-hidden="true" /> : <Smartphone size={16} aria-hidden="true" />}
+            <span>{viewMode === 'mobile' ? 'سطح المكتب' : 'عرض الهاتف'}</span>
+          </button>
           <button
             type="button"
             className="circle-button"
@@ -114,7 +133,7 @@ export default function AppLayout() {
       )}
 
       <nav
-        className="app-tabbar s8-tabbar inx-tabbar-6"
+        className="app-tabbar s8-tabbar inx-tabbar-primary inx-tabbar-6"
         aria-label="التنقل الرئيسي"
       >
         {visibleNavigation.map(({ to, label, Icon }) => (

@@ -5,7 +5,7 @@
 
 :root {
   font-family: var(--inx-font-family);
-  --inx-font-family: 'Cairo', 'IBM Plex Sans Arabic', Inter, 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-font-family: 'Alexandria', Inter, 'Segoe UI', Tahoma, Arial, sans-serif;
   --inx-type-page: 26px;
   --inx-type-section: 20px;
   --inx-type-card: 15px;

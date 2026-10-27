@@ -14,6 +14,7 @@ import './theme/insurer-dropdown-fix.css';
 import './theme/sprint8-2.css';
 import './theme/sprint8-3.css';
 import App from './App';
+import './theme/insurnex-design-system.css';
 import { ThemeProvider } from './theme/ThemeProvider';
 
 // Register the privacy-safe PWA worker only for production builds.
