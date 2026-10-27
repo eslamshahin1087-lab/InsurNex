@@ -14,6 +14,7 @@ import './theme/landing.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AcceptInvitationPage = lazy(() => import('./pages/AcceptInvitationPage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const SetupPage = lazy(() => import('./pages/SetupPage'));
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin-login" element={<AdminLoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/invite/:orgId/:invitationId" element={<AcceptInvitationPage />} />
 
             {/* AUTHENTICATED */}
             <Route element={<ProtectedRoute />}>
