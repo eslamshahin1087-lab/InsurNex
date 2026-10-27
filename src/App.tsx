@@ -39,6 +39,7 @@ const ClientsPage = lazy(() => import('./pages/ClientsPage'));
 const ClientWizardPage = lazy(() => import('./pages/ClientWizardPage'));
 const ClientDetailsPage = lazy(() => import('./pages/ClientDetailsPage'));
 const PoliciesPage = lazy(() => import('./pages/PoliciesPage'));
+const PolicyDetailsPage = lazy(() => import('./pages/PolicyDetailsPage'));
 const RenewalsPage = lazy(() => import('./pages/RenewalsPage'));
 const ClaimsPage = lazy(() => import('./pages/ClaimsPage'));
 const ClaimDetailsPage = lazy(() => import('./pages/ClaimDetailsPage'));
@@ -164,6 +165,7 @@ export default function App() {
                   {/* Feature gates also apply when users type a URL directly. */}
                   <Route element={<PlatformFeatureGate feature="policies" />}>
                     <Route path="policies" element={<PoliciesPage />} />
+                    <Route path="policies/:id" element={<PolicyDetailsPage />} />
                   </Route>
                   <Route element={<PlatformFeatureGate feature="renewals" />}>
                     <Route path="renewals" element={<RenewalsPage />} />
