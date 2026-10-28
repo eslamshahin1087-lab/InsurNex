@@ -52,7 +52,7 @@ Acceptance gate: Phase 2B CI and Emulator suite pass; all new general documents 
 
 ## Phase 2C — Migrate operation attachments as a separate resource
 
-**Status:** implementation in progress on `feat/insurnex-operation-attachment-gateway-20261028`. The branch adds an operation-specific metadata-bound gateway path and regression tests; exact-head CI, review and staging verification remain required. No Edge Function deployment or live object migration has been performed.
+**Status:** implementation in progress on `feat/insurnex-operation-attachment-gateway-20261028`. CI and Secrets Scan passed on exact head `73bcae32c7c0404768fc87b67774c0b82c652f19`; code review and staging verification remain required. No Edge Function deployment or live object migration has been performed.
 
 Scope:
 1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
