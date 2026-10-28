@@ -8,13 +8,13 @@ import { dirname, resolve } from 'node:path';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
-import { buildLegacyStorageInventory } from '../../scripts/legacy-storage-inventory-policy.mjs';
+import { buildLegacyStorageInventory, buildLegacyStorageMetadataInventory } from '../../scripts/legacy-storage-inventory-policy.mjs';
 
 const DEFAULT_COLLECTIONS = ['documents', 'operationAttachments'];
 const MAX_ATTEMPTS = 3;
 
 function parseArgs(argv) {
-  const result = { dryRun: false, projectId: '', bucketName: '', collections: [...DEFAULT_COLLECTIONS], out: '' };
+  const result = { dryRun: false, metadataOnly: false, projectId: '', bucketName: '', collections: [...DEFAULT_COLLECTIONS], out: '' };
   const value = (index, flag) => {
     const arg = argv[index];
     if (arg?.startsWith(flag + '=')) return { value: arg.slice(flag.length + 1), consumed: 0 };
@@ -26,6 +26,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--dry-run') { result.dryRun = true; continue; }
+    if (arg === '--metadata-only') { result.metadataOnly = true; continue; }
     if (arg === '--help' || arg === '-h') { result.help = true; continue; }
     const pairs = [
       ['--project', 'projectId'],
@@ -57,18 +58,21 @@ function help() {
   console.log(`InsurNex legacy Firebase Storage inventory (read-only)
 
 Usage:
-  node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-project-id> --bucket <firebase-storage-bucket>
+  node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-project-id> --metadata-only
+  node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-project-id> --bucket <exact-firebase-storage-bucket>
 
 Options:
+  --metadata-only                               Read Firestore metadata; do not access Cloud Storage
   --collections documents,operationAttachments  Firestore collections to inspect
   --out <path>                                  Output JSON path (local file only)
   --help                                        Show this message
 
 Safety:
-  --dry-run is mandatory. The script only lists bucket objects and reads Firestore
-  metadata; it has no cloud upload, update, migration or delete operation.
-  Authentication uses Application Default Credentials (ADC). Grant read-only
-  access in the target project and run from the repository root.
+  --dry-run is mandatory. Metadata-only mode reads Firestore metadata only and
+  does not verify objects. Full mode reads Firestore metadata and lists objects
+  in the explicitly selected bucket. Neither mode has cloud upload, update,
+  migration or delete operations. Authentication uses Application Default
+  Credentials (ADC); grant only the read permissions required by the chosen mode.
 `);
 }
 
@@ -129,8 +133,11 @@ async function main() {
   if (!/^[a-z][a-z0-9-]{4,29}$/.test(args.projectId)) {
     throw new Error('Provide a valid explicit Firebase project ID with --project.');
   }
-  if (!args.bucketName || args.bucketName.includes('://') || args.bucketName.includes('/')) {
-    throw new Error('Provide the exact Cloud Storage bucket name with --bucket.');
+  if (args.metadataOnly && args.bucketName) {
+    throw new Error('Do not pass --bucket with --metadata-only; no Cloud Storage bucket is accessed.');
+  }
+  if (!args.metadataOnly && (!args.bucketName || args.bucketName.includes('://') || args.bucketName.includes('/'))) {
+    throw new Error('Provide the exact Cloud Storage bucket name with --bucket, or use --metadata-only.');
   }
   if (!args.collections.length || args.collections.some(name => !/^[A-Za-z][A-Za-z0-9_-]{0,127}$/.test(name))) {
     throw new Error('Invalid --collections value.');
@@ -140,13 +147,13 @@ async function main() {
     throw new Error('Safety stop: --project does not match GCLOUD_PROJECT/GOOGLE_CLOUD_PROJECT.');
   }
 
-  const app = initializeApp({
+  const appOptions = {
     credential: applicationDefault(),
     projectId: args.projectId,
-    storageBucket: args.bucketName,
-  }, 'insurnex-legacy-storage-dry-run');
+  };
+  if (!args.metadataOnly) appOptions.storageBucket = args.bucketName;
+  const app = initializeApp(appOptions, 'insurnex-legacy-storage-dry-run');
   const firestore = getFirestore(app);
-  const bucket = getStorage(app).bucket(args.bucketName);
   const retryLog = [];
   const metadataRecords = [];
 
@@ -182,8 +189,30 @@ async function main() {
     }
   }
 
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const defaultOut = args.metadataOnly
+    ? `artifacts/legacy-storage-metadata-only-${args.projectId}-${timestamp}.json`
+    : `artifacts/legacy-storage-dry-run-${args.projectId}-${timestamp}.json`;
+  const outputPath = resolve(process.cwd(), args.out || defaultOut);
+
+  if (args.metadataOnly) {
+    const report = buildLegacyStorageMetadataInventory({
+      projectId: args.projectId,
+      collections: args.collections,
+      metadataRecords,
+      retryLog,
+    });
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, JSON.stringify(report, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
+    console.log('\nMetadata-only inventory complete (Cloud Storage was not accessed).');
+    console.log(JSON.stringify(report.summary, null, 2));
+    console.log('Report saved locally: ' + outputPath);
+    console.log('Cloud changes made: none');
+    return;
+  }
+
   console.log('Listing objects in explicitly selected storage bucket: ' + args.bucketName);
-  const objects = await listBucketObjects(bucket, retryLog);
+  const objects = await listBucketObjects(getStorage(app).bucket(args.bucketName), retryLog);
   const report = buildLegacyStorageInventory({
     projectId: args.projectId,
     bucket: args.bucketName,
@@ -192,9 +221,6 @@ async function main() {
     objects,
     retryLog,
   });
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const defaultOut = `artifacts/legacy-storage-dry-run-${args.projectId}-${timestamp}.json`;
-  const outputPath = resolve(process.cwd(), args.out || defaultOut);
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, JSON.stringify(report, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
 
