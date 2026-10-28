@@ -77,10 +77,14 @@ export default function DocumentsPage() {
   async function openDocument(record: DocumentRecord) {
     setBusyId(record.id);
     setError('');
+    const target = window.open('about:blank', '_blank');
+    if (target) target.opener = null;
     try {
       const url = await getDocumentTemporaryUrl(record);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      if (target) target.location.href = url;
+      else window.location.assign(url);
     } catch (reason) {
+      target?.close();
       console.error(reason);
       setError(documentError(reason));
     } finally {
@@ -145,7 +149,7 @@ export default function DocumentsPage() {
               {record.notes && <p>{record.notes}</p>}
             </div>
             <div className="docs-actions">
-              {(record.storagePath || record.downloadUrl) && (
+              {((record.storageProvider === 'supabase' && record.storagePath) || record.downloadUrl) && (
                 <button type="button" disabled={busyId === record.id} onClick={() => void openDocument(record)} title="عرض / تنزيل">
                   <Download />
                 </button>
