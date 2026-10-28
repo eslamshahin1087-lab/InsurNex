@@ -355,13 +355,19 @@ export async function buildAuthorizedCopilotContext(input: {
   }
 
   if (page === "finance" && financeRows.revenue && financeRows.expenses && financeRows.commissions) {
+    const allFinanceRecords = [...financeRows.revenue, ...financeRows.expenses, ...financeRows.commissions];
     const currencies = new Set<string>();
-    for (const record of [...financeRows.revenue, ...financeRows.expenses, ...financeRows.commissions]) {
-      if (typeof record.currency === "string" && record.currency.trim()) currencies.add(record.currency.trim());
+    let hasMissingCurrency = false;
+    for (const record of allFinanceRecords) {
+      if (typeof record.currency === "string" && record.currency.trim()) {
+        currencies.add(record.currency.trim());
+      } else {
+        hasMissingCurrency = true;
+      }
     }
 
-    // Do not combine values with different currencies into one misleading total.
-    if (currencies.size <= 1) {
+    // Do not combine values with different or missing currencies into one misleading total.
+    if (currencies.size <= 1 && !hasMissingCurrency) {
       const amount = (record: Record<string, unknown>, key: string): number =>
         typeof record[key] === "number" && Number.isFinite(record[key])
           ? record[key] as number
