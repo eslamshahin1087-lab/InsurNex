@@ -57,7 +57,10 @@ const records = [
     downloadUrl: urlFor('organizations/org_a/path-b.pdf'),
   } },
   { collection: 'documents', id: 'doc_duplicate_ref', data: {
-    organizationId: 'org_a', storagePath: 'organizations/org_a/documents/report.pdf', size: 100,
+    organizationId: 'org_a', storagePath: 'organizations/org_a/shared.pdf', size: 100,
+  } },
+  { collection: 'documents', id: 'doc_duplicate_ref_2', data: {
+    organizationId: 'org_a', storagePath: 'organizations/org_a/shared.pdf', size: 100,
   } },
   { collection: 'documents', id: 'doc_supabase', data: {
     organizationId: 'org_a', storageProvider: 'supabase',
@@ -73,6 +76,7 @@ const objects = [
   { name: 'organizations/org_a/documents/report.pdf', size: 100, contentType: 'application/pdf', md5Hash: 'md5-good', crc32c: 'crc-1' },
   { name: 'organizations/org_a/operations/op_a/invoice.xlsx', size: 200, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
   { name: 'organizations/org_a/size-mismatch.pdf', size: 11, md5Hash: 'md5-actual' },
+  { name: 'organizations/org_a/shared.pdf', size: 100 },
   { name: 'organizations/org_a/unreferenced.pdf', size: 99, md5Hash: 'md5-unused' },
 ];
 
@@ -97,7 +101,7 @@ assert.equal(report.summary.missingObjects, 1);
 assert.equal(report.summary.sizeMismatches, 1);
 assert.equal(report.summary.md5Mismatches, 1);
 assert.equal(report.summary.duplicateMetadataPaths, 2);
-assert.equal(report.summary.unresolvedMetadataReferences, 2);
+assert.equal(report.summary.unresolvedMetadataReferences, 1);
 assert.ok(report.metadataRecords.find(item => item.documentId === 'doc_ok')?.status === 'matched',
   'a matching object and metadata size/checksum reconcile cleanly');
 assert.ok(report.metadataRecords.find(item => item.documentId === 'att_url_only')?.status === 'matched',
