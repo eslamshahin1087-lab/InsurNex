@@ -24,6 +24,8 @@ jobs:
         run: npm run test:storage-gateway
       - name: Legacy storage inventory reconciliation regression tests
         run: npm run test:storage-inventory
+      - name: Legacy client document backfill planning regression tests
+        run: npm run test:legacy-client-backfill-plan
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
