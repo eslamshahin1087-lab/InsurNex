@@ -33,7 +33,7 @@ jobs:
       - name: Type-check Supabase AI Copilot Edge Function
         run: deno check supabase/functions/copilot-chat/index.ts
       - name: Copilot context minimization regression tests
-        run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts
+        run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts
       - name: Legacy storage inventory reconciliation regression tests
         run: npm run test:storage-inventory
       - name: Legacy client document backfill planning regression tests
