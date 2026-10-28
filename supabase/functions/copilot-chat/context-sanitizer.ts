@@ -53,6 +53,7 @@ const FIELD_RULES: Record<string, FieldRules> = {
     numbers: ["totalRevenue", "totalExpenses", "netIncome", "pendingCommissions", "receivedCommissions"],
   },
   stats: {
+    strings: [],
     numbers: ["totalClients", "activePolicies", "openClaims", "upcomingRenewals", "totalLeads", "wonLeads", "pipelineValue"],
   },
 };
