@@ -319,6 +319,10 @@ async function authorizeOperationAttachmentAccess(
     })) {
       return { ok: false, response: errorResponse('OPERATION_ATTACHMENT_RECORD_MISMATCH', 403) };
     }
+    const uploadState = stringField(metadata, 'uploadState');
+    if ((action === 'write' && uploadState !== 'pending') || (action !== 'write' && uploadState !== 'ready')) {
+      return { ok: false, response: errorResponse('OPERATION_ATTACHMENT_STATE_INVALID', 409) };
+    }
     if (!roleCanAccessOperationAttachment(role, action)) {
       return { ok: false, response: errorResponse(action === 'delete' ? 'DELETE_NOT_ALLOWED' : 'OPERATION_ATTACHMENT_ACCESS_DENIED', 403) };
     }
@@ -375,6 +379,59 @@ async function handleOperationAttachmentSignDownload(body: Record<string, unknow
     return errorResponse('SIGNED_URL_FAILED', 500);
   }
   return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.attachment.path });
+}
+
+
+async function handleOperationAttachmentCleanup(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const operationId = typeof body.operationId === 'string' ? body.operationId : '';
+  const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const parsed = parseOperationAttachmentPath(path, organizationId) as AuthorizedOperationAttachment | null;
+  if (!parsed || parsed.operationId !== operationId || !parsed.filename.startsWith(attachmentId + '-')) {
+    return errorResponse('INVALID_OPERATION_ATTACHMENT_PATH', 400);
+  }
+  try {
+    const profile = await readCallerVisibleDocument(`users/${user.uid}`, token);
+    if (!profile || stringField(profile, 'status') !== 'active'
+        || stringField(profile, 'organizationId') !== organizationId) {
+      return errorResponse('ORGANIZATION_ACCESS_DENIED', 403);
+    }
+    const metadata = await readCallerVisibleDocument(`operationAttachments/${attachmentId}`, token);
+    if (!metadata) return errorResponse('OPERATION_ATTACHMENT_NOT_FOUND', 404);
+    const metadataView = {
+      organizationId: stringField(metadata, 'organizationId'),
+      operationId: stringField(metadata, 'operationId'),
+      storagePath: stringField(metadata, 'storagePath'),
+      storageProvider: stringField(metadata, 'storageProvider'),
+      storageBucket: stringField(metadata, 'storageBucket'),
+      storageKeyVersion: numberField(metadata, 'storageKeyVersion'),
+      downloadUrl: stringField(metadata, 'downloadUrl'),
+      uploadedBy: stringField(metadata, 'uploadedBy'),
+      contentType: stringField(metadata, 'contentType'),
+      size: numberField(metadata, 'size'),
+    };
+    if (stringField(metadata, 'uploadState') !== 'pending'
+        || !operationAttachmentMetadataMatchesPath(metadataView, {
+          organizationId, operationId, attachmentId, path,
+          filename: parsed.filename, bucket: DEFAULT_BUCKET, actorUid: user.uid,
+        })) {
+      return errorResponse('OPERATION_ATTACHMENT_CLEANUP_DENIED', 403);
+    }
+    const operation = await readCallerVisibleDocument(`operations/${operationId}`, token);
+    if (!operation || stringField(operation, 'organizationId') !== organizationId) {
+      return errorResponse('OPERATION_ACCESS_DENIED', 403);
+    }
+    const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([path]);
+    if (error) {
+      console.error('Cleanup pending operation attachment failed:', error.message);
+      return errorResponse('CLEANUP_FAILED', 500);
+    }
+    return jsonResponse({ ok: true });
+  } catch (error) {
+    console.error('Pending operation attachment cleanup failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return errorResponse('CLEANUP_FAILED', 500);
+  }
 }
 
 async function handleOperationAttachmentDelete(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
@@ -464,7 +521,7 @@ serve(async (req: Request) => {
       return jsonResponse({
         ok: true,
         service: 'document-storage',
-        supportedActions: ['sign-upload', 'sign-download', 'delete', 'operation-sign-upload', 'operation-sign-download', 'operation-delete'],
+        supportedActions: ['sign-upload', 'sign-download', 'delete', 'operation-sign-upload', 'operation-sign-download', 'operation-delete', 'operation-cleanup'],
         timestamp: new Date().toISOString(),
       });
     }
@@ -504,6 +561,7 @@ serve(async (req: Request) => {
       case 'operation-sign-upload': return await handleOperationAttachmentSignUpload(body, user, token);
       case 'operation-sign-download': return await handleOperationAttachmentSignDownload(body, user, token);
       case 'operation-delete': return await handleOperationAttachmentDelete(body, user, token);
+      case 'operation-cleanup': return await handleOperationAttachmentCleanup(body, user, token);
       default: return errorResponse('UNKNOWN_ACTION', 400);
     }
   } catch (error) {
