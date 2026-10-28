@@ -219,6 +219,22 @@ async function main() {
           md5Checksum: data.md5Checksum,
           storageMd5Hash: data.storageMd5Hash,
           createdAt: data.createdAt,
+          ...(collectionName === 'clients' && Array.isArray(data.documents) ? {
+            documents: data.documents.map(item => ({
+              id: item?.id,
+              storageProvider: item?.storageProvider,
+              storagePath: item?.storagePath,
+              downloadUrl: item?.downloadUrl,
+              url: item?.url,
+              originalFileName: item?.originalFileName,
+              fileName: item?.fileName,
+              label: item?.label,
+              size: item?.size,
+              contentType: item?.contentType,
+              mimeType: item?.mimeType,
+              uploadedAt: item?.uploadedAt,
+            })),
+          } : {}),
         },
       });
     }
