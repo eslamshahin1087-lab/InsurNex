@@ -13,12 +13,11 @@ import {
   sendMessage,
 } from './copilot.service';
 import { buildTitleFromFirstMessage, canSendMessage } from './copilot-utils';
-import type {
-  CopilotContextPayload,
-  CopilotConversation,
+import type {  CopilotConversation,
   CopilotMessage,
 } from './copilot.types';
 import { getCurrentContext } from './copilot-context.store';
+import type { CopilotContextSelector } from './copilot-context-selector';
 
 interface Props {
   onClose: () => void;
@@ -40,7 +39,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Re-read context whenever route changes
-  const incomingContext = useMemo<CopilotContextPayload | undefined>(
+  const incomingContext = useMemo<CopilotContextSelector | undefined>(
     () => getCurrentContext(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [location.pathname, activeId],
