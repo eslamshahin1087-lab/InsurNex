@@ -127,6 +127,21 @@ export function buildLegacyClientDocumentBackfillPlan({
   const entries = [];
   const existingByPath = new Map();
   const existingById = new Map();
+  const embeddedPathRefs = new Map();
+
+  // Detect duplicate legacy references before checking existing mappings. A
+  // first-class record must not make duplicate source references look safe.
+  for (const clientRecord of clientRecords) {
+    const data = clientRecord.data || {};
+    const embeddedDocuments = Array.isArray(data.documents) ? data.documents : [];
+    for (const item of embeddedDocuments) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+      const parsed = normalizedEmbeddedReference(clientRecord, item, { bucket, supabaseHost });
+      if (!parsed) continue;
+      const key = pathKey(parsed.bucket, parsed.path);
+      embeddedPathRefs.set(key, (embeddedPathRefs.get(key) || 0) + 1);
+    }
+  }
 
   for (const record of documentRecords) {
     const data = record.data || {};
@@ -182,6 +197,10 @@ export function buildLegacyClientDocumentBackfillPlan({
       base.documentCategory = category;
 
       const key = pathKey(parsed.bucket, parsed.path);
+      if ((embeddedPathRefs.get(key) || 0) > 1) {
+        entries.push({ ...base, reason: 'DUPLICATE_EMBEDDED_OBJECT_REFERENCE' });
+        return;
+      }
       const existing = existingByPath.get(key) || [];
       if (existing.length > 1) {
         entries.push({ ...base, reason: 'DUPLICATE_EXISTING_DOCUMENT_MAPPINGS' });
@@ -273,23 +292,7 @@ export function buildLegacyClientDocumentBackfillPlan({
     });
   }
 
-  const candidatePathRefs = new Map();
-  for (const entry of entries) {
-    if (entry.status !== 'candidate' || !entry.bucket || !entry.objectPath) continue;
-    const key = pathKey(entry.bucket, entry.objectPath);
-    const refs = candidatePathRefs.get(key) || [];
-    refs.push(entry);
-    candidatePathRefs.set(key, refs);
-  }
-  for (const refs of candidatePathRefs.values()) {
-    if (refs.length > 1) {
-      for (const entry of refs) {
-        entry.status = 'needs_review';
-        entry.reason = 'DUPLICATE_EMBEDDED_OBJECT_REFERENCE';
-        entry.proposedRecord = null;
-      }
-    }
-  }
+  const duplicateEmbeddedObjectGroups = [...embeddedPathRefs.values()].filter(count => count > 1).length;
 
   const counts = {
     clientRecordsScanned: clientRecords.length,
@@ -298,7 +301,7 @@ export function buildLegacyClientDocumentBackfillPlan({
     eligibleCandidates: entries.filter(item => item.status === 'candidate').length,
     alreadyMapped: entries.filter(item => item.status === 'already_mapped').length,
     needsReview: entries.filter(item => item.status === 'needs_review').length,
-    duplicateEmbeddedObjectGroups: [...candidatePathRefs.values()].filter(rows => rows.length > 1).length,
+    duplicateEmbeddedObjectGroups,
   };
 
   return {
