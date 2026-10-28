@@ -100,17 +100,30 @@ const clients = [{
   },
 }];
 
-const existingDocs = [{
-  id: 'doc_existing_1',
-  data: {
-    organizationId: 'org_a',
-    relatedType: 'client',
-    relatedId: 'client_a',
-    storageProvider: 'supabase',
-    storageBucket: bucket,
-    storagePath: objectPath('already-mapped.pdf'),
+const existingDocs = [
+  {
+    id: 'doc_existing_1',
+    data: {
+      organizationId: 'org_a',
+      relatedType: 'client',
+      relatedId: 'client_a',
+      storageProvider: 'supabase',
+      storageBucket: bucket,
+      storagePath: objectPath('already-mapped.pdf'),
+    },
   },
-}];
+  {
+    id: 'doc_existing_duplicate_path',
+    data: {
+      organizationId: 'org_a',
+      relatedType: 'client',
+      relatedId: 'client_a',
+      storageProvider: 'supabase',
+      storageBucket: bucket,
+      storagePath: objectPath('duplicate.pdf'),
+    },
+  },
+];
 
 const input = {
   projectId: 'insurnex-8a9df',
@@ -127,7 +140,7 @@ assert.equal(plan.noCloudChangesMade, true);
 assert.equal(plan.writesAttempted, false);
 assert.equal(plan.storageObjectsVerified, false);
 assert.equal(plan.counts.clientRecordsScanned, 1);
-assert.equal(plan.counts.existingDocumentRecordsScanned, 1);
+assert.equal(plan.counts.existingDocumentRecordsScanned, 2);
 assert.equal(plan.counts.embeddedDocumentReferencesScanned, 10);
 assert.equal(plan.counts.eligibleCandidates, 2);
 assert.equal(plan.counts.alreadyMapped, 1);
@@ -161,6 +174,11 @@ assert.equal(duplicateEntries.length, 2);
 assert.ok(duplicateEntries.every(item => item.status === 'needs_review'));
 assert.ok(duplicateEntries.every(item => item.reason === 'DUPLICATE_EMBEDDED_OBJECT_REFERENCE'));
 assert.ok(duplicateEntries.every(item => item.proposedRecord === null));
+assert.ok(
+  duplicateEntries.every(item => item.status === 'needs_review'),
+  'duplicate embedded references remain blocked even if a first-class mapping already exists',
+);
+assert.equal(plan.counts.duplicateEmbeddedObjectGroups, 1);
 
 assert.equal(
   plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_wrong_host')?.reason,
