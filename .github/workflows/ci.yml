@@ -48,6 +48,8 @@ jobs:
         run: |
           npm ci --prefix functions
           npm run build --prefix functions
+      - name: Legacy Firebase Copilot context security regression tests
+        run: node functions/scripts/copilot-context-security-test.mjs
       - name: Verify read-only storage audit CLIs start without cloud access
         run: |
           node functions/scripts/legacy-storage-dry-run.mjs --help
