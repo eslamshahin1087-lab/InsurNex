@@ -118,10 +118,12 @@ async function queryRecords(params: {
     ? 'name'
     : collection === 'revenue' || collection === 'expenses'
       ? 'date'
-      : 'createdAt';
-  if (!clientId) {
-    query = query.orderBy(params.orderField ?? defaultOrderField, collection === 'insurers' ? 'asc' : 'desc');
-  }
+      : collection === 'tasks'
+        ? 'dueDate'
+        : 'createdAt';
+  const orderField = params.orderField ?? defaultOrderField;
+  const orderDirection = collection === 'insurers' || collection === 'tasks' || orderField === 'expiryDate' ? 'asc' : 'desc';
+  if (!clientId) query = query.orderBy(orderField, orderDirection);
   query = query.limit(params.limit ?? SAMPLE_LIMIT).select(...COLLECTION_FIELDS[collection]);
 
   const snapshot = await query.get();
