@@ -95,3 +95,59 @@ for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
 }
 
 console.log('All document-storage policy regression tests passed.');
+
+
+// Operation attachments use an independent resource and stricter delete policy.
+import {
+  parseOperationAttachmentPath,
+  operationAttachmentMetadataMatchesPath,
+  roleCanAccessOperationAttachment,
+} from '../supabase/functions/document-storage/access-policy.mjs';
+
+const operationId = 'op_456';
+const attachmentId = 'att_789';
+const operationPath = `organizations/${org}/operations/${operationId}/${attachmentId}-invoice.pdf`;
+assert.deepEqual(parseOperationAttachmentPath(operationPath, org), {
+  layout: 'operation',
+  organizationId: org,
+  operationId,
+  path: operationPath,
+  filename: `${attachmentId}-invoice.pdf`,
+}, 'valid operation attachment path parses');
+assert.equal(parseOperationAttachmentPath(operationPath, 'other-org'), null, 'cross-tenant operation path is rejected');
+assert.equal(parseOperationAttachmentPath(`organizations/${org}/operations/${operationId}/../invoice.pdf`, org), null, 'operation path traversal is rejected');
+
+const operationRequest = {
+  organizationId: org, operationId, attachmentId, path: operationPath,
+  filename: `${attachmentId}-invoice.pdf`, bucket: 'insurnex-documents',
+  contentType: 'application/pdf', size: 321, actorUid: 'uploader_1',
+};
+const operationMetadata = {
+  organizationId: org, operationId, storagePath: operationPath,
+  storageProvider: 'supabase', storageBucket: 'insurnex-documents',
+  storageKeyVersion: 2, downloadUrl: '', uploadedBy: 'uploader_1',
+  contentType: 'application/pdf', size: 321,
+};
+assert.equal(operationAttachmentMetadataMatchesPath(operationMetadata, operationRequest), true, 'operation attachment binds to exact metadata');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, operationId: 'foreign-op' }, operationRequest), false, 'foreign operation metadata is rejected');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, storagePath: operationPath + '.other' }, operationRequest), false, 'path mismatch is rejected');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, storageProvider: 'firebase' }, operationRequest), false, 'Firebase legacy metadata cannot use the Supabase gateway');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, storageKeyVersion: 1 }, operationRequest), false, 'unversioned operation attachments are rejected');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, downloadUrl: 'https://example.invalid/file' }, operationRequest), false, 'persistent download URLs are rejected');
+assert.equal(operationAttachmentMetadataMatchesPath(operationMetadata, { ...operationRequest, attachmentId: 'another-id' }), false, 'object filename must bind to attachment ID');
+assert.equal(operationAttachmentMetadataMatchesPath({ ...operationMetadata, uploadedBy: 'other-user' }, operationRequest), false, 'only uploader may request a signed upload');
+assert.equal(operationAttachmentMetadataMatchesPath(operationMetadata, { ...operationRequest, size: 322 }), false, 'file size mismatch is rejected');
+
+for (const role of ['owner', 'admin']) {
+  assert.equal(roleCanAccessOperationAttachment(role, 'read'), true, role + ' can read operation attachments');
+  assert.equal(roleCanAccessOperationAttachment(role, 'write'), true, role + ' can upload operation attachments');
+  assert.equal(roleCanAccessOperationAttachment(role, 'delete'), true, role + ' can delete operation attachments');
+}
+for (const role of ['broker', 'claims']) {
+  assert.equal(roleCanAccessOperationAttachment(role, 'read'), true, role + ' can read operation attachments');
+  assert.equal(roleCanAccessOperationAttachment(role, 'write'), true, role + ' can upload operation attachments');
+  assert.equal(roleCanAccessOperationAttachment(role, 'delete'), false, role + ' cannot delete operation attachments');
+}
+for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
+  assert.equal(roleCanAccessOperationAttachment(role, 'read'), false, role + ' cannot access operation attachment storage');
+}
