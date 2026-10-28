@@ -496,6 +496,12 @@ service cloud.firestore {
           || !request.resource.data.keys().hasAny(['storageProvider'])
           || request.resource.data.storageProvider != 'supabase'
           || (request.resource.data.storageKeyVersion == 2 && request.resource.data.downloadUrl == ''))
+        && (collection != 'operationAttachments'
+          || !request.resource.data.keys().hasAny(['storageProvider'])
+          || request.resource.data.storageProvider != 'supabase'
+          || (request.resource.data.storageKeyVersion == 2
+            && request.resource.data.downloadUrl == ''
+            && request.resource.data.uploadState == 'pending'))
         && canCreateBusinessCollection(collection, request.resource.data);
       allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
@@ -516,6 +522,20 @@ service cloud.firestore {
           && (!resource.data.keys().hasAny(['storageBucket']) || request.resource.data.storageBucket == resource.data.storageBucket)
           && (!resource.data.keys().hasAny(['storageKeyVersion']) || request.resource.data.storageKeyVersion == resource.data.storageKeyVersion)
           && (!resource.data.keys().hasAny(['downloadUrl']) || request.resource.data.downloadUrl == resource.data.downloadUrl)
+        ))
+        && (collection != 'operationAttachments' || (
+          request.resource.data.operationId == resource.data.operationId
+          && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)
+          && (!resource.data.keys().hasAny(['storageProvider']) || request.resource.data.storageProvider == resource.data.storageProvider)
+          && (!resource.data.keys().hasAny(['storageBucket']) || request.resource.data.storageBucket == resource.data.storageBucket)
+          && (!resource.data.keys().hasAny(['storageKeyVersion']) || request.resource.data.storageKeyVersion == resource.data.storageKeyVersion)
+          && (!resource.data.keys().hasAny(['downloadUrl']) || request.resource.data.downloadUrl == resource.data.downloadUrl)
+          && (request.resource.data.storageProvider != 'supabase' || resource.data.storageProvider == 'supabase')
+          && (resource.data.storageProvider != 'supabase'
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uploadState'])
+              && resource.data.uploadState == 'pending'
+              && request.resource.data.uploadState == 'ready'
+              && resource.data.uploadedBy == request.auth.uid))
         ))
         && canUpdateBusinessCollection(collection, resource.data);
       allow delete: if collection != 'users' && collection != 'organizations'
