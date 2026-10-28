@@ -15,6 +15,9 @@ const ANTHROPIC_API_KEY = defineSecret('ANTHROPIC_API_KEY');
 const CLAUDE_COPILOT_MODEL = defineString('CLAUDE_COPILOT_MODEL', {
   default: 'claude-haiku-4-5',
 });
+// This legacy callable uses the paid Anthropic API. The active client uses the
+// Supabase Gemini/Groq route, so keep this endpoint disabled unless explicitly enabled.
+const LEGACY_COPILOT_ENABLED = defineString('LEGACY_COPILOT_ENABLED', { default: 'false' });
 
 export const copilotChat = onCall(
   {
@@ -26,6 +29,10 @@ export const copilotChat = onCall(
     maxInstances: 5,
   },
   async (req) => {
+    if (LEGACY_COPILOT_ENABLED.value().toLowerCase() !== 'true') {
+      throw new HttpsError('failed-precondition', 'This legacy Copilot endpoint is disabled. Use the active Copilot service.');
+    }
+
     if (!req.auth) {
       throw new HttpsError('unauthenticated', 'Authentication required.');
     }
