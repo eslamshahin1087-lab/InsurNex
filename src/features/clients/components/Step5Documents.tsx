@@ -120,13 +120,11 @@ export default function Step5Documents({
 function UploadButton({
   label,
   type,
-  organizationId,
 
   onUploaded,
 }: {
   label: string;
   type: string;
-  organizationId: string;
 
   onUploaded: (doc: ClientDocument) => void;
 }) {
