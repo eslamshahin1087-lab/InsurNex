@@ -241,3 +241,16 @@ export async function removeOperationAttachment(
     path: object.path,
   }, userToken);
 }
+
+
+export async function cleanupPendingOperationAttachment(
+  object: OperationAttachmentStorageObject,
+  userToken: string,
+): Promise<void> {
+  await invoke('operation-cleanup', {
+    organizationId: object.organizationId,
+    operationId: object.operationId,
+    attachmentId: object.attachmentId,
+    path: object.path,
+  }, userToken);
+}
