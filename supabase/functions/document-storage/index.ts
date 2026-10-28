@@ -563,10 +563,15 @@ async function handleLegacyClientSignDownload(
     }
 
     const embeddedValues = client.fields?.documents?.arrayValue?.values ?? [];
-    const embedded = embeddedValues
+    const matchingReferences = embeddedValues
       .map(value => value.mapValue?.fields)
-      .find(fields => stringFieldsValue(fields, 'id') === embeddedDocumentId);
-    if (!embedded) return errorResponse('LEGACY_CLIENT_DOCUMENT_NOT_FOUND', 404);
+      .filter((fields): fields is Record<string, FirestoreValue> =>
+        stringFieldsValue(fields, 'id') === embeddedDocumentId);
+    if (matchingReferences.length === 0) return errorResponse('LEGACY_CLIENT_DOCUMENT_NOT_FOUND', 404);
+    if (matchingReferences.length !== 1) {
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_REFERENCE_AMBIGUOUS', 409);
+    }
+    const embedded = matchingReferences[0];
 
     const reference = {
       storageProvider: stringFieldsValue(embedded, 'storageProvider') ?? undefined,
