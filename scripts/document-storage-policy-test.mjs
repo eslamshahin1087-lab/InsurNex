@@ -28,7 +28,7 @@ assert.equal(areaForCategory('policy'), 'policy');
 assert.equal(areaForCategory('proposal'), 'quotation');
 assert.equal(areaForCategory('identity'), 'onboarding');
 
-const request = { organizationId: org, clientId: client, area: 'claim', path, contentType: 'application/pdf', size: 123 };
+const request = { organizationId: org, clientId: client, area: 'claim', path, contentType: 'application/pdf', size: 123, bucket: 'insurnex-documents', actorUid: 'uploader_1' };
 const metadata = {
   organizationId: org,
   storagePath: path,
@@ -36,6 +36,8 @@ const metadata = {
   relatedType: 'client',
   relatedId: client,
   category: 'claim',
+  storageBucket: 'insurnex-documents',
+  uploadedBy: 'uploader_1',
   contentType: 'application/pdf',
   size: 123,
 };
@@ -44,6 +46,8 @@ assert.equal(metadataMatchesPath({ ...metadata, storagePath: path + '.other' }, 
 assert.equal(metadataMatchesPath({ ...metadata, organizationId: 'different-org' }, request), false, 'metadata from another organization is rejected');
 assert.equal(metadataMatchesPath({ ...metadata, relatedId: 'another-client' }, request), false, 'metadata for another client is rejected');
 assert.equal(metadataMatchesPath({ ...metadata, storageProvider: 'firebase' }, request), false, 'legacy Firebase objects cannot be accessed through this Supabase gateway');
+assert.equal(metadataMatchesPath({ ...metadata, storageBucket: 'public-bucket' }, request), false, 'metadata bucket must match the configured private bucket');
+assert.equal(metadataMatchesPath({ ...metadata, uploadedBy: 'another-user' }, request), false, 'only the original uploader can request a signed upload for a pending path');
 assert.equal(metadataMatchesPath({ ...metadata, category: 'identity' }, request), false, 'category and storage area must agree');
 assert.equal(metadataMatchesPath(metadata, { ...request, contentType: 'image/png' }), false, 'upload content type must match the authorized metadata');
 assert.equal(metadataMatchesPath(metadata, { ...request, size: 124 }), false, 'upload size must match the authorized metadata');
