@@ -14,9 +14,7 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import { auth, db } from '../../firebase/config';
 import { buildCopilotContextSelector } from './copilot-context-selector';
-import type {
-  CopilotContextPayload,
-  CopilotConversation,
+import type {  CopilotConversation,
   CopilotMessage,
   CopilotRequestMessage,
   CopilotResponse,
@@ -150,7 +148,7 @@ async function saveMessage(params: {
 export async function sendToCopilot(params: {
   organizationId: string;
   history: CopilotRequestMessage[];
-  context?: CopilotContextPayload;
+  context?: unknown;
 }): Promise<CopilotResponse> {
   const currentUser = auth.currentUser;
   if (!currentUser) throw new Error('NOT_AUTHENTICATED');
@@ -202,7 +200,7 @@ export async function sendMessage(params: {
   conversationId: string;
   userText: string;
   history: CopilotMessage[];
-  context?: CopilotContextPayload;
+  context?: unknown;
 }): Promise<CopilotResponse> {
   const { organizationId, userId, conversationId, userText, history, context } = params;
 
