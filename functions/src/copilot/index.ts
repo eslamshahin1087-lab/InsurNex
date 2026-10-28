@@ -1,4 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
+import { CopilotAuthorizationError, resolveCopilotAccess } from './access-policy';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import { COPILOT_SYSTEM_PROMPT } from './prompts';
@@ -6,7 +7,6 @@ import {
   buildAuthorizedContext,
   buildContextString,
   normalizeCopilotContextSelector,
-  type CopilotRole,
   type CopilotContext,
 } from './context-builder';
 import { callClaude, validateMessages } from './claude.client';
@@ -15,10 +15,6 @@ const ANTHROPIC_API_KEY = defineSecret('ANTHROPIC_API_KEY');
 const CLAUDE_COPILOT_MODEL = defineString('CLAUDE_COPILOT_MODEL', {
   default: 'claude-haiku-4-5',
 });
-
-const ALLOWED_ORGANIZATION_ROLES = new Set<CopilotRole>([
-  'owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff',
-]);
 
 export const copilotChat = onCall(
   {
@@ -42,58 +38,29 @@ export const copilotChat = onCall(
       throw new HttpsError('invalid-argument', 'Invalid Copilot messages: ' + reason);
     }
 
-    const requestedOrganizationId = req.data?.organizationId;
-    if (
-      requestedOrganizationId !== undefined &&
-      (typeof requestedOrganizationId !== 'string' || requestedOrganizationId.length > 160)
-    ) {
-      throw new HttpsError('invalid-argument', 'Invalid organization scope.');
-    }
-
     const db = getFirestore();
     let context: CopilotContext;
     try {
-      const uid = req.auth.uid;
-      // Platform Admin membership is provisioned out-of-band. Check it first
-      // so an admin with a stale tenant profile cannot use the tenant context.
-      const adminMembership = await db.collection('admin').doc(uid).get();
-      if (adminMembership.exists) {
-        if (requestedOrganizationId && requestedOrganizationId !== uid) {
-          throw new HttpsError('permission-denied', 'Workspace access denied.');
-        }
+      const access = await resolveCopilotAccess({
+        db,
+        uid: req.auth.uid,
+        requestedOrganizationId: req.data?.organizationId,
+      });
+
+      if (access.scopeType === 'platform-admin') {
         context = { page: normalizeCopilotContextSelector(req.data?.context).page };
       } else {
-        const profileSnapshot = await db.collection('users').doc(uid).get();
-        if (!profileSnapshot.exists) {
-          throw new HttpsError('permission-denied', 'Workspace access denied.');
-        }
-
-        const profile = profileSnapshot.data() ?? {};
-        const organizationId = typeof profile.organizationId === 'string'
-          ? profile.organizationId
-          : '';
-        const role = profile.role;
-        if (
-          profile.status !== 'active' ||
-          !organizationId ||
-          typeof role !== 'string' ||
-          !ALLOWED_ORGANIZATION_ROLES.has(role as CopilotRole)
-        ) {
-          throw new HttpsError('permission-denied', 'Workspace access denied.');
-        }
-        if (requestedOrganizationId && requestedOrganizationId !== organizationId) {
-          throw new HttpsError('permission-denied', 'Workspace access denied.');
-        }
-
         context = await buildAuthorizedContext({
           db,
-          organizationId,
-          role: role as CopilotRole,
+          organizationId: access.organizationId,
+          role: access.role,
           requestedContext: req.data?.context,
         });
       }
     } catch (e) {
-      if (e instanceof HttpsError) throw e;
+      if (e instanceof CopilotAuthorizationError) {
+        throw new HttpsError(e.code, e.message);
+      }
       console.error('copilotChat context authorization failed.');
       throw new HttpsError('unavailable', 'Authorized Copilot context is temporarily unavailable.');
     }
