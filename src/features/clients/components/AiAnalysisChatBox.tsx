@@ -6,6 +6,7 @@ import type {
 } from '../client.types';
 import { sendToCopilot } from '../../copilot/copilot.service';
 import { calculateCompleteness } from '../risk-assessment.service';
+import { useAuth } from '../../auth/auth-context';
 
 interface Props {
   clientId: string;
@@ -35,10 +36,12 @@ export default function AiAnalysisChatBox({
   clientName,
   clientCode,
   wizardData,
-  riskAssessment,
   onAnalysisReady,
   onClose,
 }: Props) {
+  const { profile, user } = useAuth();
+  const copilotScope = profile?.organizationId || user?.uid || null;
+
   const [messages, setMessages] = useState<ChatBubble[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -51,21 +54,8 @@ export default function AiAnalysisChatBox({
   // ============================================================
   const analysisPrompt = useMemo(() => {
     const completeness = calculateCompleteness(wizardData);
-    const name =
-      wizardData.type === 'individual'
-        ? wizardData.individual?.fullName
-        : wizardData.corporate?.companyName;
-
     const details: string[] = [];
     details.push(`**النوع:** ${wizardData.type === 'individual' ? 'فردي' : 'شركات'}`);
-    details.push(`**الاسم:** ${name || 'غير محدد'}`);
-
-    if (wizardData.type === 'individual' && wizardData.individual) {
-      const i = wizardData.individual;
-      if (i.occupation) details.push(`**المهنة:** ${i.occupation}`);
-      if (i.monthlyIncome) details.push(`**الدخل الشهري:** ${i.monthlyIncome} ج.م`);
-      if (i.maritalStatus) details.push(`**الحالة الاجتماعية:** ${i.maritalStatus}`);
-    }
     if (wizardData.type === 'corporate' && wizardData.corporate) {
       const c = wizardData.corporate;
       if (c.primaryActivity) details.push(`**النشاط:** ${c.primaryActivity}`);
@@ -76,11 +66,10 @@ export default function AiAnalysisChatBox({
     details.push(
       `**الاحتياجات:** ${wizardData.needs.map(needLabel).join('، ') || 'لم تحدد'}`,
     );
-    details.push(`**درجة المخاطر:** ${riskAssessment.score}/100 (${riskAssessment.level})`);
     details.push(`**اكتمال البيانات:** ${completeness}%`);
     details.push(`**عدد المستندات:** ${wizardData.documents.length}`);
 
-    return `تم إنشاء عميل جديد في المنصة. البيانات التالية:
+    return `ملخص احتياجات تأمينية غير معرّف للعميل. البيانات التالية:
 
 ${details.join('\n')}
 
@@ -90,7 +79,7 @@ ${details.join('\n')}
 3. **تقدير الأقساط**: إن أمكن، أعط تقديرًا تقريبيًا للقسط السنوي (بالجنيه المصري).
 
 اكتب الرد بالعربية بشكل منظم. لا تستخدم عناوين markdown كبيرة، فقط نص عادي منظّم.`;
-  }, [wizardData, riskAssessment]);
+  }, [wizardData]);
 
   // ============================================================
   // Run analysis on mount
@@ -101,12 +90,14 @@ ${details.join('\n')}
 
     const initialUser: ChatBubble = {
       role: 'user',
-      content: `تحليل بيانات العميل: ${clientName}`,
+      content: 'تحليل احتياجات التأمين للعميل الجديد',
     };
     setMessages([initialUser]);
 
     try {
+      if (!copilotScope) throw new Error('WORKSPACE_ACCESS_DENIED');
       const response = await sendToCopilot({
+        organizationId: copilotScope,
         history: [{ role: 'user', content: analysisPrompt }],
       });
 
@@ -130,15 +121,13 @@ ${details.join('\n')}
         suggestedProducts: [],
         analyzedAt: new Date(),
       });
-    } catch (e) {
-      console.error('Analysis failed', e);
-      const errMsg = (e as Error).message || 'خطأ غير معروف';
+    } catch {
       setError('تعذر تحليل البيانات. يمكنك طرح أسئلتك يدويًا.');
       setMessages([
         initialUser,
         {
           role: 'assistant',
-          content: `⚠️ لم أتمكن من الاتصال بخدمة التحليل (${errMsg}). يمكنك سؤالي مباشرة عن العميل.`,
+          content: '⚠️ لم أتمكن من الاتصال بخدمة التحليل. يمكنك سؤالي مباشرة عن احتياجات التأمين.',
         },
       ]);
     } finally {
@@ -178,13 +167,13 @@ ${details.join('\n')}
         role: m.role,
         content: m.content,
       }));
-      const response = await sendToCopilot({ history });
+      if (!copilotScope) throw new Error('WORKSPACE_ACCESS_DENIED');
+      const response = await sendToCopilot({ organizationId: copilotScope, history });
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: response.reply },
       ]);
-    } catch (e) {
-      console.error(e);
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
