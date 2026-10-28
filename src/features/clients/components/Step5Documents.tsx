@@ -13,7 +13,7 @@ interface Props {
   needs: InsuranceNeed[];
   documents: ClientDocument[];
   organizationId: string;
-  firebaseToken: string;
+
   onAdd: (doc: ClientDocument) => void;
   onRemove: (id: string) => void;
 }
@@ -23,7 +23,7 @@ export default function Step5Documents({
   needs,
   documents,
   organizationId,
-  firebaseToken,
+
   onAdd,
   onRemove,
 }: Props) {
@@ -102,7 +102,7 @@ export default function Step5Documents({
                   label={req.label}
                   type={req.type}
                   organizationId={organizationId}
-                  firebaseToken={firebaseToken}
+                  
                   onUploaded={(doc) => onAdd(doc)}
                 />
               )}
@@ -124,13 +124,13 @@ function UploadButton({
   label,
   type,
   organizationId,
-  firebaseToken,
+
   onUploaded,
 }: {
   label: string;
   type: string;
   organizationId: string;
-  firebaseToken: string;
+
   onUploaded: (doc: ClientDocument) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
