@@ -69,61 +69,61 @@ function buildContextString(ctx?: CopilotContext): string {
   if (ctx.page) parts.push(`Current page/route: ${ctx.page}`);
 
   if (ctx.client) {
-    parts.push(`## Client context (authoritative)\n${JSON.stringify(ctx.client, null, 2)}`);
+    parts.push(`## Client context (filtered; unverified)\n${JSON.stringify(ctx.client, null, 2)}`);
   }
 
   if (ctx.policy) {
-    parts.push(`## Policy context (authoritative)\n${JSON.stringify(ctx.policy, null, 2)}`);
+    parts.push(`## Policy context (filtered; unverified)\n${JSON.stringify(ctx.policy, null, 2)}`);
   }
 
   if (ctx.policies && ctx.policies.length > 0) {
     parts.push(
-      `## Policies portfolio (${ctx.policies.length} total; first ${Math.min(ctx.policies.length, 20)} shown)\n` +
+      `## Policies portfolio (filtered; unverified; ${ctx.policies.length} items shown)\n` +
         JSON.stringify(ctx.policies.slice(0, 20), null, 2),
     );
   }
 
   if (ctx.claims && ctx.claims.length > 0) {
     parts.push(
-      `## Claims (${ctx.claims.length} total; first ${Math.min(ctx.claims.length, 15)} shown)\n` +
+      `## Claims (filtered; unverified; ${ctx.claims.length} items shown)\n` +
         JSON.stringify(ctx.claims.slice(0, 15), null, 2),
     );
   }
 
   if (ctx.renewals && ctx.renewals.length > 0) {
     parts.push(
-      `## Upcoming renewals (${ctx.renewals.length} total; first ${Math.min(ctx.renewals.length, 15)} shown)\n` +
+      `## Upcoming renewals (filtered; unverified; ${ctx.renewals.length} items shown)\n` +
         JSON.stringify(ctx.renewals.slice(0, 15), null, 2),
     );
   }
 
   if (ctx.leads && ctx.leads.length > 0) {
     parts.push(
-      `## Sales leads (${ctx.leads.length} total; first ${Math.min(ctx.leads.length, 15)} shown)\n` +
+      `## Sales leads (filtered; unverified; ${ctx.leads.length} items shown)\n` +
         JSON.stringify(ctx.leads.slice(0, 15), null, 2),
     );
   }
 
   if (ctx.insurers && ctx.insurers.length > 0) {
     parts.push(
-      `## Insurance companies (${ctx.insurers.length} total; first ${Math.min(ctx.insurers.length, 20)} shown)\n` +
+      `## Insurance companies (filtered; unverified; ${ctx.insurers.length} items shown)\n` +
         JSON.stringify(ctx.insurers.slice(0, 20), null, 2),
     );
   }
 
   if (ctx.tasks && ctx.tasks.length > 0) {
     parts.push(
-      `## Tasks (${ctx.tasks.length} total; first ${Math.min(ctx.tasks.length, 15)} shown)\n` +
+      `## Tasks (filtered; unverified; ${ctx.tasks.length} items shown)\n` +
         JSON.stringify(ctx.tasks.slice(0, 15), null, 2),
     );
   }
 
   if (ctx.finance) {
-    parts.push(`## Financial summary (authoritative)\n${JSON.stringify(ctx.finance, null, 2)}`);
+    parts.push(`## Financial summary (filtered; unverified)\n${JSON.stringify(ctx.finance, null, 2)}`);
   }
 
   if (ctx.stats) {
-    parts.push(`## Portfolio statistics (authoritative)\n${JSON.stringify(ctx.stats, null, 2)}`);
+    parts.push(`## Portfolio statistics (filtered; unverified)\n${JSON.stringify(ctx.stats, null, 2)}`);
   }
 
   if (ctx.notes) {
