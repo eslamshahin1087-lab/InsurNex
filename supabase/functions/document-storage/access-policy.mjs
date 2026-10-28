@@ -87,3 +87,49 @@ export function roleCanAccessDocument(role, category, action, options = {}) {
   }
   return false;
 }
+
+
+const SAFE_OPERATION_SEGMENT = /^[A-Za-z0-9_-]{1,128}$/;
+
+/** Parse an operation attachment path without accepting arbitrary object keys. */
+export function parseOperationAttachmentPath(path, organizationId) {
+  if (typeof path !== 'string' || typeof organizationId !== 'string'
+      || !SAFE_OPERATION_SEGMENT.test(organizationId)) return null;
+  const match = /^organizations\/([A-Za-z0-9_-]{1,128})\/operations\/([A-Za-z0-9_-]{1,128})\/([A-Za-z0-9._-]{1,220})$/.exec(path);
+  if (!match || match[1] !== organizationId || match[3] === '.' || match[3] === '..') return null;
+  return {
+    layout: 'operation',
+    organizationId: match[1],
+    operationId: match[2],
+    path,
+    filename: match[3],
+  };
+}
+
+/** Bind an operation attachment key to its exact metadata and parent operation. */
+export function operationAttachmentMetadataMatchesPath(metadata, request) {
+  if (!metadata || !request) return false;
+  if (metadata.organizationId !== request.organizationId
+      || metadata.operationId !== request.operationId
+      || metadata.storagePath !== request.path
+      || metadata.storageProvider !== 'supabase'
+      || metadata.storageKeyVersion !== 2) return false;
+  if (request.bucket && metadata.storageBucket !== request.bucket) return false;
+  if (request.actorUid && metadata.uploadedBy !== request.actorUid) return false;
+  if (request.contentType && metadata.contentType !== request.contentType) return false;
+  if (typeof request.size === 'number' && metadata.size !== request.size) return false;
+  if (typeof metadata.size !== 'number' || !Number.isFinite(metadata.size) || metadata.size <= 0
+      || typeof metadata.contentType !== 'string' || !metadata.contentType) return false;
+  if (typeof request.attachmentId !== 'string' || !request.attachmentId
+      || typeof request.filename !== 'string'
+      || !request.filename.startsWith(request.attachmentId + '-')) return false;
+  if (metadata.downloadUrl !== '') return false;
+  return true;
+}
+
+/** Keep attachment deletion stricter than read/upload access. */
+export function roleCanAccessOperationAttachment(role, action) {
+  if (!['read', 'write', 'delete'].includes(action)) return false;
+  if (['owner', 'admin'].includes(role)) return true;
+  return ['broker', 'claims'].includes(role) && action !== 'delete';
+}
