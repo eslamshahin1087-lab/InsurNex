@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { createClient } from '@supabase/supabase-js';
 import { auth, db } from '../../firebase/config';
+import { buildCopilotContextSelector } from './copilot-context-selector';
 import type {
   CopilotContextPayload,
   CopilotConversation,
@@ -160,7 +161,7 @@ export async function sendToCopilot(params: {
     body: {
       organizationId: params.organizationId,
       messages: params.history.slice(-MAX_HISTORY),
-      context: params.context,
+      context: buildCopilotContextSelector(params.context),
     },
     headers: { 'x-firebase-token': idToken },
   });
