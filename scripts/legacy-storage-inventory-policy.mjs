@@ -79,7 +79,7 @@ export function buildLegacyStorageMetadataInventory({
   // never copy full client records or their unrelated personal data into report.
   for (const record of metadataRecords) {
     const data = record.data || {};
-    if (record.collection !== 'clients' || !Array.isArray(data.documents)) {
+    if (record.collection !== 'clients') {
       expandedMetadataRecords.push(record);
       continue;
     }
@@ -88,6 +88,7 @@ export function buildLegacyStorageMetadataInventory({
       (typeof data.storagePath === 'string' && data.storagePath.trim()) ||
       (typeof data.downloadUrl === 'string' && data.downloadUrl.trim());
     if (clientHasTopLevelStorageRef) expandedMetadataRecords.push(record);
+    if (!Array.isArray(data.documents)) continue;
 
     data.documents.forEach((embedded, index) => {
       if (!embedded || typeof embedded !== 'object' || Array.isArray(embedded)) return;
