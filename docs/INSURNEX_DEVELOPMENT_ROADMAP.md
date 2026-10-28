@@ -5,14 +5,14 @@
 
 ## Current baseline
 
-- Phase 1 RBAC and organization invitations are merged to `main` in PR #48; see [PR #48](https://github.com/eslamshahin1087-lab/InsurNex/pull/48).
-- Phase 2A document storage gateway hardening, Phase 2B general/client document migration, and Phase 2C operation attachment gateway code are merged through PRs #49–#51. The gateway source is present, but the updated Supabase Edge Function has not been deployed; staging integration acceptance remains outstanding.
-- Read-only legacy inventory and its Spark-compatible metadata-only mode are merged through PRs #52–#55. Embedded client document references are included by PR #56, and Supabase signed-URL classification by PR #57. These changes passed CI and Secrets Scan on the latest `main` commit `414ca205711944cd06d453834ac8601950cb18c6`.
-- Live metadata-only Firestore inventory covered `documents`, `operationAttachments`, and `clients`: 24 Firestore records scanned; 10 records were explicitly marked Supabase-backed in the first two collections; three embedded client document URLs were identified as signed Supabase Storage references.
-- Read-only inspection of the active Supabase project confirmed the private `insurnex-documents` bucket has eight object metadata rows, and each of the three embedded client references has exactly one matching object row with matching declared size and MIME type. Object bytes were not downloaded or cryptographically verified.
-- Firebase Storage itself could not be inventoried because the Firebase Console for this project requires a plan upgrade. Do not infer that Firebase Storage is empty, and do not upgrade billing without explicit approval.
-- A compatibility gateway and Client Documents UI for safe on-demand access to the three embedded legacy Supabase references are being developed in the current PR branch. They are not merged or deployed yet. No production deployment, Firestore metadata backfill, file copy, migration, or deletion has occurred.
-- Sensitive client-field separation, assignment-level access, append-only audit events and AI safeguards remain incomplete; see Phases 3–5.
+- Phase 1 RBAC and organization invitations are merged to `main` through PR #48; see [PR #48](https://github.com/eslamshahin1087-lab/InsurNex/pull/48).
+- Phase 2A–2C storage-gateway changes are merged through PRs #49–#51. The gateway source is in `main`, but the updated Supabase Edge Function has not been deployed and staging integration acceptance remains outstanding.
+- The legacy inventory, Spark-compatible metadata-only mode, embedded client reference scan, Supabase signed-URL classification, secure compatibility access, and deterministic read-only backfill planner are merged through PRs #52–#59. PR #58 and PR #59 both passed CI and Secrets Scan before merge. Current `main` baseline at this roadmap revision: `f120489f5a4c86d4881f7d7862f25104aa6635bd`.
+- Live metadata-only Firestore inventory covered `documents`, `operationAttachments`, and `clients`: 24 records scanned; 10 records in the first two collections were marked Supabase-backed; three embedded client document URLs were identified as Supabase Storage signed URLs.
+- Read-only inspection confirmed the private `insurnex-documents` bucket has eight object metadata rows. Each of the three embedded client references matched exactly one object metadata row, including declared size and MIME type. Object bytes were not downloaded or cryptographically verified.
+- Firebase Storage itself has not been inventoried. The Firebase Console required a plan upgrade for Storage access; do not infer that the bucket is empty or upgrade billing without explicit approval.
+- No production deployment, Firestore metadata backfill, object copy, migration, or deletion has occurred. Phase 2D compatibility access and Phase 2E backfill planning are source-code changes only; the Edge Function rollout and staging acceptance remain outstanding.
+- The next work item is Phase 3A: a read-only inventory of sensitive/private field presence to scope the data-separation design. Sensitive data separation, assignment-level access, append-only audit events, AI safeguards, and full staging/release acceptance are still incomplete.
 
 ## Phase 2A — Bind signed storage access to authorized document metadata
 
@@ -55,7 +55,7 @@ Acceptance gate: Phase 2B CI and Emulator suite pass; staging confirms upload/do
 
 ## Phase 2C — Migrate operation attachments as a separate resource
 
-**Gateway status:** implemented and merged to `main` through PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed on the merged implementation head. The Edge Function has not been deployed, staging acceptance is outstanding, and existing Firebase objects remain in place. **Inventory status:** read-only inventory merged through PR #52 (merge commit `33a38b117b832db410c15b6c173569d34fe6a659`) with CI and Secrets Scan passing; it has not yet been run against live data.
+**Gateway status:** implemented and merged to `main` through PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); the Edge Function has not been deployed and staging acceptance is outstanding. **Inventory status:** the read-only inventory code was merged through PR #52. Metadata-only Firestore inventory has since run against live data; Firebase Storage object listing itself remains unverified because the current project access path requires a plan upgrade. Existing Firebase objects remain in place.
 
 Scope:
 1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
@@ -70,7 +70,7 @@ Acceptance gate: no remaining direct Firebase Storage calls in the audited modul
 
 ## Phase 2D — Secure compatibility access for embedded legacy client documents
 
-**Status:** implementation is in the open development PR branch `feat/secure-legacy-client-document-access-20261028`; not merged or deployed as of this roadmap update.
+**Status:** source implementation merged through [PR #58](https://github.com/eslamshahin1087-lab/InsurNex/pull/58); CI and Secrets Scan passed on the exact PR head. The updated Edge Function has not been deployed and staging acceptance is still required.
 
 Scope:
 1. Detect older `clients.documents[]` entries that contain Supabase signed URLs but lack an explicit storage provider.
@@ -87,6 +87,24 @@ Release gate:
 - Staging proves both allowed and denied cases, including claims-vs-identity access, cross-tenant attempts, missing objects, size/content-type mismatch, expired old URLs, and refreshed signed URL behavior.
 - No legacy document record is rewritten or deleted by this compatibility route.
 - After successful access testing, design a separate idempotent backfill from embedded references into first-class `documents` metadata; review and approve its dry-run manifest before any production writes.
+
+## Phase 3A — Inventory sensitive client field presence before schema separation
+
+**Status:** implementation is being added in [PR #60](https://github.com/eslamshahin1087-lab/InsurNex/pull/60); not merged or run against live data yet.
+
+Scope:
+1. Read only the `clients` collection with a capped Firestore query.
+2. Emit field-path presence and aggregate counts for identity/KYC, individual/corporate profiles, health/family risk data, financial fields, derived risk/AI fields, documents, contact/address and free-form notes.
+3. Never include raw field values, names, phone/email values, national/tax IDs, medical values, notes, document URLs, signed URL tokens or file contents in the report.
+4. Keep local reports ignored by Git; treat them as sensitive because they contain organization/client document IDs and field-presence patterns.
+5. Add synthetic regression tests proving sensitive sentinel values cannot appear in the output; add CI and CLI help checks.
+6. Use results as a design input only. No Firestore write, Rules change, schema split, storage access, backfill or deployment is performed.
+
+Acceptance gate:
+- CI, lint and build pass on the exact PR head.
+- A read-only scan runs on the intended project with a record cap high enough to cover the collection; if the cap is reached, rerun with a reviewed higher cap.
+- The data owner reviews the field-path categories and agrees the new schema/role matrix before implementation of writes or migration.
+- The next phase includes an audit of all field readers/writers and emulator tests for the proposed separate records; don't remove fields from the old client document until every consumer is migrated and staging confirms compatibility.
 
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
@@ -150,11 +168,10 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Complete review and CI for Phase 2D, then deploy the Edge Function and frontend in the documented order only after explicit release approval.
-2. Run the Spark-compatible metadata-only inventory for Firestore references; use full Firebase Storage inventory only when the project can access the exact bucket under an approved read-only setup.
-3. Test the three known Supabase legacy references through the compatibility gateway in staging, including cross-tenant denial and a fresh URL after the old signed URL expires.
-4. Prepare a separate idempotent backfill that copies no files and first writes only to a dry-run manifest. Preserve old embedded fields until the manifest, object verification and rollback are reviewed.
-5. Audit all remaining `firebase/storage` imports/call sites and test general documents, client documents and operation attachments in staging before claiming storage unification.
-6. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is exposed through broad client access.
-6. Complete audit and AI safeguards before claiming production-ready security.
-7. Treat production deployment as a separate approval-gated operation.
+1. Complete CI and review of Phase 3A sensitive-field inventory; run it read-only against the intended project with a reviewed record cap.
+2. Audit every client field reader/writer and finalize the proposed data-classification and role matrix before changing the client schema.
+3. Implement the sensitive-data split as a backward-compatible branch with explicit Firestore Rules, client-side services, emulator tests and a reversible dry-run migration plan.
+4. Complete staging acceptance for the Phase 2D gateway: allowed/denied roles, tenant boundaries, missing/mismatched metadata, expired legacy URLs and temporary URL generation.
+5. Deploy the Edge Function only after explicit release approval, verify its supported action list and staging behavior, then deploy the matching frontend as a separate approved step.
+6. Execute the approved backfill only after its dry-run manifest, object verification, counts, and rollback plan are reviewed; preserve source fields and objects until post-migration reads pass.
+7. Continue with append-only audit events, assignment-level access, AI safeguards, and operational monitoring before declaring production-ready security.
