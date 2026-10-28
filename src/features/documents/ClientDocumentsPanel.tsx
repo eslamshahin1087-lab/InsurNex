@@ -41,6 +41,12 @@ function errorLabel(error: unknown) {
   if (value.includes('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE')) {
     return 'الملف القديم غير متاح حاليًا. تحقق من التخزين أو صلاحية المرجع.';
   }
+  if (value.includes('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH')) {
+    return 'بيانات المستند لا تتطابق مع بيانات التخزين؛ تم منع فتح الملف احترازيًا.';
+  }
+  if (value.includes('POPUP_BLOCKED')) {
+    return 'المتصفح منع فتح نافذة المستند. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.';
+  }
   if (value.includes('UNKNOWN_ACTION') || value.includes('DOCUMENT_GATEWAY_REJECTED')) {
     return 'بوابة المستندات تحتاج إلى تحديث قبل فتح المستندات القديمة.';
   }
