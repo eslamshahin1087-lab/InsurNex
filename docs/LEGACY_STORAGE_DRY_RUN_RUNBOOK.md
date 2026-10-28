@@ -48,6 +48,8 @@ node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-
 
 This causes the tool to read the `clients` collection as well (one Firestore read per client document) but copies only projected document-reference fields into the local report; unrelated client profile fields are not written into the report. This is still metadata-only and cannot verify actual Storage object existence. Consider the additional Firestore read volume before running on a large production dataset.
 
+Older client records may contain Supabase Storage signed URLs in `clients.documents[].url` without an explicit `storageProvider`. Metadata-only mode recognizes standard Supabase Storage URL shapes and places those references under `supabaseUrlReferences`, with the bucket and object path extracted and signed query tokens omitted. These records are kept separate from Firebase legacy candidates. A `provider_identified_unverified` status means only that the URL shape identifies a Supabase bucket/path; the tool has not verified that the object exists, that the signed URL remains valid, or that the object is downloadable. Review `inferredSupabaseUrlReferences`, `supabaseUrlReferencesNeedingReview`, and the `supabaseUrlReferences` section of the local report.
+
 Full reconciliation requires an accessible Storage bucket and is a separate command:
 
 ```sh
@@ -68,7 +70,8 @@ The output path must not already exist; this avoids silently overwriting an earl
 - `needs_review`: a mismatch or incomplete reference requires investigation. Inspect the `issues` array; examples include `OBJECT_NOT_FOUND`, `SIZE_MISMATCH`, `MD5_MISMATCH`, `STORAGE_PATH_URL_MISMATCH`, `DUPLICATE_METADATA_REFERENCE`, `BUCKET_MISMATCH` and `UNSUPPORTED_URL`.
 - `unreferencedObjects` (full mode only): bucket objects with no legacy metadata reference from the selected collections. Do not delete them based only on this classification; they could be referenced elsewhere or retained intentionally.
 - Metadata-only reports do not contain an object listing, do not label any object as missing, and do not identify unreferenced objects.
-- `ignoredSupabaseRecords`: records already marked as Supabase-backed, excluded from Firebase legacy reconciliation.
+- `ignoredSupabaseRecords`: records already marked as Supabase-backed but not represented by a recognized signed/public/authenticated Supabase Storage URL; excluded from Firebase legacy reconciliation.
+- `inferredSupabaseUrlReferences` / `supabaseUrlReferences`: embedded records whose URL shape identifies a Supabase Storage bucket/object path. Signed URL query parameters (including access tokens) are not persisted. These references are not proof of object existence or signature validity.
 - `retryLog`: failed read attempts and bounded retries; a final read failure stops the inventory instead of producing a falsely complete report.
 
 The tool lists provider-reported MD5 and CRC32C values when available. It does not download file contents or calculate a new byte-level SHA-256 hash. A checksum mismatch can be conclusively resolved only after verifying which checksum algorithm and metadata source are authoritative.
