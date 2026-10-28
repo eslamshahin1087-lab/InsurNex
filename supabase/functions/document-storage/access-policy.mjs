@@ -73,16 +73,16 @@ export function parseLegacyClientDocumentReference(reference, request) {
     });
   }
 
-  const rawUrl = [reference.url, reference.downloadUrl]
-    .find(value => typeof value === 'string' && value.trim());
-  if (rawUrl) {
+  const rawUrls = [reference.url, reference.downloadUrl]
+    .filter(value => typeof value === 'string' && value.trim());
+  for (const rawUrl of rawUrls) {
     let url;
     try {
       url = new URL(rawUrl.trim());
     } catch {
       return null;
     }
-    if (!['https:'].includes(url.protocol) || !expectedHost || url.hostname.toLowerCase() !== expectedHost.toLowerCase()) {
+    if (url.protocol !== 'https:' || !expectedHost || url.hostname.toLowerCase() !== expectedHost.toLowerCase()) {
       return null;
     }
 
