@@ -11,7 +11,8 @@
     "test:access": "node scripts/admin-access-smoke-test.mjs",
     "test:plans": "node scripts/plan-feature-entitlements-smoke-test.mjs",
     "preview": "vite preview",
-    "test:rules": "node scripts/firestore-rules-test.mjs"
+    "test:rules": "node scripts/firestore-rules-test.mjs",
+    "test:storage-gateway": "node scripts/document-storage-policy-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
