@@ -117,6 +117,8 @@ assert.equal(candidate?.proposedRecord?.downloadUrl, '');
 assert.equal(candidate?.proposedRecord?.category, 'identity');
 assert.equal(candidate?.proposedRecord?.relatedType, 'client');
 assert.equal(candidate?.proposedRecord?.relatedId, 'client_a');
+assert.equal(candidate?.sourceUploadedAtIso, '2026-10-01T10:00:00.000Z');
+assert.equal(candidate?.proposedRecord?.createdAtSourceIso, undefined);
 assert.ok(!JSON.stringify(candidate).includes('do-not-store-this-token'));
 assert.ok(!JSON.stringify(candidate).includes('https://'));
 
