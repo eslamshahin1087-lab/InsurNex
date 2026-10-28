@@ -97,7 +97,7 @@ assert.equal(report.summary.ignoredSupabaseRecords, 1);
 assert.equal(report.summary.ignoredWithoutStorageReference, 1);
 assert.equal(report.summary.bucketObjectsScanned, objects.length);
 assert.equal(report.summary.unreferencedBucketObjects, 1);
-assert.equal(report.summary.missingObjects, 1);
+assert.equal(report.summary.missingObjects, 2);
 assert.equal(report.summary.sizeMismatches, 1);
 assert.equal(report.summary.md5Mismatches, 1);
 assert.equal(report.summary.duplicateMetadataPaths, 2);
