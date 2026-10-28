@@ -31,6 +31,7 @@ import {
   getClientPolicyHistory,
 } from '../features/policies/policy-lifecycle.service';
 import { getPolicyDocuments } from '../features/documents/document-lifecycle.service';
+import { getDocumentTemporaryUrl } from '../features/documents/document.service';
 import type { Policy, PolicyStatus } from '../types/insurance';
 import type { DocumentRecord } from '../types/document';
 import {
@@ -133,6 +134,8 @@ export default function PolicyDetailsPage() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'history'>('overview');
   const [actionLoading, setActionLoading] = useState(false);
+  const [openingDocumentId, setOpeningDocumentId] = useState<string | null>(null);
+  const [documentActionError, setDocumentActionError] = useState('');
 
   // Dialogs state
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -176,6 +179,35 @@ export default function PolicyDetailsPage() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  async function handleOpenPolicyDocument(record: DocumentRecord) {
+    let popup: Window | null = null;
+    setOpeningDocumentId(record.id);
+    setDocumentActionError('');
+    try {
+      // Open the tab synchronously to avoid popup blockers while the gateway
+      // generates a fresh signed URL for private Supabase objects.
+      popup = window.open('about:blank', '_blank');
+      if (popup) popup.opener = null;
+      if (!popup) throw new Error('POPUP_BLOCKED');
+
+      const url = await getDocumentTemporaryUrl(record);
+      popup.location.replace(url);
+    } catch (reason) {
+      popup?.close();
+      console.warn('Failed to open policy document', reason);
+      const code = reason instanceof Error ? reason.message : '';
+      setDocumentActionError(
+        code.includes('POPUP_BLOCKED')
+          ? 'المتصفح منع فتح نافذة المستند. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.'
+          : code.includes('LEGACY_DOCUMENT_REQUIRES_MIGRATION')
+            ? 'هذا المستند القديم يحتاج إلى مراجعة مسار التخزين قبل فتحه.'
+            : 'تعذر فتح المستند. تحقق من صلاحيتك أو أعد المحاولة.',
+      );
+    } finally {
+      setOpeningDocumentId(null);
+    }
+  }
 
   async function handleCancel() {
     if (!policy || !cancelReason.trim()) return;
@@ -402,6 +434,11 @@ export default function PolicyDetailsPage() {
           {/* Documents Tab */}
           {activeTab === 'documents' && (
             <div>
+              {documentActionError && (
+                <div role="alert" className="client-documents-v804-error" style={{ marginBottom: 12 }}>
+                  {documentActionError}
+                </div>
+              )}
               {documents.length === 0 ? (
                 <div className="inx-empty">
                   <FileText size={32} />
@@ -417,9 +454,17 @@ export default function PolicyDetailsPage() {
                         <small>{doc.originalFileName} · {(doc.size / 1024).toFixed(1)} KB</small>
                       </div>
                       {doc.verified && <CheckCircle size={18} className="text-[var(--inx-success)]" />}
-                      <a href={doc.downloadUrl} target="_blank" rel="noreferrer" className="inx-circle-btn" style={{ marginRight: 8 }}>
-                        <Download size={16} />
-                      </a>
+                      <button
+                        type="button"
+                        disabled={openingDocumentId === doc.id}
+                        onClick={() => void handleOpenPolicyDocument(doc)}
+                        aria-label={`فتح ${doc.name}`}
+                        title={openingDocumentId === doc.id ? 'جارٍ فتح المستند...' : 'فتح المستند'}
+                        className="inx-circle-btn"
+                        style={{ marginRight: 8, opacity: openingDocumentId === doc.id ? 0.6 : 1 }}
+                      >
+                        {openingDocumentId === doc.id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                      </button>
                     </li>
                   ))}
                 </ul>

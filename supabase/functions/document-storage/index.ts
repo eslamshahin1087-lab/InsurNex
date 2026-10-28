@@ -4,7 +4,17 @@
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
-import { metadataMatchesPath, parseDocumentPath, roleCanAccessDocument, parseOperationAttachmentPath, operationAttachmentMetadataMatchesPath, roleCanAccessOperationAttachment } from './access-policy.mjs';
+import {
+  metadataMatchesPath,
+  parseDocumentPath,
+  roleCanAccessDocument,
+  parseOperationAttachmentPath,
+  operationAttachmentMetadataMatchesPath,
+  roleCanAccessOperationAttachment,
+  parseLegacyClientDocumentReference,
+  roleCanAccessLegacyClientDocument,
+  legacyObjectMetadataMatches,
+} from './access-policy.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,13 +63,17 @@ interface FirebaseUser {
   name?: string;
 }
 
+interface FirestoreValue {
+  stringValue?: string;
+  booleanValue?: boolean;
+  integerValue?: string;
+  doubleValue?: number;
+  mapValue?: { fields?: Record<string, FirestoreValue> };
+  arrayValue?: { values?: FirestoreValue[] };
+}
+
 interface FirestoreDocument {
-  fields?: Record<string, {
-    stringValue?: string;
-    booleanValue?: boolean;
-    integerValue?: string;
-    doubleValue?: number;
-  }>;
+  fields?: Record<string, FirestoreValue>;
 }
 
 async function verifyFirebaseToken(token: string): Promise<FirebaseUser> {
@@ -87,9 +101,16 @@ function extractToken(req: Request): string | null {
   return null;
 }
 
+function stringValue(value: FirestoreValue | undefined): string | null {
+  return typeof value?.stringValue === 'string' ? value.stringValue : null;
+}
+
+function stringFieldsValue(fields: Record<string, FirestoreValue> | undefined, field: string): string | null {
+  return stringValue(fields?.[field]);
+}
+
 function stringField(document: FirestoreDocument | null, field: string): string | null {
-  const value = document?.fields?.[field]?.stringValue;
-  return typeof value === 'string' ? value : null;
+  return stringFieldsValue(document?.fields, field);
 }
 
 function numberField(document: FirestoreDocument | null, field: string): number | null {
@@ -502,6 +523,134 @@ async function handleSignDownload(body: Record<string, unknown>, user: FirebaseU
   return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.document.path });
 }
 
+/**
+ * Read-only compatibility gateway for older client documents stored inside
+ * clients.documents[]. The client sends only the client ID and embedded item
+ * ID; the canonical object path is derived from the caller-visible Firestore
+ * record and never trusted from the request body.
+ */
+async function handleLegacyClientSignDownload(
+  body: Record<string, unknown>,
+  user: FirebaseUser,
+  token: string,
+): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const clientId = typeof body.clientId === 'string' ? body.clientId : '';
+  const embeddedDocumentId = typeof body.documentId === 'string' ? body.documentId : '';
+
+  if (!organizationId || !/^[A-Za-z0-9_-]{1,128}$/.test(organizationId)) {
+    return errorResponse('INVALID_ORGANIZATION', 400);
+  }
+  if (!clientId || !/^[A-Za-z0-9_-]{1,128}$/.test(clientId)) {
+    return errorResponse('INVALID_CLIENT_ID', 400);
+  }
+  if (!embeddedDocumentId || !/^[A-Za-z0-9_-]{1,128}$/.test(embeddedDocumentId)) {
+    return errorResponse('INVALID_LEGACY_DOCUMENT_ID', 400);
+  }
+
+  try {
+    const profile = await readCallerVisibleDocument(`users/${user.uid}`, token);
+    if (!profile || stringField(profile, 'status') !== 'active') {
+      return errorResponse('ACTIVE_PROFILE_REQUIRED', 403);
+    }
+    if (stringField(profile, 'organizationId') !== organizationId) {
+      return errorResponse('ORGANIZATION_ACCESS_DENIED', 403);
+    }
+
+    const client = await readCallerVisibleDocument(`clients/${clientId}`, token);
+    if (!client) return errorResponse('CLIENT_NOT_FOUND', 404);
+    if (stringField(client, 'organizationId') !== organizationId) {
+      return errorResponse('CLIENT_ACCESS_DENIED', 403);
+    }
+
+    const embeddedValues = client.fields?.documents?.arrayValue?.values ?? [];
+    const matchingReferences = embeddedValues
+      .map(value => value.mapValue?.fields)
+      .filter((fields): fields is Record<string, FirestoreValue> =>
+        stringFieldsValue(fields, 'id') === embeddedDocumentId);
+    if (matchingReferences.length === 0) return errorResponse('LEGACY_CLIENT_DOCUMENT_NOT_FOUND', 404);
+    if (matchingReferences.length !== 1) {
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_REFERENCE_AMBIGUOUS', 409);
+    }
+    const embedded = matchingReferences[0];
+
+    const reference = {
+      storageProvider: stringFieldsValue(embedded, 'storageProvider') ?? undefined,
+      storageBucket: stringFieldsValue(embedded, 'storageBucket') ?? undefined,
+      storagePath: stringFieldsValue(embedded, 'storagePath') ?? undefined,
+      url: stringFieldsValue(embedded, 'url') ?? undefined,
+      downloadUrl: stringFieldsValue(embedded, 'downloadUrl') ?? undefined,
+    };
+    let expectedHost = '';
+    try {
+      expectedHost = new URL(SUPABASE_URL).hostname;
+    } catch {
+      return errorResponse('STORAGE_CONFIG_MISSING', 503);
+    }
+
+    const parsed = parseLegacyClientDocumentReference(reference, {
+      organizationId,
+      clientId,
+      expectedBucket: DEFAULT_BUCKET,
+      expectedHost,
+    });
+    if (!parsed) return errorResponse('LEGACY_CLIENT_DOCUMENT_REFERENCE_INVALID', 409);
+
+    const role = stringField(profile, 'role') ?? '';
+    const category = stringFieldsValue(embedded, 'category') ?? stringFieldsValue(embedded, 'type') ?? '';
+    if (!roleCanAccessLegacyClientDocument(role, 'read', category)) {
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_ACCESS_DENIED', 403);
+    }
+
+    const storage = adminClient().storage.from(DEFAULT_BUCKET);
+    const { data: fileInfo, error: infoError } = await storage.info(parsed.path);
+    if (infoError || !fileInfo) {
+      console.error('Legacy client document metadata lookup failed:', infoError?.message ?? 'NO_FILE_INFO');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
+    }
+
+    const referenceSize = numberField({ fields: { size: embedded.size } }, 'size');
+    const metadata = (fileInfo as { metadata?: Record<string, unknown> }).metadata ?? {};
+    const rawActualSize = metadata.size ?? (fileInfo as { size?: unknown }).size;
+    const actualSize = typeof rawActualSize === 'number'
+      ? rawActualSize
+      : typeof rawActualSize === 'string' && rawActualSize.trim() && Number.isFinite(Number(rawActualSize))
+        ? Number(rawActualSize)
+        : null;
+    const referenceContentType = stringFieldsValue(embedded, 'mimeType')
+      ?? stringFieldsValue(embedded, 'contentType');
+    const actualContentType = typeof metadata.mimetype === 'string'
+      ? metadata.mimetype
+      : typeof metadata.contentType === 'string' ? metadata.contentType
+        : typeof (fileInfo as { contentType?: unknown }).contentType === 'string'
+          ? (fileInfo as { contentType: string }).contentType
+          : '';
+    if (!legacyObjectMetadataMatches(
+      { size: referenceSize, contentType: referenceContentType },
+      { size: actualSize, contentType: actualContentType },
+    )) {
+      console.warn('Legacy client document metadata missing or mismatched; signed URL not issued.');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH', 409);
+    }
+
+    const { data, error } = await storage.createSignedUrl(parsed.path, 15 * 60);
+    if (error || !data?.signedUrl) {
+      console.error('Create legacy client document signed URL failed:', error?.message ?? 'NO_URL');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
+    }
+
+    return jsonResponse({
+      ok: true,
+      signedUrl: data.signedUrl,
+      expiresInSeconds: 15 * 60,
+      fileName: parsed.filename,
+    });
+  } catch (error) {
+    console.error('Legacy client document authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return errorResponse('AUTHORIZATION_CHECK_FAILED', 403);
+  }
+}
+
 async function handleDelete(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
   const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
   const documentId = typeof body.documentId === 'string' ? body.documentId : '';
@@ -526,7 +675,7 @@ serve(async (req: Request) => {
       return jsonResponse({
         ok: true,
         service: 'document-storage',
-        supportedActions: ['sign-upload', 'sign-download', 'delete', 'operation-sign-upload', 'operation-sign-download', 'operation-delete', 'operation-cleanup'],
+        supportedActions: ['sign-upload', 'sign-download', 'delete', 'legacy-client-sign-download', 'operation-sign-upload', 'operation-sign-download', 'operation-delete', 'operation-cleanup'],
         timestamp: new Date().toISOString(),
       });
     }
@@ -563,6 +712,7 @@ serve(async (req: Request) => {
       case 'sign-upload': return await handleSignUpload(body, user, token);
       case 'sign-download': return await handleSignDownload(body, user, token);
       case 'delete': return await handleDelete(body, user, token);
+      case 'legacy-client-sign-download': return await handleLegacyClientSignDownload(body, user, token);
       case 'operation-sign-upload': return await handleOperationAttachmentSignUpload(body, user, token);
       case 'operation-sign-download': return await handleOperationAttachmentSignDownload(body, user, token);
       case 'operation-delete': return await handleOperationAttachmentDelete(body, user, token);

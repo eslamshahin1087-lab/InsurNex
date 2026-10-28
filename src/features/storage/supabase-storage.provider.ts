@@ -145,6 +145,40 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
 };
 
 
+
+/**
+ * Requests a fresh, short-lived URL for an older document embedded in a
+ * client record. The browser sends only stable Firestore IDs; the server
+ * resolves and validates the canonical object path from caller-visible data.
+ */
+export async function getLegacyClientDocumentTemporaryUrl(input: {
+  organizationId: string;
+  clientId: string;
+  documentId: string;
+  userToken: string;
+}): Promise<{ signedUrl: string; expiresInSeconds: number }> {
+  const payload = await invoke<{
+    ok: true;
+    signedUrl: string;
+    expiresInSeconds: number;
+  }>(
+    'legacy-client-sign-download',
+    {
+      organizationId: input.organizationId,
+      clientId: input.clientId,
+      documentId: input.documentId,
+    },
+    input.userToken,
+  );
+  if (!payload.signedUrl || !Number.isFinite(payload.expiresInSeconds)) {
+    throw new Error('LEGACY_CLIENT_DOCUMENT_URL_UNAVAILABLE');
+  }
+  return {
+    signedUrl: payload.signedUrl,
+    expiresInSeconds: payload.expiresInSeconds,
+  };
+}
+
 export type OperationAttachmentStorageObject = {
   provider: 'supabase';
   bucket: string;

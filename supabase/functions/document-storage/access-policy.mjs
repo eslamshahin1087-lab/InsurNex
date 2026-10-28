@@ -1,6 +1,15 @@
 const SAFE_SEGMENT = /^[A-Za-z0-9_-]{1,128}$/;
 const ALLOWED_AREAS = new Set(['onboarding', 'quotation', 'issuance', 'policy', 'claim', 'renewal']);
+
 const ALLOWED_RELATIONS = new Set(['general', 'client', 'policy', 'claim']);
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
 
 export function parseDocumentPath(path, organizationId) {
   if (typeof path !== 'string' || typeof organizationId !== 'string' || !SAFE_SEGMENT.test(organizationId)) return null;
@@ -38,6 +47,215 @@ export function areaForCategory(category) {
   if (category === 'policy') return 'policy';
   if (category === 'proposal') return 'quotation';
   return 'onboarding';
+}
+
+
+/**
+ * Resolve a legacy document embedded in clients.documents[] to a safe Supabase
+ * Storage key. The signed URL query string is intentionally ignored.
+ *
+ * This does not authenticate the caller; the Edge Function must first verify
+ * the Firebase user, active profile, role and client tenant boundary.
+ */
+export function parseLegacyClientDocumentReference(reference, request) {
+  if (!reference || typeof reference !== 'object' || !request) return null;
+  const { organizationId, clientId, expectedBucket, expectedHost } = request;
+  if (!SAFE_SEGMENT.test(organizationId || '') || !SAFE_SEGMENT.test(clientId || '')) return null;
+  if (reference.storageProvider && reference.storageProvider !== 'supabase') return null;
+
+  const candidates = [];
+  if (typeof reference.storagePath === 'string' && reference.storagePath.trim()) {
+    candidates.push({
+      bucket: typeof reference.storageBucket === 'string' && reference.storageBucket
+        ? reference.storageBucket : expectedBucket,
+      path: reference.storagePath.trim(),
+      source: 'storagePath',
+    });
+  }
+
+  const rawUrls = [reference.url, reference.downloadUrl]
+    .filter(value => typeof value === 'string' && value.trim());
+  for (const rawUrl of rawUrls) {
+    let url;
+    try {
+      url = new URL(rawUrl.trim());
+    } catch {
+      return null;
+    }
+    if (url.protocol !== 'https:' || !expectedHost || url.hostname.toLowerCase() !== expectedHost.toLowerCase()) {
+      return null;
+    }
+
+    const encodedParts = url.pathname.split('/').filter(Boolean);
+    if (
+      encodedParts[0] !== 'storage' ||
+      encodedParts[1] !== 'v1' ||
+      encodedParts[2] !== 'object' ||
+      !['sign', 'public', 'authenticated'].includes(encodedParts[3]) ||
+      encodedParts.length < 6
+    ) return null;
+
+    const decodedParts = encodedParts.map(safeDecode);
+    if (decodedParts.some(part => !part || part.includes('/') || part.includes('\\'))) return null;
+    candidates.push({
+      bucket: decodedParts[4],
+      path: decodedParts.slice(5).join('/'),
+      source: 'url',
+    });
+  }
+
+  if (!candidates.length) return null;
+  const validated = candidates.map(candidate => {
+    const pathParts = candidate.path.split('/');
+    if (
+      candidate.bucket !== expectedBucket ||
+      pathParts.length !== 6 ||
+      pathParts.some(part => !part || part === '.' || part === '..' || part.includes('\\')) ||
+      pathParts[0] !== 'organizations' ||
+      pathParts[1] !== organizationId ||
+      pathParts[2] !== 'clients' ||
+      pathParts[3] !== clientId ||
+      !ALLOWED_AREAS.has(pathParts[4]) ||
+      !/^[A-Za-z0-9._-]{1,220}$/.test(pathParts[5])
+    ) return null;
+    return {
+      bucket: candidate.bucket,
+      path: candidate.path,
+      area: pathParts[4],
+      filename: pathParts[5],
+      source: candidate.source,
+    };
+  });
+  if (validated.some(item => !item)) return null;
+  if (validated.length > 1 && (validated[0].bucket !== validated[1].bucket || validated[0].path !== validated[1].path)) {
+    return null;
+  }
+  return validated[0];
+}
+
+
+/**
+ * Resolve an older top-level documents/{documentId} record to its expected
+ * general-document object path. Never trusts a URL or path sent by the browser;
+ * callers must pass the record read under the user's Firestore token.
+ */
+export function parseLegacyGeneralDocumentReference(reference, request) {
+  if (!reference || typeof reference !== 'object' || !request) return null;
+  const { organizationId, documentId, expectedBucket, expectedHost } = request;
+  if (!SAFE_SEGMENT.test(organizationId || '') || !SAFE_SEGMENT.test(documentId || '')) return null;
+  if (reference.storageProvider && reference.storageProvider !== 'supabase') return null;
+
+  const candidates = [];
+  const stablePath = typeof reference.storagePath === 'string' ? reference.storagePath.trim() : '';
+  if (stablePath) {
+    const explicitBucket = typeof reference.storageBucket === 'string' ? reference.storageBucket.trim() : '';
+    if (reference.storageProvider !== 'supabase' && !explicitBucket) return null;
+    candidates.push({
+      bucket: explicitBucket || expectedBucket,
+      path: stablePath,
+    });
+  }
+
+  const rawUrls = [reference.url, reference.downloadUrl]
+    .filter(value => typeof value === 'string' && value.trim());
+  for (const rawUrl of rawUrls) {
+    let url;
+    try {
+      url = new URL(rawUrl.trim());
+    } catch {
+      return null;
+    }
+    if (url.protocol !== 'https:' || !expectedHost || url.hostname.toLowerCase() !== expectedHost.toLowerCase()) {
+      return null;
+    }
+
+    const encodedParts = url.pathname.split('/').filter(Boolean);
+    if (
+      encodedParts[0] !== 'storage' ||
+      encodedParts[1] !== 'v1' ||
+      encodedParts[2] !== 'object' ||
+      !['sign', 'public', 'authenticated'].includes(encodedParts[3]) ||
+      encodedParts.length !== 10
+    ) return null;
+
+    const decodedParts = encodedParts.map(safeDecode);
+    if (decodedParts.some(part => !part || part.includes('/') || part.includes('\\'))) return null;
+    candidates.push({
+      bucket: decodedParts[4],
+      path: decodedParts.slice(5).join('/'),
+    });
+  }
+
+  if (!candidates.length) return null;
+  const first = candidates[0];
+  if (first.bucket !== expectedBucket) return null;
+  if (candidates.some(candidate => candidate.bucket !== first.bucket || candidate.path !== first.path)) return null;
+
+  const parts = first.path.split('/');
+  if (
+    parts.length !== 5 ||
+    parts.some(part => !part || part === '.' || part === '..' || part.includes('\\')) ||
+    parts[0] !== 'organizations' ||
+    parts[1] !== organizationId ||
+    parts[2] !== 'documents' ||
+    parts[3] !== documentId ||
+    !/^[A-Za-z0-9._-]{1,220}$/.test(parts[4])
+  ) return null;
+
+  return {
+    layout: 'general',
+    organizationId,
+    documentId,
+    bucket: first.bucket,
+    path: first.path,
+    filename: parts[4],
+  };
+}
+
+
+/**
+ * Fail-closed check for metadata that can be compared without downloading bytes.
+ * If the legacy record declares size or MIME type, Storage must report the
+ * corresponding value and it must match before a temporary URL is issued.
+ */
+export function legacyObjectMetadataMatches(reference, actual) {
+  if (!reference || !actual) return false;
+
+  const expectedSize = typeof reference.size === 'number'
+    && Number.isFinite(reference.size) && reference.size >= 0
+    ? reference.size
+    : null;
+  if (expectedSize !== null) {
+    const actualSize = typeof actual.size === 'number'
+      ? actual.size
+      : typeof actual.size === 'string' && actual.size.trim() && Number.isFinite(Number(actual.size))
+        ? Number(actual.size)
+        : null;
+    if (actualSize === null || actualSize !== expectedSize) return false;
+  }
+
+  const expectedType = typeof reference.contentType === 'string'
+    ? reference.contentType.trim().toLowerCase()
+    : '';
+  if (expectedType) {
+    const actualType = typeof actual.contentType === 'string'
+      ? actual.contentType.trim().toLowerCase()
+      : '';
+    if (!actualType || actualType !== expectedType) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Legacy embedded files are read-only via the compatibility gateway.
+ * Delete and migration actions must use a separate audited workflow.
+ */
+export function roleCanAccessLegacyClientDocument(role, action, category) {
+  if (action !== 'read') return false;
+  if (['owner', 'admin', 'broker'].includes(role)) return true;
+  if (role === 'claims') return String(category || '').toLowerCase() === 'claim';
+  return false;
 }
 
 /** Bind an object path to exactly one existing Firestore metadata record. */
