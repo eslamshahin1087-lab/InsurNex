@@ -32,8 +32,10 @@ jobs:
         run: |
           npm ci --prefix functions
           npm run build --prefix functions
-      - name: Verify legacy storage dry-run CLI starts without cloud access
-        run: node functions/scripts/legacy-storage-dry-run.mjs --help
+      - name: Verify read-only storage audit CLIs start without cloud access
+        run: |
+          node functions/scripts/legacy-storage-dry-run.mjs --help
+          node functions/scripts/legacy-client-document-backfill-plan.mjs --help
       - name: Set up Java 21 for Firebase Emulator Suite
         uses: actions/setup-java@v4
         with:
