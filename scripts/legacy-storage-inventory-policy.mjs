@@ -42,6 +42,61 @@ export function normalizeLegacyStorageReference(value, expectedBucket) {
   return { status: 'resolved', bucket: expectedBucket || null, path: raw };
 }
 
+/**
+ * Identify Supabase Storage URLs without retaining signed query strings.
+ * This extracts a bucket/object key from a signed URL; it does not verify that
+ * the object still exists or that its signature has not expired.
+ */
+export function normalizeSupabaseStorageReference(value) {
+  if (typeof value !== 'string' || !/^https?:\/\//i.test(value.trim())) {
+    return { status: 'not_supabase_storage_url' };
+  }
+
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return { status: 'invalid_url' };
+  }
+
+  const host = url.hostname.toLowerCase();
+  const isSupabaseHost = host === 'supabase.co'
+    || host.endsWith('.supabase.co')
+    || host === 'supabase.in'
+    || host.endsWith('.supabase.in');
+  if (!isSupabaseHost) return { status: 'not_supabase_storage_url' };
+
+  const parts = url.pathname.split('/').filter(Boolean);
+  if (
+    parts[0] !== 'storage' ||
+    parts[1] !== 'v1' ||
+    parts[2] !== 'object' ||
+    !['sign', 'public', 'authenticated'].includes(parts[3]) ||
+    parts.length < 6
+  ) {
+    return { status: 'unrecognized_supabase_storage_url', hostname: host };
+  }
+
+  const decoded = parts.map(safeDecode);
+  if (decoded.some(part => !part)) {
+    return { status: 'invalid_url_encoding' };
+  }
+  const bucket = decoded[4];
+  const path = decoded.slice(5).join('/');
+  if (!bucket || !path || path.startsWith('/') || path.includes('\\')
+      || path.split('/').some(part => part === '.' || part === '..')) {
+    return { status: 'invalid_path' };
+  }
+
+  return {
+    status: 'resolved',
+    provider: 'supabase',
+    bucket,
+    path,
+    accessMode: decoded[3],
+  };
+}
+
 function checksumCandidate(data) {
   for (const key of ['md5Hash', 'md5Checksum', 'storageMd5Hash']) {
     if (typeof data?.[key] === 'string' && data[key]) return { value: data[key], field: key };
@@ -70,6 +125,7 @@ export function buildLegacyStorageMetadataInventory({
   retryLog = [],
 }) {
   const legacyRecords = [];
+  const supabaseUrlRecords = [];
   let ignoredSupabaseRecords = 0;
   let ignoredWithoutStorageReference = 0;
   const expandedMetadataRecords = [];
@@ -122,13 +178,56 @@ export function buildLegacyStorageMetadataInventory({
 
   for (const record of expandedMetadataRecords) {
     const data = record.data || {};
+    const storagePath = typeof data.storagePath === 'string' ? data.storagePath.trim() : '';
+    const downloadUrl = typeof data.downloadUrl === 'string' ? data.downloadUrl.trim() : '';
+    const supabaseUrlResult = normalizeSupabaseStorageReference(downloadUrl);
+
+    if (supabaseUrlResult.status === 'resolved') {
+      const issues = [];
+      if (data.storageProvider && data.storageProvider !== 'supabase') {
+        issues.push('STORAGE_PROVIDER_URL_MISMATCH');
+      }
+
+      if (storagePath) {
+        const pathResult = normalizeLegacyStorageReference(storagePath, null);
+        if (pathResult.status === 'resolved' && pathResult.path !== supabaseUrlResult.path) {
+          issues.push('STORAGE_PATH_URL_MISMATCH');
+        } else if (pathResult.status !== 'resolved' && pathResult.status !== 'empty') {
+          issues.push('STORAGE_PATH_' + pathResult.status.toUpperCase());
+        }
+      }
+
+      const pathOrganizationMatch = /^organizations\/([^/]+)\//.exec(supabaseUrlResult.path);
+      if (pathOrganizationMatch && typeof data.organizationId === 'string'
+          && pathOrganizationMatch[1] !== data.organizationId) {
+        issues.push('PATH_ORGANIZATION_MISMATCH');
+      }
+
+      supabaseUrlRecords.push({
+        collection: record.collection,
+        documentId: record.id,
+        organizationId: printable(data.organizationId),
+        provider: 'supabase',
+        bucket: supabaseUrlResult.bucket,
+        objectPath: supabaseUrlResult.path,
+        accessMode: supabaseUrlResult.accessMode,
+        fileName: printable(data.originalFileName) || printable(data.name) || supabaseUrlResult.path.split('/').pop() || null,
+        declaredSize: data.size === undefined || data.size === null || data.size === ''
+          ? null : (Number.isFinite(Number(data.size)) ? Number(data.size) : null),
+        declaredContentType: printable(data.contentType),
+        createdAt: printable(data.createdAt),
+        status: issues.length ? 'needs_review' : 'provider_identified_unverified',
+        issues: [...new Set(issues)],
+        objectVerified: false,
+      });
+      continue;
+    }
+
     if (data.storageProvider === 'supabase') {
       ignoredSupabaseRecords += 1;
       continue;
     }
 
-    const storagePath = typeof data.storagePath === 'string' ? data.storagePath.trim() : '';
-    const downloadUrl = typeof data.downloadUrl === 'string' ? data.downloadUrl.trim() : '';
     if (!storagePath && !downloadUrl) {
       ignoredWithoutStorageReference += 1;
       continue;
@@ -214,12 +313,33 @@ export function buildLegacyStorageMetadataInventory({
     }
   }
 
+  const supabaseReferencesByKey = new Map();
+  for (const record of supabaseUrlRecords) {
+    const key = record.bucket + '\\u0000' + record.objectPath;
+    const rows = supabaseReferencesByKey.get(key) || [];
+    rows.push(record);
+    supabaseReferencesByKey.set(key, rows);
+  }
+  for (const rows of supabaseReferencesByKey.values()) {
+    if (rows.length > 1) {
+      for (const row of rows) {
+        if (!row.issues.includes('DUPLICATE_METADATA_REFERENCE')) {
+          row.issues.push('DUPLICATE_METADATA_REFERENCE');
+        }
+        row.status = 'needs_review';
+      }
+    }
+  }
+
   const summary = {
     collectionsScanned: collections.length,
     collectionNames: collections,
     metadataRecordsScanned: metadataRecords.length,
     legacyMetadataRecords: legacyRecords.length,
     ignoredSupabaseRecords,
+    inferredSupabaseUrlReferences: supabaseUrlRecords.length,
+    supabaseUrlReferencesNeedingReview: supabaseUrlRecords.filter(item => item.status === 'needs_review').length,
+    duplicateSupabaseMetadataPaths: supabaseUrlRecords.filter(item => item.issues.includes('DUPLICATE_METADATA_REFERENCE')).length,
     ignoredWithoutStorageReference,
     metadataConsistentRecords: legacyRecords.filter(item => item.status === 'metadata_consistent').length,
     metadataRecordsNeedingReview: legacyRecords.filter(item => item.status === 'needs_review').length,
@@ -244,6 +364,7 @@ export function buildLegacyStorageMetadataInventory({
     ],
     summary,
     metadataRecords: legacyRecords,
+    supabaseUrlReferences: supabaseUrlRecords,
     retryLog,
   };
 }
