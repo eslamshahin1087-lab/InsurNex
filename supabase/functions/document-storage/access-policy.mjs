@@ -175,7 +175,7 @@ export function parseLegacyGeneralDocumentReference(reference, request) {
       encodedParts[1] !== 'v1' ||
       encodedParts[2] !== 'object' ||
       !['sign', 'public', 'authenticated'].includes(encodedParts[3]) ||
-      encodedParts.length !== 8
+      encodedParts.length !== 10
     ) return null;
 
     const decodedParts = encodedParts.map(safeDecode);
