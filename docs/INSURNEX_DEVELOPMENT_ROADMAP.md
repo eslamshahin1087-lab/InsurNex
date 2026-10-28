@@ -7,13 +7,13 @@
 
 - Phase 1 RBAC and organization invitations merged to `main` in PR #48 (`611c71ef6eb94bde5a695ed32f29de5952f42f8b`).
 - CI and Secrets Scan passed on the implementation commit before merge.
-- The core `documents` collection now has client-linked and general document path layouts behind the Supabase signed-URL gateway in this Phase 2B branch. `src/features/operations/operations-attachment.service.ts` still uses direct Firebase Storage for the separate `operationAttachments` collection and remains a follow-on migration item.
-- The existing gateway checks caller identity, role, organization, and client, but must bind every signed operation to the exact Firestore document metadata record before it can be treated as a hardened boundary.
+- Phase 2A and Phase 2B storage gateway work is merged to `main` (Phase 2B merge commit `19c178aee493df8e2f105e39719aeb0c16f48120`). General and client-linked document operations use exact metadata-bound paths behind the private Supabase signed-URL gateway.
+- Phase 2C is being implemented on `feat/insurnex-operation-attachment-gateway-20261028`: operation attachments are being migrated through a separate resource policy so they remain bound to the exact operation and organization.
 - Sensitive client fields remain in a combined Client 360 record, assignment-level access and append-only audit events are incomplete, and AI processing is not yet approved for sensitive customer data.
 
 ## Phase 2A — Bind signed storage access to authorized document metadata
 
-**Status in this branch:** CI and Secrets Scan passed on head `2eaaeb63b45c5b84351579c8aaac37dd1916838e`. The PR remains draft pending code review and staging integration tests; the Edge Function has not been deployed.
+**Status:** implemented and merged to `main` through PR #49 (merge commit `a6f6d0e983b4909f37749715b9e6d6a562130342`). The Edge Function has not been deployed as part of this roadmap.
 
 Scope:
 1. Require a document ID for signed upload, signed download, and delete requests.
@@ -33,7 +33,7 @@ Acceptance gate:
 
 ## Phase 2B — Migrate the general Documents page and lifecycle operations
 
-Scope implemented in this branch:
+**Status:** implemented and merged to `main` through PR #50 (merge commit `19c178aee493df8e2f105e39719aeb0c16f48120`).
 1. Route `document.service.ts` upload, temporary URL and delete operations through the shared private gateway; remove direct Firebase Storage imports from the general document service.
 2. Route lifecycle delete operations through the same service and preserve old Firebase-backed objects rather than deleting their metadata prematurely.
 3. Use short-lived signed URLs on demand in the Documents page; do not persist signed URLs in Firestore.
@@ -52,7 +52,7 @@ Acceptance gate: Phase 2B CI and Emulator suite pass; all new general documents 
 
 ## Phase 2C — Migrate operation attachments as a separate resource
 
-**Status:** not started; keep this separate from the general `documents` collection because these files use `operationAttachments` and `operations/{operationId}` paths today.
+**Status:** implementation in progress on `feat/insurnex-operation-attachment-gateway-20261028`. The branch adds an operation-specific metadata-bound gateway path and regression tests; exact-head CI, review and staging verification remain required. No Edge Function deployment or live object migration has been performed.
 
 Scope:
 1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
