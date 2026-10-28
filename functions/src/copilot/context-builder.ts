@@ -38,7 +38,7 @@ const COLLECTION_FIELDS: Record<ContextCollection, string[]> = {
   policies: ['organizationId', 'clientId', 'insurerName', 'line', 'startDate', 'expiryDate', 'premium', 'currency', 'status', 'createdAt'],
   claims: ['organizationId', 'clientId', 'insurerName', 'claimAmount', 'approvedAmount', 'currency', 'status', 'incidentDate', 'createdAt'],
   leads: ['organizationId', 'stage', 'insuranceType', 'estimatedValue', 'createdAt'],
-  tasks: ['organizationId', 'clientId', 'status', 'priority', 'dueDate', 'createdAt'],
+  tasks: ['organizationId', 'clientId', 'relatedType', 'relatedId', 'status', 'priority', 'dueDate', 'createdAt'],
   insurers: ['organizationId', 'name', 'category', 'status'],
   revenue: ['organizationId', 'amount', 'status', 'currency', 'date'],
   expenses: ['organizationId', 'amount', 'currency', 'category', 'date'],
@@ -109,15 +109,20 @@ async function queryRecords(params: {
   if (!allowedForRole(collection, role)) return [];
 
   let query = db.collection(collection).where('organizationId', '==', organizationId);
-  if (clientId) query = query.where('clientId', '==', clientId);
+  if (clientId && collection === 'tasks') {
+    query = query.where('relatedType', '==', 'client').where('relatedId', '==', clientId);
+  } else if (clientId) {
+    query = query.where('clientId', '==', clientId);
+  }
   const defaultOrderField = collection === 'insurers'
     ? 'name'
     : collection === 'revenue' || collection === 'expenses'
       ? 'date'
       : 'createdAt';
-  query = query.orderBy(params.orderField ?? defaultOrderField, collection === 'insurers' ? 'asc' : 'desc')
-    .limit(params.limit ?? SAMPLE_LIMIT)
-    .select(...COLLECTION_FIELDS[collection]);
+  if (!clientId) {
+    query = query.orderBy(params.orderField ?? defaultOrderField, collection === 'insurers' ? 'asc' : 'desc');
+  }
+  query = query.limit(params.limit ?? SAMPLE_LIMIT).select(...COLLECTION_FIELDS[collection]);
 
   const snapshot = await query.get();
   const records: Array<Record<string, unknown>> = [];
@@ -126,7 +131,7 @@ async function queryRecords(params: {
     if (data.organizationId !== organizationId) continue;
     const safe: Record<string, unknown> = {};
     for (const key of COLLECTION_FIELDS[collection]) {
-      if (key === 'organizationId' || key === 'clientId' || key === 'createdAt') continue;
+      if (key === 'organizationId' || key === 'clientId' || key === 'relatedType' || key === 'relatedId' || key === 'createdAt') continue;
       const value = data[key];
       if (typeof value === 'string') {
         const cleaned = safeString(value);
