@@ -116,6 +116,7 @@ export async function uploadDocument(input: {
       storagePath: path,
       storageProvider: stored.provider,
       storageBucket: stored.bucket,
+      storageKeyVersion: 2,
       downloadUrl: '',
       relatedType: input.relatedType,
       relatedId: input.relatedType === 'general' ? '' : input.relatedId,
