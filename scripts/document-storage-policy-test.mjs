@@ -7,6 +7,8 @@ import {
   parseOperationAttachmentPath,
   operationAttachmentMetadataMatchesPath,
   roleCanAccessOperationAttachment,
+  parseLegacyClientDocumentReference,
+  roleCanAccessLegacyClientDocument,
 } from '../supabase/functions/document-storage/access-policy.mjs';
 
 const org = 'org_A-123';
@@ -36,6 +38,93 @@ assert.equal(parseDocumentPath(`organizations/${org}/clients/${client}/unknown/$
 assert.equal(parseDocumentPath(`organizations/${org}/clients/${client}/claim/../secret.pdf`, org), null, 'client path traversal is rejected');
 assert.equal(parseDocumentPath(`organizations/${org}/documents/${documentId}/../secret.pdf`, org), null, 'general path traversal is rejected');
 assert.equal(parseDocumentPath('organizations/org_A/../claims/secret.pdf', org), null, 'unexpected path shape is rejected');
+
+const legacyHost = 'piloiwtdbtmfiyqxfbae.supabase.co';
+const legacyUrl = `https://${legacyHost}/storage/v1/object/sign/insurnex-documents/organizations/${org}/clients/${client}/onboarding/legacy-id.pdf?token=do-not-retain`;
+const legacyRequest = {
+  organizationId: org,
+  clientId: client,
+  expectedBucket: 'insurnex-documents',
+  expectedHost: legacyHost,
+};
+assert.deepEqual(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', url: legacyUrl }, legacyRequest),
+  {
+    bucket: 'insurnex-documents',
+    path: `organizations/${org}/clients/${client}/onboarding/legacy-id.pdf`,
+    area: 'onboarding',
+    filename: 'legacy-id.pdf',
+    source: 'url',
+  },
+  'valid embedded Supabase signed URL resolves to its stable object key without its token',
+);
+assert.deepEqual(
+  parseLegacyClientDocumentReference({
+    id: 'legacy_doc',
+    storageProvider: 'supabase',
+    storageBucket: 'insurnex-documents',
+    storagePath: `organizations/${org}/clients/${client}/claim/legacy-claim.pdf`,
+  }, legacyRequest),
+  {
+    bucket: 'insurnex-documents',
+    path: `organizations/${org}/clients/${client}/claim/legacy-claim.pdf`,
+    area: 'claim',
+    filename: 'legacy-claim.pdf',
+    source: 'storagePath',
+  },
+  'provider-tagged stable paths are supported for backward-compatible embedded records',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', url: legacyUrl }, { ...legacyRequest, organizationId: 'other_org' }),
+  null,
+  'foreign organization is rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', url: legacyUrl }, { ...legacyRequest, clientId: 'other_client' }),
+  null,
+  'foreign client is rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', url: legacyUrl.replace(legacyHost, 'attacker.supabase.co') }, legacyRequest),
+  null,
+  'URLs from a different Supabase project are rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', url: legacyUrl.replace('insurnex-documents', 'public-bucket') }, legacyRequest),
+  null,
+  'a different bucket is rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({ id: 'legacy_doc', storageProvider: 'firebase', url: legacyUrl }, legacyRequest),
+  null,
+  'explicit Firebase metadata cannot be coerced into a Supabase reference',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({
+    id: 'legacy_doc', storageProvider: 'supabase',
+    storagePath: `organizations/${org}/clients/${client}/onboarding/path-a.pdf`,
+    url: legacyUrl,
+  }, legacyRequest),
+  null,
+  'conflicting stable path and URL are rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({
+    id: 'legacy_doc',
+    url: `https://${legacyHost}/storage/v1/object/sign/insurnex-documents/organizations/${org}/clients/${client}/onboarding/%2e%2e%2fsecrets.pdf?token=x`,
+  }, legacyRequest),
+  null,
+  'encoded path traversal is rejected',
+);
+for (const role of ['owner', 'admin', 'broker']) {
+  assert.equal(roleCanAccessLegacyClientDocument(role, 'read', 'identity'), true, role + ' can read active-tenant legacy client documents');
+  assert.equal(roleCanAccessLegacyClientDocument(role, 'delete', 'identity'), false, role + ' cannot delete legacy documents through the compatibility route');
+}
+assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'claim'), true, 'claims role can only read claim-category legacy documents');
+assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'identity'), false, 'claims role cannot read identity legacy documents');
+assert.equal(roleCanAccessLegacyClientDocument('platform_admin', 'read', 'claim'), false, 'platform admin has no implicit document gateway access');
+assert.equal(roleCanAccessLegacyClientDocument('broker', 'write', 'identity'), false, 'legacy compatibility route is read-only');
+
 
 assert.equal(areaForCategory('claim'), 'claim');
 assert.equal(areaForCategory('policy'), 'policy');
