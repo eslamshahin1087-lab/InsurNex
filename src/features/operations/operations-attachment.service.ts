@@ -14,6 +14,7 @@ import {
 import { auth, db } from '../../firebase/config';
 import {
   buildOperationAttachmentPath,
+  cleanupPendingOperationAttachment,
   getOperationAttachmentTemporaryUrl,
   removeOperationAttachment,
   uploadOperationAttachment,
@@ -206,30 +207,4 @@ export async function deleteOperationAttachmentRecord(record: OperationAttachmen
     if (!['owner', 'admin'].includes(role)) throw new Error('DELETE_NOT_ALLOWED');
   }
   await deleteDoc(doc(db, 'operationAttachments', record.id));
-}
-
-// Defined beside the workflow service because cleanup is only valid for a pending
-// attachment created by this uploader. It intentionally has no UI-facing use.
-async function cleanupPendingOperationAttachment(
-  object: OperationAttachmentStorageObject,
-  userToken: string,
-): Promise<void> {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-  if (!supabaseUrl || !publishableKey) return;
-  const client = createClient(supabaseUrl, publishableKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-  });
-  const { data, error } = await client.functions.invoke('document-storage', {
-    body: {
-      action: 'operation-cleanup',
-      organizationId: object.organizationId,
-      operationId: object.operationId,
-      attachmentId: object.attachmentId,
-      path: object.path,
-    },
-    headers: { 'x-firebase-token': userToken },
-  });
-  if (error || !data?.ok) throw new Error(data?.error || 'OPERATION_ATTACHMENT_CLEANUP_FAILED');
 }
