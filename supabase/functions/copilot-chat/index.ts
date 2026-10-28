@@ -3,10 +3,12 @@
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { sanitizeCopilotContext, type SanitizedCopilotContext } from './context-sanitizer.ts';
+import { authorizeCopilotWorkspace } from './workspace-authorization.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
 const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY') ?? '';
 const FIREBASE_API_KEY = Deno.env.get('FIREBASE_API_KEY') ?? '';
+const FIREBASE_PROJECT_ID = Deno.env.get('FIREBASE_PROJECT_ID') ?? 'insurnex-8a9df';
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.8-flash';
 const GROQ_MODEL = Deno.env.get('GROQ_MODEL') ?? 'openai/gpt-oss-120b';
@@ -248,7 +250,7 @@ serve(async (req) => {
     const firebaseToken = req.headers.get('x-firebase-token');
     if (!firebaseToken) throw new Error('MISSING_TOKEN');
 
-    await verifyFirebaseToken(firebaseToken);
+    const caller = await verifyFirebaseToken(firebaseToken);
 
     const contentLength = Number(req.headers.get('content-length') ?? 0);
     if (Number.isFinite(contentLength) && contentLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
@@ -257,7 +259,15 @@ serve(async (req) => {
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('INVALID_REQUEST_JSON');
     const requestBody = body as Record<string, unknown>;
     const messages = validateMessages(requestBody.messages);
-    const context = sanitizeCopilotContext(requestBody.context);
+    const workspace = await authorizeCopilotWorkspace({
+      projectId: FIREBASE_PROJECT_ID,
+      uid: caller.uid,
+      idToken: firebaseToken,
+      requestedScope: requestBody.organizationId,
+    });
+    const context = workspace.allowClientContext
+      ? sanitizeCopilotContext(requestBody.context)
+      : undefined;
 
     const systemPrompt = SYSTEM_PROMPT + buildContextString(context);
     const { reply, provider } = await callAI(systemPrompt, messages);
@@ -268,12 +278,16 @@ serve(async (req) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'UNKNOWN';
     const authenticationError = message === 'INVALID_TOKEN' || message === 'MISSING_TOKEN';
+    const scopeErrors = new Set(['WORKSPACE_ACCESS_DENIED', 'ORGANIZATION_ACCESS_DENIED']);
     const clientErrors = new Set([
       'INVALID_MESSAGES', 'TOO_MANY_MESSAGES', 'CONTENT_TOO_LONG',
       'LAST_MESSAGE_MUST_BE_USER', 'INVALID_REQUEST_JSON', 'REQUEST_TOO_LARGE',
     ]);
-    const status = authenticationError ? 401 : clientErrors.has(message) ? 400 : 500;
-    const publicError = authenticationError || clientErrors.has(message)
+    const status = authenticationError ? 401
+      : scopeErrors.has(message) ? 403
+      : clientErrors.has(message) ? 400
+      : 500;
+    const publicError = authenticationError || scopeErrors.has(message) || clientErrors.has(message)
       ? message
       : 'COPILOT_TEMPORARILY_UNAVAILABLE';
     console.error('copilot-chat request failed', { status, code: publicError });
