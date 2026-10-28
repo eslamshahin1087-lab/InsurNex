@@ -62,6 +62,9 @@ const records = [
   { collection: 'documents', id: 'doc_duplicate_ref_2', data: {
     organizationId: 'org_a', storagePath: 'organizations/org_a/shared.pdf', size: 100,
   } },
+  { collection: 'documents', id: 'doc_tenant_mismatch', data: {
+    organizationId: 'org_b', storagePath: 'organizations/org_a/tenant-mismatch.pdf', size: 40,
+  } },
   { collection: 'documents', id: 'doc_supabase', data: {
     organizationId: 'org_a', storageProvider: 'supabase',
     storagePath: 'organizations/org_a/documents/supabase-new.pdf',
@@ -77,6 +80,7 @@ const objects = [
   { name: 'organizations/org_a/operations/op_a/invoice.xlsx', size: 200, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
   { name: 'organizations/org_a/size-mismatch.pdf', size: 11, md5Hash: 'md5-actual' },
   { name: 'organizations/org_a/shared.pdf', size: 100 },
+  { name: 'organizations/org_a/tenant-mismatch.pdf', size: 40 },
   { name: 'organizations/org_a/unreferenced.pdf', size: 99, md5Hash: 'md5-unused' },
 ];
 
@@ -116,6 +120,8 @@ assert.ok(report.metadataRecords.find(item => item.documentId === 'doc_missing')
   'metadata pointing to a missing bucket object is reported');
 assert.ok(report.metadataRecords.find(item => item.documentId === 'doc_duplicate_ref')?.issues.includes('DUPLICATE_METADATA_REFERENCE'),
   'multiple metadata records pointing to one object are reported');
+assert.ok(report.metadataRecords.find(item => item.documentId === 'doc_tenant_mismatch')?.issues.includes('PATH_ORGANIZATION_MISMATCH'),
+  'metadata organization must match the organization embedded in the path');
 assert.ok(!JSON.stringify(report).includes('not-in-report'),
   'download URL tokens never enter the inventory report');
 assert.ok(!JSON.stringify(report).includes('https://firebasestorage.googleapis.com'),
