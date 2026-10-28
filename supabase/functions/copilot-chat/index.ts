@@ -254,6 +254,8 @@ serve(async (req) => {
 
     const caller = await verifyFirebaseToken(firebaseToken);
 
+    const declaredContentLength = Number(req.headers.get('content-length') ?? 0);
+    if (Number.isFinite(declaredContentLength) && declaredContentLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
     const rawBody = await req.text();
     if (new TextEncoder().encode(rawBody).byteLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
     let body: unknown;
