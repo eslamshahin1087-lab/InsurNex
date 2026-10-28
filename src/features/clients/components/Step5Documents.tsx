@@ -6,14 +6,13 @@ import type {
   InsuranceNeed,
 } from '../client.types';
 import { getRequiredDocuments } from '../document-requirements';
-import { supabaseDocumentStorage } from '../../storage/supabase-storage.provider';
+
 
 interface Props {
   type: ClientKind;
   needs: InsuranceNeed[];
   documents: ClientDocument[];
-  organizationId: string;
-  firebaseToken: string;
+
   onAdd: (doc: ClientDocument) => void;
   onRemove: (id: string) => void;
 }
@@ -22,8 +21,7 @@ export default function Step5Documents({
   type,
   needs,
   documents,
-  organizationId,
-  firebaseToken,
+  
   onAdd,
   onRemove,
 }: Props) {
@@ -101,8 +99,7 @@ export default function Step5Documents({
                 <UploadButton
                   label={req.label}
                   type={req.type}
-                  organizationId={organizationId}
-                  firebaseToken={firebaseToken}
+                  
                   onUploaded={(doc) => onAdd(doc)}
                 />
               )}
@@ -123,14 +120,12 @@ export default function Step5Documents({
 function UploadButton({
   label,
   type,
-  organizationId,
-  firebaseToken,
+
   onUploaded,
 }: {
   label: string;
   type: string;
-  organizationId: string;
-  firebaseToken: string;
+
   onUploaded: (doc: ClientDocument) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -141,50 +136,42 @@ function UploadButton({
     setUploading(true);
     setError('');
     try {
-      supabaseDocumentStorage.validate(file);
+      const maxBytes = 10 * 1024 * 1024;
+      const allowed = new Set([
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+      ]);
+      if (file.size <= 0) throw new Error('EMPTY_FILE');
+      if (file.size > maxBytes) throw new Error('FILE_TOO_LARGE');
+      if (!allowed.has(file.type)) throw new Error('FILE_TYPE_NOT_ALLOWED');
 
-      // 1. Upload to Supabase
-      const stored = await supabaseDocumentStorage.upload(file, {
-        organizationId,
-        clientId: 'draft',
-        userToken: firebaseToken,
-        area: 'onboarding',
-      });
-
-      if (!stored) {
-        setError('تعذر رفع الملف');
-        return;
-      }
-
-      // 2. Get a temporary URL (signed) for preview
-      let tempUrl = '';
-      try {
-        tempUrl = await supabaseDocumentStorage.getTemporaryUrl(
-          stored,
-          firebaseToken,
-          organizationId,
-        );
-      } catch (e) {
-        console.warn('Failed to get temp URL', e);
-      }
-
-      // 3. Build the ClientDocument object
-      const doc: ClientDocument = {
-        id: `${type}-${Date.now()}`,
+      // Stage locally until the client record exists. The secured storage
+      // gateway requires a real client ID and an authorized Firestore metadata
+      // record; uploading against a placeholder client ID would be unsafe and
+      // cannot be authorized correctly.
+      const staged: ClientDocument = {
+        id: `${type}-${crypto.randomUUID()}`,
         type,
         label,
-        url: tempUrl,
+        url: '',
         fileName: file.name,
         mimeType: file.type,
         size: file.size,
         uploadedAt: new Date(),
         verified: false,
+        pendingFile: file,
       };
-
-      onUploaded(doc);
+      onUploaded(staged);
     } catch (e) {
-      console.error(e);
-      setError((e as Error).message || 'تعذر رفع الملف');
+      const code = e instanceof Error ? e.message : '';
+      setError(
+        code === 'FILE_TOO_LARGE'
+          ? 'الملف أكبر من 10 MB.'
+          : code === 'FILE_TYPE_NOT_ALLOWED'
+            ? 'نوع الملف غير مسموح.'
+            : 'تعذر تجهيز المستند.',
+      );
     } finally {
       setUploading(false);
     }
