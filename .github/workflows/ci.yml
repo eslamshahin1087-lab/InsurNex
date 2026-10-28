@@ -26,6 +26,8 @@ jobs:
         run: npm run test:copilot-minimization
       - name: Copilot session-context minimization regression checks
         run: npm run test:copilot-session-context
+      - name: Visual identity and responsive layout regression checks
+        run: npm run test:visual-identity
       - name: Document storage authorization policy regression tests
         run: npm run test:storage-gateway
       - name: Set up Deno for Supabase Edge Function type-checking
