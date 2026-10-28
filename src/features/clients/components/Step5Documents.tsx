@@ -156,7 +156,7 @@ function UploadButton({
       // record; uploading against a placeholder client ID would be unsafe and
       // cannot be authorized correctly.
       const staged: ClientDocument = {
-        id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: `${type}-${crypto.randomUUID()}`,
         type,
         label,
         url: '',
