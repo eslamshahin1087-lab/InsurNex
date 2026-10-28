@@ -147,6 +147,7 @@ async function saveMessage(params: {
 // ---------- Copilot Call (Supabase Edge Function) ----------
 
 export async function sendToCopilot(params: {
+  organizationId: string;
   history: CopilotRequestMessage[];
   context?: CopilotContextPayload;
 }): Promise<CopilotResponse> {
@@ -157,6 +158,7 @@ export async function sendToCopilot(params: {
   const client = supabaseInstance();
   const { data, error } = await client.functions.invoke('copilot-chat', {
     body: {
+      organizationId: params.organizationId,
       messages: params.history.slice(-MAX_HISTORY),
       context: params.context,
     },
@@ -218,7 +220,7 @@ export async function sendMessage(params: {
     { role: 'user', content: userText },
   ];
 
-  const response = await sendToCopilot({ history: requestHistory, context });
+  const response = await sendToCopilot({ organizationId, history: requestHistory, context });
 
   await saveMessage({
     conversationId,
