@@ -188,7 +188,8 @@ export function buildLegacyClientDocumentBackfillPlan({
           data.organizationId === organizationId &&
           data.relatedType === 'client' &&
           data.relatedId === clientId &&
-          (data.storageProvider === 'supabase' || !data.storageProvider);
+          data.storageProvider === 'supabase' &&
+          (text(data.storageBucket) === parsed.bucket || !text(data.storageBucket));
         if (isSameTenantRelation) {
           entries.push({
             ...base,
