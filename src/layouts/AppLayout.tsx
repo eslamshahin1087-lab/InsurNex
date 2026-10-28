@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Bell,
   Bot,
@@ -33,6 +33,43 @@ const navigation: { to: string; label: string; Icon: LucideIcon; feature?: Platf
   { to: '/copilot', label: 'الذكاء', Icon: Sparkles, feature: 'copilot' },
 ];
 
+const INTERNAL_DISPLAY_NAMES = new Set([
+  'admin',
+  'broker',
+  'claims',
+  'client',
+  'clients',
+  'default',
+  'finance',
+  'lead',
+  'leads',
+  'owner',
+  'platform-admin',
+  'platform_admin',
+  'sales',
+  'staff',
+  'unknown',
+  'user',
+  'users',
+]);
+
+function getGreetingName(displayName?: string | null): string {
+  const firstName = displayName?.trim().split(/\s+/)[0];
+  const normalized = firstName?.toLowerCase().replace(/\s+/g, '-');
+  if (!firstName || !normalized || INTERNAL_DISPLAY_NAMES.has(normalized)) return 'بك';
+  return firstName;
+}
+
+const roleLabels: Record<string, string> = {
+  owner: 'مالك المؤسسة',
+  admin: 'مسؤول المؤسسة',
+  broker: 'وسيط تأمين',
+  sales: 'فريق المبيعات',
+  claims: 'فريق المطالبات',
+  finance: 'الإدارة المالية',
+  staff: 'عضو الفريق',
+};
+
 export default function AppLayout() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
@@ -43,16 +80,35 @@ export default function AppLayout() {
       (settings.features[item.feature] && planFeatures[item.feature]),
   );
   const { resolvedTheme, toggleTheme } = useTheme();
-  const firstName = profile?.displayName?.trim().split(/\s+/)[0] || 'مستخدم';
+  const firstName = getGreetingName(profile?.displayName);
+  const roleLabel = profile?.role ? roleLabels[profile.role] ?? 'مستخدم' : 'مستخدم';
   const location = useLocation();
   const [floatingOpen, setFloatingOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>(() => {
-    if (typeof window === 'undefined') return 'mobile';
-    return window.matchMedia('(min-width: 760px)').matches ? 'desktop' : 'mobile';
+  const [isWideViewport, setIsWideViewport] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth >= 1024 && window.matchMedia('(min-width: 1024px)').matches;
   });
+  const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(null);
+  const viewMode = viewModeOverride ?? (isWideViewport ? 'desktop' : 'mobile');
+
+  useEffect(() => {
+    const breakpoint = window.matchMedia('(min-width: 1024px)');
+    const syncViewportMode = () => {
+      setIsWideViewport(window.innerWidth >= 1024 && breakpoint.matches);
+    };
+
+    syncViewportMode();
+    window.addEventListener('resize', syncViewportMode, { passive: true });
+    breakpoint.addEventListener('change', syncViewportMode);
+
+    return () => {
+      window.removeEventListener('resize', syncViewportMode);
+      breakpoint.removeEventListener('change', syncViewportMode);
+    };
+  }, []);
 
   const toggleViewMode = () => {
-    setViewMode((current) => (current === 'mobile' ? 'desktop' : 'mobile'));
+    setViewModeOverride(viewMode === 'mobile' ? 'desktop' : 'mobile');
   };
 
   const isCopilotPage = location.pathname === '/copilot';
@@ -69,11 +125,7 @@ export default function AppLayout() {
           <Logo alt="InsurNex" />
           <div className="s8-hello">
             <strong>أهلاً {firstName}</strong>
-            <small>
-              {profile?.role === 'owner'
-                ? 'مالك المؤسسة'
-                : profile?.role || 'مستخدم'}
-            </small>
+            <small>{roleLabel}</small>
           </div>
         </div>
 
