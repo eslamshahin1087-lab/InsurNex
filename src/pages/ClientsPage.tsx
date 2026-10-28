@@ -2,12 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Bot,
+  Building2,
+  CheckCircle2,
   Mail,
   Moon,
   Phone,
   Plus,
   Search,
   Sun,
+  Target,
   Users,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -201,28 +204,28 @@ export default function ClientsPage() {
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">👥</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><Users size={17} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{statistics.total}</div>
             <small className="inx-kpi-label">إجمالي العملاء</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">✅</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CheckCircle2 size={17} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{statistics.active}</div>
             <small className="inx-kpi-label">عملاء نشطون</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">🎯</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Target size={17} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{statistics.prospect}</div>
             <small className="inx-kpi-label">محتملون</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-purple">🏢</span>
+              <span className="inx-3d-icon sm tone-purple" aria-hidden="true"><Building2 size={17} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{statistics.companies}</div>
             <small className="inx-kpi-label">شركات</small>
