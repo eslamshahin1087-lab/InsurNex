@@ -4,7 +4,7 @@
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
-import { metadataMatchesPath, parseDocumentPath, roleCanAccessDocument } from './access-policy.mjs';
+import { metadataMatchesPath, parseDocumentPath, roleCanAccessDocument, parseOperationAttachmentPath, operationAttachmentMetadataMatchesPath, roleCanAccessOperationAttachment } from './access-policy.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -246,6 +246,152 @@ async function authorizeDocumentAccess(
   }
 }
 
+
+type AuthorizedOperationAttachment = {
+  layout: 'operation';
+  organizationId: string;
+  operationId: string;
+  path: string;
+  filename: string;
+};
+
+const OPERATION_ATTACHMENT_MIME = new Set([
+  'application/pdf',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+  'application/csv',
+]);
+
+async function authorizeOperationAttachmentAccess(
+  organizationId: string,
+  operationId: string,
+  attachmentId: string,
+  path: string,
+  user: FirebaseUser,
+  token: string,
+  action: 'read' | 'write' | 'delete',
+  expectedFile?: { contentType?: string; size?: number },
+): Promise<{ ok: true; attachment: AuthorizedOperationAttachment } | { ok: false; response: Response }> {
+  if (!organizationId || !/^[A-Za-z0-9_-]{1,128}$/.test(organizationId)) {
+    return { ok: false, response: errorResponse('INVALID_ORGANIZATION', 400) };
+  }
+  if (!operationId || !/^[A-Za-z0-9_-]{1,128}$/.test(operationId)) {
+    return { ok: false, response: errorResponse('INVALID_OPERATION_ID', 400) };
+  }
+  if (!attachmentId || !/^[A-Za-z0-9_-]{1,128}$/.test(attachmentId)) {
+    return { ok: false, response: errorResponse('INVALID_ATTACHMENT_ID', 400) };
+  }
+  const parsed = parseOperationAttachmentPath(path, organizationId) as AuthorizedOperationAttachment | null;
+  if (!parsed || parsed.operationId !== operationId || !parsed.filename.startsWith(attachmentId + '-')) {
+    return { ok: false, response: errorResponse('INVALID_OPERATION_ATTACHMENT_PATH', 400) };
+  }
+
+  try {
+    const profile = await readCallerVisibleDocument(`users/${user.uid}`, token);
+    if (!profile) return { ok: false, response: errorResponse('ACTIVE_PROFILE_REQUIRED', 403) };
+    const role = stringField(profile, 'role') ?? '';
+    if (stringField(profile, 'status') !== 'active'
+        || stringField(profile, 'organizationId') !== organizationId) {
+      return { ok: false, response: errorResponse('ORGANIZATION_ACCESS_DENIED', 403) };
+    }
+
+    const metadata = await readCallerVisibleDocument(`operationAttachments/${attachmentId}`, token);
+    if (!metadata) return { ok: false, response: errorResponse('OPERATION_ATTACHMENT_NOT_FOUND', 404) };
+    const metadataView = {
+      organizationId: stringField(metadata, 'organizationId'),
+      operationId: stringField(metadata, 'operationId'),
+      storagePath: stringField(metadata, 'storagePath'),
+      storageProvider: stringField(metadata, 'storageProvider'),
+      storageBucket: stringField(metadata, 'storageBucket'),
+      storageKeyVersion: numberField(metadata, 'storageKeyVersion'),
+      downloadUrl: stringField(metadata, 'downloadUrl'),
+      uploadedBy: stringField(metadata, 'uploadedBy'),
+      contentType: stringField(metadata, 'contentType'),
+      size: numberField(metadata, 'size'),
+    };
+    if (!operationAttachmentMetadataMatchesPath(metadataView, {
+      organizationId, operationId, attachmentId, path, filename: parsed.filename,
+      bucket: DEFAULT_BUCKET,
+      ...(action === 'write' ? { actorUid: user.uid } : {}),
+      ...(expectedFile?.contentType ? { contentType: expectedFile.contentType } : {}),
+      ...(typeof expectedFile?.size === 'number' ? { size: expectedFile.size } : {}),
+    })) {
+      return { ok: false, response: errorResponse('OPERATION_ATTACHMENT_RECORD_MISMATCH', 403) };
+    }
+    if (!roleCanAccessOperationAttachment(role, action)) {
+      return { ok: false, response: errorResponse(action === 'delete' ? 'DELETE_NOT_ALLOWED' : 'OPERATION_ATTACHMENT_ACCESS_DENIED', 403) };
+    }
+
+    const operation = await readCallerVisibleDocument(`operations/${operationId}`, token);
+    if (!operation) return { ok: false, response: errorResponse('OPERATION_NOT_FOUND', 404) };
+    if (stringField(operation, 'organizationId') !== organizationId) {
+      return { ok: false, response: errorResponse('OPERATION_ACCESS_DENIED', 403) };
+    }
+    return { ok: true, attachment: parsed };
+  } catch (error) {
+    console.error('Operation attachment authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
+    return { ok: false, response: errorResponse('AUTHORIZATION_CHECK_FAILED', 403) };
+  }
+}
+
+async function handleOperationAttachmentSignUpload(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const operationId = typeof body.operationId === 'string' ? body.operationId : '';
+  const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const contentType = typeof body.contentType === 'string' ? body.contentType : '';
+  const size = body.size;
+  if (!OPERATION_ATTACHMENT_MIME.has(contentType)) return errorResponse('FILE_TYPE_NOT_ALLOWED', 415);
+  if (typeof size !== 'number' || !Number.isFinite(size) || size <= 0) return errorResponse('INVALID_FILE_SIZE', 400);
+  if (size > MAX_FILE_SIZE) return errorResponse('FILE_TOO_LARGE', 413);
+  const extension = path.toLowerCase().split('.').pop() ?? '';
+  const allowedExtension = (extension === 'pdf' && contentType === 'application/pdf')
+    || (extension === 'xls' && contentType === 'application/vnd.ms-excel')
+    || (extension === 'xlsx' && contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    || (extension === 'csv' && ['text/csv', 'application/csv'].includes(contentType));
+  if (!allowedExtension) return errorResponse('FILE_TYPE_EXTENSION_MISMATCH', 415);
+
+  const access = await authorizeOperationAttachmentAccess(organizationId, operationId, attachmentId, path, user, token, 'write', { contentType, size });
+  if (!access.ok) return access.response;
+  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUploadUrl(access.attachment.path);
+  if (error || !data?.token || !data?.path) {
+    console.error('Create operation attachment signed upload URL failed:', error?.message ?? 'NO_URL');
+    return errorResponse('SIGN_UPLOAD_FAILED', 500);
+  }
+  return jsonResponse({ ok: true, provider: 'supabase', bucket: DEFAULT_BUCKET, path: data.path, token: data.token });
+}
+
+async function handleOperationAttachmentSignDownload(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const operationId = typeof body.operationId === 'string' ? body.operationId : '';
+  const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const access = await authorizeOperationAttachmentAccess(organizationId, operationId, attachmentId, path, user, token, 'read');
+  if (!access.ok) return access.response;
+  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUrl(access.attachment.path, 60 * 60);
+  if (error || !data?.signedUrl) {
+    console.error('Create operation attachment signed URL failed:', error?.message ?? 'NO_URL');
+    return errorResponse('SIGNED_URL_FAILED', 500);
+  }
+  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.attachment.path });
+}
+
+async function handleOperationAttachmentDelete(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
+  const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
+  const operationId = typeof body.operationId === 'string' ? body.operationId : '';
+  const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : '';
+  const path = typeof body.path === 'string' ? body.path : '';
+  const access = await authorizeOperationAttachmentAccess(organizationId, operationId, attachmentId, path, user, token, 'delete');
+  if (!access.ok) return access.response;
+  const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([access.attachment.path]);
+  if (error) {
+    console.error('Delete operation attachment failed:', error.message);
+    return errorResponse('DELETE_FAILED', 500);
+  }
+  return jsonResponse({ ok: true });
+}
+
 async function handleSignUpload(body: Record<string, unknown>, user: FirebaseUser, token: string): Promise<Response> {
   const organizationId = typeof body.organizationId === 'string' ? body.organizationId : '';
   const documentId = typeof body.documentId === 'string' ? body.documentId : '';
@@ -318,7 +464,7 @@ serve(async (req: Request) => {
       return jsonResponse({
         ok: true,
         service: 'document-storage',
-        supportedActions: ['sign-upload', 'sign-download', 'delete'],
+        supportedActions: ['sign-upload', 'sign-download', 'delete', 'operation-sign-upload', 'operation-sign-download', 'operation-delete'],
         timestamp: new Date().toISOString(),
       });
     }
@@ -355,6 +501,9 @@ serve(async (req: Request) => {
       case 'sign-upload': return await handleSignUpload(body, user, token);
       case 'sign-download': return await handleSignDownload(body, user, token);
       case 'delete': return await handleDelete(body, user, token);
+      case 'operation-sign-upload': return await handleOperationAttachmentSignUpload(body, user, token);
+      case 'operation-sign-download': return await handleOperationAttachmentSignDownload(body, user, token);
+      case 'operation-delete': return await handleOperationAttachmentDelete(body, user, token);
       default: return errorResponse('UNKNOWN_ACTION', 400);
     }
   } catch (error) {
