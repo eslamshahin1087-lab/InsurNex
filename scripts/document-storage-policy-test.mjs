@@ -111,6 +111,15 @@ assert.equal(
 assert.equal(
   parseLegacyClientDocumentReference({
     id: 'legacy_doc',
+    url: legacyUrl,
+    downloadUrl: legacyUrl.replace('legacy-id.pdf', 'different-file.pdf'),
+  }, legacyRequest),
+  null,
+  'conflicting stored URL fields are rejected',
+);
+assert.equal(
+  parseLegacyClientDocumentReference({
+    id: 'legacy_doc',
     url: `https://${legacyHost}/storage/v1/object/sign/insurnex-documents/organizations/${org}/clients/${client}/onboarding/%2e%2e%2fsecrets.pdf?token=x`,
   }, legacyRequest),
   null,
