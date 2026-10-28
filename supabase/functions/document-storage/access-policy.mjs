@@ -1,6 +1,15 @@
 const SAFE_SEGMENT = /^[A-Za-z0-9_-]{1,128}$/;
 const ALLOWED_AREAS = new Set(['onboarding', 'quotation', 'issuance', 'policy', 'claim', 'renewal']);
+
 const ALLOWED_RELATIONS = new Set(['general', 'client', 'policy', 'claim']);
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
 
 export function parseDocumentPath(path, organizationId) {
   if (typeof path !== 'string' || typeof organizationId !== 'string' || !SAFE_SEGMENT.test(organizationId)) return null;
