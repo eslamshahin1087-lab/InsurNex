@@ -106,6 +106,14 @@ export function buildLegacyStorageInventory({ projectId, bucket, collections, me
       else issues.push('DOWNLOAD_URL_' + urlResult.status.toUpperCase());
     }
 
+    const pathOrganizationMatch = objectPath
+      ? /^organizations\/([^/]+)\//.exec(objectPath)
+      : null;
+    if (pathOrganizationMatch && typeof data.organizationId === 'string'
+        && pathOrganizationMatch[1] !== data.organizationId) {
+      issues.push('PATH_ORGANIZATION_MISMATCH');
+    }
+
     if (!objectPath) {
       if (!issues.length) issues.push('UNRESOLVED_STORAGE_REFERENCE');
       legacyRecords.push({
