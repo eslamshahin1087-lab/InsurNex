@@ -191,7 +191,6 @@ export function buildLegacyClientDocumentBackfillPlan({
       const category = categoryFor(item);
       const contentType = text(item.mimeType) || text(item.contentType);
       const size = safeSize(item.size);
-      const uploadedAt = isoTimestamp(item.uploadedAt);
       const proposedRecord = {
         organizationId,
         name: text(item.label) || originalFileName,
