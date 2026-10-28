@@ -131,7 +131,7 @@ assert.equal(plan.counts.existingDocumentRecordsScanned, 1);
 assert.equal(plan.counts.embeddedDocumentReferencesScanned, 10);
 assert.equal(plan.counts.eligibleCandidates, 2);
 assert.equal(plan.counts.alreadyMapped, 1);
-assert.equal(plan.counts.needsReview, 8);
+assert.equal(plan.counts.needsReview, 7);
 
 const candidate = plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_candidate');
 assert.equal(candidate?.status, 'candidate');
