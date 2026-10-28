@@ -133,6 +133,41 @@ export function parseLegacyClientDocumentReference(reference, request) {
   return validated[0];
 }
 
+
+/**
+ * Fail-closed check for metadata that can be compared without downloading bytes.
+ * If the legacy record declares size or MIME type, Storage must report the
+ * corresponding value and it must match before a temporary URL is issued.
+ */
+export function legacyObjectMetadataMatches(reference, actual) {
+  if (!reference || !actual) return false;
+
+  const expectedSize = typeof reference.size === 'number'
+    && Number.isFinite(reference.size) && reference.size >= 0
+    ? reference.size
+    : null;
+  if (expectedSize !== null) {
+    const actualSize = typeof actual.size === 'number'
+      ? actual.size
+      : typeof actual.size === 'string' && actual.size.trim() && Number.isFinite(Number(actual.size))
+        ? Number(actual.size)
+        : null;
+    if (actualSize === null || actualSize !== expectedSize) return false;
+  }
+
+  const expectedType = typeof reference.contentType === 'string'
+    ? reference.contentType.trim().toLowerCase()
+    : '';
+  if (expectedType) {
+    const actualType = typeof actual.contentType === 'string'
+      ? actual.contentType.trim().toLowerCase()
+      : '';
+    if (!actualType || actualType !== expectedType) return false;
+  }
+
+  return true;
+}
+
 /**
  * Legacy embedded files are read-only via the compatibility gateway.
  * Delete and migration actions must use a separate audited workflow.
