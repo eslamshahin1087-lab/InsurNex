@@ -17,6 +17,7 @@ import {
   cleanupPendingOperationAttachment,
   getOperationAttachmentTemporaryUrl,
   removeOperationAttachment,
+  supabaseDocumentStorage,
   uploadOperationAttachment,
   type OperationAttachmentStorageObject,
 } from '../storage/supabase-storage.provider';
@@ -124,7 +125,7 @@ export async function uploadOperationAttachments(
       size: file.size,
       storagePath: path,
       storageProvider: 'supabase',
-      storageBucket: 'insurnex-documents',
+      storageBucket: supabaseDocumentStorage.bucket,
       storageKeyVersion: 2,
       downloadUrl: '',
       uploadState: 'pending',
@@ -148,10 +149,11 @@ export async function uploadOperationAttachments(
       // Do not leave a failed object publicly reachable. The private cleanup
       // action is restricted to the uploader and a still-pending metadata row.
       const token = await user.getIdToken().catch(() => '');
+      let cleanupSucceeded = false;
       if (token) {
         const pendingObject: OperationAttachmentStorageObject = {
           provider: 'supabase',
-          bucket: 'insurnex-documents',
+          bucket: supabaseDocumentStorage.bucket,
           path,
           attachmentId: metadataRef.id,
           operationId,
@@ -160,9 +162,14 @@ export async function uploadOperationAttachments(
           contentType,
           size: file.size,
         };
-        await cleanupPendingOperationAttachment(pendingObject, token).catch(() => undefined);
+        try {
+          await cleanupPendingOperationAttachment(pendingObject, token);
+          cleanupSucceeded = true;
+        } catch {
+          // Keep the pending metadata for safe reconciliation if storage cleanup fails.
+        }
       }
-      await deleteDoc(metadataRef).catch(() => undefined);
+      if (cleanupSucceeded) await deleteDoc(metadataRef).catch(() => undefined);
       throw error;
     }
   }
@@ -182,7 +189,9 @@ export async function listOperationAttachments(
       limit(100),
     ),
   );
-  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as OperationAttachmentRecord));
+  return snapshot.docs
+    .map((item) => ({ id: item.id, ...item.data() } as OperationAttachmentRecord))
+    .filter((item) => item.storageProvider !== 'supabase' || item.uploadState === 'ready');
 }
 
 export async function getOperationAttachmentUrl(record: OperationAttachmentRecord): Promise<string> {
