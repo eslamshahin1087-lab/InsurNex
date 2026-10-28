@@ -343,6 +343,59 @@ try {
     'new Supabase documents cannot be changed to persist a download URL',
   );
 
+
+  // Operation attachment metadata must use versioned private keys and a controlled pending -> ready transition.
+  const protectedOperationId = 'rbac-operation-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'operations', protectedOperationId), {
+    organizationId: orgA, kind: 'policy_issuance', title: 'Attachment fixture',
+    status: 'request', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  const unversionedAttachmentId = 'rbac-unversioned-attachment-' + randomUUID();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'operationAttachments', unversionedAttachmentId), {
+      organizationId: orgA, operationId: protectedOperationId, name: 'invoice.pdf',
+      uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+      storageProvider: 'supabase', storageBucket: 'insurnex-documents',
+      storagePath: `organizations/${orgA}/operations/${protectedOperationId}/${unversionedAttachmentId}-invoice.pdf`,
+      downloadUrl: '', uploadState: 'pending',
+    }),
+    'new Supabase operation attachment metadata requires storageKeyVersion 2',
+  );
+  const operationAttachmentId = 'rbac-attachment-' + randomUUID();
+  const operationAttachmentRef = doc(ownerA.db, 'operationAttachments', operationAttachmentId);
+  await setDoc(operationAttachmentRef, {
+    organizationId: orgA, operationId: protectedOperationId, name: 'invoice.pdf',
+    contentType: 'application/pdf', size: 120,
+    uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+    storageProvider: 'supabase', storageKeyVersion: 2, storageBucket: 'insurnex-documents',
+    storagePath: `organizations/${orgA}/operations/${protectedOperationId}/${operationAttachmentId}-invoice.pdf`,
+    downloadUrl: '', uploadState: 'pending',
+  });
+  await expectDenied(
+    () => updateDoc(operationAttachmentRef, {
+      storagePath: `organizations/${orgA}/operations/${protectedOperationId}/forged-invoice.pdf`,
+    }),
+    'operation attachment storage paths cannot be redirected after creation',
+  );
+  await expectDenied(
+    () => updateDoc(operationAttachmentRef, { downloadUrl: 'https://example.invalid/persistent-link' }),
+    'operation attachments cannot persist download URLs',
+  );
+  await updateDoc(operationAttachmentRef, { uploadState: 'ready' });
+  check((await getDoc(operationAttachmentRef)).data().uploadState === 'ready',
+    'the uploader may mark an operation attachment ready after upload');
+  await expectDenied(
+    () => updateDoc(operationAttachmentRef, { uploadState: 'pending' }),
+    'operation attachment upload state cannot be reset after becoming ready',
+  );
+  await expectDenied(
+    () => updateDoc(operationAttachmentRef, {
+      storagePath: `organizations/${orgA}/operations/${protectedOperationId}/forged-again.pdf`,
+      uploadState: 'pending',
+    }),
+    'operation attachment metadata rejects combined path and upload-state tampering',
+  );
+
   check((await getDoc(doc(claimsMember.actor.db, 'documents', protectedClaimDocumentId))).exists(),
     'claims role can read claim-category document metadata');
   await expectDenied(
