@@ -123,6 +123,8 @@ export interface ClientDocument {
   uploadedAt: unknown;
   verified: boolean;
   verifiedBy?: string;
+  /** Local-only staged file; stripped before persisting the client document. */
+  pendingFile?: File;
 }
 
 // ============================================================
