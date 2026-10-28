@@ -177,6 +177,7 @@ async function authorizeDocumentAccess(
       storagePath: stringField(metadata, 'storagePath'),
       storageProvider: stringField(metadata, 'storageProvider'),
       storageBucket: stringField(metadata, 'storageBucket'),
+      storageKeyVersion: numberField(metadata, 'storageKeyVersion'),
       uploadedBy: stringField(metadata, 'uploadedBy'),
       relatedType: stringField(metadata, 'relatedType'),
       relatedId: stringField(metadata, 'relatedId'),
@@ -204,6 +205,7 @@ async function authorizeDocumentAccess(
     if (!roleCanAccessDocument(role, metadataView.category, action, {
       layout: parsed.layout,
       relatedType: metadataView.relatedType,
+      documentIdMatchesPath: parsed.layout === 'general' || parsed.filename.startsWith(documentId + '-'),
     })) {
       return { ok: false, response: errorResponse(action === 'delete' ? 'DELETE_NOT_ALLOWED' : 'DOCUMENT_ROLE_ACCESS_DENIED', 403) };
     }
