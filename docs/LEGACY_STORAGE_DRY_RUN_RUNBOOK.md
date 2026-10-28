@@ -22,7 +22,12 @@ The tool supports two read-only modes. Full mode compares Firestore metadata wit
    npm ci
    npm ci --prefix functions
    ```
-3. Authenticate ADC using your organization's approved workflow. For metadata-only mode, grant only the read permissions needed for the selected Firestore collections. For full mode, the identity also needs permission to list/read object metadata in the selected bucket.
+3. Authenticate ADC using your organization's approved workflow. On Windows, if Google Cloud CLI is installed, run:
+   ```cmd
+   gcloud auth application-default login
+   gcloud config set project insurnex-8a9df
+   ```
+   `firebase login` alone does not configure ADC for this Firebase Admin SDK script. If `gcloud` is not recognized, install Google Cloud CLI from https://cloud.google.com/sdk/docs/install and open a new CMD window. For metadata-only mode, grant the ADC identity only the read permissions needed for the selected Firestore collections. For full mode, it also needs permission to list/read object metadata in the selected bucket.
 4. If the project is on the Spark plan and the Storage screen says an upgrade is required, do not guess a bucket name. Run metadata-only mode unless a billing-plan change is explicitly approved. Firebase documents that Storage buckets and their data are inaccessible while the project remains on Spark.
 
 ## Run locally
