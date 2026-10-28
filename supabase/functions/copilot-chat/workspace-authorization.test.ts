@@ -53,7 +53,8 @@ Deno.test("active organization members can use only their own organization scope
   assert(result.scopeType === "organization", "member should use organization scope");
   assert(result.organizationId === "org-1", "verified organization ID should be returned");
   assert(result.allowClientContext, "active organization members may use filtered context");
-  assert(seen[0].includes("/documents/users/uid-1|Bearer firebase-token"), "profile lookup must use the verified caller token");
+  assert(seen[0].includes("/documents/admin/uid-1|Bearer firebase-token"), "platform-admin membership must be checked first");
+  assert(seen[1].includes("/documents/users/uid-1|Bearer firebase-token"), "profile lookup must use the verified caller token");
 });
 
 Deno.test("organization mismatch and inactive or unsupported roles are denied", async () => {
@@ -95,7 +96,7 @@ Deno.test("organization mismatch and inactive or unsupported roles are denied", 
 
 Deno.test("platform admins without an organization profile are restricted to private scope", async () => {
   const fetcher = fetchFor({
-    "users/admin-1": null,
+    "users/admin-1": firestoreDocument({ organizationId: "org-1", status: "active", role: "admin" }),
     "admin/admin-1": firestoreDocument({ enabled: "true" }),
   });
 
