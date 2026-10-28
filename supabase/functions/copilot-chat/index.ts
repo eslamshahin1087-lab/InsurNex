@@ -110,7 +110,7 @@ function buildContextString(ctx?: CopilotContext): string {
   }
 
   if (ctx.finance) {
-    parts.push(`## Financial summary (server-loaded sample)\n${JSON.stringify(ctx.finance, null, 2)}`);
+    parts.push(`## Finance summary (computed from up to 500 recent records per source; may be capped)\n${JSON.stringify(ctx.finance, null, 2)}`);
   }
 
   if (ctx.stats) {
