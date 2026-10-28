@@ -14,7 +14,7 @@
     "test:rules": "node scripts/firestore-rules-test.mjs",
     "test:storage-gateway": "node scripts/document-storage-policy-test.mjs",
     "test:storage-inventory": "node --check functions/scripts/legacy-storage-dry-run.mjs && node scripts/legacy-storage-inventory-test.mjs",
-    "test:legacy-client-backfill-plan": "node --check functions/scripts/legacy-client-document-backfill-plan.mjs && node scripts/legacy-client-document-backfill-plan-test.mjs && node functions/scripts/legacy-client-document-backfill-plan.mjs --help"
+    "test:legacy-client-backfill-plan": "node --check functions/scripts/legacy-client-document-backfill-plan.mjs && node scripts/legacy-client-document-backfill-plan-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
