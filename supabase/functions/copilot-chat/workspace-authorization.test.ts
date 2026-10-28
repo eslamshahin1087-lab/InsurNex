@@ -16,7 +16,8 @@ function fetchFor(documents: Record<string, Response | null>, seen: string[] = [
   return (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     seen.push(url + "|" + new Headers(init?.headers).get("Authorization"));
-    const key = url.slice(url.indexOf("/documents/") + "/documents/".length);
+    const pathname = new URL(url).pathname;
+    const key = pathname.slice(pathname.indexOf("/documents/") + "/documents/".length);
     const response = documents[key];
     return response ? response.clone() : new Response(null, { status: 404 });
   }) as typeof fetch;
@@ -54,7 +55,7 @@ Deno.test("active organization members can use only their own organization scope
   assert(result.organizationId === "org-1", "verified organization ID should be returned");
   assert(result.allowClientContext, "active organization members may use filtered context");
   assert(seen[0].includes("/documents/admin/uid-1|Bearer firebase-token"), "platform-admin membership must be checked first");
-  assert(seen[1].includes("/documents/users/uid-1|Bearer firebase-token"), "profile lookup must use the verified caller token");
+  assert(seen[1].includes("/documents/users/uid-1?mask.fieldPaths=organizationId") && seen[1].includes("Bearer firebase-token"), "profile lookup must use the verified caller token");
 });
 
 Deno.test("organization mismatch and inactive or unsupported roles are denied", async () => {
