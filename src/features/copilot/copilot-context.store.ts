@@ -1,33 +1,68 @@
 import type { CopilotContextPayload } from './copilot.types';
+import { buildCopilotContextSelector, type CopilotContextSelector } from './copilot-context-selector';
 
-const STORAGE_KEY = 'insurnex-copilot-context-v1';
+const STORAGE_KEY = 'insurnex-copilot-context-v2';
+const LEGACY_STORAGE_KEY = 'insurnex-copilot-context-v1';
 
-/**
- * Store the current page context so the global FAB can pick it up.
- * Each page calls setCurrentContext() on mount with its data.
- */
-export function setCurrentContext(context: CopilotContextPayload): void {
+function clearStoredContext(): void {
   try {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(context));
+    window.sessionStorage.removeItem(STORAGE_KEY);
+    window.sessionStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     /* ignore storage errors */
   }
 }
 
-export function getCurrentContext(): CopilotContextPayload | undefined {
+/**
+ * Persist only a page selector, never the page's business data.
+ * This intentionally also removes data stored under the older v1 key.
+ */
+export function setCurrentContext(context: CopilotContextPayload): void {
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return undefined;
-    return JSON.parse(raw) as CopilotContextPayload;
+    const storage = window.sessionStorage;
+    const selector = buildCopilotContextSelector(context);
+    storage.removeItem(LEGACY_STORAGE_KEY);
+
+    if (!selector) {
+      storage.removeItem(STORAGE_KEY);
+      return;
+    }
+
+    storage.setItem(STORAGE_KEY, JSON.stringify(selector));
   } catch {
+    clearStoredContext();
+  }
+}
+
+/**
+ * Migrate any existing v1 payload by reducing it to the approved selector,
+ * then delete the previous entry so private client/business data is not kept.
+ */
+export function getCurrentContext(): CopilotContextSelector | undefined {
+  try {
+    const storage = window.sessionStorage;
+    const raw = storage.getItem(STORAGE_KEY) ?? storage.getItem(LEGACY_STORAGE_KEY);
+    storage.removeItem(LEGACY_STORAGE_KEY);
+
+    if (!raw) {
+      storage.removeItem(STORAGE_KEY);
+      return undefined;
+    }
+
+    const selector = buildCopilotContextSelector(JSON.parse(raw) as unknown);
+    if (!selector) {
+      storage.removeItem(STORAGE_KEY);
+      return undefined;
+    }
+
+    storage.setItem(STORAGE_KEY, JSON.stringify(selector));
+    return selector;
+  } catch {
+    clearStoredContext();
     return undefined;
   }
 }
 
 export function clearCurrentContext(): void {
-  try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
+  clearStoredContext();
 }
