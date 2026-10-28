@@ -9,6 +9,7 @@ import {
   roleCanAccessOperationAttachment,
   parseLegacyClientDocumentReference,
   roleCanAccessLegacyClientDocument,
+  legacyObjectMetadataMatches,
 } from '../supabase/functions/document-storage/access-policy.mjs';
 
 const org = 'org_A-123';
@@ -133,6 +134,48 @@ assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'claim'), true,
 assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'identity'), false, 'claims role cannot read identity legacy documents');
 assert.equal(roleCanAccessLegacyClientDocument('platform_admin', 'read', 'claim'), false, 'platform admin has no implicit document gateway access');
 assert.equal(roleCanAccessLegacyClientDocument('broker', 'write', 'identity'), false, 'legacy compatibility route is read-only');
+
+assert.equal(
+  legacyObjectMetadataMatches(
+    { size: 109904, contentType: 'application/pdf' },
+    { size: 109904, contentType: 'application/pdf' },
+  ),
+  true,
+  'matching actual object size and MIME metadata permit signing',
+);
+assert.equal(
+  legacyObjectMetadataMatches(
+    { size: 109904, contentType: 'application/pdf' },
+    { size: 109903, contentType: 'application/pdf' },
+  ),
+  false,
+  'size mismatch blocks signing',
+);
+assert.equal(
+  legacyObjectMetadataMatches(
+    { size: 109904, contentType: 'application/pdf' },
+    { size: null, contentType: 'application/pdf' },
+  ),
+  false,
+  'missing actual size blocks signing when reference size is declared',
+);
+assert.equal(
+  legacyObjectMetadataMatches(
+    { size: 109904, contentType: 'application/pdf' },
+    { size: 109904, contentType: '' },
+  ),
+  false,
+  'missing actual MIME metadata blocks signing when reference MIME is declared',
+);
+assert.equal(
+  legacyObjectMetadataMatches(
+    { size: 109904, contentType: 'application/pdf' },
+    { size: 109904, contentType: 'image/png' },
+  ),
+  false,
+  'MIME mismatch blocks signing',
+);
+
 
 
 assert.equal(areaForCategory('claim'), 'claim');
