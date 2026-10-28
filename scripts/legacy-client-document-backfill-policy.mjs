@@ -172,6 +172,8 @@ export function buildLegacyClientDocumentBackfillPlan({
       }
       base.bucket = parsed.bucket;
       base.objectPath = parsed.path;
+      const category = categoryFor(item);
+      base.documentCategory = category;
 
       const key = pathKey(parsed.bucket, parsed.path);
       const existing = existingByPath.get(key) || [];
@@ -221,11 +223,19 @@ export function buildLegacyClientDocumentBackfillPlan({
         return;
       }
 
+      if (category === 'claim') {
+        entries.push({
+          ...base,
+          reason: 'CLAIM_LEGACY_PATH_ROLE_POLICY_REVIEW_REQUIRED',
+          targetDocumentId,
+        });
+        return;
+      }
+
       const originalFileName = text(item.originalFileName)
         || text(item.fileName)
         || text(item.label)
         || parsed.filename;
-      const category = categoryFor(item);
       const contentType = text(item.mimeType) || text(item.contentType);
       const size = safeSize(item.size);
       const proposedRecord = {
