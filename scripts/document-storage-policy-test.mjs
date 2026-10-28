@@ -4,6 +4,9 @@ import {
   metadataMatchesPath,
   parseDocumentPath,
   roleCanAccessDocument,
+  parseOperationAttachmentPath,
+  operationAttachmentMetadataMatchesPath,
+  roleCanAccessOperationAttachment,
 } from '../supabase/functions/document-storage/access-policy.mjs';
 
 const org = 'org_A-123';
@@ -98,12 +101,6 @@ console.log('All document-storage policy regression tests passed.');
 
 
 // Operation attachments use an independent resource and stricter delete policy.
-import {
-  parseOperationAttachmentPath,
-  operationAttachmentMetadataMatchesPath,
-  roleCanAccessOperationAttachment,
-} from '../supabase/functions/document-storage/access-policy.mjs';
-
 const operationId = 'op_456';
 const attachmentId = 'att_789';
 const operationPath = `organizations/${org}/operations/${operationId}/${attachmentId}-invoice.pdf`;
