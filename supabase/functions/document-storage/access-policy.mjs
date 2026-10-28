@@ -135,6 +135,85 @@ export function parseLegacyClientDocumentReference(reference, request) {
 
 
 /**
+ * Resolve an older top-level documents/{documentId} record to its expected
+ * general-document object path. Never trusts a URL or path sent by the browser;
+ * callers must pass the record read under the user's Firestore token.
+ */
+export function parseLegacyGeneralDocumentReference(reference, request) {
+  if (!reference || typeof reference !== 'object' || !request) return null;
+  const { organizationId, documentId, expectedBucket, expectedHost } = request;
+  if (!SAFE_SEGMENT.test(organizationId || '') || !SAFE_SEGMENT.test(documentId || '')) return null;
+  if (reference.storageProvider && reference.storageProvider !== 'supabase') return null;
+
+  const candidates = [];
+  const stablePath = typeof reference.storagePath === 'string' ? reference.storagePath.trim() : '';
+  if (stablePath) {
+    const explicitBucket = typeof reference.storageBucket === 'string' ? reference.storageBucket.trim() : '';
+    if (reference.storageProvider !== 'supabase' && !explicitBucket) return null;
+    candidates.push({
+      bucket: explicitBucket || expectedBucket,
+      path: stablePath,
+    });
+  }
+
+  const rawUrls = [reference.url, reference.downloadUrl]
+    .filter(value => typeof value === 'string' && value.trim());
+  for (const rawUrl of rawUrls) {
+    let url;
+    try {
+      url = new URL(rawUrl.trim());
+    } catch {
+      return null;
+    }
+    if (url.protocol !== 'https:' || !expectedHost || url.hostname.toLowerCase() !== expectedHost.toLowerCase()) {
+      return null;
+    }
+
+    const encodedParts = url.pathname.split('/').filter(Boolean);
+    if (
+      encodedParts[0] !== 'storage' ||
+      encodedParts[1] !== 'v1' ||
+      encodedParts[2] !== 'object' ||
+      !['sign', 'public', 'authenticated'].includes(encodedParts[3]) ||
+      encodedParts.length !== 8
+    ) return null;
+
+    const decodedParts = encodedParts.map(safeDecode);
+    if (decodedParts.some(part => !part || part.includes('/') || part.includes('\\'))) return null;
+    candidates.push({
+      bucket: decodedParts[4],
+      path: decodedParts.slice(5).join('/'),
+    });
+  }
+
+  if (!candidates.length) return null;
+  const first = candidates[0];
+  if (first.bucket !== expectedBucket) return null;
+  if (candidates.some(candidate => candidate.bucket !== first.bucket || candidate.path !== first.path)) return null;
+
+  const parts = first.path.split('/');
+  if (
+    parts.length !== 5 ||
+    parts.some(part => !part || part === '.' || part === '..' || part.includes('\\')) ||
+    parts[0] !== 'organizations' ||
+    parts[1] !== organizationId ||
+    parts[2] !== 'documents' ||
+    parts[3] !== documentId ||
+    !/^[A-Za-z0-9._-]{1,220}$/.test(parts[4])
+  ) return null;
+
+  return {
+    layout: 'general',
+    organizationId,
+    documentId,
+    bucket: first.bucket,
+    path: first.path,
+    filename: parts[4],
+  };
+}
+
+
+/**
  * Fail-closed check for metadata that can be compared without downloading bytes.
  * If the legacy record declares size or MIME type, Storage must report the
  * corresponding value and it must match before a temporary URL is issued.
