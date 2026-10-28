@@ -11,6 +11,7 @@
     "test:documents-route": "node scripts/documents-route-smoke-test.mjs",
     "test:copilot-minimization": "node scripts/copilot-client-data-minimization-test.mjs",
     "test:copilot-session-context": "node scripts/copilot-session-context-minimization-test.mjs",
+    "test:visual-identity": "node scripts/visual-identity-quality-test.mjs",
     "test:access": "node scripts/admin-access-smoke-test.mjs",
     "test:plans": "node scripts/plan-feature-entitlements-smoke-test.mjs",
     "preview": "vite preview",
