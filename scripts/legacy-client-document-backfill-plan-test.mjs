@@ -34,6 +34,25 @@ const clients = [{
         size: 300,
       },
       {
+        id: 'embedded_stable_path_supabase',
+        storageProvider: 'supabase',
+        storageBucket: bucket,
+        storagePath: objectPath('stable-path.pdf'),
+        label: 'Stable Path',
+        fileName: 'stable-path.pdf',
+        category: 'identity',
+        mimeType: 'application/pdf',
+        size: 101,
+      },
+      {
+        id: 'embedded_unknown_stable_path',
+        storagePath: objectPath('unknown-provider.pdf'),
+        label: 'Unknown Provider',
+        fileName: 'unknown-provider.pdf',
+        mimeType: 'application/pdf',
+        size: 102,
+      },
+      {
         id: 'embedded_duplicate_a',
         url: signedUrl('duplicate.pdf'),
         label: 'Duplicate A',
@@ -109,10 +128,10 @@ assert.equal(plan.writesAttempted, false);
 assert.equal(plan.storageObjectsVerified, false);
 assert.equal(plan.counts.clientRecordsScanned, 1);
 assert.equal(plan.counts.existingDocumentRecordsScanned, 1);
-assert.equal(plan.counts.embeddedDocumentReferencesScanned, 8);
-assert.equal(plan.counts.eligibleCandidates, 1);
+assert.equal(plan.counts.embeddedDocumentReferencesScanned, 10);
+assert.equal(plan.counts.eligibleCandidates, 2);
 assert.equal(plan.counts.alreadyMapped, 1);
-assert.equal(plan.counts.needsReview, 6);
+assert.equal(plan.counts.needsReview, 8);
 
 const candidate = plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_candidate');
 assert.equal(candidate?.status, 'candidate');
@@ -159,6 +178,16 @@ assert.equal(
   plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_claim_needs_review')?.reason,
   'CLAIM_LEGACY_PATH_ROLE_POLICY_REVIEW_REQUIRED',
   'legacy claim records are held until the role policy for non-v2 paths is reviewed',
+);
+assert.equal(
+  plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_stable_path_supabase')?.status,
+  'candidate',
+  'stable storage paths are accepted when provider and bucket are explicit',
+);
+assert.equal(
+  plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_unknown_stable_path')?.reason,
+  'REFERENCE_UNSUPPORTED_OR_CONFLICTING',
+  'unlabelled stable paths are never assumed to belong to Supabase',
 );
 
 
