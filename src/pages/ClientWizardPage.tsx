@@ -301,7 +301,6 @@ export default function ClientWizardPage() {
               type={data.type}
               needs={data.needs}
               documents={data.documents}
-              organizationId={profile?.organizationId || ''}
               onAdd={addDocument}
               onRemove={removeDocument}
             />
