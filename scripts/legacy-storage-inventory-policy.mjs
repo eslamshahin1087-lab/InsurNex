@@ -175,7 +175,7 @@ export function buildLegacyStorageInventory({ projectId, bucket, collections, me
     rows.push(record);
     referencesByPath.set(record.objectPath, rows);
   }
-  for (const [path, rows] of referencesByPath) {
+  for (const rows of referencesByPath.values()) {
     if (rows.length > 1) {
       for (const row of rows) {
         if (!row.issues.includes('DUPLICATE_METADATA_REFERENCE')) row.issues.push('DUPLICATE_METADATA_REFERENCE');
