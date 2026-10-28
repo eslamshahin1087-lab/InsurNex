@@ -13,6 +13,7 @@ import {
   roleCanAccessOperationAttachment,
   parseLegacyClientDocumentReference,
   roleCanAccessLegacyClientDocument,
+  legacyObjectMetadataMatches,
 } from './access-policy.mjs';
 
 const corsHeaders = {
@@ -610,18 +611,25 @@ async function handleLegacyClientSignDownload(
 
     const referenceSize = numberField({ fields: { size: embedded.size } }, 'size');
     const metadata = (fileInfo as { metadata?: Record<string, unknown> }).metadata ?? {};
-    const actualSize = Number(metadata.size ?? (fileInfo as { size?: unknown }).size);
+    const rawActualSize = metadata.size ?? (fileInfo as { size?: unknown }).size;
+    const actualSize = typeof rawActualSize === 'number'
+      ? rawActualSize
+      : typeof rawActualSize === 'string' && rawActualSize.trim() && Number.isFinite(Number(rawActualSize))
+        ? Number(rawActualSize)
+        : null;
     const referenceContentType = stringFieldsValue(embedded, 'mimeType')
       ?? stringFieldsValue(embedded, 'contentType');
     const actualContentType = typeof metadata.mimetype === 'string'
       ? metadata.mimetype
-      : typeof metadata.contentType === 'string' ? metadata.contentType : '';
-    if (referenceSize !== null && Number.isFinite(actualSize) && referenceSize !== actualSize) {
-      console.warn('Legacy client document size metadata mismatch; signed URL not issued.');
-      return errorResponse('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH', 409);
-    }
-    if (referenceContentType && actualContentType && referenceContentType !== actualContentType) {
-      console.warn('Legacy client document content type metadata mismatch; signed URL not issued.');
+      : typeof metadata.contentType === 'string' ? metadata.contentType
+        : typeof (fileInfo as { contentType?: unknown }).contentType === 'string'
+          ? (fileInfo as { contentType: string }).contentType
+          : '';
+    if (!legacyObjectMetadataMatches(
+      { size: referenceSize, contentType: referenceContentType },
+      { size: actualSize, contentType: actualContentType },
+    )) {
+      console.warn('Legacy client document metadata missing or mismatched; signed URL not issued.');
       return errorResponse('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH', 409);
     }
 
