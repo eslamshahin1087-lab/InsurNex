@@ -68,3 +68,4 @@ insurnex@0.0.0
 path-1a672-firebase-adminsdk-fbsvc-ddb42ec528.json
 # Local read-only storage inventory reports (contain organization IDs and object paths)
 artifacts/legacy-storage-dry-run-*.json
+artifacts/client-sensitive-data-inventory-*.json
