@@ -205,6 +205,47 @@
                                            "order":  "ASCENDING"
                                        }
                                    ]
+                    },
+
+                    {
+                        "collectionGroup": "clients",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "__name__", "order": "ASCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "policies",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "expiryDate", "order": "ASCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "revenue",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "date", "order": "DESCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "expenses",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "date", "order": "DESCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "commissions",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "createdAt", "order": "DESCENDING" }
+                        ]
                     }
                 ],
     "fieldOverrides":  [
