@@ -162,6 +162,8 @@ async function authorizeDocumentAccess(
       organizationId: stringField(metadata, 'organizationId'),
       storagePath: stringField(metadata, 'storagePath'),
       storageProvider: stringField(metadata, 'storageProvider'),
+      storageBucket: stringField(metadata, 'storageBucket'),
+      uploadedBy: stringField(metadata, 'uploadedBy'),
       relatedType: stringField(metadata, 'relatedType'),
       relatedId: stringField(metadata, 'relatedId'),
       category: stringField(metadata, 'category'),
@@ -173,6 +175,8 @@ async function authorizeDocumentAccess(
       clientId: parsed.clientId,
       area: parsed.area,
       path,
+      bucket: DEFAULT_BUCKET,
+      ...(action === 'write' ? { actorUid: user.uid } : {}),
       ...(expectedFile?.contentType ? { contentType: expectedFile.contentType } : {}),
       ...(typeof expectedFile?.size === 'number' ? { size: expectedFile.size } : {}),
     })) {
