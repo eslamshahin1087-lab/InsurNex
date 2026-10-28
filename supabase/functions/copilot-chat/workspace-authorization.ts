@@ -36,9 +36,16 @@ async function readCallerDocument(
   idToken: string,
   fetcher: typeof fetch,
 ): Promise<FirestoreDocument | null> {
-  const url =
-    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/${collectionName}/${encodeURIComponent(uid)}`;
-  const response = await fetcher(url, {
+  const url = new URL(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/${collectionName}/${encodeURIComponent(uid)}`,
+  );
+  // Only fetch fields required for authorization; do not load contact/profile data.
+  if (collectionName === "users") {
+    for (const fieldPath of ["organizationId", "status", "role"]) {
+      url.searchParams.append("mask.fieldPaths", fieldPath);
+    }
+  }
+  const response = await fetcher(url.toString(), {
     headers: { Authorization: `Bearer ${idToken}` },
   });
 
