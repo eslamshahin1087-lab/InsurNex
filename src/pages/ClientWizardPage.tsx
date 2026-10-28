@@ -148,7 +148,7 @@ export default function ClientWizardPage() {
         return [{
           file: item.pendingFile,
           name: item.label,
-          category: isIdentity ? 'identity' : 'other',
+          category: isIdentity ? 'identity' as const : 'other' as const,
           notes: `Wizard document type: ${item.type}`,
         }];
       });
