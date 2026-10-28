@@ -7,7 +7,7 @@
 
 - Phase 1 RBAC and organization invitations merged to `main` in PR #48 (`611c71ef6eb94bde5a695ed32f29de5952f42f8b`).
 - CI and Secrets Scan passed on the implementation commit before merge.
-- Current document storage is mixed: client-linked documents may use the Supabase signed-URL gateway, while `src/features/documents/document.service.ts` still uses direct Firebase Storage upload/download/delete operations.
+- The core `documents` collection now has client-linked and general document path layouts behind the Supabase signed-URL gateway in this Phase 2B branch. `src/features/operations/operations-attachment.service.ts` still uses direct Firebase Storage for the separate `operationAttachments` collection and remains a follow-on migration item.
 - The existing gateway checks caller identity, role, organization, and client, but must bind every signed operation to the exact Firestore document metadata record before it can be treated as a hardened boundary.
 - Sensitive client fields remain in a combined Client 360 record, assignment-level access and append-only audit events are incomplete, and AI processing is not yet approved for sensitive customer data.
 
@@ -31,18 +31,24 @@ Acceptance gate:
 - Verify and configure the Supabase private bucket's maximum object size and allowed MIME types; the signed-upload request's claimed size/type is not a substitute for storage-side enforcement.
 - Do not enable or deploy this code until the Supabase Edge Function on the target project is updated in a separately reviewed release step.
 
-## Phase 2B — Finish the document-storage migration without losing legacy files
+## Phase 2B — Migrate the general Documents page and lifecycle operations
 
-Scope:
-1. Route the general Documents page and `document.service.ts` through the same private gateway; remove direct Firebase Storage upload/download/delete calls from application paths.
-2. Keep existing Firebase-backed records read-only while migration tooling inventories metadata, bucket/path, file existence, checksum/size and last-access status.
-3. Build an explicit migration job with dry-run mode, object count/size report, checksum validation, retry log and idempotent rerun.
-4. Migrate only after a verified backup/export and a tested rollback path. Preserve original IDs, filenames, timestamps, categories, relationships and uploader metadata.
-5. Replace long-lived download URLs with short-lived authorized links. Avoid persisting signed URLs in Firestore.
-6. Configure private bucket policies and verify that the browser's public/publishable key cannot bypass the gateway.
-7. Add automated gateway integration tests and test the no-file, duplicate, corrupt-object, expired-link and interrupted-upload cases.
+Scope implemented in this branch:
+1. Route `document.service.ts` upload, temporary URL and delete operations through the shared private gateway; remove direct Firebase Storage imports from the general document service.
+2. Route lifecycle delete operations through the same service and preserve old Firebase-backed objects rather than deleting their metadata prematurely.
+3. Use short-lived signed URLs on demand in the Documents page; do not persist signed URLs in Firestore.
+4. Extend path authorization to both client-linked paths and general-document paths, binding the general path's embedded document ID to its Firestore metadata ID.
+5. Validate related client, policy or claim records against the same organization before signing general-document access.
+6. Add regression tests for both path layouts, ID mismatch, tenant mismatch, invalid relation types and role restrictions.
 
-Acceptance gate: zero remaining direct Firebase Storage calls for document operations; migrated object counts/checksums reconcile; existing files remain retrievable only to authorized users; rollback drill succeeds. Do not delete legacy objects as part of the first migration pass.
+Still required before release:
+- Verify and configure private bucket max size and allowed MIME types at storage level; the signed-upload request's claimed size/type is not substitute for storage-side enforcement.
+- Build a separate dry-run migration utility for existing Firebase objects with file existence, checksum/size, retry log, idempotent rerun and verified rollback.
+- Preserve original IDs, filenames, timestamps, categories, relations and uploader metadata during any future migration.
+- Add staging integration tests for actual upload/preview/download/delete and expired URLs.
+- Keep `operationAttachments` on Firebase Storage until its own metadata/authorization path is designed and migrated; do not call the entire product storage-unified yet.
+
+Acceptance gate: Phase 2B CI and Emulator suite pass; all new general documents use the gateway and short-lived URLs; all legacy objects remain available through their existing read-only URL until migrated; no legacy object is deleted by this PR. A separate acceptance gate is required for migrating `operationAttachments` and other remaining direct Storage call sites.
 
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
@@ -106,9 +112,10 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Finish review and CI for Phase 2A in this branch.
-2. If accepted, merge Phase 2A only after the storage gateway release procedure and target-project configuration are ready.
-3. Open a separate PR for Phase 2B and migrate the general Documents page; do not combine a destructive legacy migration with gateway changes.
-4. Execute Phase 3 before real sensitive identity, family, medical or claim narrative data is used with broad client access.
-5. Complete audit and AI safeguards before claiming production-ready security.
-6. Treat production deployment as a separate approval-gated operation.
+1. Review and verify Phase 2B on the exact PR head; do not deploy the updated Supabase Edge Function from this branch yet.
+2. Run staging integration tests for upload, temporary URL and delete, including mismatched IDs, cross-tenant relations, claims role and expired signed URL handling.
+3. Plan a separate Phase 2C PR for `operationAttachments` and audit all remaining `firebase/storage` imports before declaring storage migration complete.
+4. Build a dry-run inventory/migration/rollback tool for existing Firebase objects. Never delete legacy objects during the first pass.
+5. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is used with broad client access.
+6. Complete audit and AI safeguards before claiming production-ready security.
+7. Treat production deployment as a separate approval-gated operation.
