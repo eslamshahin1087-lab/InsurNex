@@ -9,7 +9,7 @@
 - CI and Secrets Scan passed on the implementation commit before merge.
 - Phase 2A and Phase 2B storage gateway work is merged to `main` (Phase 2B merge commit `19c178aee493df8e2f105e39719aeb0c16f48120`). General and client-linked document operations use exact metadata-bound paths behind the private Supabase signed-URL gateway.
 - Phase 2C operation-attachment gateway implementation merged to `main` in PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed. The updated Supabase Edge Function is not deployed and existing Firebase objects have not been migrated.
-- Read-only legacy Storage inventory and reconciliation are proposed in PR #52; a separate copy/migration tool and verified rollback remain future work.
+- Read-only legacy Storage inventory and reconciliation merged to `main` in PR #52 (merge commit `33a38b117b832db410c15b6c173569d34fe6a659`); CI and Secrets Scan passed. The inventory has not yet been run against a live bucket. A separate copy/migration tool and verified rollback remain future work.
 - Sensitive client fields remain in a combined Client 360 record, assignment-level access and append-only audit events are incomplete, and AI processing is not yet approved for sensitive customer data.
 
 ## Phase 2A — Bind signed storage access to authorized document metadata
@@ -53,7 +53,7 @@ Acceptance gate: Phase 2B CI and Emulator suite pass; staging confirms upload/do
 
 ## Phase 2C — Migrate operation attachments as a separate resource
 
-**Gateway status:** implemented and merged to `main` through PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed on the merged implementation head. The Edge Function has not been deployed, staging acceptance is outstanding, and existing Firebase objects remain in place. **Inventory status:** read-only inventory is in PR #52 and requires exact-head CI/review before use.
+**Gateway status:** implemented and merged to `main` through PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed on the merged implementation head. The Edge Function has not been deployed, staging acceptance is outstanding, and existing Firebase objects remain in place. **Inventory status:** read-only inventory merged through PR #52 (merge commit `33a38b117b832db410c15b6c173569d34fe6a659`) with CI and Secrets Scan passing; it has not yet been run against live data.
 
 Scope:
 1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
@@ -128,7 +128,7 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Complete code review and exact-head checks for PR #52, then run the read-only inventory only against an explicitly selected project/bucket using approved read-only credentials.
+1. Run the merged read-only inventory only against an explicitly selected project/bucket using approved read-only credentials.
 2. Review missing objects, duplicate metadata references, organization/path mismatches, size/checksum mismatches, unsupported URLs and unreferenced objects before making a migration manifest.
 3. Run staging integration tests for Phase 2B and Phase 2C gateway changes: upload, temporary URL and delete, mismatched IDs, cross-tenant parents, role restrictions and expired URLs.
 4. Build a separate migration/copy tool with idempotent resume, destination verification and a tested rollback. Never delete legacy objects during the initial copy phase.
