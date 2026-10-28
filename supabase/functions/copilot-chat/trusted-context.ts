@@ -115,7 +115,10 @@ function buildQueryBody(
       select: {
         fields: COLLECTION_FIELDS[collectionId].map((fieldPath) => ({ fieldPath })),
       },
-      orderBy: [{ field: { fieldPath: "createdAt" }, direction: "DESCENDING" }],
+      orderBy: [{
+        field: { fieldPath: collectionId === "insurers" ? "name" : "createdAt" },
+        direction: collectionId === "insurers" ? "ASCENDING" : "DESCENDING",
+      }],
       limit: MAX_PER_COLLECTION,
     },
   };
@@ -257,16 +260,18 @@ export async function buildAuthorizedCopilotContext(input: {
         clientId: page === "client-details" ? clientId : undefined,
         fetcher,
       });
-      return { collectionId, records };
+      return { collectionId, records: records as Record<string, unknown>[] | null };
     } catch {
-      return { collectionId, records: [] as Record<string, unknown>[] };
+      return { collectionId, records: null as Record<string, unknown>[] | null };
     }
   }));
 
   for (const { collectionId, records } of results) {
+    // Permission/network failures are not equivalent to an empty collection.
+    if (records === null) continue;
     if (collectionId === "clients") {
       output.stats = {
-        totalClients: records.length,
+        sampledClients: records.length,
       };
       continue;
     }
