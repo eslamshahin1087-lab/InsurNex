@@ -18,6 +18,7 @@ const SENSITIVE_ROOTS = new Map([
 ]);
 
 const KEY_CATEGORIES = [
+  ['basic_contact', /^(name|full.?name|company.?name|phone|phone.?alt|mobile|email|city|country|website)$/i],
   ['identity', /^(national.?id|tax.?id|commercial.?register|tax.?card|authorized.?signatory.?nid|passport(number)?|birth(date)?|date.?of.?birth|gender|marital.?status|signatory|identity(number)?|kyc)$/i],
   ['health', /^(health|medical|chronic.?conditions?|medications?|surgeries|smoker|height|weight|last.?checkup|diagnosis|treatment|disability|pre.?existing.?conditions?)$/i],
   ['family', /^(dependents?|spouse|children|family|beneficiaries|marital.?status)$/i],
