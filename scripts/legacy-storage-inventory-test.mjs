@@ -3,6 +3,7 @@ import {
   buildLegacyStorageInventory,
   buildLegacyStorageMetadataInventory,
   normalizeLegacyStorageReference,
+  normalizeSupabaseStorageReference,
 } from './legacy-storage-inventory-policy.mjs';
 
 const bucket = 'insurnex-8a9df.appspot.com';
@@ -33,6 +34,25 @@ assert.equal(normalizeLegacyStorageReference('https://storage.supabase.co/object
   'unsupported_url', 'non-Firebase download links are never treated as Firebase object keys');
 assert.equal(normalizeLegacyStorageReference('organizations/org_a/../secret.pdf', bucket).status,
   'invalid_path', 'path traversal-like metadata is rejected');
+assert.deepEqual(
+  normalizeSupabaseStorageReference(
+    'https://project.supabase.co/storage/v1/object/sign/insurnex-documents/organizations/org_a/clients/client_a/documents/id%20scan.pdf?token=private-supabase-token',
+  ),
+  {
+    status: 'resolved',
+    provider: 'supabase',
+    bucket: 'insurnex-documents',
+    path: 'organizations/org_a/clients/client_a/documents/id scan.pdf',
+    accessMode: 'sign',
+  },
+  'Supabase signed URL resolves to provider/bucket/object path without its token',
+);
+assert.equal(
+  normalizeSupabaseStorageReference('https://storage.supabase.co/object/sign/bucket/file.pdf').status,
+  'unrecognized_supabase_storage_url',
+  'a non-standard Supabase URL path is not treated as a resolved object path',
+);
+
 
 const records = [
   { collection: 'documents', id: 'doc_ok', data: {
@@ -150,6 +170,27 @@ const embeddedClientRecord = {
         mimeType: 'application/pdf',
         size: 20,
       },
+      {
+        id: 'client_doc_supabase_1',
+        url: 'https://piloiwtdbtmfiyqxfbae.supabase.co/storage/v1/object/sign/insurnex-documents/organizations/org_a/clients/client_a/documents/id-1.pdf?token=private-supabase-token',
+        fileName: 'id-1.pdf',
+        mimeType: 'application/pdf',
+        size: 77,
+      },
+      {
+        id: 'client_doc_supabase_2',
+        url: 'https://piloiwtdbtmfiyqxfbae.supabase.co/storage/v1/object/sign/insurnex-documents/organizations/org_a/clients/client_a/documents/id-2.pdf?token=private-supabase-token',
+        fileName: 'id-2.pdf',
+        mimeType: 'application/pdf',
+        size: 78,
+      },
+      {
+        id: 'client_doc_supabase_3',
+        url: 'https://piloiwtdbtmfiyqxfbae.supabase.co/storage/v1/object/sign/insurnex-documents/organizations/org_a/clients/client_a/documents/id-3.pdf?token=private-supabase-token',
+        fileName: 'id-3.pdf',
+        mimeType: 'application/pdf',
+        size: 79,
+      },
     ],
   },
 };
@@ -211,6 +252,29 @@ assert.ok(
 assert.ok(
   !JSON.stringify(metadataOnlyReport).includes('not-in-report'),
   'nested Firebase URLs and their access tokens never enter the report',
+);
+assert.equal(metadataOnlyReport.summary.inferredSupabaseUrlReferences, 3);
+assert.equal(metadataOnlyReport.summary.supabaseUrlReferencesNeedingReview, 0);
+assert.equal(metadataOnlyReport.supabaseUrlReferences.length, 3);
+assert.ok(
+  metadataOnlyReport.supabaseUrlReferences.every(item =>
+    item.provider === 'supabase'
+    && item.bucket === 'insurnex-documents'
+    && item.status === 'provider_identified_unverified'
+    && item.objectVerified === false),
+  'Supabase signed URLs are identified but never reported as Firebase legacy records or object-verified',
+);
+assert.ok(
+  metadataOnlyReport.supabaseUrlReferences.every(item => item.objectPath.startsWith('organizations/org_a/')),
+  'Supabase object keys are extracted for later verification',
+);
+assert.ok(
+  !JSON.stringify(metadataOnlyReport).includes('private-supabase-token'),
+  'signed URL tokens are never retained in inventory reports',
+);
+assert.ok(
+  !metadataOnlyReport.metadataRecords.some(item => item.documentId.startsWith('client_a::client_doc_supabase_')),
+  'inferred Supabase URLs are kept separate from Firebase legacy records',
 );
 
 console.log('All legacy storage inventory regression tests passed.');
