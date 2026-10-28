@@ -114,7 +114,7 @@ function buildContextString(ctx?: CopilotContext): string {
   }
 
   if (ctx.stats) {
-    parts.push(`## Portfolio statistics (server-loaded sample)\n${JSON.stringify(ctx.stats, null, 2)}`);
+    parts.push(`## Bounded sample metadata (not portfolio totals)\n${JSON.stringify(ctx.stats, null, 2)}`);
   }
 
 
