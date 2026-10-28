@@ -596,9 +596,31 @@ async function handleLegacyClientSignDownload(
       return errorResponse('LEGACY_CLIENT_DOCUMENT_ACCESS_DENIED', 403);
     }
 
-    const { data, error } = await adminClient().storage
-      .from(DEFAULT_BUCKET)
-      .createSignedUrl(parsed.path, 15 * 60);
+    const storage = adminClient().storage.from(DEFAULT_BUCKET);
+    const { data: fileInfo, error: infoError } = await storage.info(parsed.path);
+    if (infoError || !fileInfo) {
+      console.error('Legacy client document metadata lookup failed:', infoError?.message ?? 'NO_FILE_INFO');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
+    }
+
+    const referenceSize = numberField({ fields: { size: embedded.size } }, 'size');
+    const metadata = (fileInfo as { metadata?: Record<string, unknown> }).metadata ?? {};
+    const actualSize = Number(metadata.size ?? (fileInfo as { size?: unknown }).size);
+    const referenceContentType = stringFieldsValue(embedded, 'mimeType')
+      ?? stringFieldsValue(embedded, 'contentType');
+    const actualContentType = typeof metadata.mimetype === 'string'
+      ? metadata.mimetype
+      : typeof metadata.contentType === 'string' ? metadata.contentType : '';
+    if (referenceSize !== null && Number.isFinite(actualSize) && referenceSize !== actualSize) {
+      console.warn('Legacy client document size metadata mismatch; signed URL not issued.');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH', 409);
+    }
+    if (referenceContentType && actualContentType && referenceContentType !== actualContentType) {
+      console.warn('Legacy client document content type metadata mismatch; signed URL not issued.');
+      return errorResponse('LEGACY_CLIENT_DOCUMENT_METADATA_MISMATCH', 409);
+    }
+
+    const { data, error } = await storage.createSignedUrl(parsed.path, 15 * 60);
     if (error || !data?.signedUrl) {
       console.error('Create legacy client document signed URL failed:', error?.message ?? 'NO_URL');
       return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
