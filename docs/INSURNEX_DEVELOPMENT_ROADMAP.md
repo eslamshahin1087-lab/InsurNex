@@ -158,3 +158,14 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 6. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is exposed through broad client access.
 6. Complete audit and AI safeguards before claiming production-ready security.
 7. Treat production deployment as a separate approval-gated operation.
+
+## Phase 3A — Architecture and data contracts (2026-10-28)
+
+**Status:** design artifacts committed on branch `feat/phase3-master-architecture-20261028`; not merged and not deployed. These documents do not change Firestore data, rules, indexes, runtime behavior or secrets.
+
+- [Master Architecture](MASTER_ARCHITECTURE.md): module boundaries, data flows, trust boundaries, integration and release posture.
+- [Firestore Schema v2 Proposal](FIRESTORE_SCHEMA_V2_PROPOSAL.md): additive target record model and sensitive-data separation proposal; not yet a live schema.
+- [AI Module Contracts](AI_MODULE_CONTRACTS.md): safe input/output contracts and guardrails for Document, Medical, Coverage, Claims, Sales and Copilot.
+- [Phase 3 Acceptance Plan](PHASE_3_ACCEPTANCE_PLAN.md): baseline, field separation, authorization, AI, storage staging and release acceptance gates.
+
+**Current gate:** review PR #60 and the open Phase 2D work; verify CI on exact candidate commits; complete privacy-safe inventory and staging acceptance before modifying production records or deploying the gateway. No production operation is authorized by this documentation update.
