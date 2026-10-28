@@ -68,14 +68,29 @@ export default function ClientDocumentsPanel({ clientId, organizationId }: Props
     setLoading(true);
     setError('');
     try {
-      const [currentDocuments, legacyDocuments] = await Promise.all([
+      const [currentResult, legacyResult] = await Promise.allSettled([
         listClientDocuments(organizationId, clientId),
         listLegacyClientDocuments(organizationId, clientId),
       ]);
-      setItems(currentDocuments);
-      setLegacyItems(legacyDocuments);
+
+      if (currentResult.status === 'rejected') {
+        throw currentResult.reason;
+      }
+
+      setItems(currentResult.value);
+
+      if (legacyResult.status === 'fulfilled') {
+        setLegacyItems(legacyResult.value);
+        setError('');
+      } else {
+        // Keep the normal documents usable if the optional legacy resolver is
+        // unavailable (for example before the Edge Function is deployed).
+        console.warn('Legacy client document lookup unavailable', legacyResult.reason);
+        setLegacyItems([]);
+        setError('تعذر تحميل بعض المستندات القديمة؛ المستندات الحالية ما زالت متاحة.');
+      }
     } catch (reason) {
-      console.error('Failed to load client documents', reason);
+      console.error('Failed to load current client documents', reason);
       setError('تعذر تحميل مستندات العميل.');
     } finally {
       setLoading(false);
