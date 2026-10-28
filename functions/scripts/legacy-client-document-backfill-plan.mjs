@@ -165,7 +165,7 @@ async function main() {
     const defaultOut = `artifacts/legacy-client-document-backfill-plan-${args.projectId}-${timestamp}.json`;
     const outputPath = resolve(process.cwd(), args.out || defaultOut);
     await mkdir(dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, JSON.stringify(plan, null, 2) + '\\n', { encoding: 'utf8', flag: 'wx' });
+    await writeFile(outputPath, JSON.stringify(plan, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
 
     console.log('Read-only backfill plan complete.');
     console.log(JSON.stringify(plan.counts, null, 2));
