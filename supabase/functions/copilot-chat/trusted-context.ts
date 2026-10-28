@@ -79,12 +79,6 @@ function recordToMap(document: FirestoreDocument): Record<string, unknown> {
   return result;
 }
 
-function documentId(document: FirestoreDocument): string | undefined {
-  if (typeof document.name !== "string") return undefined;
-  const id = document.name.split("/").filter(Boolean).at(-1);
-  return id && id.length <= MAX_CLIENT_ID_LENGTH ? id : undefined;
-}
-
 function buildQueryBody(
   collectionId: CollectionKey,
   organizationId: string,
