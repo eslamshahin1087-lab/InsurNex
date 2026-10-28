@@ -1,0 +1,99 @@
+/* InsurNex visual identity quality pass — responsive desktop, clean brand lockup. */
+
+/* The wide workspace should read as a desktop application, not a phone mockup. */
+@media (min-width: 1024px) {
+  #root .mobile-shell.view-mode-desktop {
+    width: min(100%, 1680px) !important;
+    max-width: 1680px !important;
+    grid-template-columns: 240px minmax(0, 1fr) !important;
+    margin-inline: auto !important;
+  }
+
+  body:has(#root .mobile-shell.view-mode-desktop) {
+    background: var(--app-bg, var(--inx-bg, #f4f6fa)) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-body {
+    width: min(1400px, 100%) !important;
+    max-width: 1400px !important;
+    padding-inline: clamp(24px, 3vw, 48px) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .s8-brand {
+    gap: 14px !important;
+    min-width: 0;
+  }
+
+  #root .mobile-shell.view-mode-desktop .s8-brand > img[data-logo-variant="lockup"] {
+    width: 124px !important;
+    max-width: 124px !important;
+    max-height: 64px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    box-shadow: none !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .s8-hello strong {
+    max-width: 220px;
+    font-size: 13px;
+  }
+
+  #root .mobile-shell.view-mode-desktop .s8-hello small {
+    font-size: 11px;
+  }
+}
+
+/* Preserve the exact supplied logo artwork; remove only the decorative image-box shadow. */
+#root .mobile-shell .s8-brand > img[data-logo-variant="lockup"] {
+  display: block;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  filter: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1023px) {
+  #root .mobile-shell.view-mode-mobile .s8-brand > img[data-logo-variant="lockup"] {
+    width: min(92px, 22vw) !important;
+    max-width: 92px !important;
+    max-height: 58px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .s8-brand > img[data-logo-variant="lockup"] {
+    width: min(64px, 20vw) !important;
+    max-width: 64px !important;
+    max-height: 48px !important;
+  }
+}
+
+/* Consistent line-art iconography for KPI cards and toolbar buttons. */
+#root .mobile-shell .inx-kpi .inx-3d-icon svg {
+  display: block;
+  width: 17px !important;
+  height: 17px !important;
+  stroke-width: 1.9;
+  filter: none !important;
+}
+
+/* Prevent long or internal identifiers from breaking the header on compact screens. */
+#root .mobile-shell .s8-hello strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-desktop,
+  #root .mobile-shell.view-mode-desktop * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
