@@ -126,7 +126,6 @@ export async function getClientDocumentUrl(record: DocumentRecord, organizationI
   if (record.storageProvider === 'supabase' && record.storagePath) {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('AUTH_REQUIRED');
-    if (currentUser.uid.length === 0) throw new Error('AUTH_REQUIRED');
     const firebaseToken = await currentUser.getIdToken();
     return supabaseDocumentStorage.getTemporaryUrl({
       provider: 'supabase',
@@ -143,20 +142,24 @@ export async function getClientDocumentUrl(record: DocumentRecord, organizationI
 }
 
 export async function deleteClientDocumentV8(record: DocumentRecord, organizationId: string) {
-  if (record.storageProvider === 'supabase' && record.storagePath) {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error('AUTH_REQUIRED');
-    const firebaseToken = await currentUser.getIdToken();
-    await supabaseDocumentStorage.remove({
-      provider: 'supabase',
-      bucket: record.storageBucket || supabaseDocumentStorage.bucket,
-      path: record.storagePath,
-      documentId: record.id,
-      originalFileName: record.originalFileName,
-      contentType: record.contentType,
-      size: record.size,
-    }, firebaseToken, organizationId);
+  // Do not delete metadata for legacy Firebase-backed files: that would orphan
+  // the original object before the explicit migration/verification phase.
+  if (record.storageProvider !== 'supabase' || !record.storagePath) {
+    throw new Error('LEGACY_DOCUMENT_REQUIRES_MIGRATION');
   }
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('AUTH_REQUIRED');
+  const firebaseToken = await currentUser.getIdToken();
+  await supabaseDocumentStorage.remove({
+    provider: 'supabase',
+    bucket: record.storageBucket || supabaseDocumentStorage.bucket,
+    path: record.storagePath,
+    documentId: record.id,
+    originalFileName: record.originalFileName,
+    contentType: record.contentType,
+    size: record.size,
+  }, firebaseToken, organizationId);
   await deleteDoc(doc(db, 'documents', record.id));
 }
 
