@@ -35,8 +35,10 @@ function errorLabel(error: unknown) {
   if (value.includes('LEGACY_CLIENT_DOCUMENT_ACCESS_DENIED')) {
     return 'دور المستخدم لا يسمح بفتح هذا المستند القديم.';
   }
-  if (value.includes('LEGACY_CLIENT_DOCUMENT_NOT_FOUND') || value.includes('LEGACY_CLIENT_DOCUMENT_REFERENCE_INVALID')) {
-    return 'مرجع المستند القديم غير صالح أو لم يعد متاحًا. لم يتم تعديل الملف الأصلي.';
+  if (value.includes('LEGACY_CLIENT_DOCUMENT_NOT_FOUND')
+      || value.includes('LEGACY_CLIENT_DOCUMENT_REFERENCE_INVALID')
+      || value.includes('LEGACY_CLIENT_DOCUMENT_REFERENCE_AMBIGUOUS')) {
+    return 'مرجع المستند القديم غير صالح أو مكرر أو لم يعد متاحًا. لم يتم تعديل الملف الأصلي.';
   }
   if (value.includes('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE')) {
     return 'الملف القديم غير متاح حاليًا. تحقق من التخزين أو صلاحية المرجع.';
