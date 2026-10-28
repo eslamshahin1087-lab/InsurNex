@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   buildLegacyStorageInventory,
+  buildLegacyStorageMetadataInventory,
   normalizeLegacyStorageReference,
 } from './legacy-storage-inventory-policy.mjs';
 
@@ -126,5 +127,49 @@ assert.ok(!JSON.stringify(report).includes('not-in-report'),
   'download URL tokens never enter the inventory report');
 assert.ok(!JSON.stringify(report).includes('https://firebasestorage.googleapis.com'),
   'source download URLs never enter the inventory report');
+
+const metadataOnlyReport = buildLegacyStorageMetadataInventory({
+  projectId: 'insurnex-8a9df',
+  collections: ['documents', 'operationAttachments'],
+  metadataRecords: records,
+  generatedAt: '2026-10-28T10:00:00.000Z',
+});
+
+assert.equal(metadataOnlyReport.mode, 'metadata-only-read-only');
+assert.equal(metadataOnlyReport.noCloudChangesMade, true);
+assert.equal(metadataOnlyReport.storageObjectsInspected, false);
+assert.equal(metadataOnlyReport.summary.storageObjectsInspected, 0);
+assert.equal(metadataOnlyReport.summary.metadataRecordsScanned, records.length);
+assert.equal(metadataOnlyReport.summary.ignoredSupabaseRecords, 1);
+assert.equal(metadataOnlyReport.summary.ignoredWithoutStorageReference, 1);
+assert.equal(metadataOnlyReport.summary.duplicateMetadataPaths, 2);
+assert.equal(
+  metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_ok')?.status,
+  'metadata_consistent',
+  'metadata-only mode reports internal consistency without claiming object verification',
+);
+assert.equal(
+  metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_missing')?.status,
+  'metadata_consistent',
+  'metadata-only mode must not infer missing objects without listing Storage',
+);
+assert.ok(
+  metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_path_url_mismatch')?.issues.includes('STORAGE_PATH_URL_MISMATCH'),
+  'metadata-only mode reports disagreement between path and URL metadata',
+);
+assert.ok(
+  metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_tenant_mismatch')?.issues.includes('PATH_ORGANIZATION_MISMATCH'),
+  'metadata-only mode still reports organization/path mismatches',
+);
+assert.ok(
+  metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_unsupported')?.issues.includes('UNSUPPORTED_URL'),
+  'metadata-only mode flags unsupported URL hosts',
+);
+assert.ok(!JSON.stringify(metadataOnlyReport).includes('not-in-report'));
+assert.ok(!JSON.stringify(metadataOnlyReport).includes('https://firebasestorage.googleapis.com'));
+assert.ok(
+  metadataOnlyReport.limitations.some(text => text.includes('Does not verify object existence')),
+  'report declares object-existence limitation',
+);
 
 console.log('All legacy storage inventory regression tests passed.');
