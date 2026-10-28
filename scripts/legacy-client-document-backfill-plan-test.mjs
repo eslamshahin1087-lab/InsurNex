@@ -50,6 +50,15 @@ const clients = [{
         size: 10,
       },
       {
+        id: 'embedded_claim_needs_review',
+        url: `https://${host}/storage/v1/object/sign/${bucket}/organizations/org_a/clients/client_a/claim/claim-document.pdf?token=claim-token`,
+        label: 'Claim evidence',
+        type: 'claim',
+        fileName: 'claim-document.pdf',
+        mimeType: 'application/pdf',
+        size: 99,
+      },
+      {
         id: 'embedded_wrong_host',
         url: 'https://attacker.supabase.co/storage/v1/object/sign/insurnex-documents/organizations/org_a/clients/client_a/onboarding/evil.pdf?token=secret',
         fileName: 'evil.pdf',
@@ -100,10 +109,10 @@ assert.equal(plan.writesAttempted, false);
 assert.equal(plan.storageObjectsVerified, false);
 assert.equal(plan.counts.clientRecordsScanned, 1);
 assert.equal(plan.counts.existingDocumentRecordsScanned, 1);
-assert.equal(plan.counts.embeddedDocumentReferencesScanned, 7);
+assert.equal(plan.counts.embeddedDocumentReferencesScanned, 8);
 assert.equal(plan.counts.eligibleCandidates, 1);
 assert.equal(plan.counts.alreadyMapped, 1);
-assert.equal(plan.counts.needsReview, 5);
+assert.equal(plan.counts.needsReview, 6);
 
 const candidate = plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_candidate');
 assert.equal(candidate?.status, 'candidate');
@@ -146,6 +155,12 @@ assert.equal(
   plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_path_url_conflict')?.reason,
   'REFERENCE_UNSUPPORTED_OR_CONFLICTING',
 );
+assert.equal(
+  plan.entries.find(item => item.sourceEmbeddedDocumentId === 'embedded_claim_needs_review')?.reason,
+  'CLAIM_LEGACY_PATH_ROLE_POLICY_REVIEW_REQUIRED',
+  'legacy claim records are held until the role policy for non-v2 paths is reviewed',
+);
+
 
 const rerun = buildLegacyClientDocumentBackfillPlan(input);
 assert.equal(
