@@ -58,7 +58,7 @@ const ClientInsuranceAnalysisPage = lazy(
 );
 const MorePage = lazy(() => import('./pages/MorePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
+const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const CopilotPage = lazy(() => import('./pages/CopilotPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
 
@@ -206,7 +206,7 @@ export default function App() {
                   <Route path="more" element={<MorePage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route element={<PlatformFeatureGate feature="documents" />}>
-                    <Route path="documents" element={<ComingSoonPage />} />
+                    <Route path="documents" element={<DocumentsPage />} />
                   </Route>
                 </Route>
               </Route>
