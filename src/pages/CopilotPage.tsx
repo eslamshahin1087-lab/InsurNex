@@ -67,7 +67,7 @@ export default function CopilotPage() {
     try {
       const rows = await listConversations(scope, user.uid);
       setConversations(rows);
-    } catch (e) {
+    } catch {
       
       setError('تعذر تحميل المحادثات.');
     } finally {
@@ -90,7 +90,7 @@ export default function CopilotPage() {
       try {
         const rows = await listMessages(activeId, scope);
         if (!cancelled) setMessages(rows);
-      } catch (e) {
+      } catch {
         
         if (!cancelled) setError('تعذر تحميل الرسائل.');
       } finally {
@@ -121,7 +121,7 @@ export default function CopilotPage() {
       setMessages([]);
       setError('');
       await loadConversations();
-    } catch (e) {
+    } catch {
       
       setError('تعذر بدء محادثة جديدة.');
     }
@@ -136,7 +136,7 @@ export default function CopilotPage() {
         setMessages([]);
       }
       await loadConversations();
-    } catch (e) {
+    } catch {
       
       setError('تعذر حذف المحادثة.');
     }
@@ -171,7 +171,7 @@ export default function CopilotPage() {
           buildTitleFromFirstMessage(text),
         );
         setActiveId(conversationId);
-      } catch (e) {
+      } catch {
         
         setError('تعذر بدء محادثة جديدة.');
         return;
@@ -233,7 +233,7 @@ export default function CopilotPage() {
           /* ignore */
         }
       }
-    } catch (e) {
+    } catch {
       setError('تعذر الاتصال بالمساعد الذكي الآن. تحقق من الاتصال وحاول مجددًا.');
       setMessages(previousHistory);
     } finally {
