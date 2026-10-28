@@ -90,15 +90,50 @@ function asObjectMetadata(file, raw = {}) {
   };
 }
 
+function safeErrorMessage(error) {
+  const raw = typeof error?.message === 'string' ? error.message : String(error ?? 'Unknown error');
+  return raw
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
+    .replace(/((?:access|refresh)?_?token|authorization|api[_-]?key)=([^&\s]+)/gi, '$1=[REDACTED]')
+    .replace(/([?&]key=)[^&\s]+/gi, '$1[REDACTED]')
+    .slice(0, 320);
+}
+
+function readErrorHint(code, message) {
+  const normalizedCode = String(code ?? '').toLowerCase();
+  const normalizedMessage = String(message ?? '').toLowerCase();
+  if (['16', 'unauthenticated', '401'].includes(normalizedCode)
+      || /default credentials|application default credentials|could not load.*credentials/.test(normalizedMessage)) {
+    return ' Configure Application Default Credentials (ADC), for example with `gcloud auth application-default login`, then retry.';
+  }
+  if (['7', 'permission-denied', '403'].includes(normalizedCode)
+      || /permission denied|insufficient permission|does not have permission/.test(normalizedMessage)) {
+    return ' Confirm the ADC identity has read permission for the selected Firestore collections in the target project.';
+  }
+  return ' Check ADC authentication, project ID, network access, and the original error details above.';
+}
+
+function isRetryableReadError(error) {
+  const code = String(error?.code ?? '').toLowerCase();
+  return [
+    '4', '8', '10', '14', 'deadline-exceeded', 'resource-exhausted',
+    'aborted', 'unavailable', 'econnreset', 'etimedout', 'eai_again',
+    '408', '429', '500', '502', '503', '504',
+  ].includes(code);
+}
+
 async function retryRead(label, operation, retryLog) {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
       return await operation();
     } catch (error) {
       const code = typeof error?.code === 'string' || typeof error?.code === 'number' ? String(error.code) : null;
-      if (attempt >= MAX_ATTEMPTS) {
+      const message = safeErrorMessage(error);
+      const retryable = isRetryableReadError(error);
+      if (!retryable || attempt >= MAX_ATTEMPTS) {
         retryLog.push({ operation: label, attempt, outcome: 'failed', errorName: error?.name || 'Error', errorCode: code });
-        throw new Error(`Read failed after ${MAX_ATTEMPTS} attempts: ${label} (${code || error?.name || 'unknown error'})`);
+        const attemptText = attempt === 1 ? 'after 1 attempt' : `after ${attempt} attempts`;
+        throw new Error(`Read failed ${attemptText}: ${label} (${code || error?.name || 'unknown error'}): ${message}.${readErrorHint(code, message)}`, { cause: error });
       }
       const delayMs = Math.min(500 * (2 ** (attempt - 1)), 4000);
       retryLog.push({ operation: label, attempt, outcome: 'retrying', delayMs, errorName: error?.name || 'Error', errorCode: code });
