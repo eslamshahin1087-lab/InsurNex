@@ -54,7 +54,7 @@ const FIELD_RULES: Record<string, FieldRules> = {
   },
   stats: {
     strings: [],
-    numbers: ["totalClients", "activePolicies", "openClaims", "upcomingRenewals", "totalLeads", "wonLeads", "pipelineValue"],
+    numbers: ["sampledClients"],
   },
 };
 
