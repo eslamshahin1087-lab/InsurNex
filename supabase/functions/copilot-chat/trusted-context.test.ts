@@ -168,3 +168,86 @@ Deno.test("permission failures are not converted into zero-client statistics", a
 
   assert(context?.stats === undefined, "denied client query must not be represented as zero clients");
 });
+
+Deno.test("finance summary is computed from authorized bounded records, not client-supplied totals", async () => {
+  const requests: Array<{ collectionId: string; authorization: string | null; body: Record<string, unknown> }> = [];
+  const records: Record<string, unknown[]> = {
+    revenue: [
+      doc({ organizationId: "org-finance", amount: 2000, status: "confirmed", currency: "EGP", type: "fee", clientName: "PRIVATE_CLIENT" }),
+      doc({ organizationId: "org-finance", amount: 300, status: "pending", currency: "EGP", type: "premium" }),
+    ],
+    expenses: [
+      doc({ organizationId: "org-finance", amount: 400, currency: "EGP", category: "operational", description: "PRIVATE_DESCRIPTION" }),
+    ],
+    commissions: [
+      doc({ organizationId: "org-finance", commissionAmount: 100, status: "pending", currency: "EGP", policyNumber: "PRIVATE_POLICY" }),
+      doc({ organizationId: "org-finance", commissionAmount: 50, status: "received", currency: "EGP" }),
+    ],
+  };
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const authorization = new Headers(init?.headers).get("Authorization");
+    const body = JSON.parse(String(init?.body)) as {
+      structuredQuery: {
+        from: Array<{ collectionId: string }>;
+        where: unknown;
+        select: { fields: Array<{ fieldPath: string }> };
+        limit: number;
+      };
+    };
+    const collectionId = body.structuredQuery.from[0].collectionId;
+    requests.push({ collectionId, authorization, body: body as unknown as Record<string, unknown> });
+    return Response.json(records[collectionId] ?? []);
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-finance",
+    idToken: "finance-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "finance",
+      finance: { totalRevenue: 999999999, netIncome: 999999999 },
+      notes: "FORGED_FINANCE_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(requests.length === 3, "finance context must read each ledger collection separately");
+  assert(requests.every((request) => request.authorization === "Bearer finance-user-token"), "all finance queries must use the authenticated caller token");
+  assert(requests.every((request) => JSON.stringify(request.body.structuredQuery.where).includes("org-finance")), "every finance query must filter to the verified organization");
+  assert(requests.every((request) => request.body.structuredQuery.limit === 500), "finance reads must respect the existing 500-row ledger cap");
+  const summary = context?.finance as Record<string, unknown> | undefined;
+  assert(summary?.totalRevenue === 2000, "only confirmed revenue should be included");
+  assert(summary.totalExpenses === 400, "expenses should be aggregated from server-returned records");
+  assert(summary.netIncome === 1600, "net income should be deterministically computed");
+  assert(summary.pendingCommissions === 100, "pending commissions should be aggregated");
+  assert(summary.receivedCommissions === 50, "received commissions should be aggregated");
+  assert(summary.currency === "EGP", "the one consistent currency should be preserved");
+  const serialized = JSON.stringify(context);
+  assert(!serialized.includes("FORGED"), "client-supplied finance data and notes must be ignored");
+  assert(!serialized.includes("PRIVATE_CLIENT"), "client names must not be included in finance context");
+  assert(!serialized.includes("PRIVATE_DESCRIPTION"), "expense descriptions must not be included in finance context");
+  assert(!serialized.includes("PRIVATE_POLICY"), "policy identifiers must not be included in finance context");
+});
+
+Deno.test("finance summary is omitted rather than mixing currencies", async () => {
+  const records: Record<string, unknown[]> = {
+    revenue: [doc({ organizationId: "org-finance", amount: 100, status: "confirmed", currency: "EGP" })],
+    expenses: [doc({ organizationId: "org-finance", amount: 10, category: "other", currency: "USD" })],
+    commissions: [doc({ organizationId: "org-finance", commissionAmount: 5, status: "pending", currency: "EGP" })],
+  };
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body)) as { structuredQuery: { from: Array<{ collectionId: string }> } };
+    return Response.json(records[body.structuredQuery.from[0].collectionId] ?? []);
+  }) as typeof fetch;
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-finance",
+    idToken: "finance-user-token",
+    isPlatformAdmin: false,
+    requestedContext: { page: "finance", finance: { totalRevenue: 1234 } },
+    fetcher,
+  });
+  assert(context?.finance === undefined, "mixed-currency totals must not be surfaced as one number");
+});
