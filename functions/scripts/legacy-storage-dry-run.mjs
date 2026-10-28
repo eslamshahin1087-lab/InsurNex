@@ -93,9 +93,9 @@ function asObjectMetadata(file, raw = {}) {
 function safeErrorMessage(error) {
   const raw = typeof error?.message === 'string' ? error.message : String(error ?? 'Unknown error');
   return raw
-    .replace(/Bearer\\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
-    .replace(/((?:access|refresh)?_?token|authorization|api[_-]?key)=([^&\\s]+)/gi, '$1=[REDACTED]')
-    .replace(/([?&]key=)[^&\\s]+/gi, '$1[REDACTED]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [REDACTED]')
+    .replace(/((?:access|refresh)?_?token|authorization|api[_-]?key)=([^&\s]+)/gi, '$1=[REDACTED]')
+    .replace(/([?&]key=)[^&\s]+/gi, '$1[REDACTED]')
     .slice(0, 320);
 }
 
