@@ -118,10 +118,19 @@ async function readCallerVisibleDocument(path: string, token: string): Promise<F
 }
 
 type AuthorizedDocument = {
+  layout: 'client' | 'general';
   organizationId: string;
-  clientId: string;
-  area: string;
+  clientId?: string;
+  documentId: string;
+  area?: string;
   path: string;
+  filename: string;
+};
+
+const RELATION_COLLECTION: Record<string, string> = {
+  client: 'clients',
+  policy: 'policies',
+  claim: 'claims',
 };
 
 async function authorizeDocumentAccess(
@@ -142,6 +151,12 @@ async function authorizeDocumentAccess(
   const parsed = parseDocumentPath(path, organizationId) as AuthorizedDocument | null;
   if (!parsed) return { ok: false, response: errorResponse('INVALID_DOCUMENT_PATH', 400) };
 
+  // A caller must present the ID of the exact metadata record, and the path's
+  // embedded ID (or client-file prefix) must agree with it.
+  if (parsed.layout === 'general' && parsed.documentId !== documentId) {
+    return { ok: false, response: errorResponse('DOCUMENT_PATH_ID_MISMATCH', 403) };
+  }
+
   try {
     const profile = await readCallerVisibleDocument(`users/${user.uid}`, token);
     if (!profile) return { ok: false, response: errorResponse('ACTIVE_PROFILE_REQUIRED', 403) };
@@ -153,9 +168,8 @@ async function authorizeDocumentAccess(
       return { ok: false, response: errorResponse('ORGANIZATION_ACCESS_DENIED', 403) };
     }
 
-    // The path alone is never authority. Read the exact metadata record using
-    // the caller's token (so Firestore Rules apply), then bind path, category,
-    // tenant, client relationship, content type and size to that record.
+    // All storage layouts are authorized against the specific Firestore metadata
+    // record read with the caller token so Firestore Rules remain in force.
     const metadata = await readCallerVisibleDocument(`documents/${documentId}`, token);
     if (!metadata) return { ok: false, response: errorResponse('DOCUMENT_RECORD_NOT_FOUND', 404) };
     const metadataView = {
@@ -171,10 +185,14 @@ async function authorizeDocumentAccess(
       size: numberField(metadata, 'size'),
     };
     if (!metadataMatchesPath(metadataView, {
+      layout: parsed.layout,
       organizationId,
-      clientId: parsed.clientId,
-      area: parsed.area,
+      ...(parsed.clientId ? { clientId: parsed.clientId } : {}),
+      documentId,
+      ...(parsed.documentId ? { pathDocumentId: parsed.documentId } : {}),
+      ...(parsed.area ? { area: parsed.area } : {}),
       path,
+      filename: parsed.filename,
       bucket: DEFAULT_BUCKET,
       ...(action === 'write' ? { actorUid: user.uid } : {}),
       ...(expectedFile?.contentType ? { contentType: expectedFile.contentType } : {}),
@@ -182,15 +200,42 @@ async function authorizeDocumentAccess(
     })) {
       return { ok: false, response: errorResponse('DOCUMENT_RECORD_MISMATCH', 403) };
     }
-    if (!roleCanAccessDocument(role, metadataView.category, parsed.area, action)) {
+
+    if (!roleCanAccessDocument(role, metadataView.category, action, {
+      layout: parsed.layout,
+      relatedType: metadataView.relatedType,
+    })) {
       return { ok: false, response: errorResponse(action === 'delete' ? 'DELETE_NOT_ALLOWED' : 'DOCUMENT_ROLE_ACCESS_DENIED', 403) };
     }
 
-    const client = await readCallerVisibleDocument(`clients/${parsed.clientId}`, token);
-    if (!client) return { ok: false, response: errorResponse('CLIENT_NOT_FOUND', 404) };
-    if (stringField(client, 'organizationId') !== organizationId) {
-      return { ok: false, response: errorResponse('CLIENT_ACCESS_DENIED', 403) };
+    if (parsed.layout === 'client') {
+      const client = await readCallerVisibleDocument(`clients/${parsed.clientId}`, token);
+      if (!client) return { ok: false, response: errorResponse('CLIENT_NOT_FOUND', 404) };
+      if (stringField(client, 'organizationId') !== organizationId) {
+        return { ok: false, response: errorResponse('CLIENT_ACCESS_DENIED', 403) };
+      }
+    } else {
+      // General document paths may relate to a client, policy, claim, or the
+      // organization itself. Verify parent tenancy before signing any URL.
+      const relatedType = metadataView.relatedType;
+      if (relatedType === 'general') {
+        if (!['owner', 'admin', 'broker'].includes(role)) {
+          return { ok: false, response: errorResponse('GENERAL_DOCUMENT_ACCESS_DENIED', 403) };
+        }
+      } else {
+        const parentCollection = RELATION_COLLECTION[relatedType ?? ''];
+        const relatedId = metadataView.relatedId;
+        if (!parentCollection || !relatedId || !/^[A-Za-z0-9_-]{1,128}$/.test(relatedId)) {
+          return { ok: false, response: errorResponse('INVALID_DOCUMENT_RELATION', 403) };
+        }
+        const parent = await readCallerVisibleDocument(`${parentCollection}/${relatedId}`, token);
+        if (!parent) return { ok: false, response: errorResponse('RELATED_RECORD_NOT_FOUND', 404) };
+        if (stringField(parent, 'organizationId') !== organizationId) {
+          return { ok: false, response: errorResponse('RELATED_RECORD_ACCESS_DENIED', 403) };
+        }
+      }
     }
+
     return { ok: true, document: parsed };
   } catch (error) {
     // Do not disclose upstream errors or document metadata to the caller.
