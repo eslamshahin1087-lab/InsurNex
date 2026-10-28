@@ -50,6 +50,21 @@ Still required before release:
 
 Acceptance gate: Phase 2B CI and Emulator suite pass; all new general documents use the gateway and short-lived URLs; all legacy objects remain available through their existing read-only URL until migrated; no legacy object is deleted by this PR. A separate acceptance gate is required for migrating `operationAttachments` and other remaining direct Storage call sites.
 
+## Phase 2C — Migrate operation attachments as a separate resource
+
+**Status:** not started; keep this separate from the general `documents` collection because these files use `operationAttachments` and `operations/{operationId}` paths today.
+
+Scope:
+1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
+2. Define a dedicated metadata-first gateway resource for operation attachments (or migrate them to the unified `documents` collection only if references and IDs can be preserved).
+3. Bind each attachment to the exact operation/organization record, validate the operation's tenant, and apply role-specific read/write/delete rules.
+4. Use private objects and short-lived URLs; do not persist fresh download URLs.
+5. Preserve existing operation IDs, attachment metadata and workflow references. Implement dry-run inventory, object existence checks, byte-size/checksum reconciliation, retries and rollback.
+6. Remove direct `uploadBytes`, `getDownloadURL` and `deleteObject` calls only after the new path passes staging integration tests.
+7. Add regression tests for cross-organization operation IDs, missing operations, wrong-role access, duplicate attachments and cleanup after interrupted upload.
+
+Acceptance gate: no remaining direct Firebase Storage calls in the audited file/document/attachment modules; all legacy objects are catalogued and can be restored; operation workflows pass staging acceptance. Do not declare whole-app storage unification complete until this gate passes.
+
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
 Scope:
