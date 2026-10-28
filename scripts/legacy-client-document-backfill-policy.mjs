@@ -11,11 +11,6 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function nullableText(value) {
-  const result = text(value);
-  return result || null;
-}
-
 function safeSize(value) {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
 }
