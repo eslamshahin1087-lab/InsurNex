@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto';
-import { parseLegacyClientDocumentReference } from '../supabase/functions/document-storage/access-policy.mjs';
+import { normalizeSupabaseStorageReference } from './legacy-storage-inventory-policy.mjs';
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const CATEGORIES = new Set([
   'policy', 'claim', 'client', 'identity', 'proposal',
   'correspondence', 'invoice', 'receipt', 'other',
 ]);
+const ALLOWED_AREAS = new Set(['onboarding', 'quotation', 'issuance', 'policy', 'claim', 'renewal']);
 
 function text(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -55,19 +56,54 @@ function deterministicDocumentId({ projectId, organizationId, clientId, embedded
 }
 
 function normalizedEmbeddedReference(clientRecord, item, options) {
-  return parseLegacyClientDocumentReference({
-    id: text(item.id),
-    storageProvider: text(item.storageProvider) || undefined,
-    storageBucket: text(item.storageBucket) || undefined,
-    storagePath: text(item.storagePath) || undefined,
-    url: text(item.url) || undefined,
-    downloadUrl: text(item.downloadUrl) || undefined,
-  }, {
-    organizationId: text(clientRecord.data?.organizationId),
-    clientId: text(clientRecord.id),
-    expectedBucket: options.bucket,
-    expectedHost: options.supabaseHost,
-  });
+  const organizationId = text(clientRecord.data?.organizationId);
+  const clientId = text(clientRecord.id);
+  if (!SAFE_ID.test(organizationId) || !SAFE_ID.test(clientId)) return null;
+  if (text(item.storageProvider).toLowerCase() === 'firebase') return null;
+
+  const candidates = [];
+  const stablePath = text(item.storagePath);
+  if (stablePath) {
+    const stableBucket = text(item.storageBucket) || options.bucket;
+    if (stableBucket !== options.bucket) return null;
+    candidates.push({ bucket: stableBucket, path: stablePath, source: 'storagePath' });
+  }
+
+  for (const rawUrl of [item.url, item.downloadUrl].filter(value => typeof value === 'string' && value.trim())) {
+    let url;
+    try {
+      url = new URL(rawUrl.trim());
+    } catch {
+      return null;
+    }
+    if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== options.supabaseHost.toLowerCase()) return null;
+    const normalized = normalizeSupabaseStorageReference(rawUrl);
+    if (normalized.status !== 'resolved' || normalized.bucket !== options.bucket) return null;
+    candidates.push({ bucket: normalized.bucket, path: normalized.path, source: 'url' });
+  }
+
+  if (!candidates.length) return null;
+  const first = candidates[0];
+  if (candidates.some(candidate => candidate.bucket !== first.bucket || candidate.path !== first.path)) return null;
+
+  const parts = first.path.split('/');
+  if (
+    parts.length !== 6 ||
+    parts[0] !== 'organizations' ||
+    parts[1] !== organizationId ||
+    parts[2] !== 'clients' ||
+    parts[3] !== clientId ||
+    !ALLOWED_AREAS.has(parts[4]) ||
+    !/^[A-Za-z0-9._-]{1,220}$/.test(parts[5])
+  ) return null;
+
+  return {
+    bucket: first.bucket,
+    path: first.path,
+    area: parts[4],
+    filename: parts[5],
+    source: first.source,
+  };
 }
 
 /**
@@ -99,6 +135,7 @@ export function buildLegacyClientDocumentBackfillPlan({
   }
 
   for (const clientRecord of clientRecords) {
+    const clientData = clientRecord.data || {};
     const organizationId = text(clientData.organizationId);
     const clientId = text(clientRecord.id);
     const embeddedDocuments = Array.isArray(clientData.documents) ? clientData.documents : [];
