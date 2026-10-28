@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const handlerSource = readFileSync(new URL('../src/copilot/index.ts', import.meta.url), 'utf8');
-const indexConfig = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', import.meta.url), 'utf8').replace(/^\\uFEFF/, ''));
+const indexConfig = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', import.meta.url), 'utf8').replace(/^\uFEFF/, ''));
 const { FieldPath } = require('firebase-admin/firestore');
 const {
   buildAuthorizedContext,
