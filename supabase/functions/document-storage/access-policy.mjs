@@ -56,7 +56,9 @@ export function metadataMatchesPath(metadata, request) {
     if (metadata.relatedType !== 'client' || metadata.relatedId !== request.clientId) return false;
     if (areaForCategory(metadata.category) !== request.area) return false;
     if (typeof request.documentId !== 'string' || !request.documentId) return false;
-    if (!request.filename.startsWith(request.documentId + '-')) return false;
+    // Version 2 paths embed the Firestore metadata ID. Missing version is treated
+    // as a legacy object for backwards-compatible reads by privileged roles.
+    if (metadata.storageKeyVersion === 2 && !request.filename.startsWith(request.documentId + '-')) return false;
   } else if (request.layout === 'general') {
     if (request.documentId !== request.pathDocumentId) return false;
     if (metadata.relatedType === 'general' && metadata.relatedId !== '') return false;
@@ -80,7 +82,8 @@ export function roleCanAccessDocument(role, category, action, options = {}) {
     return category === 'claim'
       && ['client', 'claim'].includes(relatedType)
       && action !== 'delete'
-      && ['client', 'general'].includes(layout);
+      && ['client', 'general'].includes(layout)
+      && (layout !== 'client' || options.documentIdMatchesPath === true);
   }
   return false;
 }
