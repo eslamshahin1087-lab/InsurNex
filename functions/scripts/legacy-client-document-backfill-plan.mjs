@@ -76,7 +76,6 @@ function safeClientProjection(snapshot) {
     id: snapshot.id,
     data: {
       organizationId: data.organizationId,
-      createdBy: data.createdBy,
       documents: Array.isArray(data.documents) ? data.documents.map(item => {
         if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
         return {
@@ -98,8 +97,6 @@ function safeClientProjection(snapshot) {
           uploadedAt: item.uploadedAt,
           uploadedBy: item.uploadedBy,
           notes: item.notes,
-          verified: item.verified,
-          verifiedBy: item.verifiedBy,
         };
       }) : [],
     },
