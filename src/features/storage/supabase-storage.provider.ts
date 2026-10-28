@@ -70,17 +70,25 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
   },
 
   buildPath(file, context) {
-    if (!/^[A-Za-z0-9_-]{1,128}$/.test(context.organizationId)
-      || !/^[A-Za-z0-9_-]{1,128}$/.test(context.clientId)
-      || !/^[A-Za-z0-9_-]{1,128}$/.test(context.documentId)) {
+    const safeSegment = /^[A-Za-z0-9_-]{1,128}$/;
+    if (!safeSegment.test(context.organizationId) || !safeSegment.test(context.documentId)) {
+      throw new Error('INVALID_DOCUMENT_CONTEXT');
+    }
+
+    const filename = `${context.documentId}-${safeName(file.name)}`;
+    if (context.layout === 'general') {
+      return `organizations/${context.organizationId}/documents/${context.documentId}/${safeName(file.name)}`;
+    }
+
+    if (!context.clientId || !safeSegment.test(context.clientId)) {
       throw new Error('INVALID_DOCUMENT_CONTEXT');
     }
     const area = context.area || 'onboarding';
     if (!['onboarding', 'quotation', 'issuance', 'policy', 'claim', 'renewal'].includes(area)) {
       throw new Error('INVALID_DOCUMENT_AREA');
     }
-    // Firestore's random document ID is the unique prefix; metadata stores this exact path before upload.
-    return `organizations/${context.organizationId}/clients/${context.clientId}/${area}/${context.documentId}-${safeName(file.name)}`;
+    // The document ID prefix binds client-linked objects to the Firestore metadata record.
+    return `organizations/${context.organizationId}/clients/${context.clientId}/${area}/${filename}`;
   },
 
   async upload(file, context) {
