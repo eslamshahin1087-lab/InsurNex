@@ -141,50 +141,42 @@ function UploadButton({
     setUploading(true);
     setError('');
     try {
-      supabaseDocumentStorage.validate(file);
+      const maxBytes = 10 * 1024 * 1024;
+      const allowed = new Set([
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+      ]);
+      if (file.size <= 0) throw new Error('EMPTY_FILE');
+      if (file.size > maxBytes) throw new Error('FILE_TOO_LARGE');
+      if (!allowed.has(file.type)) throw new Error('FILE_TYPE_NOT_ALLOWED');
 
-      // 1. Upload to Supabase
-      const stored = await supabaseDocumentStorage.upload(file, {
-        organizationId,
-        clientId: 'draft',
-        userToken: firebaseToken,
-        area: 'onboarding',
-      });
-
-      if (!stored) {
-        setError('تعذر رفع الملف');
-        return;
-      }
-
-      // 2. Get a temporary URL (signed) for preview
-      let tempUrl = '';
-      try {
-        tempUrl = await supabaseDocumentStorage.getTemporaryUrl(
-          stored,
-          firebaseToken,
-          organizationId,
-        );
-      } catch (e) {
-        console.warn('Failed to get temp URL', e);
-      }
-
-      // 3. Build the ClientDocument object
-      const doc: ClientDocument = {
-        id: `${type}-${Date.now()}`,
+      // Stage locally until the client record exists. The secured storage
+      // gateway requires a real client ID and an authorized Firestore metadata
+      // record; uploading against a placeholder client ID would be unsafe and
+      // cannot be authorized correctly.
+      const staged: ClientDocument = {
+        id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         type,
         label,
-        url: tempUrl,
+        url: '',
         fileName: file.name,
         mimeType: file.type,
         size: file.size,
         uploadedAt: new Date(),
         verified: false,
+        pendingFile: file,
       };
-
-      onUploaded(doc);
+      onUploaded(staged);
     } catch (e) {
-      console.error(e);
-      setError((e as Error).message || 'تعذر رفع الملف');
+      const code = e instanceof Error ? e.message : '';
+      setError(
+        code === 'FILE_TOO_LARGE'
+          ? 'الملف أكبر من 10 MB.'
+          : code === 'FILE_TYPE_NOT_ALLOWED'
+            ? 'نوع الملف غير مسموح.'
+            : 'تعذر تجهيز المستند.',
+      );
     } finally {
       setUploading(false);
     }
