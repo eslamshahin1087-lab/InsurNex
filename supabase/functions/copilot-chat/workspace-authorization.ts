@@ -73,6 +73,16 @@ export async function authorizeCopilotWorkspace(input: {
     throw new Error("WORKSPACE_ACCESS_DENIED");
   }
 
+  // Check the dedicated platform-admin membership first so a platform admin
+  // cannot use a tenant profile to bypass the private admin-only scope.
+  const adminMembership = await readCallerDocument(projectId, "admin", uid, idToken, fetcher);
+  if (adminMembership) {
+    if (requestedScope === uid) {
+      return { scopeType: "platform-admin", organizationId: null, allowClientContext: false };
+    }
+    throw new Error("WORKSPACE_ACCESS_DENIED");
+  }
+
   const profile = await readCallerDocument(projectId, "users", uid, idToken, fetcher);
   if (profile) {
     const organizationId = stringField(profile, "organizationId");
@@ -87,13 +97,6 @@ export async function authorizeCopilotWorkspace(input: {
     }
 
     return { scopeType: "organization", organizationId, allowClientContext: true };
-  }
-
-  // Platform administrators without a tenant profile retain a private scope.
-  // They do not receive organization context through this endpoint.
-  const adminMembership = await readCallerDocument(projectId, "admin", uid, idToken, fetcher);
-  if (adminMembership && requestedScope === uid) {
-    return { scopeType: "platform-admin", organizationId: null, allowClientContext: false };
   }
 
   throw new Error("WORKSPACE_ACCESS_DENIED");
