@@ -20,6 +20,8 @@ jobs:
         run: npm run test:plans
       - name: PWA installability and privacy smoke checks
         run: npm run test:pwa
+      - name: Document storage authorization policy regression tests
+        run: npm run test:storage-gateway
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
