@@ -58,6 +58,150 @@ function printable(value) {
 }
 
 /**
+ * Metadata-only inventory for projects where Firebase Storage is inaccessible.
+ * It reads only supplied Firestore metadata and does not infer whether an object
+ * exists, whether it is orphaned, or whether its actual size/checksum matches.
+ */
+export function buildLegacyStorageMetadataInventory({
+  projectId,
+  collections,
+  metadataRecords,
+  generatedAt = new Date().toISOString(),
+  retryLog = [],
+}) {
+  const legacyRecords = [];
+  let ignoredSupabaseRecords = 0;
+  let ignoredWithoutStorageReference = 0;
+
+  for (const record of metadataRecords) {
+    const data = record.data || {};
+    if (data.storageProvider === 'supabase') {
+      ignoredSupabaseRecords += 1;
+      continue;
+    }
+
+    const storagePath = typeof data.storagePath === 'string' ? data.storagePath.trim() : '';
+    const downloadUrl = typeof data.downloadUrl === 'string' ? data.downloadUrl.trim() : '';
+    if (!storagePath && !downloadUrl) {
+      ignoredWithoutStorageReference += 1;
+      continue;
+    }
+
+    const pathResult = storagePath
+      ? normalizeLegacyStorageReference(storagePath, null)
+      : { status: 'empty' };
+    const urlResult = downloadUrl
+      ? normalizeLegacyStorageReference(downloadUrl, null)
+      : { status: 'empty' };
+    const issues = [];
+    let objectPath = null;
+    let objectBucket = null;
+
+    if (pathResult.status === 'resolved') {
+      objectPath = pathResult.path;
+      objectBucket = pathResult.bucket || null;
+    } else if (pathResult.status !== 'empty') {
+      issues.push(pathResult.status.toUpperCase());
+    }
+
+    if (urlResult.status === 'resolved') {
+      if (objectPath && objectPath !== urlResult.path) {
+        issues.push('STORAGE_PATH_URL_MISMATCH');
+      } else if (!objectPath) {
+        objectPath = urlResult.path;
+      }
+      if (objectBucket && urlResult.bucket && objectBucket !== urlResult.bucket) {
+        issues.push('BUCKET_MISMATCH');
+      } else if (!objectBucket && urlResult.bucket) {
+        objectBucket = urlResult.bucket;
+      }
+    } else if (urlResult.status !== 'empty') {
+      if (!objectPath) issues.push(urlResult.status.toUpperCase());
+      else issues.push('DOWNLOAD_URL_' + urlResult.status.toUpperCase());
+    }
+
+    const pathOrganizationMatch = objectPath
+      ? /^organizations\/([^/]+)\//.exec(objectPath)
+      : null;
+    if (pathOrganizationMatch && typeof data.organizationId === 'string'
+        && pathOrganizationMatch[1] !== data.organizationId) {
+      issues.push('PATH_ORGANIZATION_MISMATCH');
+    }
+
+    if (!objectPath && !issues.length) issues.push('UNRESOLVED_STORAGE_REFERENCE');
+
+    legacyRecords.push({
+      collection: record.collection,
+      documentId: record.id,
+      organizationId: printable(data.organizationId),
+      objectPath,
+      bucket: objectBucket,
+      fileName: printable(data.originalFileName) || printable(data.name) || objectPath?.split('/').pop() || null,
+      declaredSize: data.size === undefined || data.size === null || data.size === ''
+        ? null : (Number.isFinite(Number(data.size)) ? Number(data.size) : null),
+      declaredContentType: printable(data.contentType),
+      createdAt: printable(data.createdAt),
+      status: issues.length ? 'needs_review' : 'metadata_consistent',
+      issues: [...new Set(issues)],
+      objectVerified: false,
+    });
+  }
+
+  const referencesByObjectKey = new Map();
+  for (const record of legacyRecords) {
+    if (!record.objectPath) continue;
+    const bucketScope = record.bucket || '<bucket-not-known>';
+    const key = bucketScope + '\u0000' + record.objectPath;
+    const rows = referencesByObjectKey.get(key) || [];
+    rows.push(record);
+    referencesByObjectKey.set(key, rows);
+  }
+  for (const rows of referencesByObjectKey.values()) {
+    if (rows.length > 1) {
+      for (const row of rows) {
+        if (!row.issues.includes('DUPLICATE_METADATA_REFERENCE')) {
+          row.issues.push('DUPLICATE_METADATA_REFERENCE');
+        }
+        row.status = 'needs_review';
+      }
+    }
+  }
+
+  const summary = {
+    collectionsScanned: collections.length,
+    collectionNames: collections,
+    metadataRecordsScanned: metadataRecords.length,
+    legacyMetadataRecords: legacyRecords.length,
+    ignoredSupabaseRecords,
+    ignoredWithoutStorageReference,
+    metadataConsistentRecords: legacyRecords.filter(item => item.status === 'metadata_consistent').length,
+    metadataRecordsNeedingReview: legacyRecords.filter(item => item.status === 'needs_review').length,
+    duplicateMetadataPaths: legacyRecords.filter(item => item.issues.includes('DUPLICATE_METADATA_REFERENCE')).length,
+    unresolvedMetadataReferences: legacyRecords.filter(item => !item.objectPath).length,
+    storageObjectsInspected: 0,
+    retryEvents: retryLog.length,
+  };
+
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    projectId,
+    mode: 'metadata-only-read-only',
+    noCloudChangesMade: true,
+    storageObjectsInspected: false,
+    limitations: [
+      'Does not verify object existence or accessibility in Cloud Storage.',
+      'Does not identify unreferenced/orphaned Cloud Storage objects.',
+      'Does not compare declared size or checksums with actual object metadata.',
+      'A metadata_consistent status means only that the stored references are internally consistent.',
+    ],
+    summary,
+    metadataRecords: legacyRecords,
+    retryLog,
+  };
+}
+
+/**
  * Pure reconciliation: it only inspects supplied Firestore metadata and bucket
  * listings. It has no Firebase/Supabase client and performs no writes.
  */
