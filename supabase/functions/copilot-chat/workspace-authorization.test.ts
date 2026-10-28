@@ -18,7 +18,7 @@ function fetchFor(documents: Record<string, Response | null>, seen: string[] = [
     seen.push(url + "|" + new Headers(init?.headers).get("Authorization"));
     const key = url.slice(url.indexOf("/documents/") + "/documents/".length);
     const response = documents[key];
-    return response ?? new Response(null, { status: 404 });
+    return response ? response.clone() : new Response(null, { status: 404 });
   }) as typeof fetch;
 }
 
