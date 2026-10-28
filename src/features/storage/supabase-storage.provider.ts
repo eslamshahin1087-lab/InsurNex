@@ -143,3 +143,101 @@ export const supabaseDocumentStorage: DocumentStorageProvider = {
     return payload.signedUrl;
   },
 };
+
+
+export type OperationAttachmentStorageObject = {
+  provider: 'supabase';
+  bucket: string;
+  path: string;
+  attachmentId: string;
+  operationId: string;
+  organizationId: string;
+  originalFileName: string;
+  contentType: string;
+  size: number;
+};
+
+const SAFE_STORAGE_SEGMENT = /^[A-Za-z0-9_-]{1,128}$/;
+
+export function buildOperationAttachmentPath(
+  organizationId: string,
+  operationId: string,
+  attachmentId: string,
+  originalFileName: string,
+) {
+  if (![organizationId, operationId, attachmentId].every((value) => SAFE_STORAGE_SEGMENT.test(value))) {
+    throw new Error('INVALID_OPERATION_ATTACHMENT_CONTEXT');
+  }
+  return `organizations/${organizationId}/operations/${operationId}/${attachmentId}-${safeName(originalFileName)}`;
+}
+
+export async function uploadOperationAttachment(
+  file: File,
+  input: {
+    organizationId: string;
+    operationId: string;
+    attachmentId: string;
+    userToken: string;
+    contentType: string;
+  },
+): Promise<OperationAttachmentStorageObject> {
+  const path = buildOperationAttachmentPath(input.organizationId, input.operationId, input.attachmentId, file.name);
+  const payload = await invoke<{ ok: true; token: string; path: string }>(
+    'operation-sign-upload',
+    {
+      organizationId: input.organizationId,
+      operationId: input.operationId,
+      attachmentId: input.attachmentId,
+      path,
+      contentType: input.contentType,
+      size: file.size,
+    },
+    input.userToken,
+  );
+  const client = configured();
+  const { error } = await client.storage.from(bucket).uploadToSignedUrl(payload.path, payload.token, file, {
+    contentType: input.contentType,
+    cacheControl: '3600',
+  });
+  if (error) throw new Error(`OPERATION_ATTACHMENT_UPLOAD_FAILED:${error.message}`);
+  return {
+    provider: 'supabase',
+    bucket,
+    path: payload.path,
+    attachmentId: input.attachmentId,
+    operationId: input.operationId,
+    organizationId: input.organizationId,
+    originalFileName: file.name,
+    contentType: input.contentType,
+    size: file.size,
+  };
+}
+
+export async function getOperationAttachmentTemporaryUrl(
+  object: OperationAttachmentStorageObject,
+  userToken: string,
+): Promise<string> {
+  const payload = await invoke<{ ok: true; signedUrl: string }>(
+    'operation-sign-download',
+    {
+      organizationId: object.organizationId,
+      operationId: object.operationId,
+      attachmentId: object.attachmentId,
+      path: object.path,
+    },
+    userToken,
+  );
+  return payload.signedUrl;
+}
+
+export async function removeOperationAttachment(
+  object: OperationAttachmentStorageObject,
+  userToken: string,
+): Promise<void> {
+  await invoke('operation-delete', {
+    organizationId: object.organizationId,
+    operationId: object.operationId,
+    attachmentId: object.attachmentId,
+    path: object.path,
+  }, userToken);
+}
