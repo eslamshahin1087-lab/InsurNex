@@ -22,5 +22,5 @@ export const COPILOT_SYSTEM_PROMPT = [
   '- Arabic: professional, clear Modern Standard Arabic.',
   '- English: professional, concise business English.',
   '- Currency: use the currency code present in context; do not combine different currencies.',
-  '- Dates: use a format appropriate to the user's language.',
+  '- Dates: use a format appropriate to the response language.',
 ].join('\n');
