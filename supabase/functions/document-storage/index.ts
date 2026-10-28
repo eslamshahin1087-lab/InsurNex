@@ -54,7 +54,12 @@ interface FirebaseUser {
 }
 
 interface FirestoreDocument {
-  fields?: Record<string, { stringValue?: string; booleanValue?: boolean }>;
+  fields?: Record<string, {
+    stringValue?: string;
+    booleanValue?: boolean;
+    integerValue?: string;
+    doubleValue?: number;
+  }>;
 }
 
 async function verifyFirebaseToken(token: string): Promise<FirebaseUser> {
@@ -88,8 +93,7 @@ function stringField(document: FirestoreDocument | null, field: string): string 
 }
 
 function numberField(document: FirestoreDocument | null, field: string): number | null {
-  const fields = document?.fields as Record<string, { integerValue?: string; doubleValue?: number }> | undefined;
-  const value = fields?.[field];
+  const value = document?.fields?.[field];
   if (typeof value?.doubleValue === 'number') return value.doubleValue;
   if (typeof value?.integerValue === 'string') {
     const parsed = Number(value.integerValue);
