@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Save } from 'lucide-react';
 import { useAuth } from '../features/auth/auth-context';
@@ -20,6 +20,7 @@ import type {
   InsuranceNeed,
 } from '../features/clients/client.types';
 import { assessRisk } from '../features/clients/risk-assessment.service';
+import { uploadClientDocumentsAtomic, type PendingClientDocument } from '../features/operations/operations-document.service';
 import '../theme/client-wizard.css';
 
 const STEP_LABELS = [
@@ -51,26 +52,12 @@ export default function ClientWizardPage() {
   const [data, setData] = useState<ClientWizardInput>(emptyInput);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [firebaseToken, setFirebaseToken] = useState('');
+  const [uploadWarning, setUploadWarning] = useState('');
   const [created, setCreated] = useState<{
     id: string;
     code: string;
     clientName: string;
   } | null>(null);
-
-  // ============================================================
-  // Fetch Firebase ID token once (for Supabase uploads)
-  // ============================================================
-  useEffect(() => {
-    if (!user) {
-      setFirebaseToken('');
-      return;
-    }
-    void user
-      .getIdToken()
-      .then(setFirebaseToken)
-      .catch(() => setFirebaseToken(''));
-  }, [user]);
 
   const update = useCallback((patch: Partial<ClientWizardInput>) => {
     setData((prev) => ({ ...prev, ...patch }));
@@ -129,13 +116,61 @@ export default function ClientWizardPage() {
 
     setSaving(true);
     setError('');
+    setUploadWarning('');
     try {
       const clientName =
         data.type === 'individual'
           ? data.individual?.fullName || 'عميل'
           : data.corporate?.companyName || 'شركة';
 
-      const res = await createExtendedClient(data, orgId, user.uid);
+      // Never serialize the in-memory File or a temporary URL into the client record.
+      const safeDocuments: ClientDocument[] = data.documents.map((item) => ({
+        id: item.id,
+        type: item.type,
+        label: item.label,
+        url: '',
+        fileName: item.fileName,
+        mimeType: item.mimeType,
+        size: item.size,
+        uploadedAt: item.uploadedAt,
+        verified: item.verified,
+        ...(item.verifiedBy ? { verifiedBy: item.verifiedBy } : {}),
+      }));
+      const res = await createExtendedClient(
+        { ...data, documents: safeDocuments },
+        orgId,
+        user.uid,
+      );
+
+      const pendingDocuments: PendingClientDocument[] = data.documents.flatMap((item) => {
+        if (!item.pendingFile) return [];
+        const isIdentity = /national-id|signatory-id|tax-card|commercial-register|license/.test(item.type);
+        return [{
+          file: item.pendingFile,
+          name: item.label,
+          category: isIdentity ? 'identity' : 'other',
+          notes: `Wizard document type: ${item.type}`,
+        }];
+      });
+
+      if (pendingDocuments.length > 0) {
+        try {
+          const firebaseToken = await user.getIdToken();
+          await uploadClientDocumentsAtomic({
+            organizationId: orgId,
+            clientId: res.id,
+            userId: user.uid,
+            firebaseToken,
+            documents: pendingDocuments,
+          });
+        } catch (uploadError) {
+          console.error('Client was created but staged document upload failed:', uploadError);
+          setUploadWarning(
+            'تم إنشاء ملف العميل، لكن تعذر رفع مستند أو أكثر. لم تُحذف بيانات العميل. افتح قسم المستندات داخل ملف العميل لإعادة الرفع، ولا تعِد إنشاء العميل.',
+          );
+        }
+      }
+
       setCreated({ id: res.id, code: res.code, clientName });
     } catch (e) {
       console.error(e);
@@ -167,6 +202,7 @@ export default function ClientWizardPage() {
     return (
       <main className="mobile-page wizard-page" dir="rtl">
         <div className="inx-container">
+          {uploadWarning && <div className="wizard-error" role="alert">{uploadWarning}</div>}
           <AiAnalysisChatBox
             clientId={created.id}
             clientName={created.clientName}
@@ -266,7 +302,6 @@ export default function ClientWizardPage() {
               needs={data.needs}
               documents={data.documents}
               organizationId={profile?.organizationId || ''}
-              firebaseToken={firebaseToken}
               onAdd={addDocument}
               onRemove={removeDocument}
             />
