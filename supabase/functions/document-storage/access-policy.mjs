@@ -118,7 +118,10 @@ export function operationAttachmentMetadataMatchesPath(metadata, request) {
   if (request.actorUid && metadata.uploadedBy !== request.actorUid) return false;
   if (request.contentType && metadata.contentType !== request.contentType) return false;
   if (typeof request.size === 'number' && metadata.size !== request.size) return false;
+  if (typeof metadata.size !== 'number' || !Number.isFinite(metadata.size) || metadata.size <= 0
+      || typeof metadata.contentType !== 'string' || !metadata.contentType) return false;
   if (typeof request.attachmentId !== 'string' || !request.attachmentId
+      || typeof request.filename !== 'string'
       || !request.filename.startsWith(request.attachmentId + '-')) return false;
   if (metadata.downloadUrl !== '') return false;
   return true;
