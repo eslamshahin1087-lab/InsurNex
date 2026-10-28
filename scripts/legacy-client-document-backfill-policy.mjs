@@ -59,17 +59,23 @@ function normalizedEmbeddedReference(clientRecord, item, options) {
   const organizationId = text(clientRecord.data?.organizationId);
   const clientId = text(clientRecord.id);
   if (!SAFE_ID.test(organizationId) || !SAFE_ID.test(clientId)) return null;
-  if (text(item.storageProvider).toLowerCase() === 'firebase') return null;
 
+  const provider = text(item.storageProvider).toLowerCase();
+  if (provider && provider !== 'supabase') return null;
+
+  const rawUrls = [item.url, item.downloadUrl].filter(value => typeof value === 'string' && value.trim());
   const candidates = [];
   const stablePath = text(item.storagePath);
+  // A plain path without a confirming Supabase URL is accepted only when
+  // the stored provider explicitly says Supabase. Otherwise keep it for review.
   if (stablePath) {
-    const stableBucket = text(item.storageBucket) || options.bucket;
-    if (stableBucket !== options.bucket) return null;
+    if (provider !== 'supabase' && rawUrls.length === 0) return null;
+    const stableBucket = text(item.storageBucket) || (provider === 'supabase' ? options.bucket : '');
+    if (!stableBucket || stableBucket !== options.bucket) return null;
     candidates.push({ bucket: stableBucket, path: stablePath, source: 'storagePath' });
   }
 
-  for (const rawUrl of [item.url, item.downloadUrl].filter(value => typeof value === 'string' && value.trim())) {
+  for (const rawUrl of rawUrls) {
     let url;
     try {
       url = new URL(rawUrl.trim());
