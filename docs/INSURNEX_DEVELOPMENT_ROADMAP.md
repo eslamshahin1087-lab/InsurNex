@@ -43,8 +43,8 @@ Acceptance gate:
 
 Still required before release:
 - Verify and configure private bucket max size and allowed MIME types at storage level; the signed-upload request's claimed size/type is not substitute for storage-side enforcement.
-- Build a separate dry-run migration utility for existing Firebase objects with file existence, checksum/size, retry log, idempotent rerun and verified rollback.
-- Preserve original IDs, filenames, timestamps, categories, relations and uploader metadata during any future migration.
+- Use the read-only inventory command in `functions/scripts/legacy-storage-dry-run.mjs` to reconcile Firestore metadata with Firebase Storage object listings before creating a migration manifest. The inventory is scoped to the selected collections and never mutates cloud data.
+- A separate migration/copy utility is still required, including idempotent reruns, checksum verification, retry/resume log and a tested rollback that preserves original IDs, filenames, timestamps, categories, relations and uploader metadata.
 - Add staging integration tests for actual upload/preview/download/delete and expired URLs.
 - Keep `operationAttachments` on Firebase Storage until its own metadata/authorization path is designed and migrated; do not call the entire product storage-unified yet.
 
@@ -130,7 +130,7 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 1. Review and verify Phase 2B on the exact PR head; do not deploy the updated Supabase Edge Function from this branch yet.
 2. Run staging integration tests for upload, temporary URL and delete, including mismatched IDs, cross-tenant relations, claims role and expired signed URL handling.
 3. Plan a separate Phase 2C PR for `operationAttachments` and audit all remaining `firebase/storage` imports before declaring storage migration complete.
-4. Build a dry-run inventory/migration/rollback tool for existing Firebase objects. Never delete legacy objects during the first pass.
+4. Run the read-only legacy storage inventory against an explicitly selected project/bucket; then build a separate migration/copy tool with a verified rollback. Never delete legacy objects during the first pass.
 5. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is used with broad client access.
 6. Complete audit and AI safeguards before claiming production-ready security.
 7. Treat production deployment as a separate approval-gated operation.
