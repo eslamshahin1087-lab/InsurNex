@@ -72,8 +72,54 @@ export function buildLegacyStorageMetadataInventory({
   const legacyRecords = [];
   let ignoredSupabaseRecords = 0;
   let ignoredWithoutStorageReference = 0;
+  const expandedMetadataRecords = [];
 
+  // Some older client-wizard flows persisted document references inside
+  // clients.documents[]. Project only the document metadata needed for audit;
+  // never copy full client records or their unrelated personal data into report.
   for (const record of metadataRecords) {
+    const data = record.data || {};
+    if (record.collection !== 'clients' || !Array.isArray(data.documents)) {
+      expandedMetadataRecords.push(record);
+      continue;
+    }
+
+    const clientHasTopLevelStorageRef =
+      (typeof data.storagePath === 'string' && data.storagePath.trim()) ||
+      (typeof data.downloadUrl === 'string' && data.downloadUrl.trim());
+    if (clientHasTopLevelStorageRef) expandedMetadataRecords.push(record);
+
+    data.documents.forEach((embedded, index) => {
+      if (!embedded || typeof embedded !== 'object' || Array.isArray(embedded)) return;
+      const storagePath = typeof embedded.storagePath === 'string' ? embedded.storagePath.trim() : '';
+      const downloadUrl = [embedded.downloadUrl, embedded.url]
+        .find(value => typeof value === 'string' && value.trim())?.trim() || '';
+      if (!storagePath && !downloadUrl) {
+        ignoredWithoutStorageReference += 1;
+        return;
+      }
+      const embeddedId = typeof embedded.id === 'string' && embedded.id.trim()
+        ? embedded.id.trim()
+        : String(index);
+      expandedMetadataRecords.push({
+        collection: 'clients.documents',
+        id: record.id + '::' + embeddedId,
+        data: {
+          organizationId: data.organizationId,
+          storageProvider: embedded.storageProvider,
+          storagePath,
+          downloadUrl,
+          originalFileName: embedded.originalFileName || embedded.fileName || embedded.label,
+          name: embedded.label || embedded.fileName,
+          size: embedded.size,
+          contentType: embedded.contentType || embedded.mimeType,
+          createdAt: embedded.uploadedAt,
+        },
+      });
+    });
+  }
+
+  for (const record of expandedMetadataRecords) {
     const data = record.data || {};
     if (data.storageProvider === 'supabase') {
       ignoredSupabaseRecords += 1;
