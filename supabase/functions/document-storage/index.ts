@@ -387,6 +387,11 @@ async function handleOperationAttachmentCleanup(body: Record<string, unknown>, u
   const operationId = typeof body.operationId === 'string' ? body.operationId : '';
   const attachmentId = typeof body.attachmentId === 'string' ? body.attachmentId : '';
   const path = typeof body.path === 'string' ? body.path : '';
+  if (!organizationId || !/^[A-Za-z0-9_-]{1,128}$/.test(organizationId)
+      || !operationId || !/^[A-Za-z0-9_-]{1,128}$/.test(operationId)
+      || !attachmentId || !/^[A-Za-z0-9_-]{1,128}$/.test(attachmentId)) {
+    return errorResponse('INVALID_OPERATION_ATTACHMENT_CONTEXT', 400);
+  }
   const parsed = parseOperationAttachmentPath(path, organizationId) as AuthorizedOperationAttachment | null;
   if (!parsed || parsed.operationId !== operationId || !parsed.filename.startsWith(attachmentId + '-')) {
     return errorResponse('INVALID_OPERATION_ATTACHMENT_PATH', 400);
