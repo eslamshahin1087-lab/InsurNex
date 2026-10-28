@@ -252,10 +252,10 @@ serve(async (req) => {
 
     const caller = await verifyFirebaseToken(firebaseToken);
 
-    const contentLength = Number(req.headers.get('content-length') ?? 0);
-    if (Number.isFinite(contentLength) && contentLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
+    const rawBody = await req.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
     let body: unknown;
-    try { body = await req.json(); } catch { throw new Error('INVALID_REQUEST_JSON'); }
+    try { body = JSON.parse(rawBody); } catch { throw new Error('INVALID_REQUEST_JSON'); }
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('INVALID_REQUEST_JSON');
     const requestBody = body as Record<string, unknown>;
     const messages = validateMessages(requestBody.messages);
