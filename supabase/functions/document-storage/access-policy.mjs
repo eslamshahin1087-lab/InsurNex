@@ -22,6 +22,8 @@ export function metadataMatchesPath(metadata, request) {
   if (metadata.organizationId !== request.organizationId) return false;
   if (metadata.storagePath !== request.path) return false;
   if (metadata.storageProvider !== 'supabase') return false;
+  if (request.bucket && metadata.storageBucket !== request.bucket) return false;
+  if (request.actorUid && metadata.uploadedBy !== request.actorUid) return false;
   if (metadata.relatedType !== 'client' || metadata.relatedId !== request.clientId) return false;
   if (areaForCategory(metadata.category) !== request.area) return false;
   if (request.contentType && metadata.contentType !== request.contentType) return false;
