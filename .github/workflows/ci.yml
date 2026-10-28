@@ -22,12 +22,16 @@ jobs:
         run: npm run test:pwa
       - name: Document storage authorization policy regression tests
         run: npm run test:storage-gateway
+      - name: Legacy storage inventory reconciliation regression tests
+        run: npm run test:storage-inventory
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
         run: |
           npm ci --prefix functions
           npm run build --prefix functions
+      - name: Verify legacy storage dry-run CLI starts without cloud access
+        run: node functions/scripts/legacy-storage-dry-run.mjs --help
       - name: Set up Java 21 for Firebase Emulator Suite
         uses: actions/setup-java@v4
         with:

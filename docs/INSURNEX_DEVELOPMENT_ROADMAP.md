@@ -8,7 +8,8 @@
 - Phase 1 RBAC and organization invitations merged to `main` in PR #48 (`611c71ef6eb94bde5a695ed32f29de5952f42f8b`).
 - CI and Secrets Scan passed on the implementation commit before merge.
 - Phase 2A and Phase 2B storage gateway work is merged to `main` (Phase 2B merge commit `19c178aee493df8e2f105e39719aeb0c16f48120`). General and client-linked document operations use exact metadata-bound paths behind the private Supabase signed-URL gateway.
-- Phase 2C is being implemented on `feat/insurnex-operation-attachment-gateway-20261028`: operation attachments are being migrated through a separate resource policy so they remain bound to the exact operation and organization.
+- Phase 2C operation-attachment gateway implementation merged to `main` in PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed. The updated Supabase Edge Function is not deployed and existing Firebase objects have not been migrated.
+- Read-only legacy Storage inventory and reconciliation are proposed in PR #52; a separate copy/migration tool and verified rollback remain future work.
 - Sensitive client fields remain in a combined Client 360 record, assignment-level access and append-only audit events are incomplete, and AI processing is not yet approved for sensitive customer data.
 
 ## Phase 2A — Bind signed storage access to authorized document metadata
@@ -43,27 +44,27 @@ Acceptance gate:
 
 Still required before release:
 - Verify and configure private bucket max size and allowed MIME types at storage level; the signed-upload request's claimed size/type is not substitute for storage-side enforcement.
-- Build a separate dry-run migration utility for existing Firebase objects with file existence, checksum/size, retry log, idempotent rerun and verified rollback.
-- Preserve original IDs, filenames, timestamps, categories, relations and uploader metadata during any future migration.
+- Use the read-only inventory command in `functions/scripts/legacy-storage-dry-run.mjs` to reconcile Firestore metadata with Firebase Storage object listings before creating a migration manifest. The inventory is scoped to the selected collections and never mutates cloud data.
+- A separate migration/copy utility is still required, including idempotent reruns, checksum verification, retry/resume log and a tested rollback that preserves original IDs, filenames, timestamps, categories, relations and uploader metadata.
 - Add staging integration tests for actual upload/preview/download/delete and expired URLs.
-- Keep `operationAttachments` on Firebase Storage until its own metadata/authorization path is designed and migrated; do not call the entire product storage-unified yet.
+- Do not enable the client-side Phase 2C path until the matching Edge Function is deployed in a separately approved release and passes staging tests. Existing Firebase-backed operation attachments remain untouched pending inventory and migration.
 
-Acceptance gate: Phase 2B CI and Emulator suite pass; all new general documents use the gateway and short-lived URLs; all legacy objects remain available through their existing read-only URL until migrated; no legacy object is deleted by this PR. A separate acceptance gate is required for migrating `operationAttachments` and other remaining direct Storage call sites.
+Acceptance gate: Phase 2B CI and Emulator suite pass; staging confirms upload/download/delete and expiry behavior; legacy objects remain available until migrated; no source object is deleted as part of the gateway rollout. Remaining direct Storage call sites must be audited separately.
 
 ## Phase 2C — Migrate operation attachments as a separate resource
 
-**Status:** implementation in progress on `feat/insurnex-operation-attachment-gateway-20261028`. CI and Secrets Scan passed on exact head `73bcae32c7c0404768fc87b67774c0b82c652f19`; code review and staging verification remain required. No Edge Function deployment or live object migration has been performed.
+**Gateway status:** implemented and merged to `main` through PR #51 (merge commit `69ef5bb28faf4afa5d1795777082f1e56c656fa0`); CI and Secrets Scan passed on the merged implementation head. The Edge Function has not been deployed, staging acceptance is outstanding, and existing Firebase objects remain in place. **Inventory status:** read-only inventory is in PR #52 and requires exact-head CI/review before use.
 
 Scope:
 1. Inventory all `firebase/storage` imports and call sites and classify them by collection, path layout, owner relationship and user workflow.
 2. Define a dedicated metadata-first gateway resource for operation attachments (or migrate them to the unified `documents` collection only if references and IDs can be preserved).
 3. Bind each attachment to the exact operation/organization record, validate the operation's tenant, and apply role-specific read/write/delete rules.
 4. Use private objects and short-lived URLs; do not persist fresh download URLs.
-5. Preserve existing operation IDs, attachment metadata and workflow references. Implement dry-run inventory, object existence checks, byte-size/checksum reconciliation, retries and rollback.
-6. Remove direct `uploadBytes`, `getDownloadURL` and `deleteObject` calls only after the new path passes staging integration tests.
-7. Add regression tests for cross-organization operation IDs, missing operations, wrong-role access, duplicate attachments and cleanup after interrupted upload.
+5. Preserve existing operation IDs, attachment metadata and workflow references. The read-only inventory in PR #52 reports object existence, size, available provider checksums, duplicate references and retry history; a separate migration/copy utility with resume and rollback is still required.
+6. The operation attachment service no longer uses direct Firebase Storage SDK calls. Do not enable the new client path until the matching Edge Function passes staging integration tests.
+7. Gateway policy and Firestore Emulator regressions cover cross-organization operation IDs, missing operations, role access, metadata versioning and pending-upload cleanup; manual staging acceptance remains required.
 
-Acceptance gate: no remaining direct Firebase Storage calls in the audited file/document/attachment modules; all legacy objects are catalogued and can be restored; operation workflows pass staging acceptance. Do not declare whole-app storage unification complete until this gate passes.
+Acceptance gate: no remaining direct Firebase Storage calls in the audited modules; every legacy object is catalogued and recoverable; signed upload/preview/download/delete passes staging. Do not declare whole-app storage unification complete until the repository-wide Storage call-site audit and migration gate pass.
 
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
@@ -127,10 +128,11 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Review and verify Phase 2B on the exact PR head; do not deploy the updated Supabase Edge Function from this branch yet.
-2. Run staging integration tests for upload, temporary URL and delete, including mismatched IDs, cross-tenant relations, claims role and expired signed URL handling.
-3. Plan a separate Phase 2C PR for `operationAttachments` and audit all remaining `firebase/storage` imports before declaring storage migration complete.
-4. Build a dry-run inventory/migration/rollback tool for existing Firebase objects. Never delete legacy objects during the first pass.
+1. Complete code review and exact-head checks for PR #52, then run the read-only inventory only against an explicitly selected project/bucket using approved read-only credentials.
+2. Review missing objects, duplicate metadata references, organization/path mismatches, size/checksum mismatches, unsupported URLs and unreferenced objects before making a migration manifest.
+3. Run staging integration tests for Phase 2B and Phase 2C gateway changes: upload, temporary URL and delete, mismatched IDs, cross-tenant parents, role restrictions and expired URLs.
+4. Build a separate migration/copy tool with idempotent resume, destination verification and a tested rollback. Never delete legacy objects during the initial copy phase.
+5. Audit all remaining `firebase/storage` imports and call sites before declaring storage migration complete.
 5. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is used with broad client access.
 6. Complete audit and AI safeguards before claiming production-ready security.
 7. Treat production deployment as a separate approval-gated operation.
