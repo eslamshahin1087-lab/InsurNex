@@ -99,7 +99,6 @@ export function buildLegacyClientDocumentBackfillPlan({
   }
 
   for (const clientRecord of clientRecords) {
-    const clientData = clientRecord.data || {};
     const organizationId = text(clientData.organizationId);
     const clientId = text(clientRecord.id);
     const embeddedDocuments = Array.isArray(clientData.documents) ? clientData.documents : [];
@@ -113,6 +112,7 @@ export function buildLegacyClientDocumentBackfillPlan({
         sourceEmbeddedDocumentId: embeddedDocumentId || null,
         sourceIndex: index,
         organizationId: organizationId || null,
+        sourceUploadedAtIso: isoTimestamp(rawItem?.uploadedAt),
         status: 'needs_review',
         reason: '',
         bucket: null,
@@ -209,7 +209,6 @@ export function buildLegacyClientDocumentBackfillPlan({
         ...(text(item.uploadedBy) ? { uploadedBy: text(item.uploadedBy) } : {}),
         notes: text(item.notes),
         status: 'active',
-        ...(uploadedAt ? { createdAtSourceIso: uploadedAt } : {}),
       };
       entries.push({
         ...base,
