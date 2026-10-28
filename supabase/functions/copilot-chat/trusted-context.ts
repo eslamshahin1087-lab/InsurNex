@@ -4,7 +4,7 @@ type FirestoreDocument = {
   fields?: Record<string, FirestoreValue | undefined>;
 };
 
-type CollectionKey = "clients" | "policies" | "claims" | "leads" | "tasks" | "insurers";
+type CollectionKey = "clients" | "policies" | "claims" | "leads" | "tasks" | "insurers" | "revenue" | "expenses" | "commissions";
 
 const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   dashboard: ["clients", "policies", "claims", "leads", "tasks", "insurers"],
@@ -15,7 +15,7 @@ const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   tasks: ["tasks"],
   insurers: ["insurers"],
   "client-details": [],
-  finance: [],
+  finance: ["revenue", "expenses", "commissions"],
 };
 
 const COLLECTION_FIELDS: Record<CollectionKey, string[]> = {
@@ -25,9 +25,13 @@ const COLLECTION_FIELDS: Record<CollectionKey, string[]> = {
   leads: ["organizationId", "stage", "insuranceType", "estimatedValue", "createdAt"],
   tasks: ["organizationId", "status", "priority", "dueDate", "createdAt"],
   insurers: ["organizationId", "name", "status"],
+  revenue: ["organizationId", "amount", "status", "currency", "date"],
+  expenses: ["organizationId", "amount", "currency", "category", "date"],
+  commissions: ["organizationId", "commissionAmount", "status", "currency", "createdAt"],
 };
 
 const MAX_PER_COLLECTION = 20;
+const MAX_FINANCE_ROWS = 500;
 const MAX_CLIENT_ID_LENGTH = 160;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -116,10 +120,18 @@ function buildQueryBody(
         fields: COLLECTION_FIELDS[collectionId].map((fieldPath) => ({ fieldPath })),
       },
       orderBy: [{
-        field: { fieldPath: collectionId === "insurers" ? "name" : "createdAt" },
+        field: {
+          fieldPath: collectionId === "insurers"
+            ? "name"
+            : collectionId === "revenue" || collectionId === "expenses"
+              ? "date"
+              : "createdAt",
+        },
         direction: collectionId === "insurers" ? "ASCENDING" : "DESCENDING",
       }],
-      limit: MAX_PER_COLLECTION,
+      limit: ["revenue", "expenses", "commissions"].includes(collectionId)
+        ? MAX_FINANCE_ROWS
+        : MAX_PER_COLLECTION,
     },
   };
 }
@@ -250,6 +262,8 @@ export async function buildAuthorizedCopilotContext(input: {
     ? (["policies", "claims", "tasks"] as CollectionKey[])
     : PAGE_COLLECTIONS[page] ?? [];
 
+  const financeRows: { revenue?: Record<string, unknown>[]; expenses?: Record<string, unknown>[]; commissions?: Record<string, unknown>[] } = {};
+
   const results = await Promise.all(collectionIds.map(async (collectionId) => {
     try {
       const records = await queryCollection({
@@ -273,6 +287,21 @@ export async function buildAuthorizedCopilotContext(input: {
       output.stats = {
         sampledClients: records.length,
       };
+      continue;
+    }
+
+    if (collectionId === "revenue") {
+      financeRows.revenue = records;
+      continue;
+    }
+
+    if (collectionId === "expenses") {
+      financeRows.expenses = records;
+      continue;
+    }
+
+    if (collectionId === "commissions") {
+      financeRows.commissions = records;
       continue;
     }
 
@@ -322,6 +351,42 @@ export async function buildAuthorizedCopilotContext(input: {
         name: safeScalar(record.name),
         status: safeScalar(record.status),
       })).filter((record) => Object.values(record).some((value) => value !== undefined));
+    }
+  }
+
+  if (page === "finance" && financeRows.revenue && financeRows.expenses && financeRows.commissions) {
+    const currencies = new Set<string>();
+    for (const record of [...financeRows.revenue, ...financeRows.expenses, ...financeRows.commissions]) {
+      if (typeof record.currency === "string" && record.currency.trim()) currencies.add(record.currency.trim());
+    }
+
+    // Do not combine values with different currencies into one misleading total.
+    if (currencies.size <= 1) {
+      const amount = (record: Record<string, unknown>, key: string): number =>
+        typeof record[key] === "number" && Number.isFinite(record[key])
+          ? record[key] as number
+          : 0;
+
+      const totalRevenue = financeRows.revenue
+        .filter((record) => record.status === "confirmed")
+        .reduce((sum, record) => sum + amount(record, "amount"), 0);
+      const totalExpenses = financeRows.expenses
+        .reduce((sum, record) => sum + amount(record, "amount"), 0);
+      const pendingCommissions = financeRows.commissions
+        .filter((record) => record.status === "pending")
+        .reduce((sum, record) => sum + amount(record, "commissionAmount"), 0);
+      const receivedCommissions = financeRows.commissions
+        .filter((record) => record.status === "received")
+        .reduce((sum, record) => sum + amount(record, "commissionAmount"), 0);
+
+      output.finance = {
+        totalRevenue,
+        totalExpenses,
+        netIncome: totalRevenue - totalExpenses,
+        pendingCommissions,
+        receivedCommissions,
+        currency: currencies.values().next().value ?? "EGP",
+      };
     }
   }
 
