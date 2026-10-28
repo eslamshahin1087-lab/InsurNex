@@ -128,10 +128,36 @@ assert.ok(!JSON.stringify(report).includes('not-in-report'),
 assert.ok(!JSON.stringify(report).includes('https://firebasestorage.googleapis.com'),
   'source download URLs never enter the inventory report');
 
+const embeddedClientRecord = {
+  collection: 'clients',
+  id: 'client_a',
+  data: {
+    organizationId: 'org_a',
+    name: 'PRIVATE CLIENT NAME MUST NOT ENTER REPORT',
+    documents: [
+      {
+        id: 'client_doc_firebase',
+        url: urlFor('organizations/org_a/clients/client_a/old-id.pdf'),
+        fileName: 'old-id.pdf',
+        mimeType: 'application/pdf',
+        size: 77,
+        uploadedAt: new Date('2026-10-02T10:00:00.000Z'),
+      },
+      {
+        id: 'client_doc_without_url',
+        url: '',
+        fileName: 'staged-without-url.pdf',
+        mimeType: 'application/pdf',
+        size: 20,
+      },
+    ],
+  },
+};
+const metadataOnlyRecords = [...records, embeddedClientRecord];
 const metadataOnlyReport = buildLegacyStorageMetadataInventory({
   projectId: 'insurnex-8a9df',
-  collections: ['documents', 'operationAttachments'],
-  metadataRecords: records,
+  collections: ['documents', 'operationAttachments', 'clients'],
+  metadataRecords: metadataOnlyRecords,
   generatedAt: '2026-10-28T10:00:00.000Z',
 });
 
@@ -139,9 +165,9 @@ assert.equal(metadataOnlyReport.mode, 'metadata-only-read-only');
 assert.equal(metadataOnlyReport.noCloudChangesMade, true);
 assert.equal(metadataOnlyReport.storageObjectsInspected, false);
 assert.equal(metadataOnlyReport.summary.storageObjectsInspected, 0);
-assert.equal(metadataOnlyReport.summary.metadataRecordsScanned, records.length);
+assert.equal(metadataOnlyReport.summary.metadataRecordsScanned, metadataOnlyRecords.length);
 assert.equal(metadataOnlyReport.summary.ignoredSupabaseRecords, 1);
-assert.equal(metadataOnlyReport.summary.ignoredWithoutStorageReference, 1);
+assert.equal(metadataOnlyReport.summary.ignoredWithoutStorageReference, 2);
 assert.equal(metadataOnlyReport.summary.duplicateMetadataPaths, 2);
 assert.equal(
   metadataOnlyReport.metadataRecords.find(item => item.documentId === 'doc_ok')?.status,
@@ -170,6 +196,21 @@ assert.ok(!JSON.stringify(metadataOnlyReport).includes('https://firebasestorage.
 assert.ok(
   metadataOnlyReport.limitations.some(text => text.includes('Does not verify object existence')),
   'report declares object-existence limitation',
+);
+const embeddedLegacyRecord = metadataOnlyReport.metadataRecords.find(item =>
+  item.collection === 'clients.documents' && item.documentId === 'client_a::client_doc_firebase');
+assert.equal(embeddedLegacyRecord?.objectPath, 'organizations/org_a/clients/client_a/old-id.pdf');
+assert.equal(embeddedLegacyRecord?.bucket, bucket);
+assert.equal(embeddedLegacyRecord?.fileName, 'old-id.pdf');
+assert.equal(embeddedLegacyRecord?.status, 'metadata_consistent');
+assert.equal(embeddedLegacyRecord?.objectVerified, false);
+assert.ok(
+  !JSON.stringify(metadataOnlyReport).includes('PRIVATE CLIENT NAME MUST NOT ENTER REPORT'),
+  'embedded client document audit must not copy unrelated client profile fields into the report',
+);
+assert.ok(
+  !JSON.stringify(metadataOnlyReport).includes('not-in-report'),
+  'nested Firebase URLs and their access tokens never enter the report',
 );
 
 console.log('All legacy storage inventory regression tests passed.');

@@ -40,6 +40,14 @@ node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-
 
 This reads only Firestore metadata in the default `documents` and `operationAttachments` collections and writes a timestamped local report under `artifacts/`. It does not call Cloud Storage APIs and cannot confirm whether a referenced object exists.
 
+The initial default scan intentionally does not read every client profile. Repository review found that older client-wizard flows can store file metadata inside `clients.documents[]`. To include those possible legacy references, explicitly run:
+
+```sh
+node functions/scripts/legacy-storage-dry-run.mjs --dry-run --project <firebase-project-id> --metadata-only --collections documents,operationAttachments,clients
+```
+
+This causes the tool to read the `clients` collection as well (one Firestore read per client document) but copies only projected document-reference fields into the local report; unrelated client profile fields are not written into the report. This is still metadata-only and cannot verify actual Storage object existence. Consider the additional Firestore read volume before running on a large production dataset.
+
 Full reconciliation requires an accessible Storage bucket and is a separate command:
 
 ```sh
