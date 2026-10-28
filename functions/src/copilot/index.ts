@@ -7,6 +7,7 @@ import {
   buildContextString,
   normalizeCopilotContextSelector,
   type CopilotRole,
+  type CopilotContext,
 } from './context-builder';
 import { callClaude, validateMessages } from './claude.client';
 
@@ -50,7 +51,7 @@ export const copilotChat = onCall(
     }
 
     const db = getFirestore();
-    let context;
+    let context: CopilotContext;
     try {
       const uid = req.auth.uid;
       // Platform Admin membership is provisioned out-of-band. Check it first
