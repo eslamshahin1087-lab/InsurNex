@@ -15,7 +15,9 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-} from 'firebase/firestore';import { db } from '../../firebase/config';
+} from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import { deleteDocumentRecord } from './document.service';
 import type {
   DocumentRecord,
   DocumentStatus,
@@ -325,26 +327,13 @@ export async function updateDocument(
 // 12. حذف وثيقة (مع الملف)
 // ============================================================
 
-export async function deleteDocument(
-  documentId: string,
-): Promise<void> {
-  const { deleteDoc } = await import('firebase/firestore');
-  const { deleteObject, ref: storageRef } = await import('firebase/storage');
-  const { storage } = await import('../../firebase/config');
-
-  const docSnap = await getDoc(doc(db, 'documents', documentId));
-  if (!docSnap.exists()) return;
-
-  const data = docSnap.data();
-  if (data.storagePath) {
-    try {
-      await deleteObject(storageRef(storage, data.storagePath));
-    } catch (e) {
-      console.warn('Storage deletion failed:', e);
-    }
-  }
-
-  await deleteDoc(doc(db, 'documents', documentId));
+export async function deleteDocument(documentId: string): Promise<void> {
+  const snapshot = await getDoc(doc(db, 'documents', documentId));
+  if (!snapshot.exists()) return;
+  const record = mapDocument(snapshot.id, snapshot.data());
+  // Keep legacy Firebase objects intact until a verified migration; all new
+  // Supabase objects are deleted through the same authorization gateway.
+  await deleteDocumentRecord(record);
 }
 
 // ============================================================
