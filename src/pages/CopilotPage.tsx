@@ -58,20 +58,6 @@ export default function CopilotPage() {
     [conversations, activeId],
   );
 
-  // ============================================================
-  // Diagnostic
-  // ============================================================
-  useEffect(() => {
-    console.log('[Copilot] Auth state:', {
-      uid: user?.uid ?? null,
-      email: user?.email ?? null,
-      hasProfile: !!profile,
-      organizationId: profile?.organizationId ?? null,
-      scope,
-      isAdminScope,
-    });
-  }, [user, profile, scope, isAdminScope]);
-
   const loadConversations = useCallback(async () => {
     if (!scope || !user?.uid) {
       setLoadingConvs(false);
@@ -82,7 +68,7 @@ export default function CopilotPage() {
       const rows = await listConversations(scope, user.uid);
       setConversations(rows);
     } catch (e) {
-      console.error('Failed to load conversations', e);
+      
       setError('تعذر تحميل المحادثات.');
     } finally {
       setLoadingConvs(false);
@@ -105,7 +91,7 @@ export default function CopilotPage() {
         const rows = await listMessages(activeId, scope);
         if (!cancelled) setMessages(rows);
       } catch (e) {
-        console.error('Failed to load messages', e);
+        
         if (!cancelled) setError('تعذر تحميل الرسائل.');
       } finally {
         if (!cancelled) setLoadingMsgs(false);
@@ -136,7 +122,7 @@ export default function CopilotPage() {
       setError('');
       await loadConversations();
     } catch (e) {
-      console.error(e);
+      
       setError('تعذر بدء محادثة جديدة.');
     }
   }
@@ -151,14 +137,12 @@ export default function CopilotPage() {
       }
       await loadConversations();
     } catch (e) {
-      console.error(e);
+      
       setError('تعذر حذف المحادثة.');
     }
   }
 
   async function submitText(text: string) {
-    console.log('[Copilot] submitText:', JSON.stringify(text));
-
     if (!user?.uid) {
       setError('يجب تسجيل الدخول أولاً.');
       return;
@@ -188,7 +172,7 @@ export default function CopilotPage() {
         );
         setActiveId(conversationId);
       } catch (e) {
-        console.error('Failed to create conversation', e);
+        
         setError('تعذر بدء محادثة جديدة.');
         return;
       }
@@ -210,7 +194,6 @@ export default function CopilotPage() {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
-      console.log('[Copilot] Calling sendMessage with scope:', scope);
       const response = await sendMessage({
         organizationId: scope,
         userId: user.uid,
@@ -219,7 +202,6 @@ export default function CopilotPage() {
         history: previousHistory,
         context: incomingContext,
       });
-      console.log('[Copilot] Response received:', response);
 
       const fresh = await listMessages(conversationId, scope);
       setMessages(fresh);
@@ -252,9 +234,7 @@ export default function CopilotPage() {
         }
       }
     } catch (e) {
-      console.error('[Copilot] Request failed:', e);
-      const errMsg = (e as Error).message || 'خطأ غير معروف';
-      setError(`تعذر الاتصال بالمساعد الذكي: ${errMsg}`);
+      setError('تعذر الاتصال بالمساعد الذكي الآن. تحقق من الاتصال وحاول مجددًا.');
       setMessages(previousHistory);
     } finally {
       setSending(false);
