@@ -170,7 +170,15 @@ Deno.test("permission failures are not converted into zero-client statistics", a
 });
 
 Deno.test("finance summary is computed from authorized bounded records, not client-supplied totals", async () => {
-  const requests: Array<{ collectionId: string; authorization: string | null; body: Record<string, unknown> }> = [];
+  type FinanceQueryBody = {
+    structuredQuery: {
+      from: Array<{ collectionId: string }>;
+      where: unknown;
+      select: { fields: Array<{ fieldPath: string }> };
+      limit: number;
+    };
+  };
+  const requests: Array<{ collectionId: string; authorization: string | null; body: FinanceQueryBody }> = [];
   const records: Record<string, unknown[]> = {
     revenue: [
       doc({ organizationId: "org-finance", amount: 2000, status: "confirmed", currency: "EGP", type: "fee", clientName: "PRIVATE_CLIENT" }),
@@ -187,16 +195,9 @@ Deno.test("finance summary is computed from authorized bounded records, not clie
   const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     const authorization = new Headers(init?.headers).get("Authorization");
-    const body = JSON.parse(String(init?.body)) as {
-      structuredQuery: {
-        from: Array<{ collectionId: string }>;
-        where: unknown;
-        select: { fields: Array<{ fieldPath: string }> };
-        limit: number;
-      };
-    };
+    const body = JSON.parse(String(init?.body)) as FinanceQueryBody;
     const collectionId = body.structuredQuery.from[0].collectionId;
-    requests.push({ collectionId, authorization, body: body as unknown as Record<string, unknown> });
+    requests.push({ collectionId, authorization, body });
     return Response.json(records[collectionId] ?? []);
   }) as typeof fetch;
 
