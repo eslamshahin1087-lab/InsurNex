@@ -47,7 +47,7 @@ const clientRequest = {
 const clientMetadata = {
   organizationId: org, storagePath: clientPath, storageProvider: 'supabase',
   relatedType: 'client', relatedId: client, category: 'claim',
-  storageBucket: 'insurnex-documents', uploadedBy: 'uploader_1',
+  storageBucket: 'insurnex-documents', uploadedBy: 'uploader_1', storageKeyVersion: 2,
   contentType: 'application/pdf', size: 123,
 };
 assert.equal(metadataMatchesPath(clientMetadata, clientRequest), true, 'client metadata binds exact file identity');
@@ -84,10 +84,11 @@ for (const role of ['owner', 'admin', 'broker']) {
   assert.equal(roleCanAccessDocument(role, 'claim', 'delete', { layout: 'client', relatedType: 'client' }), true, role + ' may delete authorized files');
   assert.equal(roleCanAccessDocument(role, 'other', 'read', { layout: 'general', relatedType: 'general' }), true, role + ' may access general records');
 }
-assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'client', relatedType: 'client' }), true, 'claims can read claim-category client documents');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), true, 'claims can read properly bound claim-category client documents');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: false }), false, 'claims cannot access legacy paths without a metadata-ID prefix');
 assert.equal(roleCanAccessDocument('claims', 'claim', 'write', { layout: 'general', relatedType: 'claim' }), true, 'claims can access explicitly related claim records');
-assert.equal(roleCanAccessDocument('claims', 'claim', 'delete', { layout: 'client', relatedType: 'client' }), false, 'claims cannot delete documents');
-assert.equal(roleCanAccessDocument('claims', 'identity', 'read', { layout: 'client', relatedType: 'client' }), false, 'claims cannot access identity documents');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'delete', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), false, 'claims cannot delete documents');
+assert.equal(roleCanAccessDocument('claims', 'identity', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), false, 'claims cannot access identity documents');
 assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'general', relatedType: 'general' }), false, 'claims cannot read unattached organization-wide claim files');
 for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
   assert.equal(roleCanAccessDocument(role, 'claim', 'read', { layout: 'client', relatedType: 'client' }), false, role + ' has no storage gateway access');
