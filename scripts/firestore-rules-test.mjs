@@ -310,6 +310,39 @@ try {
     'claims role can read claim records in its own organization');
   check((await getDoc(doc(claimsMember.actor.db, 'policies', protectedPolicyId))).exists(),
     'claims role can read linked policy metadata within its organization');
+  // New Supabase metadata must declare the bound-path key version and may not persist URLs.
+  const unversionedSupabaseId = 'rbac-unversioned-storage-' + randomUUID();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'documents', unversionedSupabaseId), {
+      organizationId: orgA, category: 'other', relatedType: 'general', relatedId: '',
+      name: 'Unversioned Supabase metadata', uploadedBy: ownerA.user.uid,
+      createdBy: ownerA.user.uid, storageProvider: 'supabase',
+      storageBucket: 'insurnex-documents', storagePath: `organizations/${orgA}/documents/${unversionedSupabaseId}/file.pdf`,
+      downloadUrl: '',
+    }),
+    'new Supabase metadata requires storageKeyVersion 2',
+  );
+  const versionedSupabaseId = 'rbac-versioned-storage-' + randomUUID();
+  const versionedSupabaseRef = doc(ownerA.db, 'documents', versionedSupabaseId);
+  await setDoc(versionedSupabaseRef, {
+    organizationId: orgA, category: 'other', relatedType: 'general', relatedId: '',
+    name: 'Versioned Supabase metadata', uploadedBy: ownerA.user.uid,
+    createdBy: ownerA.user.uid, storageProvider: 'supabase', storageKeyVersion: 2,
+    storageBucket: 'insurnex-documents',
+    storagePath: `organizations/${orgA}/documents/${versionedSupabaseId}/file.pdf`,
+    downloadUrl: '', size: 120, contentType: 'application/pdf',
+  });
+  await expectDenied(
+    () => updateDoc(versionedSupabaseRef, {
+      storagePath: `organizations/${orgA}/documents/another-document/file.pdf`,
+    }),
+    'document metadata storage paths cannot be redirected after creation',
+  );
+  await expectDenied(
+    () => updateDoc(versionedSupabaseRef, { downloadUrl: 'https://example.invalid/persistent-link' }),
+    'new Supabase documents cannot be changed to persist a download URL',
+  );
+
   check((await getDoc(doc(claimsMember.actor.db, 'documents', protectedClaimDocumentId))).exists(),
     'claims role can read claim-category document metadata');
   await expectDenied(

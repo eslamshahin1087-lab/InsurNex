@@ -9,18 +9,29 @@ import {
 const org = 'org_A-123';
 const client = 'client_A-456';
 const documentId = 'doc_123';
-const path = `organizations/${org}/clients/${client}/claim/${documentId}-evidence.pdf`;
+const clientPath = `organizations/${org}/clients/${client}/claim/${documentId}-evidence.pdf`;
+const generalPath = `organizations/${org}/documents/${documentId}/evidence.pdf`;
 
-assert.deepEqual(parseDocumentPath(path, org), {
+assert.deepEqual(parseDocumentPath(clientPath, org), {
+  layout: 'client',
   organizationId: org,
   clientId: client,
   area: 'claim',
-  path,
-}, 'valid organization/client document paths parse');
-
-assert.equal(parseDocumentPath(path, 'other-org'), null, 'cross-organization path is rejected');
+  path: clientPath,
+  filename: `${documentId}-evidence.pdf`,
+}, 'valid client-linked document path parses');
+assert.deepEqual(parseDocumentPath(generalPath, org), {
+  layout: 'general',
+  organizationId: org,
+  documentId,
+  path: generalPath,
+  filename: 'evidence.pdf',
+}, 'valid organization-wide document path parses');
+assert.equal(parseDocumentPath(clientPath, 'other-org'), null, 'cross-organization client path is rejected');
+assert.equal(parseDocumentPath(generalPath, 'other-org'), null, 'cross-organization general path is rejected');
 assert.equal(parseDocumentPath(`organizations/${org}/clients/${client}/unknown/${documentId}.pdf`, org), null, 'unknown storage area is rejected');
-assert.equal(parseDocumentPath(`organizations/${org}/clients/${client}/claim/../secret.pdf`, org), null, 'path traversal is rejected');
+assert.equal(parseDocumentPath(`organizations/${org}/clients/${client}/claim/../secret.pdf`, org), null, 'client path traversal is rejected');
+assert.equal(parseDocumentPath(`organizations/${org}/documents/${documentId}/../secret.pdf`, org), null, 'general path traversal is rejected');
 assert.equal(parseDocumentPath('organizations/org_A/../claims/secret.pdf', org), null, 'unexpected path shape is rejected');
 
 assert.equal(areaForCategory('claim'), 'claim');
@@ -28,40 +39,59 @@ assert.equal(areaForCategory('policy'), 'policy');
 assert.equal(areaForCategory('proposal'), 'quotation');
 assert.equal(areaForCategory('identity'), 'onboarding');
 
-const request = { organizationId: org, clientId: client, area: 'claim', path, contentType: 'application/pdf', size: 123, bucket: 'insurnex-documents', actorUid: 'uploader_1' };
-const metadata = {
-  organizationId: org,
-  storagePath: path,
-  storageProvider: 'supabase',
-  relatedType: 'client',
-  relatedId: client,
-  category: 'claim',
-  storageBucket: 'insurnex-documents',
-  uploadedBy: 'uploader_1',
-  contentType: 'application/pdf',
-  size: 123,
+const clientRequest = {
+  layout: 'client', organizationId: org, clientId: client, documentId,
+  area: 'claim', path: clientPath, filename: `${documentId}-evidence.pdf`,
+  contentType: 'application/pdf', size: 123, bucket: 'insurnex-documents', actorUid: 'uploader_1',
 };
-assert.equal(metadataMatchesPath(metadata, request), true, 'matching metadata binds exact path, tenant, relation and file type');
-assert.equal(metadataMatchesPath({ ...metadata, storagePath: path + '.other' }, request), false, 'path must match the Firestore metadata exactly');
-assert.equal(metadataMatchesPath({ ...metadata, organizationId: 'different-org' }, request), false, 'metadata from another organization is rejected');
-assert.equal(metadataMatchesPath({ ...metadata, relatedId: 'another-client' }, request), false, 'metadata for another client is rejected');
-assert.equal(metadataMatchesPath({ ...metadata, storageProvider: 'firebase' }, request), false, 'legacy Firebase objects cannot be accessed through this Supabase gateway');
-assert.equal(metadataMatchesPath({ ...metadata, storageBucket: 'public-bucket' }, request), false, 'metadata bucket must match the configured private bucket');
-assert.equal(metadataMatchesPath({ ...metadata, uploadedBy: 'another-user' }, request), false, 'only the original uploader can request a signed upload for a pending path');
-assert.equal(metadataMatchesPath({ ...metadata, category: 'identity' }, request), false, 'category and storage area must agree');
-assert.equal(metadataMatchesPath(metadata, { ...request, contentType: 'image/png' }), false, 'upload content type must match the authorized metadata');
-assert.equal(metadataMatchesPath(metadata, { ...request, size: 124 }), false, 'upload size must match the authorized metadata');
+const clientMetadata = {
+  organizationId: org, storagePath: clientPath, storageProvider: 'supabase',
+  relatedType: 'client', relatedId: client, category: 'claim',
+  storageBucket: 'insurnex-documents', uploadedBy: 'uploader_1', storageKeyVersion: 2,
+  contentType: 'application/pdf', size: 123,
+};
+assert.equal(metadataMatchesPath(clientMetadata, clientRequest), true, 'client metadata binds exact file identity');
+assert.equal(metadataMatchesPath({ ...clientMetadata, storagePath: clientPath + '.other' }, clientRequest), false, 'path must exactly match metadata');
+assert.equal(metadataMatchesPath({ ...clientMetadata, organizationId: 'different-org' }, clientRequest), false, 'foreign tenant metadata is rejected');
+assert.equal(metadataMatchesPath({ ...clientMetadata, relatedId: 'another-client' }, clientRequest), false, 'foreign client relation is rejected');
+assert.equal(metadataMatchesPath({ ...clientMetadata, storageProvider: 'firebase' }, clientRequest), false, 'legacy Firebase object cannot use this gateway');
+assert.equal(metadataMatchesPath({ ...clientMetadata, storageBucket: 'public-bucket' }, clientRequest), false, 'bucket must match configured private bucket');
+assert.equal(metadataMatchesPath({ ...clientMetadata, uploadedBy: 'another-user' }, clientRequest), false, 'only uploader may obtain a signed URL for a pending upload');
+assert.equal(metadataMatchesPath({ ...clientMetadata, category: 'identity' }, clientRequest), false, 'category and area must agree');
+assert.equal(metadataMatchesPath(clientMetadata, { ...clientRequest, contentType: 'image/png' }), false, 'content type mismatch is rejected');
+assert.equal(metadataMatchesPath(clientMetadata, { ...clientRequest, size: 124 }), false, 'size mismatch is rejected');
+assert.equal(metadataMatchesPath(clientMetadata, { ...clientRequest, documentId: 'another-doc' }), false, 'client path must be bound to metadata ID');
+
+const generalRequest = {
+  layout: 'general', organizationId: org, documentId, pathDocumentId: documentId,
+  path: generalPath, filename: 'evidence.pdf', bucket: 'insurnex-documents',
+  contentType: 'application/pdf', size: 123, actorUid: 'uploader_1',
+};
+const generalMetadata = {
+  ...clientMetadata,
+  storagePath: generalPath,
+  relatedType: 'general',
+  relatedId: '',
+  category: 'other',
+};
+assert.equal(metadataMatchesPath(generalMetadata, generalRequest), true, 'general metadata binds folder document ID');
+assert.equal(metadataMatchesPath(generalMetadata, { ...generalRequest, pathDocumentId: 'another-doc' }), false, 'general path document ID must equal metadata ID');
+assert.equal(metadataMatchesPath({ ...generalMetadata, relatedId: 'unrelated-id' }, generalRequest), false, 'general metadata cannot contain a stray relation ID');
+assert.equal(metadataMatchesPath({ ...generalMetadata, relatedType: 'unsupported' }, generalRequest), false, 'unsupported relation types are rejected');
 
 for (const role of ['owner', 'admin', 'broker']) {
-  assert.equal(roleCanAccessDocument(role, 'identity', 'onboarding', 'read'), true, role + ' can access authorized client files');
-  assert.equal(roleCanAccessDocument(role, 'claim', 'claim', 'delete'), true, role + ' can delete per existing owner/admin/broker policy');
+  assert.equal(roleCanAccessDocument(role, 'identity', 'read', { layout: 'client', relatedType: 'client' }), true, role + ' may read authorized files');
+  assert.equal(roleCanAccessDocument(role, 'claim', 'delete', { layout: 'client', relatedType: 'client' }), true, role + ' may delete authorized files');
+  assert.equal(roleCanAccessDocument(role, 'other', 'read', { layout: 'general', relatedType: 'general' }), true, role + ' may access general records');
 }
-assert.equal(roleCanAccessDocument('claims', 'claim', 'claim', 'read'), true, 'claims can read claim files');
-assert.equal(roleCanAccessDocument('claims', 'claim', 'claim', 'write'), true, 'claims can upload claim files');
-assert.equal(roleCanAccessDocument('claims', 'claim', 'claim', 'delete'), false, 'claims cannot delete files');
-assert.equal(roleCanAccessDocument('claims', 'identity', 'onboarding', 'read'), false, 'claims cannot access identity files');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), true, 'claims can read properly bound claim-category client documents');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: false }), false, 'claims cannot access legacy paths without a metadata-ID prefix');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'write', { layout: 'general', relatedType: 'claim' }), true, 'claims can access explicitly related claim records');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'delete', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), false, 'claims cannot delete documents');
+assert.equal(roleCanAccessDocument('claims', 'identity', 'read', { layout: 'client', relatedType: 'client', documentIdMatchesPath: true }), false, 'claims cannot access identity documents');
+assert.equal(roleCanAccessDocument('claims', 'claim', 'read', { layout: 'general', relatedType: 'general' }), false, 'claims cannot read unattached organization-wide claim files');
 for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
-  assert.equal(roleCanAccessDocument(role, 'claim', 'claim', 'read'), false, role + ' has no document gateway access');
+  assert.equal(roleCanAccessDocument(role, 'claim', 'read', { layout: 'client', relatedType: 'client' }), false, role + ' has no storage gateway access');
 }
 
 console.log('All document-storage policy regression tests passed.');

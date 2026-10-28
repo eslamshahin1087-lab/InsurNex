@@ -490,6 +490,12 @@ service cloud.firestore {
         && request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
         && (!request.resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == request.auth.uid)
+        // New Supabase document records must use the bound-path format. Legacy
+        // records remain readable, but cannot be re-created without an explicit key version.
+        && (collection != 'documents'
+          || !request.resource.data.keys().hasAny(['storageProvider'])
+          || request.resource.data.storageProvider != 'supabase'
+          || (request.resource.data.storageKeyVersion == 2 && request.resource.data.downloadUrl == ''))
         && canCreateBusinessCollection(collection, request.resource.data);
       allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
@@ -503,7 +509,14 @@ service cloud.firestore {
         && sameOrg(resource.data.organizationId)
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
-        && (collection != 'documents' || request.resource.data.category == resource.data.category)
+        && (collection != 'documents' || (
+          request.resource.data.category == resource.data.category
+          && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)
+          && (!resource.data.keys().hasAny(['storageProvider']) || request.resource.data.storageProvider == resource.data.storageProvider)
+          && (!resource.data.keys().hasAny(['storageBucket']) || request.resource.data.storageBucket == resource.data.storageBucket)
+          && (!resource.data.keys().hasAny(['storageKeyVersion']) || request.resource.data.storageKeyVersion == resource.data.storageKeyVersion)
+          && (!resource.data.keys().hasAny(['downloadUrl']) || request.resource.data.downloadUrl == resource.data.downloadUrl)
+        ))
         && canUpdateBusinessCollection(collection, resource.data);
       allow delete: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'

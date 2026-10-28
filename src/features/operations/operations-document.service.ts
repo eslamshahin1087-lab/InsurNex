@@ -67,6 +67,7 @@ export async function uploadClientDocumentsAtomic(input: {
         storagePath: stored.path,
         storageProvider: stored.provider,
         storageBucket: stored.bucket,
+        storageKeyVersion: 2,
         downloadUrl: '',
         relatedType: 'client',
         relatedId: input.clientId,
