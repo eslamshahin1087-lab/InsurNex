@@ -99,6 +99,7 @@ function safeClientProjection(snapshot) {
           uploadedBy: item.uploadedBy,
           notes: item.notes,
           verified: item.verified,
+          verifiedBy: item.verifiedBy,
         };
       }) : [],
     },
