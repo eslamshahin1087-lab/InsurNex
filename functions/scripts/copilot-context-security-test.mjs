@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
+const handlerSource = readFileSync(new URL('../src/copilot/index.ts', import.meta.url), 'utf8');
+const indexConfig = JSON.parse(readFileSync(new URL('../../firestore.indexes.json', import.meta.url), 'utf8').replace(/^\\uFEFF/, ''));
 const { FieldPath } = require('firebase-admin/firestore');
 const {
   buildAuthorizedContext,
@@ -301,6 +304,24 @@ async function run() {
   });
   assert.deepEqual(salesFinanceContext, { page: 'finance' }, 'sales role must not receive finance context');
   assert.equal(salesFinanceDb.calls.length, 0, 'financial collections must not be queried for unauthorized roles');
+
+  assert.ok(handlerSource.includes("LEGACY_COPILOT_ENABLED = defineString('LEGACY_COPILOT_ENABLED', { default: 'false' })"), 'paid legacy Claude route must be disabled by default');
+  assert.ok(handlerSource.indexOf("LEGACY_COPILOT_ENABLED.value()") < handlerSource.indexOf("callClaude("), 'disabled legacy route must reject before contacting Anthropic');
+
+  const hasCompositeIndex = (collectionGroup, requiredFields) => indexConfig.indexes.some((index) =>
+    index.collectionGroup === collectionGroup &&
+    requiredFields.every((required) => index.fields.some((field) =>
+      field.fieldPath === required.fieldPath && field.order === required.order)));
+
+  for (const [collectionGroup, requiredFields] of [
+    ['clients', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: '__name__', order: 'ASCENDING' }]],
+    ['policies', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'expiryDate', order: 'ASCENDING' }]],
+    ['revenue', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'date', order: 'DESCENDING' }]],
+    ['expenses', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'date', order: 'DESCENDING' }]],
+    ['commissions', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }]],
+  ]) {
+    assert.ok(hasCompositeIndex(collectionGroup, requiredFields), 'required context query index missing: ' + collectionGroup);
+  }
 
   console.log('Legacy Copilot context security regression tests passed.');
 }
