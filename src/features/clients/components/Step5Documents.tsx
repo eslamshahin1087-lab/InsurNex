@@ -6,13 +6,12 @@ import type {
   InsuranceNeed,
 } from '../client.types';
 import { getRequiredDocuments } from '../document-requirements';
-import { supabaseDocumentStorage } from '../../storage/supabase-storage.provider';
+
 
 interface Props {
   type: ClientKind;
   needs: InsuranceNeed[];
   documents: ClientDocument[];
-  organizationId: string;
 
   onAdd: (doc: ClientDocument) => void;
   onRemove: (id: string) => void;
@@ -22,8 +21,7 @@ export default function Step5Documents({
   type,
   needs,
   documents,
-  organizationId,
-
+  
   onAdd,
   onRemove,
 }: Props) {
@@ -101,7 +99,6 @@ export default function Step5Documents({
                 <UploadButton
                   label={req.label}
                   type={req.type}
-                  organizationId={organizationId}
                   
                   onUploaded={(doc) => onAdd(doc)}
                 />
