@@ -1,6 +1,6 @@
 # InsurNex — Proposed Role Capability Matrix
 
-**Status:** approved starting matrix; Phase 1 implementation is in the current draft PR and remains subject to emulator/CI acceptance.  
+**Status:** approved starting matrix; Phase 1 RBAC implementation merged to `main` in PR #48 on 2026-10-27. Production readiness is still blocked by the residual risks below.  
 **Baseline:** repository roles in `src/types/auth.ts`: `owner`, `admin`, `broker`, `sales`, `claims`, `finance`, `staff`. Platform Admin is a separate platform-operator identity and is not an organization role.
 
 ## Security principles
@@ -53,7 +53,7 @@ The draft implementation now adds a client-side Firestore Rules-constrained invi
 4. Owner/Admin can revoke pending invitations. Invitation email delivery is manual/copy-link for the free-only MVP; no paid email provider is assumed.
 5. Owner/Admin can update roles and enable/disable membership by atomically changing both profile and membership records. Owner role transfer is intentionally excluded.
 
-This is deliberately not a claim of complete production security. The team must run the Firebase Emulator tests and review the exact rules before merging. There is no append-only audit-log implementation in this PR yet; invitation and role changes are not considered fully audited until a trusted audit sink is implemented.
+Phase 1 CI and Firestore Emulator regression tests passed for PR #48. This is not a claim of complete production security. There is no append-only audit-log implementation yet; invitation and role changes are not fully audited until a trusted audit sink is implemented.
 
 ## Required tests
 
@@ -67,11 +67,11 @@ This is deliberately not a claim of complete production security. The team must 
 - Onboarding existing owner account remains functional.
 - Run all checks against the Firestore Emulator; no production security-rule deployment before review.
 
-## Review decision needed
+## Review and release decisions
 
-This matrix is intentionally conservative for sensitive data. Please review the proposed role boundaries before we enforce them. If changed, update this document first, then implement rules + invitation provisioning + emulator tests in the same reviewed phase.
+This matrix remains the baseline for subsequent phases. Any material role-boundary change must update this document and the matching automated tests together. Never rely on frontend-only route hiding for authorization.
 
-## Implemented capability boundaries and known gaps (draft branch)
+## Implemented capability boundaries and known gaps (Phase 1 merged)
 
 The current rule changes enforce organization membership plus action/collection capability on the main business collections. They remove the generic Platform Admin bypass for tenant business records, scope Copilot conversation/message access to the current user, restrict document metadata by role/category, and add a one-time verified-email invitation flow.
 
@@ -83,4 +83,4 @@ Important residual risks before production:
 - The legacy general document service still contains direct Firebase Storage upload/download/delete code. It remains incompatible with a strict Spark-only operation model until all call sites are migrated to the canonical private storage gateway and the complete workflow is tested.
 - Firebase Functions/Anthropic AI deployment is not made free-tier compatible by this PR. Sensitive AI calls stay out of scope until a suitable runtime and data-handling posture are approved.
 
-No production rules, hosting, function, or storage deployment is part of this pull request.
+No production rules, hosting, function, or storage deployment was performed as part of PR #48.
