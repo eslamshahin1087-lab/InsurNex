@@ -97,7 +97,6 @@ for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
   assert.equal(roleCanAccessDocument(role, 'claim', 'read', { layout: 'client', relatedType: 'client' }), false, role + ' has no storage gateway access');
 }
 
-console.log('All document-storage policy regression tests passed.');
 
 
 // Operation attachments use an independent resource and stricter delete policy.
@@ -148,3 +147,5 @@ for (const role of ['broker', 'claims']) {
 for (const role of ['sales', 'finance', 'staff', 'platform_admin', '']) {
   assert.equal(roleCanAccessOperationAttachment(role, 'read'), false, role + ' cannot access operation attachment storage');
 }
+
+console.log('All document-storage and operation-attachment policy regression tests passed.');
