@@ -13,7 +13,7 @@
 
 ## Phase 2A — Bind signed storage access to authorized document metadata
 
-**Status in this branch:** implementation candidate; requires CI, emulator and code review.
+**Status in this branch:** CI and Secrets Scan passed on head `2eaaeb63b45c5b84351579c8aaac37dd1916838e`. The PR remains draft pending code review and staging integration tests; the Edge Function has not been deployed.
 
 Scope:
 1. Require a document ID for signed upload, signed download, and delete requests.
@@ -28,6 +28,7 @@ Acceptance gate:
 - Storage policy regression tests pass.
 - Firestore Emulator tests pass.
 - Manual staging test proves upload, preview/download and authorized deletion work for each allowed role, while cross-tenant, wrong-category and mismatched-document attempts are denied.
+- Verify and configure the Supabase private bucket's maximum object size and allowed MIME types; the signed-upload request's claimed size/type is not a substitute for storage-side enforcement.
 - Do not enable or deploy this code until the Supabase Edge Function on the target project is updated in a separately reviewed release step.
 
 ## Phase 2B — Finish the document-storage migration without losing legacy files
