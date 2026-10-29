@@ -54,6 +54,10 @@ jobs:
         run: npm run test:client-sensitive-separation-plan
       - name: Client sensitive-data separation review regression tests
         run: npm run test:client-sensitive-separation-review
+      - name: Client data-access audit safety regression tests
+        run: npm run test:client-data-access-audit
+      - name: Client data-access static inventory
+        run: npm run audit:client-data-access
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
@@ -69,6 +73,7 @@ jobs:
           node functions/scripts/client-sensitive-data-inventory.mjs --help
           node functions/scripts/client-sensitive-data-separation-plan.mjs --help
           node functions/scripts/client-sensitive-data-separation-review.mjs --help
+          node scripts/client-data-access-audit.mjs --help
       - name: Set up Java 21 for Firebase Emulator Suite
         uses: actions/setup-java@v4
         with:
