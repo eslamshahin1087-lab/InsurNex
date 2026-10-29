@@ -1,4 +1,4 @@
-import type { CopilotContextSelector } from "./copilot-context-selector";
+import type { CopilotContextSelector } from "./copilot-context-selector.ts";
 
 type DetailSelectorKey = "client" | "lead" | "policyRef" | "claimRef";
 
