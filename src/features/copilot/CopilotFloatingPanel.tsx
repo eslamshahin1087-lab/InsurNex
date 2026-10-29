@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bot, Maximize2, MessageSquare, Minimize2, Send, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,7 +16,8 @@ import { buildTitleFromFirstMessage, canSendMessage } from './copilot-utils';
 import type {  CopilotConversation,
   CopilotMessage,
 } from './copilot.types';
-import { getCurrentContext } from './copilot-context.store';
+import { clearCurrentContext, COPILOT_CONTEXT_CHANGE_EVENT, getCurrentContext } from './copilot-context.store';
+import { getCopilotConversationScopeKey, resolveCopilotContextForRoute } from './copilot-context-route';
 import type { CopilotContextSelector } from './copilot-context-selector';
 
 interface Props {
@@ -37,36 +38,105 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const conversationScopeRef = useRef<string | null>(null);
+  const identityScopeRef = useRef<string | null>(null);
+  const conversationCreateSequenceRef = useRef(0);
+  const messageRequestSequenceRef = useRef(0);
+  const routeConversationScopeKey = getCopilotConversationScopeKey(location.pathname);
 
-  // Re-read context whenever route changes
-  const incomingContext = useMemo<CopilotContextSelector | undefined>(
-    () => getCurrentContext(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [location.pathname, activeId],
+  const [incomingContext, setIncomingContext] = useState<CopilotContextSelector | undefined>(
+    () => resolveCopilotContextForRoute(location.pathname, getCurrentContext()),
   );
 
-  // Always create a fresh conversation when panel opens
+  // Context is page-scoped: never reuse an unrelated page or record selector.
   useEffect(() => {
-    if (!profile?.organizationId || !user?.uid) return;
-    let cancelled = false;
-    (async () => {
+    const refreshContext = () => {
+      const storedContext = getCurrentContext();
+      const resolvedContext = resolveCopilotContextForRoute(location.pathname, storedContext);
+
+      // The full Copilot route intentionally preserves context from the page that opened it.
+      const normalizedPath = location.pathname.length > 1
+        ? location.pathname.replace(/\/+$/, '')
+        : location.pathname;
+      if (storedContext && !resolvedContext && normalizedPath !== '/copilot') {
+        clearCurrentContext();
+      }
+
+      setIncomingContext(resolvedContext);
+    };
+
+    refreshContext();
+    window.addEventListener(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext);
+    return () => window.removeEventListener(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext);
+  }, [location.pathname]);
+
+  const activeContext = resolveCopilotContextForRoute(location.pathname, incomingContext);
+
+  // Bind each conversation to one route/record and one authenticated workspace.
+  useEffect(() => {
+    if (!profile?.organizationId || !user?.uid) {
+      if (conversationScopeRef.current !== null || identityScopeRef.current !== null) {
+        conversationCreateSequenceRef.current += 1;
+        messageRequestSequenceRef.current += 1;
+        conversationScopeRef.current = null;
+        identityScopeRef.current = null;
+        setActiveId(null);
+        setMessages([]);
+        setConversations([]);
+        setSending(false);
+        setLoadingMsgs(false);
+        setError('');
+      }
+      return;
+    }
+
+    const identityScope = `${user.uid}|${profile.organizationId}`;
+    const identityChanged = identityScopeRef.current !== null && identityScopeRef.current !== identityScope;
+    identityScopeRef.current = identityScope;
+    if (identityChanged) {
+      // Never carry the previous account's page selector into a different login.
+      clearCurrentContext();
+      setIncomingContext(undefined);
+    }
+
+    // Opening the full Copilot route is a continuation; preserve the source conversation.
+    if (
+      routeConversationScopeKey === undefined &&
+      !identityChanged &&
+      conversationScopeRef.current !== null
+    ) {
+      return;
+    }
+
+    const nextScope = `${identityScope}|${routeConversationScopeKey ?? 'route:/copilot'}`;
+    if (conversationScopeRef.current === nextScope) return;
+
+    conversationScopeRef.current = nextScope;
+    const creationSequence = ++conversationCreateSequenceRef.current;
+    // An answer requested for the previous record/workspace must not repopulate this chat.
+    messageRequestSequenceRef.current += 1;
+    setSending(false);
+    setLoadingMsgs(false);
+    setActiveId(null);
+    setMessages([]);
+    setError('');
+
+    void (async () => {
       try {
         const id = await createConversation(profile.organizationId, user.uid);
-        if (cancelled) return;
+        if (creationSequence !== conversationCreateSequenceRef.current) return;
         setActiveId(id);
 
         const rows = await listConversations(profile.organizationId, user.uid);
-        if (cancelled) return;
+        if (creationSequence !== conversationCreateSequenceRef.current) return;
         setConversations(rows);
-      } catch (e) {
-        console.error('Failed to start fresh conversation', e);
-        if (!cancelled) setError('تعذر بدء محادثة جديدة.');
+      } catch {
+        if (creationSequence === conversationCreateSequenceRef.current) {
+          setError('تعذر بدء محادثة جديدة.');
+        }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [profile?.organizationId, user?.uid]);
+  }, [routeConversationScopeKey, profile?.organizationId, user?.uid]);
 
   // Load messages
   useEffect(() => {
@@ -98,16 +168,31 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
   const handleNew = useCallback(async () => {
     if (!profile?.organizationId || !user?.uid) return;
+    messageRequestSequenceRef.current += 1;
+    const creationSequence = ++conversationCreateSequenceRef.current;
+    const creationScope = conversationScopeRef.current;
+    setSending(false);
+    setActiveId(null);
+    setMessages([]);
+    setError('');
     try {
       const id = await createConversation(profile.organizationId, user.uid);
+      if (
+        creationSequence !== conversationCreateSequenceRef.current ||
+        creationScope !== conversationScopeRef.current
+      ) return;
       const rows = await listConversations(profile.organizationId, user.uid);
+      if (
+        creationSequence !== conversationCreateSequenceRef.current ||
+        creationScope !== conversationScopeRef.current
+      ) return;
       setConversations(rows);
       setActiveId(id);
-      setMessages([]);
-      setError('');
-    } catch (e) {
-      console.error(e);
-      setError('تعذر إنشاء محادثة جديدة.');
+    } catch {
+      if (
+        creationSequence === conversationCreateSequenceRef.current &&
+        creationScope === conversationScopeRef.current
+      ) setError('تعذر إنشاء محادثة جديدة.');
     }
   }, [profile?.organizationId, user?.uid]);
 
@@ -115,8 +200,20 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
     if (!profile?.organizationId || !user?.uid) return;
     if (!canSendMessage(text) || sending || !activeId) return;
 
+    const expectedIdentityScope = `${user.uid}|${profile.organizationId}`;
+    const expectedConversationScope = routeConversationScopeKey === undefined
+      ? undefined
+      : `${expectedIdentityScope}|${routeConversationScopeKey}`;
+    if (
+      identityScopeRef.current !== expectedIdentityScope ||
+      (expectedConversationScope !== undefined && conversationScopeRef.current !== expectedConversationScope) ||
+      (expectedConversationScope === undefined && !conversationScopeRef.current?.startsWith(`${expectedIdentityScope}|`))
+    ) return;
+
     setSending(true);
     setError('');
+    const requestSequence = ++messageRequestSequenceRef.current;
+    const requestScope = conversationScopeRef.current;
     const previousHistory = messages;
     const userText = text.trim();
     setInput('');
@@ -132,7 +229,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
-      const latestContext = getCurrentContext() ?? incomingContext;
+      const latestContext = resolveCopilotContextForRoute(location.pathname, getCurrentContext())
+        ?? resolveCopilotContextForRoute(location.pathname, incomingContext);
 
       const response = await sendMessage({
         organizationId: profile.organizationId,
@@ -143,7 +241,16 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
         context: latestContext,
       });
 
+      if (
+        requestSequence !== messageRequestSequenceRef.current ||
+        requestScope !== conversationScopeRef.current
+      ) return;
+
       const fresh = await listMessages(activeId, profile.organizationId);
+      if (
+        requestSequence !== messageRequestSequenceRef.current ||
+        requestScope !== conversationScopeRef.current
+      ) return;
       setMessages(fresh);
 
       setConversations((prev) =>
@@ -162,10 +269,15 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       );
     } catch (e) {
       console.error('Floating copilot failed', e);
-      setError('تعذر الاتصال بالمساعد. حاول مرة أخرى.');
-      setMessages(previousHistory);
+      if (
+        requestSequence === messageRequestSequenceRef.current &&
+        requestScope === conversationScopeRef.current
+      ) {
+        setError('تعذر الاتصال بالمساعد. حاول مرة أخرى.');
+        setMessages(previousHistory);
+      }
     } finally {
-      setSending(false);
+      if (requestSequence === messageRequestSequenceRef.current) setSending(false);
     }
   }
 
@@ -179,13 +291,20 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   async function handleDeleteCurrent() {
     if (!activeId || !profile?.organizationId) return;
     if (!window.confirm('حذف هذه المحادثة؟')) return;
+    const deletionScope = conversationScopeRef.current;
+    messageRequestSequenceRef.current += 1;
+    conversationCreateSequenceRef.current += 1;
+    setSending(false);
     try {
       await deleteConversation(activeId, profile.organizationId);
+      if (deletionScope !== conversationScopeRef.current) return;
       setActiveId(null);
       setMessages([]);
       await handleNew();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      if (deletionScope === conversationScopeRef.current) {
+        setError('تعذر حذف المحادثة الحالية.');
+      }
     }
   }
 
@@ -221,8 +340,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
           <div>
             <strong>InsurNex AI</strong>
             <small>
-              {incomingContext?.page
-                ? `السياق: ${incomingContext.page}`
+              {activeContext?.page
+                ? `السياق: ${activeContext.page}`
                 : 'مساعدك الذكي'}
             </small>
           </div>
@@ -233,7 +352,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/copilot')}
+            onClick={() => navigate('/copilot', { state: { context: activeContext } })}
             title="فتح الصفحة الكاملة"
           >
             <MessageSquare size={14} />
