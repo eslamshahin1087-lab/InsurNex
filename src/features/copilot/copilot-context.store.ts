@@ -1,7 +1,14 @@
 import type { CopilotContextPayload } from './copilot.types';
 import { buildCopilotContextSelector, type CopilotContextSelector } from './copilot-context-selector';
 
+export const COPILOT_CONTEXT_CHANGE_EVENT = 'insurnex:copilot-context-change';
+
 const STORAGE_KEY = 'insurnex-copilot-context-v2';
+
+function notifyContextChanged(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(COPILOT_CONTEXT_CHANGE_EVENT));
+}
 const LEGACY_STORAGE_KEY = 'insurnex-copilot-context-v1';
 
 function clearStoredContext(): void {
@@ -25,12 +32,15 @@ export function setCurrentContext(context: CopilotContextPayload): void {
 
     if (!selector) {
       storage.removeItem(STORAGE_KEY);
+      notifyContextChanged();
       return;
     }
 
     storage.setItem(STORAGE_KEY, JSON.stringify(selector));
+    notifyContextChanged();
   } catch {
     clearStoredContext();
+    notifyContextChanged();
   }
 }
 
@@ -65,4 +75,5 @@ export function getCurrentContext(): CopilotContextSelector | undefined {
 
 export function clearCurrentContext(): void {
   clearStoredContext();
+  notifyContextChanged();
 }
