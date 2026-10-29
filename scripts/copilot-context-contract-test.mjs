@@ -27,6 +27,10 @@ assert.match(routeContext, /export function getCopilotConversationScopeKey\(path
 assert.match(routeContext, /return expected\.page \+ ":" \+ expected\.detail\.id/, 'detail conversation scope must include the exact record ID');
 assert.match(copilotPanel, /const requestSequence = \+\+messageRequestSequenceRef\.current/, 'Copilot requests must have an invalidation sequence');
 assert.match(copilotPanel, /requestScope !== conversationScopeRef\.current/, 'old-record responses must not update the current conversation');
+assert.match(copilotPanel, /const expectedIdentityScope = `\$\{user\.uid\}\|\$\{profile\.organizationId\}`/, 'the send path must bind requests to the current authenticated identity');
+assert.match(copilotPanel, /conversationScopeRef\.current !== expectedConversationScope/, 'the send path must confirm the active route/record scope before sending');
+assert.match(copilotPanel, /if \(identityChanged\) \{[\s\S]*?clearCurrentContext\(\)/, 'changing authenticated accounts must clear prior page context');
+assert.match(copilotPanel, /if \(!profile\?\.organizationId \|\| !user\?\.uid\) \{[\s\S]*?setMessages\(\[\]\)/, 'missing identity must clear previous conversation state');
 assert.match(copilotPanel, /setActiveId\(null\);\s*setMessages\(\[\]\);\s*setError\(''\)/, 'route/workspace changes must clear the previous conversation from view');
 assert.match(copilotPanel, /resolveCopilotContextForRoute\(location\.pathname, getCurrentContext\(\)\)/, 'panel must validate stored context before sending');
 assert.match(copilotPanel, /window\.addEventListener\(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext\)/, 'panel must refresh when page context changes');
