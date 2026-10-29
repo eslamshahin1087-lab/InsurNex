@@ -64,7 +64,11 @@ function buildContextString(ctx?: CopilotContext): string {
   }
 
   if (ctx.policy) {
-    parts.push(`## Policy context (server-loaded sample)\n${JSON.stringify(ctx.policy, null, 2)}`);
+    parts.push(`## Policy 360 context (server-loaded, field-allow-listed)\n${JSON.stringify(ctx.policy, null, 2)}`);
+  }
+
+  if (ctx.claim) {
+    parts.push(`## Claim 360 context (server-loaded, field-allow-listed)\n${JSON.stringify(ctx.claim, null, 2)}`);
   }
 
   if (ctx.policies && ctx.policies.length > 0) {
