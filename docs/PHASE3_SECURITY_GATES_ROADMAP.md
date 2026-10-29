@@ -6,6 +6,7 @@
 
 - Repository default branch: `main`.
 - Baseline inspected: `4b53fd680ff3002f6366a8334bed84d03b519c10` (2026-10-29).
+- Follow-up merge: PR #77 merged as `629d343a4710d7f6cb511f27990ece757c9a3e99`; CI and Secrets Scan both passed on that exact `main` commit.
 - CI on the baseline failed in `npm run build` because `src/features/copilot/copilot-page-session.test.ts` imports Deno's remote assertion module and refers to the `Deno` global, while the browser TypeScript project includes the whole `src` tree.
 - The isolated fix on `fix/copilot-session-test-build-isolation-20261029` excludes only this Deno test from `tsconfig.app.json`; CI and Secrets Scan both passed on commit `03417c4602660ac54d0c2153bc87eabef6b6875d`. That PR was still open at the time of review.
 - Latest observed main CI and Secrets Scan: CI failed at build; Secrets Scan succeeded.
