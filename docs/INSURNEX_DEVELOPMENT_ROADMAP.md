@@ -88,6 +88,24 @@ Release gate:
 - No legacy document record is rewritten or deleted by this compatibility route.
 - After successful access testing, design a separate idempotent backfill from embedded references into first-class `documents` metadata; review and approve its dry-run manifest before any production writes.
 
+## Phase 3B — Inventory sensitive client field presence before schema separation
+
+**Status:** implementation is proposed in [PR #60](https://github.com/eslamshahin1087-lab/InsurNex/pull/60); do not treat it as merged or run against live data until its exact head passes CI and is reviewed.
+
+Scope:
+1. Read only the `clients` collection with a capped Firestore query.
+2. Emit field-path presence and aggregate counts for identity/KYC, individual/corporate profiles, health/family risk data, financial fields, derived risk/AI fields, documents, contact/address and free-form notes.
+3. Never include raw field values, names, phone/email values, national/tax IDs, medical values, notes, document URLs, signed URL tokens or file contents in the report.
+4. Keep local reports ignored by Git; treat them as sensitive because they contain organization/client document IDs and field-presence patterns.
+5. Add synthetic regression tests proving sensitive sentinels cannot appear in the output; add CI and CLI help checks.
+6. Use results as design input only. No Firestore write, Rules change, schema split, storage access, backfill or deployment is performed.
+
+Acceptance gate:
+- CI, lint, browser build, Firebase Functions build, and Secrets Scan pass on the exact PR head.
+- A read-only scan runs on the intended project with a reviewed record cap; if the cap is reached, it must be rerun with a reviewed higher cap.
+- The data owner reviews field-path categories and agrees on the schema/role matrix before write or migration work.
+- Audit every client-field reader/writer and add Emulator denial tests before removing fields from the legacy client record.
+
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
 Scope:
@@ -150,14 +168,13 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Complete review and CI for Phase 2D, then deploy the Edge Function and frontend in the documented order only after explicit release approval.
-2. Run the Spark-compatible metadata-only inventory for Firestore references; use full Firebase Storage inventory only when the project can access the exact bucket under an approved read-only setup.
-3. Test the three known Supabase legacy references through the compatibility gateway in staging, including cross-tenant denial and a fresh URL after the old signed URL expires.
-4. Prepare a separate idempotent backfill that copies no files and first writes only to a dry-run manifest. Preserve old embedded fields until the manifest, object verification and rollback are reviewed.
-5. Audit all remaining `firebase/storage` imports/call sites and test general documents, client documents and operation attachments in staging before claiming storage unification.
-6. Execute Phase 3 before sensitive identity, family, medical or claim narrative data is exposed through broad client access.
-6. Complete audit and AI safeguards before claiming production-ready security.
-7. Treat production deployment as a separate approval-gated operation.
+1. Complete review and CI for Phase 2D; deploy the Edge Function and frontend only after explicit release approval and staging acceptance.
+2. Complete review and CI of Phase 3B field inventory; run it read-only against the intended project with an agreed record cap. Keep the generated report local.
+3. Audit client-field readers and writers and finalize the data classification / RBAC matrix before changing the schema.
+4. Define and test a reversible, idempotent dry-run separation plan with source/target reconciliation and rollback; do not write production records until separately approved.
+5. Test legacy document references through the compatibility gateway in staging, including cross-tenant denial and expired-link refresh.
+6. Complete audit, retention, consent and AI safeguards before claiming production-ready security.
+7. Treat production deployment, Rules/index/function changes and data migration as separate approval-gated operations.
 
 ## Phase 3A — Architecture and data contracts (2026-10-28)
 
