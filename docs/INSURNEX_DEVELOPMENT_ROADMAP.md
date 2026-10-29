@@ -1,6 +1,6 @@
 # InsurNex Development Roadmap
 
-**Last updated:** 2026-10-28  
+**Last updated:** 2026-10-29  
 **Release posture:** continue on isolated branches and reviewed pull requests. No production deployment, data migration, or live-secret change is authorized by this roadmap.
 
 ## Current baseline
@@ -90,7 +90,7 @@ Release gate:
 
 ## Phase 3B — Inventory sensitive client field presence before schema separation
 
-**Status:** implementation is proposed in [PR #60](https://github.com/eslamshahin1087-lab/InsurNex/pull/60); do not treat it as merged or run against live data until its exact head passes CI and is reviewed.
+**Status:** read-only inventory code is merged through [PR #60](https://github.com/eslamshahin1087-lab/InsurNex/pull/60); CI and Secrets Scan passed on head `c1d268571c2ae1da394fb9f69ff5160628c3db02`. The code merge did not execute a live inventory.
 
 Scope:
 1. Read only the `clients` collection with a capped Firestore query.
@@ -105,6 +105,24 @@ Acceptance gate:
 - A read-only scan runs on the intended project with a reviewed record cap; if the cap is reached, it must be rerun with a reviewed higher cap.
 - The data owner reviews field-path categories and agrees on the schema/role matrix before write or migration work.
 - Audit every client-field reader/writer and add Emulator denial tests before removing fields from the legacy client record.
+
+## Phase 3C — Proposal-only sensitive-data separation planner
+
+**Status:** implementation on isolated branch `feat/phase3-sensitive-separation-plan-20261029`; no cloud or runtime data changes.
+
+Scope:
+1. Consume the sanitized Phase 3B inventory JSON locally, not Firestore or Storage.
+2. Propose logical destinations for field paths only; never copy field values.
+3. Mark composite parent objects for leaf-level splitting to prevent duplicate/mixed-sensitivity copies.
+4. Keep document references, free-form narrative and unknown paths on an explicit manual-review path.
+5. Require human approval for every mapping and preserve whether the inventory reached its record cap.
+6. Add synthetic regression tests that reject malformed report shape and invalid field-path tokens, plus CI and CLI help checks.
+
+Acceptance gate:
+- Current PR head passes the complete CI and Secrets Scan.
+- The inventory is intentionally run by an authorized operator against the correct project; the report remains local and access-restricted.
+- Review all mapping counts and unclassified paths. If the inventory was capped, do not treat it as complete.
+- No migration writer is implemented in Phase 3C; any future writer needs a separate reviewed PR, reversible plan, emulator denial tests and explicit authorization.
 
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
@@ -168,11 +186,11 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Complete review and CI for Phase 2D; deploy the Edge Function and frontend only after explicit release approval and staging acceptance.
-2. Complete review and CI of Phase 3B field inventory; run it read-only against the intended project with an agreed record cap. Keep the generated report local.
-3. Audit client-field readers and writers and finalize the data classification / RBAC matrix before changing the schema.
-4. Define and test a reversible, idempotent dry-run separation plan with source/target reconciliation and rollback; do not write production records until separately approved.
-5. Test legacy document references through the compatibility gateway in staging, including cross-tenant denial and expired-link refresh.
+1. Review and run the Phase 3B inventory locally against the intended project, using an authorized identity and a reviewed record cap; keep the report local.
+2. Generate the Phase 3C proposal-only separation plan from that sanitized report and review every destination, parent split and unclassified field path.
+3. Audit client-field readers/writers and finalize the data-classification, purpose, retention and RBAC matrix before building a migration adapter.
+4. Design source/target reconciliation, idempotency, resume and rollback; do not write production records until separately approved.
+5. Finish Phase 2D compatibility-gateway staging checks before deployment; test cross-tenant denial and expired-link refresh.
 6. Complete audit, retention, consent and AI safeguards before claiming production-ready security.
 7. Treat production deployment, Rules/index/function changes and data migration as separate approval-gated operations.
 
