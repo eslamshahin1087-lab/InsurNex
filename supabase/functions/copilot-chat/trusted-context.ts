@@ -344,7 +344,7 @@ export async function buildAuthorizedCopilotContext(input: {
         const part = (type: string) => todayParts.find((item) => item.type === type)?.value ?? "";
         const today = `${part("year")}-${part("month")}-${part("day")}`;
         const dayNumber = (date: string) => {
-          const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(date);
+          const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
           if (!match) return undefined;
           return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86_400_000;
         };
