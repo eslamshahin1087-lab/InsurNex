@@ -481,6 +481,44 @@ try {
     'an owner can create a message in their own Copilot conversation',
   );
 
+  const invalidCopilotMessages = [
+    {
+      label: 'system-role Copilot messages are rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'system', content: 'Synthetic invalid role', createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'empty Copilot message content is rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: '', createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'oversized Copilot message content is rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: 'x'.repeat(8001), createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'Copilot messages cannot carry unexpected sensitive fields',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: 'Synthetic allowlist test', createdAt: serverTimestamp(),
+        medicalDetails: 'SYNTHETIC_PRIVATE_FIELD_SENTINEL',
+      },
+    },
+  ];
+  for (const invalidMessage of invalidCopilotMessages) {
+    await expectDenied(
+      () => setDoc(doc(ownerA.db, 'copilotMessages', 'rbac-invalid-message-' + randomUUID()), invalidMessage.payload),
+      invalidMessage.label,
+    );
+  }
+
   await expectDenied(
     () => updateDoc(doc(ownerA.db, 'copilotMessages', ownerOwnMessageId), {
       conversationId: privateConversationId,
