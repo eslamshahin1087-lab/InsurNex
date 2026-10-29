@@ -273,7 +273,7 @@ export function buildClientSensitiveDataSeparationPlan({
       throw new Error('Inventory record is missing a document ID, organization ID, or field-path map.');
     }
 
-    const safePathPattern = /^(?:[A-Za-z0-9_-]{1,64}|\\[field\\])(?:\\[\\])*(?:\\.(?:[A-Za-z0-9_-]{1,64}|\\[field\\])(?:\\[\\])*)*$/;
+    const safePathPattern = /^(?:[A-Za-z0-9_-]{1,64}|\[field\])(?:\[\])*(?:\.(?:[A-Za-z0-9_-]{1,64}|\[field\])(?:\[\])*)*$/;
     if (!record.fieldPaths.every(path => typeof path === 'string' && safePathPattern.test(path))) {
       throw new Error('Inventory contains an invalid field-path token; refusing to propagate it into the plan.');
     }
