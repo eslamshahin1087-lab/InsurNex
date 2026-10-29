@@ -139,7 +139,7 @@ assert.throws(() => buildClientSensitiveDataSeparationPlan({
 assert.throws(() => buildClientSensitiveDataSeparationPlan({
   inventoryReport: {
     ...report,
-    records: [{ documentId: 'bad-token', organizationId: 'synthetic-org-1', fieldPaths: ['SENSITIVE_SENTINEL_RAW_VALUE'], pathCategories: {} }],
+    records: [{ documentId: 'bad-token', organizationId: 'synthetic-org-1', fieldPaths: ['SENSITIVE SENTINEL RAW VALUE'], pathCategories: {} }],
   },
 }), /invalid field-path token/);
 
