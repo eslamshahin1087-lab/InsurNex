@@ -25,6 +25,7 @@ assert.match(routeContext, /path === "\/copilot"\) return "preserve"/, 'full Cop
 assert.match(routeContext, /detailIdFromContext\(context, expected\.detail\.key\) === expected\.detail\.id/, 'detail context must match the exact URL record ID');
 assert.match(copilotPanel, /resolveCopilotContextForRoute\(location\.pathname, getCurrentContext\(\)\)/, 'panel must validate stored context before sending');
 assert.match(copilotPanel, /window\.addEventListener\(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext\)/, 'panel must refresh when page context changes');
+assert.match(copilotPanel, /navigate\('\/copilot', \{ state: \{ context: activeContext \} \}\)/, 'opening full Copilot must forward the validated current-page selector');
 assert.match(contextStore, /window\.dispatchEvent\(new Event\(COPILOT_CONTEXT_CHANGE_EVENT\)\)/, 'context store must notify the panel of updates');
 assert.match(copilotPanel, /if \(storedContext && !resolvedContext && normalizedPath !== '\/copilot'\)/, 'panel must clear selectors not valid for the current route');
 assert.match(trustedContext, /renewals: \["policies"\]/, 'server context builder must map renewals to policy records');
