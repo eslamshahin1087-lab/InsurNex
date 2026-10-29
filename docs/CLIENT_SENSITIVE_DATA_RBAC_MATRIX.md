@@ -44,6 +44,12 @@ Legend: **Scoped** means same-organization and resource/assignment checks still 
 
 The matrix intentionally makes sensitive classes **deny by default**, including for Owner/Admin. A business owner or administrator may have a legitimate purpose for a specific record, but the role label alone must not bypass purpose, consent/legal basis, relationship scope or audit requirements.
 
+## Current runtime gate — deny by default
+
+As of the current `main` baseline, the proposed `clientSensitiveProfiles`, `clientMedicalProfiles`, `claimSensitiveDetails`, `aiFindings` and `auditLogs` collections are not in the generic tenant-business allow-list. Client SDK access must remain denied until a separate, reviewed Rules/endpoint implementation adds collection-specific validation. Do not add these collection names to the generic allow-list as a shortcut.
+
+The Phase 3 Emulator regression suite now asserts that Owner, Broker, Sales, Claims, Finance, Staff and an owner from another organization are denied direct gets, tenant queries and creates for each proposed collection. These tests protect the default-deny boundary; they do not establish that future access grants are already implemented.
+
 ## 4. Record and endpoint enforcement
 
 Every read/write path must be checked in both the direct database and trusted service surfaces where applicable.

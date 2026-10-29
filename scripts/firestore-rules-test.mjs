@@ -252,6 +252,53 @@ try {
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
   const staffMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-staff', 'staff');
 
+  // Phase 3 proposed sensitive collections remain closed until a dedicated,
+  // collection-specific rules PR explicitly enables the approved role matrix.
+  // This guards against accidentally adding them to the generic business allow-list.
+  const defaultDenyCollections = [
+    'clientSensitiveProfiles',
+    'clientMedicalProfiles',
+    'claimSensitiveDetails',
+    'aiFindings',
+    'auditLogs',
+  ];
+  const sensitiveCollectionActors = [
+    { label: 'owner', actor: ownerA, organizationId: orgA },
+    { label: 'broker', actor: brokerMember.actor, organizationId: orgA },
+    { label: 'sales', actor: salesMember.actor, organizationId: orgA },
+    { label: 'claims', actor: claimsMember.actor, organizationId: orgA },
+    { label: 'finance', actor: financeMember.actor, organizationId: orgA },
+    { label: 'staff', actor: staffMember.actor, organizationId: orgA },
+    { label: 'foreign organization owner', actor: ownerB, organizationId: orgB },
+  ];
+  for (const collectionName of defaultDenyCollections) {
+    for (const roleActor of sensitiveCollectionActors) {
+      const candidateId = 'phase3-deny-' + randomUUID();
+      await expectDenied(
+        () => getDoc(doc(roleActor.actor.db, collectionName, candidateId)),
+        roleActor.label + ' cannot read proposed sensitive collection ' + collectionName + ' before explicit rules exist',
+      );
+      await expectDenied(
+        () => getDocs(query(
+          collection(roleActor.actor.db, collectionName),
+          where('organizationId', '==', roleActor.organizationId),
+        )),
+        roleActor.label + ' cannot query proposed sensitive collection ' + collectionName + ' before explicit rules exist',
+      );
+      await expectDenied(
+        () => setDoc(doc(roleActor.actor.db, collectionName, candidateId), {
+          organizationId: roleActor.organizationId,
+          createdBy: roleActor.actor.user.uid,
+          createdAt: serverTimestamp(),
+          sensitivityClass: collectionName,
+          syntheticFixture: true,
+        }),
+        roleActor.label + ' cannot create records in proposed sensitive collection ' + collectionName + ' before explicit rules exist',
+      );
+    }
+  }
+
+
   const protectedClientId = 'rbac-client-' + randomUUID();
   const protectedPolicyId = 'rbac-policy-' + randomUUID();
   const protectedClaimId = 'rbac-claim-' + randomUUID();
