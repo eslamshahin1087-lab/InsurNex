@@ -42,6 +42,8 @@ jobs:
         run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts supabase/functions/copilot-chat/trusted-context.test.ts supabase/functions/copilot-chat/client-context-selector.test.ts
       - name: Copilot context contract and Firestore index regression checks
         run: npm run test:copilot-context-contract
+      - name: Copilot gateway safe-error regression checks
+        run: npm run test:copilot-safe-errors
       - name: Legacy storage inventory reconciliation regression tests
         run: npm run test:storage-inventory
       - name: Legacy client document backfill planning regression tests
