@@ -39,6 +39,7 @@ import {
   INSURANCE_LINE_LABELS,
 } from '../types/insurance';
 import RenewPolicyModal from '../features/policies/RenewPolicyModal';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 // ============================================================
 // أدوات مساعدة
@@ -175,6 +176,10 @@ export default function PolicyDetailsPage() {
       setLoading(false);
     }
   }, [id, profile]);
+
+  useEffect(() => {
+    setCurrentContext({ page: 'policy-details', policyRef: id ? { id } : undefined });
+  }, [id]);
 
   useEffect(() => {
     void loadData();
