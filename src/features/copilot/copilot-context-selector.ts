@@ -1,12 +1,14 @@
 export interface CopilotContextSelector {
   page: string;
   client?: { id: string };
+  lead?: { id: string };
 }
 
 const ALLOWED_PAGES = new Set([
   "dashboard",
   "clients",
   "client-details",
+  "lead-details",
   "policies",
   "claims",
   "leads",
@@ -32,11 +34,20 @@ export function buildCopilotContextSelector(value: unknown): CopilotContextSelec
   const requestedPage = typeof value.page === "string" ? value.page : "general";
   const page = ALLOWED_PAGES.has(requestedPage) ? requestedPage : "general";
 
-  if (page !== "client-details") return { page };
+  if (page === "client-details") {
+    const clientId = isRecord(value.client) ? value.client.id : undefined;
+    if (typeof clientId === "string" && /^[A-Za-z0-9_-]{1,160}$/.test(clientId)) {
+      return { page, client: { id: clientId } };
+    }
+    return { page };
+  }
 
-  const clientId = isRecord(value.client) ? value.client.id : undefined;
-  if (typeof clientId === "string" && /^[A-Za-z0-9_-]{1,160}$/.test(clientId)) {
-    return { page, client: { id: clientId } };
+  if (page === "lead-details") {
+    const leadId = isRecord(value.lead) ? value.lead.id : undefined;
+    if (typeof leadId === "string" && /^[A-Za-z0-9_-]{1,160}$/.test(leadId)) {
+      return { page, lead: { id: leadId } };
+    }
+    return { page };
   }
 
   return { page };
