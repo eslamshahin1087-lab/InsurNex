@@ -22,6 +22,15 @@ assert.match(edge, /console\.error\('copilot-chat request failed', \{ status, co
 assert.equal(edge.includes('console.error(err)'), false, 'raw request exception objects must not be logged');
 assert.equal(panel.includes('console.'), false, 'floating Copilot must not write raw client exceptions or context to the browser console');
 assert.equal(panel.includes('catch (e)'), false, 'floating Copilot should not bind raw exception objects when it does not inspect them');
+for (const publicMessage of [
+  'تعذر بدء محادثة جديدة.',
+  'تعذر تحميل الرسائل.',
+  'تعذر إنشاء محادثة جديدة.',
+  'تعذر الاتصال بالمساعد. حاول مرة أخرى.',
+  'تعذر حذف المحادثة الحالية.',
+]) {
+  assert.equal(panel.includes(publicMessage), true, 'floating Copilot must use a generic user-facing error: ' + publicMessage);
+}
 assert.match(panel, /setError\('تعذر تحميل الرسائل\.'\)/, 'message-load failures need a generic Arabic user-facing error');
 assert.match(panel, /setError\('تعذر حذف المحادثة الحالية\.'\)/, 'delete failures need a generic Arabic user-facing error');
 
