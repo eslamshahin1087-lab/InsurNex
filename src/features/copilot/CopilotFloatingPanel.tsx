@@ -67,6 +67,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
   const activeContext = resolveCopilotContextForRoute(location.pathname, incomingContext);
 
+  // Raw SDK exceptions are intentionally not logged; they may contain request or resource details.
   // Always create a fresh conversation when panel opens
   useEffect(() => {
     if (!profile?.organizationId || !user?.uid) return;
