@@ -77,6 +77,16 @@ service cloud.firestore {
           && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
           && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
     }
+    function copilotConversationBelongsToCaller(data) {
+      return signedIn()
+        && data.keys().hasAll(['organizationId', 'userId', 'conversationId'])
+        && data.userId == request.auth.uid
+        && data.conversationId is string
+        && exists(/databases/$(database)/documents/copilotConversations/$(data.conversationId))
+        && get(/databases/$(database)/documents/copilotConversations/$(data.conversationId)).data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/copilotConversations/$(data.conversationId)).data.organizationId == data.organizationId;
+    }
+
     function canCreateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -88,9 +98,13 @@ service cloud.firestore {
         || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
         || (collection == 'documents' && (roleIs(['owner','admin','broker']) || (roleIs(['claims']) && data.category == 'claim')))
         || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
-        || (collection in ['copilotConversations','copilotMessages']
+        || (collection == 'copilotConversations'
           && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
-          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
+          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid)
+        || (collection == 'copilotMessages'
+          && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
+          && data.keys().hasAny(['userId']) && data.userId == request.auth.uid
+          && copilotConversationBelongsToCaller(data));
     }
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
@@ -515,6 +529,7 @@ service cloud.firestore {
         && sameOrg(resource.data.organizationId)
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
         && (collection != 'documents' || (
           request.resource.data.category == resource.data.category
           && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)
