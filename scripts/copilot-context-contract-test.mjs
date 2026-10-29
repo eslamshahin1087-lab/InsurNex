@@ -13,7 +13,10 @@ const config = JSON.parse(indexText);
 
 assert.match(selector, /"renewals"/, 'browser selector must preserve the renewal page');
 assert.match(trustedContext, /renewals: \["policies"\]/, 'server context builder must map renewals to policy records');
-assert.match(trustedContext, /page === "renewals" && collectionId === "policies"/, 'renewal queries must sort by expiry date');
+assert.match(trustedContext, /const MAX_RENEWAL_POLICIES = 300/, 'renewal queries must use a bounded 300-policy sample');
+assert.match(trustedContext, /page === "renewals" && collectionId === "policies"\s*\?\s*\{\}/, 'renewal query must not let oldest expiry dates crowd out actionable records');
+assert.match(trustedContext, /item\.daysLeft >= -90 &&\s*item\.daysLeft <= 90/, 'renewal context must be limited to the actionable 90-day past/future window');
+assert.match(trustedContext, /Math\.abs\(left\.daysLeft!\)/, 'renewal context must prioritize dates closest to action');
 assert.match(trustedContext, /fieldPath: "relatedType"/, 'Client 360 task query must use relatedType');
 assert.match(trustedContext, /fieldPath: "relatedId"/, 'Client 360 task query must use relatedId');
 assert.match(selector, /"lead-details"/, 'Lead 360 must be an allow-listed browser context page');
@@ -33,7 +36,6 @@ const requiredIndexes = [
   ['claims', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'clientId', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }]],
   ['tasks', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }]],
   ['tasks', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'relatedType', order: 'ASCENDING' }, { fieldPath: 'relatedId', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }]],
-  ['policies', [{ fieldPath: 'organizationId', order: 'ASCENDING' }, { fieldPath: 'expiryDate', order: 'ASCENDING' }]],
 ];
 
 for (const [collectionGroup, fields] of requiredIndexes) {
