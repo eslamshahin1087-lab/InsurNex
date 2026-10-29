@@ -75,3 +75,14 @@ Deno.test("conversation scope isolates different records while preserving relate
   assertEquals(getCopilotConversationScopeKey("/copilot"), undefined);
   assertEquals(getCopilotConversationScopeKey("/settings"), "route:/settings");
 });
+
+Deno.test("trailing slashes do not produce a new Copilot conversation scope", () => {
+  assertEquals(
+    getCopilotConversationScopeKey("/clients/client-42"),
+    getCopilotConversationScopeKey("/clients/client-42/"),
+  );
+  assertEquals(
+    getCopilotConversationScopeKey("/renewals"),
+    getCopilotConversationScopeKey("/renewals/"),
+  );
+});
