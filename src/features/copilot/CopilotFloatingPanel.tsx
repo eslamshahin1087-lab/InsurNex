@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bot, Maximize2, MessageSquare, Minimize2, Send, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,7 +16,8 @@ import { buildTitleFromFirstMessage, canSendMessage } from './copilot-utils';
 import type {  CopilotConversation,
   CopilotMessage,
 } from './copilot.types';
-import { getCurrentContext } from './copilot-context.store';
+import { clearCurrentContext, COPILOT_CONTEXT_CHANGE_EVENT, getCurrentContext } from './copilot-context.store';
+import { resolveCopilotContextForRoute } from './copilot-context-route';
 import type { CopilotContextSelector } from './copilot-context-selector';
 
 interface Props {
@@ -38,12 +39,33 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Re-read context whenever route changes
-  const incomingContext = useMemo<CopilotContextSelector | undefined>(
-    () => getCurrentContext(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [location.pathname, activeId],
+  const [incomingContext, setIncomingContext] = useState<CopilotContextSelector | undefined>(
+    () => resolveCopilotContextForRoute(location.pathname, getCurrentContext()),
   );
+
+  // Context is page-scoped: never reuse an unrelated page or record selector.
+  useEffect(() => {
+    const refreshContext = () => {
+      const storedContext = getCurrentContext();
+      const resolvedContext = resolveCopilotContextForRoute(location.pathname, storedContext);
+
+      // The full Copilot route intentionally preserves context from the page that opened it.
+      const normalizedPath = location.pathname.length > 1
+        ? location.pathname.replace(/\/+$/, '')
+        : location.pathname;
+      if (storedContext && !resolvedContext && normalizedPath !== '/copilot') {
+        clearCurrentContext();
+      }
+
+      setIncomingContext(resolvedContext);
+    };
+
+    refreshContext();
+    window.addEventListener(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext);
+    return () => window.removeEventListener(COPILOT_CONTEXT_CHANGE_EVENT, refreshContext);
+  }, [location.pathname]);
+
+  const activeContext = resolveCopilotContextForRoute(location.pathname, incomingContext);
 
   // Always create a fresh conversation when panel opens
   useEffect(() => {
@@ -132,7 +154,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
-      const latestContext = getCurrentContext() ?? incomingContext;
+      const latestContext = resolveCopilotContextForRoute(location.pathname, getCurrentContext())
+        ?? resolveCopilotContextForRoute(location.pathname, incomingContext);
 
       const response = await sendMessage({
         organizationId: profile.organizationId,
@@ -221,8 +244,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
           <div>
             <strong>InsurNex AI</strong>
             <small>
-              {incomingContext?.page
-                ? `السياق: ${incomingContext.page}`
+              {activeContext?.page
+                ? `السياق: ${activeContext.page}`
                 : 'مساعدك الذكي'}
             </small>
           </div>
