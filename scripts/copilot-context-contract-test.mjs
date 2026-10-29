@@ -32,14 +32,14 @@ assert.match(trustedContext, /page === "lead-details"/, 'server must implement a
 assert.match(trustedContext, /"estimatedValue"/, 'Lead 360 server projection must include the permitted estimate field');
 assert.match(selector, /"policy-details"/, 'Policy 360 must be an allow-listed page');
 assert.match(selector, /"claim-details"/, 'Claim 360 must be an allow-listed page');
-assert.match(selector, /return \\{ page, policyRef: \\{ id: policyId \\} \\}/, 'Policy 360 may forward only a validated policy ID');
-assert.match(selector, /return \\{ page, claimRef: \\{ id: claimId \\} \\}/, 'Claim 360 may forward only a validated claim ID');
-assert.match(policyDetailsPage, /page: 'policy-details', policyRef: id \\? \\{ id \\} : undefined/, 'PolicyDetailsPage must provide only its selected policy ID');
-assert.match(claimDetailsPage, /page:'claim-details',claimRef:id\\?\\{id\\}:undefined/, 'ClaimDetailsPage must provide only its selected claim ID');
-assert.match(trustedContext, /async function getScopedDetailSelector\\(/, 'Policy/Claim 360 must read records from Firestore on the server');
+assert.match(selector, /return \{ page, policyRef: \{ id: policyId \} \}/, 'Policy 360 may forward only a validated policy ID');
+assert.match(selector, /return \{ page, claimRef: \{ id: claimId \} \}/, 'Claim 360 may forward only a validated claim ID');
+assert.match(policyDetailsPage, /page: 'policy-details', policyRef: id \? \{ id \} : undefined/, 'PolicyDetailsPage must provide only its selected policy ID');
+assert.match(claimDetailsPage, /page:'claim-details',claimRef:id\?\{id\}:undefined/, 'ClaimDetailsPage must provide only its selected claim ID');
+assert.match(trustedContext, /async function getScopedDetailSelector\(/, 'Policy/Claim 360 must read records from Firestore on the server');
 assert.match(trustedContext, /collectionName: isPolicy \\? "policies" : "claims"/, 'Policy/Claim lookup must use fixed collection names');
-assert.match(trustedContext, /if \\(data\\.organizationId !== input\\.organizationId\\) return undefined;/, 'Policy/Claim detail must verify tenant scope');
-assert.match(sanitizer, /claim\\?: SafeContextRecord/, 'Claim 360 output must pass through the sanitizer');
+assert.match(trustedContext, /if \(data\.organizationId !== input\.organizationId\) return undefined;/, 'Policy/Claim detail must verify tenant scope');
+assert.match(sanitizer, /claim\?: SafeContextRecord/, 'Claim 360 output must pass through the sanitizer');
 assert.match(copilotHandler, /Claim 360 context/, 'Copilot system prompt must render the safe Claim 360 summary');
 
 
