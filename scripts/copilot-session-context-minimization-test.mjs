@@ -31,5 +31,10 @@ assert.equal(panel.includes('const nextScope = `${identityScope}|${routeConversa
 assert.equal(panel.includes('const requestSequence = ++messageRequestSequenceRef.current;'), true, 'each Copilot request must carry an invalidation sequence');
 assert.equal(panel.includes('requestSequence !== messageRequestSequenceRef.current'), true, 'stale Copilot responses must be ignored after navigation');
 assert.equal(panel.includes('requestScope !== conversationScopeRef.current'), true, 'responses from previous records must not repopulate the current conversation');
+assert.equal(panel.includes('const expectedIdentityScope = `${user.uid}|${profile.organizationId}`;'), true, 'send path must validate the active identity scope');
+assert.equal(panel.includes('identityScopeRef.current !== expectedIdentityScope'), true, 'requests must be rejected until the current identity is scoped');
+assert.equal(panel.includes('conversationScopeRef.current !== expectedConversationScope'), true, 'requests must be rejected until the active record conversation is ready');
+assert.equal(panel.includes('if (identityChanged) {'), true, 'context must be reset when the authenticated identity changes');
+assert.equal(panel.includes('conversationCreateSequenceRef.current += 1;'), true, 'pending conversation creation must be invalidated when identity is cleared');
 
 console.log('Copilot session context minimization checks passed.');
