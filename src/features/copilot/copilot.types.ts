@@ -33,6 +33,8 @@ export interface CopilotContextPayload {
     city?: string;
     notes?: string;
   };
+  // Client-side selector only; Copilot sends the ID and fetches authorized fields server-side.
+  lead?: { id: string };
   policy?: {
     policyNumber: string;
     insurerName: string;
