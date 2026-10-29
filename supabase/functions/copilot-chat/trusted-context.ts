@@ -17,6 +17,8 @@ const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   renewals: ["policies"],
   "client-details": [],
   "lead-details": [],
+  "policy-details": [],
+  "claim-details": [],
   finance: ["revenue", "expenses", "commissions"],
 };
 
@@ -33,6 +35,7 @@ const COLLECTION_FIELDS: Record<CollectionKey, string[]> = {
 };
 
 const MAX_PER_COLLECTION = 20;
+const MAX_RENEWAL_POLICIES = 300;
 const MAX_FINANCE_ROWS = 500;
 const MAX_CLIENT_ID_LENGTH = 160;
 
@@ -133,23 +136,25 @@ function buildQueryBody(
       select: {
         fields: COLLECTION_FIELDS[collectionId].map((fieldPath) => ({ fieldPath })),
       },
-      orderBy: [{
-        field: {
-          fieldPath: page === "renewals" && collectionId === "policies"
-            ? "expiryDate"
-            : collectionId === "insurers"
-              ? "name"
-              : collectionId === "revenue" || collectionId === "expenses"
-                ? "date"
-                : "createdAt",
-        },
-        direction: collectionId === "insurers" || (page === "renewals" && collectionId === "policies")
-          ? "ASCENDING"
-          : "DESCENDING",
-      }],
-      limit: ["revenue", "expenses", "commissions"].includes(collectionId)
-        ? MAX_FINANCE_ROWS
-        : MAX_PER_COLLECTION,
+      ...(page === "renewals" && collectionId === "policies"
+        ? {}
+        : {
+            orderBy: [{
+              field: {
+                fieldPath: collectionId === "insurers"
+                  ? "name"
+                  : collectionId === "revenue" || collectionId === "expenses"
+                    ? "date"
+                    : "createdAt",
+              },
+              direction: collectionId === "insurers" ? "ASCENDING" : "DESCENDING",
+            }],
+          }),
+      limit: page === "renewals" && collectionId === "policies"
+        ? MAX_RENEWAL_POLICIES
+        : ["revenue", "expenses", "commissions"].includes(collectionId)
+          ? MAX_FINANCE_ROWS
+          : MAX_PER_COLLECTION,
     },
   };
 }
@@ -230,6 +235,46 @@ async function getClientSelector(
   if (type !== undefined) client.type = type;
   if (status !== undefined) client.status = status;
   return Object.keys(client).length ? client : undefined;
+}
+
+async function getScopedDetailSelector(input: {
+  projectId: string;
+  idToken: string;
+  organizationId: string;
+  collectionName: "policies" | "claims";
+  documentId: string;
+  fetcher: typeof fetch;
+}): Promise<Record<string, unknown> | undefined> {
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(input.documentId)) return undefined;
+  const fieldsByCollection = {
+    policies: ["insurerName", "line", "startDate", "expiryDate", "premium", "currency", "status"],
+    claims: ["insurerName", "currency", "status", "incidentDate", "claimAmount"],
+  } as const;
+  const allowedFields: readonly string[] = fieldsByCollection[input.collectionName];
+  const url = new URL(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(input.projectId)}/databases/(default)/documents/${input.collectionName}/${encodeURIComponent(input.documentId)}`,
+  );
+  for (const fieldPath of ["organizationId", ...allowedFields]) {
+    url.searchParams.append("mask.fieldPaths", fieldPath);
+  }
+  const response = await input.fetcher(url.toString(), {
+    headers: { Authorization: `Bearer ${input.idToken}` },
+  });
+
+  if (response.status === 404 || response.status === 403) return undefined;
+  if (!response.ok) throw new Error("FIRESTORE_DETAIL_LOOKUP_FAILED");
+
+  const raw: unknown = await response.json();
+  if (!isRecord(raw)) return undefined;
+  const data = recordToMap(raw as FirestoreDocument);
+  if (data.organizationId !== input.organizationId) return undefined;
+
+  const detail: Record<string, unknown> = {};
+  for (const fieldPath of allowedFields) {
+    const value = safeScalar(data[fieldPath]);
+    if (value !== undefined) detail[fieldPath] = value;
+  }
+  return Object.keys(detail).length ? detail : undefined;
 }
 
 async function getLeadSelector(
@@ -313,6 +358,35 @@ export async function buildAuthorizedCopilotContext(input: {
 
     // No client-supplied lead values enter the prompt.
     if (lead) output.leads = [lead];
+    return output;
+  }
+
+  if (page === "policy-details" || page === "claim-details") {
+    const isPolicy = page === "policy-details";
+    const selectorKey = isPolicy ? "policyRef" : "claimRef";
+    const rawSelector = isRecord(raw[selectorKey]) ? raw[selectorKey] : undefined;
+    const rawDocumentId = rawSelector?.id;
+    if (typeof rawDocumentId !== "string") return output;
+
+    let detail: Record<string, unknown> | undefined;
+    try {
+      detail = await getScopedDetailSelector({
+        projectId: input.projectId,
+        organizationId: input.organizationId,
+        idToken: input.idToken,
+        collectionName: isPolicy ? "policies" : "claims",
+        documentId: rawDocumentId,
+        fetcher,
+      });
+    } catch {
+      detail = undefined;
+    }
+
+    // Only server-read, field-masked data from the verified organization is returned.
+    if (detail) {
+      if (isPolicy) output.policy = detail;
+      else output.claim = detail;
+    }
     return output;
   }
 
@@ -408,19 +482,49 @@ export async function buildAuthorizedCopilotContext(input: {
         const dayNumber = (date: string) => {
           const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
           if (!match) return undefined;
-          return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86_400_000;
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const day = Number(match[3]);
+          const timestamp = Date.UTC(year, month - 1, day);
+          const parsed = new Date(timestamp);
+          if (
+            parsed.getUTCFullYear() !== year ||
+            parsed.getUTCMonth() + 1 !== month ||
+            parsed.getUTCDate() !== day
+          ) return undefined;
+          return timestamp / 86_400_000;
         };
         const todayNumber = dayNumber(today);
-        output.renewals = mapped.map((record) => {
+        const renewalWindow = mapped.map((record) => {
           const expiryDate = typeof record.expiryDate === "string" ? record.expiryDate : "";
           const expiryNumber = dayNumber(expiryDate);
-          return {
-            ...record,
-            daysLeft: todayNumber !== undefined && expiryNumber !== undefined
-              ? expiryNumber - todayNumber
-              : undefined,
-          };
-        }).filter((record) => Object.values(record).some((value) => value !== undefined));
+          const daysLeft = todayNumber !== undefined && expiryNumber !== undefined
+            ? expiryNumber - todayNumber
+            : undefined;
+          return { record, daysLeft };
+        }).filter((item) =>
+          item.daysLeft !== undefined &&
+          item.daysLeft >= -90 &&
+          item.daysLeft <= 90 &&
+          item.record.status !== "cancelled" &&
+          typeof item.record.expiryDate === "string" &&
+          item.record.expiryDate.length > 0
+        ).sort((left, right) =>
+          Math.abs(left.daysLeft!) - Math.abs(right.daysLeft!) ||
+          left.daysLeft! - right.daysLeft!
+        );
+
+        // Mirror the renewal screen's 300-policy scan, then prioritize actionable
+        // dates (expired within 90 days or expiring within 90 days) rather than
+        // allowing old expired policies to occupy every context slot.
+        output.renewals = renewalWindow.slice(0, 15).map(({ record, daysLeft }) => ({
+          insurerName: record.insurerName,
+          line: record.line,
+          expiryDate: record.expiryDate,
+          premium: record.premium,
+          currency: record.currency,
+          daysLeft,
+        })).filter((record) => Object.values(record).some((value) => value !== undefined));
       } else {
         output.policies = mapped;
       }

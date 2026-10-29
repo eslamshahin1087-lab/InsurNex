@@ -65,7 +65,11 @@ function buildContextString(ctx?: CopilotContext): string {
   }
 
   if (ctx.policy) {
-    parts.push(`## Policy context (server-loaded sample)\n${JSON.stringify(ctx.policy, null, 2)}`);
+    parts.push(`## Policy 360 context (server-loaded, field-allow-listed)\n${JSON.stringify(ctx.policy, null, 2)}`);
+  }
+
+  if (ctx.claim) {
+    parts.push(`## Claim 360 context (server-loaded, field-allow-listed)\n${JSON.stringify(ctx.claim, null, 2)}`);
   }
 
   if (ctx.policies && ctx.policies.length > 0) {
@@ -84,7 +88,7 @@ function buildContextString(ctx?: CopilotContext): string {
 
   if (ctx.renewals && ctx.renewals.length > 0) {
     parts.push(
-      `## Upcoming renewals (server-loaded sample; ${ctx.renewals.length} items shown)\n` +
+      `## Renewal watchlist: overdue within 90 days and upcoming within 90 days (bounded sample; ${ctx.renewals.length} items shown)\n` +
         JSON.stringify(ctx.renewals.slice(0, 15), null, 2),
     );
   }

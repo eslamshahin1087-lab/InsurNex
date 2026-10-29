@@ -5,6 +5,7 @@ export interface SanitizedCopilotContext {
   page?: string;
   client?: SafeContextRecord;
   policy?: SafeContextRecord;
+  claim?: SafeContextRecord;
   policies?: SafeContextRecord[];
   claims?: SafeContextRecord[];
   renewals?: SafeContextRecord[];
@@ -25,6 +26,10 @@ const FIELD_RULES: Record<string, FieldRules> = {
   policy: {
     strings: ["insurerName", "line", "startDate", "expiryDate", "currency", "status"],
     numbers: ["premium"],
+  },
+  claim: {
+    strings: ["insurerName", "currency", "status", "incidentDate"],
+    numbers: ["claimAmount"],
   },
   policies: {
     strings: ["insurerName", "line", "expiryDate", "currency", "status"],
@@ -127,6 +132,9 @@ export function sanitizeCopilotContext(value: unknown): SanitizedCopilotContext 
 
   const policy = sanitizeRecord(value.policy, FIELD_RULES.policy);
   if (policy) output.policy = policy;
+
+  const claim = sanitizeRecord(value.claim, FIELD_RULES.claim);
+  if (claim) output.claim = claim;
 
   const policies = sanitizeList(value.policies, FIELD_RULES.policies, 20);
   if (policies) output.policies = policies;

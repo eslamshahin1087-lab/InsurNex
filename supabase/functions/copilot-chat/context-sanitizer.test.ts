@@ -37,3 +37,28 @@ Deno.test("empty or non-object context is omitted", () => {
   expect(sanitizeCopilotContext(null) === undefined, "null should be omitted");
   expect(sanitizeCopilotContext({ notes: "private" }) === undefined, "unsupported-only context should be omitted");
 });
+
+
+Deno.test("single Claim 360 context uses only safe summary fields", () => {
+  const value = sanitizeCopilotContext({
+    claim: {
+      insurerName: "Approved insurer",
+      currency: "EGP",
+      status: "review",
+      incidentDate: "2026-10-01",
+      claimAmount: 12000,
+      claimNumber: "PRIVATE_CLAIM",
+      policyNumber: "PRIVATE_POLICY",
+      clientName: "PRIVATE_CLIENT",
+      medicalDetails: "PRIVATE_MEDICAL",
+      notes: "PRIVATE_NOTES",
+    },
+  });
+  expect(value, "claim summary should remain");
+  expect(value.claim?.claimAmount === 12000, "approved claim amount should remain");
+  expect(value.claim?.status === "review", "approved claim status should remain");
+  const serialized = JSON.stringify(value);
+  for (const valueToExclude of ["PRIVATE_CLAIM", "PRIVATE_POLICY", "PRIVATE_CLIENT", "PRIVATE_MEDICAL", "PRIVATE_NOTES"]) {
+    expect(!serialized.includes(valueToExclude), "claim PII or free-text must be excluded: " + valueToExclude);
+  }
+});

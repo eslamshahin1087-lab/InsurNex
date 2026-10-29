@@ -8,6 +8,7 @@ import { getClaim } from '../features/claims/claim.service';
 import { addClaimNote, createClaimTask, listClaimActivities, nextClaimStatuses, transitionClaimStatus, type ClaimActivity, type ClaimWorkflowStatus } from '../features/claims/claim-workflow.service';
 import type { Claim } from '../types/claim';
 import type { AppTask } from '../types/task';
+import { setCurrentContext } from '../features/copilot/copilot-context.store';
 
 const statusLabels: Record<string, string> = { new:'جديدة', documents:'استلام المستندات', submitted:'تم الإرسال', additional_documents:'مستندات إضافية', review:'مراجعة', approved:'معتمدة', settlement:'التسوية', rejected:'مرفوضة', closed:'مغلقة' };
 const priorityLabels: Record<string, string> = { low:'منخفضة', medium:'متوسطة', high:'مرتفعة', urgent:'عاجلة' };
@@ -20,6 +21,7 @@ export default function ClaimDetailsPage(){
  const [loading,setLoading]=useState(true); const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [note,setNote]=useState('');
  const [taskTitle,setTaskTitle]=useState(''); const [taskDue,setTaskDue]=useState(''); const [taskPriority,setTaskPriority]=useState<'low'|'medium'|'high'|'urgent'>('medium');
  const load=useCallback(async()=>{if(!id||!profile){setLoading(false);return;}setLoading(true);setError('');try{const tasksQ=query(collection(db,'tasks'),where('organizationId','==',profile.organizationId),where('relatedType','==','claim'),where('relatedId','==',id),limit(100));const [c,a,t]=await Promise.all([getClaim(id),listClaimActivities(profile.organizationId,id),getDocs(tasksQ)]);setClaim(c);setActivities(a);setTasks(t.docs.map(d=>({id:d.id,...d.data()} as AppTask)));}catch{setError('تعذر تحميل ملف المطالبة.');}finally{setLoading(false);}},[id,profile]);
+ useEffect(()=>{setCurrentContext({page:'claim-details',claimRef:id?{id}:undefined});},[id]);
  useEffect(()=>{void load();},[load]);
  const next=useMemo(()=>claim?nextClaimStatuses(claim.status):[],[claim]); const openTasks=tasks.filter(t=>t.status!=='completed');
  async function changeStatus(to:ClaimWorkflowStatus){if(!id||!profile||!user)return;setBusy(true);setError('');try{await transitionClaimStatus({claimId:id,organizationId:profile.organizationId,userId:user.uid,toStatus:to});await load();}catch(e){setError(e instanceof Error&&e.message==='INVALID_CLAIM_TRANSITION'?'انتقال الحالة غير مسموح من الحالة الحالية.':'تعذر تحديث حالة المطالبة.');}finally{setBusy(false);}}

@@ -253,23 +253,61 @@ Deno.test("finance summary is omitted rather than mixing currencies", async () =
   assert(context?.finance === undefined, "mixed-currency totals must not be surfaced as one number");
 });
 
-Deno.test("renewals selector loads expiry-ordered renewal context instead of a general page", async () => {
+Deno.test("renewal context prioritizes actionable dates from a bounded org-scoped sample", async () => {
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: string) => dateParts.find((item) => item.type === type)?.value ?? "";
+  const currentDay = [part("year"), part("month"), part("day")].join("-");
+  const dateOffset = (offset: number) => {
+    const [year, month, day] = currentDay.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day + offset)).toISOString().slice(0, 10);
+  };
+
   const requests: Array<{ body: Record<string, unknown>; authorization: string | null }> = [];
-  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
+  const fetcher = (async (_input: RequestInfo | URL, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) as Record<string, unknown> : {};
     requests.push({ body, authorization: new Headers(init?.headers).get("Authorization") });
     return Response.json([
       doc({
-        organizationId: "org-renewals",
-        insurerName: "Renewal Insurer",
-        line: "motor",
-        expiryDate: "2027-01-15",
-        premium: 3200,
-        currency: "EGP",
-        status: "active",
-        policyNumber: "PRIVATE_POLICY_NUMBER",
-        clientName: "PRIVATE_CLIENT_NAME",
+        organizationId: "org-renewals", insurerName: "Soon Insurer", line: "motor",
+        expiryDate: dateOffset(2), premium: 3200, currency: "EGP", status: "active",
+        policyNumber: "PRIVATE_SOON_POLICY", clientName: "PRIVATE_CLIENT_NAME",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Recently Overdue Insurer", line: "health",
+        expiryDate: dateOffset(-4), premium: 2200, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Later Insurer", line: "property",
+        expiryDate: dateOffset(14), premium: 1500, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Stale Overdue Insurer", line: "motor",
+        expiryDate: dateOffset(-180), premium: 3000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Far Future Insurer", line: "motor",
+        expiryDate: dateOffset(200), premium: 1000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Cancelled Insurer", line: "motor",
+        expiryDate: dateOffset(1), premium: 1000, currency: "EGP", status: "cancelled",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Invalid Date Insurer", line: "motor",
+        expiryDate: "2027-02-31", premium: 1000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-other", insurerName: "OTHER_TENANT_INSURER", line: "motor",
+        expiryDate: dateOffset(1), premium: 99999, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Missing Date Insurer", line: "motor",
+        expiryDate: "", premium: 1000, currency: "EGP", status: "active",
       }),
     ]);
   }) as typeof fetch;
@@ -283,23 +321,28 @@ Deno.test("renewals selector loads expiry-ordered renewal context instead of a g
     fetcher,
   });
 
-  assert(requests.length === 1, "renewal page must load policy records once");
+  assert(requests.length === 1, "renewal page must load a single bounded policy sample");
   assert(requests[0].authorization === "Bearer renewal-user-token", "renewal query must use caller Firebase token");
   const structured = requests[0].body.structuredQuery as Record<string, unknown>;
-  const orderBy = (structured.orderBy as Array<{ field: { fieldPath: string }; direction: string }>)[0];
-  assert(orderBy.field.fieldPath === "expiryDate", "renewal context must order by expiry date");
-  assert(orderBy.direction === "ASCENDING", "nearest expiries must be returned first");
+  assert(structured.orderBy === undefined, "renewal sample must be sorted by computed days-left, not oldest expiry first in Firestore");
+  assert(structured.limit === 300, "renewal sampling should match the renewal page's 300-policy cap");
   assert(JSON.stringify(structured.where).includes("org-renewals"), "renewal query must be scoped to the verified organization");
 
   const renewals = context?.renewals as Array<Record<string, unknown>> | undefined;
-  assert(Array.isArray(renewals) && renewals.length === 1, "renewal context must be populated");
-  assert(typeof renewals[0].daysLeft === "number", "days remaining must be calculated deterministically");
-  assert(renewals[0].insurerName === "Renewal Insurer", "allow-listed renewal fields should remain");
+  assert(Array.isArray(renewals) && renewals.length === 3, "only valid, non-cancelled dates inside the action window should be returned");
+  assert(renewals[0].daysLeft === 2, "nearest upcoming expiry should be prioritized first");
+  assert(renewals[1].daysLeft === -4, "recently overdue policy should be retained after the nearest date");
+  assert(renewals[2].daysLeft === 14, "the next upcoming expiry should follow the nearest action dates");
+  assert(!JSON.stringify(renewals).includes("Stale Overdue Insurer"), "very old expiries must not crowd out actionable renewals");
+  assert(!JSON.stringify(renewals).includes("Far Future Insurer"), "far-future expiries must not crowd out actionable renewals");
+  assert(!JSON.stringify(renewals).includes("Cancelled Insurer"), "cancelled policies must not appear in the renewal watchlist");
+  assert(!JSON.stringify(renewals).includes("Invalid Date Insurer"), "invalid dates must not appear in the renewal watchlist");
+  assert(!JSON.stringify(renewals).includes("OTHER_TENANT_INSURER"), "foreign-tenant policies must be excluded");
   assert(context?.policies === undefined, "renewals should use a dedicated renewal context section");
   const serialized = JSON.stringify(context);
-  assert(!serialized.includes("PRIVATE_POLICY_NUMBER"), "policy identifiers must be excluded");
-  assert(!serialized.includes("PRIVATE_CLIENT_NAME"), "client names must be excluded");
-  assert(!serialized.includes("FORGED_POLICY"), "browser-supplied renewal values must be ignored");
+  for (const privateValue of ["PRIVATE_SOON_POLICY", "PRIVATE_CLIENT_NAME", "FORGED_POLICY"]) {
+    assert(!serialized.includes(privateValue), "private or browser-supplied renewal data must be excluded: " + privateValue);
+  }
 });
 
 Deno.test("Client 360 task context uses relatedType/relatedId schema, not a nonexistent clientId field", async () => {
@@ -470,3 +513,158 @@ Deno.test("Lead 360 does not return a lead from another organization", async () 
   assert(context?.page === "lead-details", "safe page label may remain after a tenant mismatch");
 });
 
+
+
+Deno.test("Policy 360 loads only allow-listed server fields for a same-tenant policy", async () => {
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    seen.push({ url, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/policies/policy-123",
+      fields: {
+        organizationId: { stringValue: "org-policy" },
+        insurerName: { stringValue: "Trusted insurer" },
+        line: { stringValue: "motor" },
+        startDate: { stringValue: "2026-01-01" },
+        expiryDate: { stringValue: "2027-01-01" },
+        premium: { doubleValue: 4500 },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "active" },
+        policyNumber: { stringValue: "PRIVATE_POLICY_NUMBER" },
+        clientId: { stringValue: "PRIVATE_CLIENT_ID" },
+        clientName: { stringValue: "PRIVATE_CLIENT_NAME" },
+        downloadUrl: { stringValue: "PRIVATE_DOCUMENT_URL" },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-policy",
+    idToken: "policy-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "policy-details",
+      policyRef: { id: "policy-123", policyNumber: "FORGED_POLICY" },
+      policy: { insurerName: "FORGED_INSURER", premium: 999999 },
+      notes: "FORGED_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(seen.length === 1, "Policy 360 should fetch only the selected policy");
+  assert(seen[0].url.includes("/documents/policies/policy-123"), "server must use the selected policy ID");
+  assert(seen[0].authorization === "Bearer policy-user-token", "policy lookup must use caller Firebase token");
+  const url = new URL(seen[0].url);
+  const mask = url.searchParams.getAll("mask.fieldPaths");
+  for (const field of ["organizationId", "insurerName", "line", "startDate", "expiryDate", "premium", "currency", "status"]) {
+    assert(mask.includes(field), "required Policy 360 field is missing from field mask: " + field);
+  }
+  for (const field of ["policyNumber", "clientId", "clientName", "downloadUrl", "notes"]) {
+    assert(!mask.includes(field), "sensitive Policy 360 field must not be requested: " + field);
+  }
+
+  const policy = context?.policy as Record<string, unknown> | undefined;
+  assert(policy?.insurerName === "Trusted insurer", "server insurer name should be used");
+  assert(policy?.premium === 4500 && policy?.currency === "EGP", "server financial fields should be used");
+  assert(policy?.status === "active", "server policy status should be used");
+  assert(!JSON.stringify(context).includes("PRIVATE_"), "private policy fields must not enter the prompt");
+  assert(!JSON.stringify(context).includes("FORGED_"), "browser-supplied policy details must be ignored");
+});
+
+Deno.test("Claim 360 loads allow-listed server fields and excludes identifiers and medical notes", async () => {
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    seen.push({ url, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/claims/claim-123",
+      fields: {
+        organizationId: { stringValue: "org-claim" },
+        insurerName: { stringValue: "Trusted insurer" },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "review" },
+        incidentDate: { stringValue: "2026-10-01" },
+        claimAmount: { doubleValue: 12000 },
+        claimNumber: { stringValue: "PRIVATE_CLAIM_NUMBER" },
+        policyNumber: { stringValue: "PRIVATE_POLICY_NUMBER" },
+        clientName: { stringValue: "PRIVATE_CLIENT_NAME" },
+        description: { stringValue: "PRIVATE_DESCRIPTION" },
+        medicalDetails: { stringValue: "PRIVATE_MEDICAL_DETAILS" },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-claim",
+    idToken: "claim-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "claim-details",
+      claimRef: { id: "claim-123", claimNumber: "FORGED_CLAIM" },
+      claim: { claimAmount: 999999, status: "forged" },
+      notes: "FORGED_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(seen.length === 1, "Claim 360 should fetch only the selected claim");
+  assert(seen[0].url.includes("/documents/claims/claim-123"), "server must use the selected claim ID");
+  assert(seen[0].authorization === "Bearer claim-user-token", "claim lookup must use caller Firebase token");
+  const url = new URL(seen[0].url);
+  const mask = url.searchParams.getAll("mask.fieldPaths");
+  for (const field of ["organizationId", "insurerName", "currency", "status", "incidentDate", "claimAmount"]) {
+    assert(mask.includes(field), "required Claim 360 field is missing from field mask: " + field);
+  }
+  for (const field of ["claimNumber", "policyNumber", "clientName", "description", "medicalDetails", "notes"]) {
+    assert(!mask.includes(field), "sensitive Claim 360 field must not be requested: " + field);
+  }
+
+  const claim = context?.claim as Record<string, unknown> | undefined;
+  assert(claim?.claimAmount === 12000 && claim?.currency === "EGP", "server claim amount/currency should be used");
+  assert(claim?.status === "review", "server claim status should be used");
+  const serialized = JSON.stringify(context);
+  for (const privateValue of ["PRIVATE_", "FORGED_"]) {
+    assert(!serialized.includes(privateValue), "private or browser-supplied claim data must not enter the prompt");
+  }
+});
+
+Deno.test("Policy and Claim 360 reject records returned for another organization", async () => {
+  const fetcher = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    const collectionName = url.includes("/documents/policies/") ? "policies" : "claims";
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/" + collectionName + "/foreign-record",
+      fields: {
+        organizationId: { stringValue: "org-other" },
+        insurerName: { stringValue: "FOREIGN_INSURER" },
+        line: { stringValue: "motor" },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "active" },
+        expiryDate: { stringValue: "2027-01-01" },
+        incidentDate: { stringValue: "2026-10-01" },
+        premium: { doubleValue: 1 },
+        claimAmount: { doubleValue: 2 },
+      },
+    });
+  }) as typeof fetch;
+
+  for (const [page, selectorKey, id] of [
+    ["policy-details", "policyRef", "foreign-policy"],
+    ["claim-details", "claimRef", "foreign-claim"],
+  ] as const) {
+    const context = await buildAuthorizedCopilotContext({
+      projectId: "demo-project",
+      organizationId: "org-current",
+      idToken: "current-user-token",
+      isPlatformAdmin: false,
+      requestedContext: { page, [selectorKey]: { id } },
+      fetcher,
+    });
+    assert(context?.policy === undefined, "foreign policy context must be omitted");
+    assert(context?.claim === undefined, "foreign claim context must be omitted");
+    assert(!JSON.stringify(context).includes("FOREIGN_INSURER"), "foreign tenant data must not enter the prompt");
+  }
+});

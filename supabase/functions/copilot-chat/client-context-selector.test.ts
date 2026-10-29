@@ -80,3 +80,41 @@ Deno.test("Lead 360 selector drops invalid lead IDs", () => {
 
   assert(JSON.stringify(selector) === JSON.stringify({ page: "lead-details" }), "invalid lead ID must not be forwarded");
 });
+
+
+Deno.test("Policy 360 browser selector sends only the validated policy ID", () => {
+  const selector = buildCopilotContextSelector({
+    page: "policy-details",
+    policyRef: {
+      id: "policy_123-abc",
+      policyNumber: "PRIVATE_POLICY",
+      clientName: "PRIVATE_CLIENT",
+      premium: 999999,
+      downloadUrl: "PRIVATE_URL",
+    },
+    policy: { insurerName: "FORGED_INSURER", premium: 999999 },
+  });
+  assert(JSON.stringify(selector) === JSON.stringify({ page: "policy-details", policyRef: { id: "policy_123-abc" } }), "only page and policy document ID may be sent");
+});
+
+Deno.test("Claim 360 browser selector sends only the validated claim ID", () => {
+  const selector = buildCopilotContextSelector({
+    page: "claim-details",
+    claimRef: {
+      id: "claim_123-abc",
+      claimNumber: "PRIVATE_CLAIM",
+      policyNumber: "PRIVATE_POLICY",
+      clientName: "PRIVATE_CLIENT",
+      medicalDetails: "PRIVATE_MEDICAL",
+    },
+    claim: { claimAmount: 999999, status: "forged" },
+  });
+  assert(JSON.stringify(selector) === JSON.stringify({ page: "claim-details", claimRef: { id: "claim_123-abc" } }), "only page and claim document ID may be sent");
+});
+
+Deno.test("Policy and Claim 360 selectors drop malformed record IDs", () => {
+  const policy = buildCopilotContextSelector({ page: "policy-details", policyRef: { id: "../other-tenant" } });
+  const claim = buildCopilotContextSelector({ page: "claim-details", claimRef: { id: "bad/id" } });
+  assert(JSON.stringify(policy) === JSON.stringify({ page: "policy-details" }), "invalid policy ID must fail closed");
+  assert(JSON.stringify(claim) === JSON.stringify({ page: "claim-details" }), "invalid claim ID must fail closed");
+});

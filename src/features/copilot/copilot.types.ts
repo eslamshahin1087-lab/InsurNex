@@ -35,6 +35,9 @@ export interface CopilotContextPayload {
   };
   // Client-side selector only; Copilot sends the ID and fetches authorized fields server-side.
   lead?: { id: string };
+  // Policy/Claim 360 selectors only; the server loads authorized summary fields.
+  policyRef?: { id: string };
+  claimRef?: { id: string };
   policy?: {
     policyNumber: string;
     insurerName: string;
