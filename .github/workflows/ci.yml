@@ -39,7 +39,7 @@ jobs:
       - name: Type-check Supabase AI Copilot Edge Function
         run: deno check supabase/functions/copilot-chat/index.ts
       - name: Copilot context minimization regression tests
-        run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts supabase/functions/copilot-chat/trusted-context.test.ts supabase/functions/copilot-chat/client-context-selector.test.ts
+        run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts supabase/functions/copilot-chat/trusted-context.test.ts supabase/functions/copilot-chat/client-context-selector.test.ts supabase/functions/copilot-chat/api-key-authorization.test.ts
       - name: Copilot context contract and Firestore index regression checks
         run: npm run test:copilot-context-contract
       - name: Copilot gateway safe-error regression checks

@@ -5,6 +5,7 @@ import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { sanitizeCopilotContext, type SanitizedCopilotContext } from './context-sanitizer.ts';
 import { authorizeCopilotWorkspace } from './workspace-authorization.ts';
 import { buildAuthorizedCopilotContext } from './trusted-context.ts';
+import { isAllowedSupabaseApiKey } from './api-key-authorization.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
 const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY') ?? '';
@@ -249,6 +250,14 @@ serve(async (req) => {
   }
 
   try {
+    const apiKey = req.headers.get('apikey');
+    const hasValidSupabaseApiKey = isAllowedSupabaseApiKey(apiKey, {
+      legacyAnonKey: Deno.env.get('SUPABASE_ANON_KEY'),
+      publishableKeysJson: Deno.env.get('SUPABASE_PUBLISHABLE_KEYS'),
+      lookupEnvironmentVariable: (name) => Deno.env.get(name) ?? undefined,
+    });
+    if (!hasValidSupabaseApiKey) throw new Error('INVALID_API_KEY');
+
     const firebaseToken = req.headers.get('x-firebase-token');
     if (!firebaseToken) throw new Error('MISSING_TOKEN');
 
@@ -286,7 +295,7 @@ serve(async (req) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'UNKNOWN';
-    const authenticationError = message === 'INVALID_TOKEN' || message === 'MISSING_TOKEN';
+    const authenticationError = message === 'INVALID_API_KEY' || message === 'INVALID_TOKEN' || message === 'MISSING_TOKEN';
     const scopeErrors = new Set(['WORKSPACE_ACCESS_DENIED', 'ORGANIZATION_ACCESS_DENIED']);
     const clientErrors = new Set([
       'INVALID_MESSAGES', 'TOO_MANY_MESSAGES', 'CONTENT_TOO_LONG',

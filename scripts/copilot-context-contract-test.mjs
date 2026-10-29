@@ -8,6 +8,9 @@ const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const selector = read('src/features/copilot/copilot-context-selector.ts');
 const leadDetailsPage = read('src/pages/LeadDetailsPage.tsx');
 const trustedContext = read('supabase/functions/copilot-chat/trusted-context.ts');
+const copilotHandler = read('supabase/functions/copilot-chat/index.ts');
+const supabaseApiKeyAuth = read('supabase/functions/copilot-chat/api-key-authorization.ts');
+const supabaseFunctionConfig = read('supabase/config.toml');
 const indexText = read('firestore.indexes.json').replace(/^\uFEFF/, '');
 const config = JSON.parse(indexText);
 
@@ -16,6 +19,11 @@ assert.match(trustedContext, /renewals: \["policies"\]/, 'server context builder
 assert.match(trustedContext, /page === "renewals" && collectionId === "policies"/, 'renewal queries must sort by expiry date');
 assert.match(trustedContext, /fieldPath: "relatedType"/, 'Client 360 task query must use relatedType');
 assert.match(trustedContext, /fieldPath: "relatedId"/, 'Client 360 task query must use relatedId');
+assert.match(supabaseFunctionConfig, /\[functions\.copilot-chat\][\s\S]*verify_jwt = false/, 'Copilot must use explicit app-level auth for modern publishable keys');
+assert.match(copilotHandler, /isAllowedSupabaseApiKey\(apiKey/, 'Copilot must validate the supplied Supabase application key');
+assert.match(copilotHandler, /verifyFirebaseToken\(firebaseToken\)/, 'Copilot must still verify the caller Firebase ID token');
+assert.match(copilotHandler, /authorizeCopilotWorkspace\(/, 'Copilot must still enforce verified organization membership');
+assert.match(supabaseApiKeyAuth, /SUPABASE_PUBLISHABLE_KEYS|publishableKeysJson/, 'Copilot must support modern publishable API key config');
 assert.match(selector, /"lead-details"/, 'Lead 360 must be an allow-listed browser context page');
 assert.match(selector, /return \{ page, lead: \{ id: leadId \} \}/, 'Lead 360 may forward only a validated lead ID');
 assert.match(leadDetailsPage, /lead: \{ id: lead\.id \}/, 'LeadDetailsPage must provide the selected lead ID');

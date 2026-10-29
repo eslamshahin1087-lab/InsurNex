@@ -1,0 +1,7 @@
+project_id = "piloiwtdbtmfiyqxfbae"
+
+[functions.copilot-chat]
+# This function authenticates the Supabase API key explicitly and verifies the
+# caller's Firebase ID token plus organization membership in application code.
+# Modern sb_publishable_* values are not JWTs and cannot pass gateway JWT checks.
+verify_jwt = false
