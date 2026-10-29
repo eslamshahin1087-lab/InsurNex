@@ -147,8 +147,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       try {
         const rows = await listMessages(activeId, profile.organizationId);
         if (!cancelled) setMessages(rows);
-      } catch (e) {
-        console.error('Failed to load messages', e);
+      } catch {
+        if (!cancelled) setError('تعذر تحميل الرسائل.');
       } finally {
         if (!cancelled) setLoadingMsgs(false);
       }
@@ -267,8 +267,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
             : c,
         ),
       );
-    } catch (e) {
-      console.error('Floating copilot failed', e);
+    } catch {
       if (
         requestSequence === messageRequestSequenceRef.current &&
         requestScope === conversationScopeRef.current
