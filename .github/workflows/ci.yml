@@ -50,6 +50,8 @@ jobs:
         run: npm run test:legacy-client-backfill-plan
       - name: Client sensitive-field inventory regression tests
         run: npm run test:client-sensitive-inventory
+      - name: Client sensitive-data separation planner regression tests
+        run: npm run test:client-sensitive-separation-plan
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
@@ -63,6 +65,7 @@ jobs:
           node functions/scripts/legacy-storage-dry-run.mjs --help
           node functions/scripts/legacy-client-document-backfill-plan.mjs --help
           node functions/scripts/client-sensitive-data-inventory.mjs --help
+          node functions/scripts/client-sensitive-data-separation-plan.mjs --help
       - name: Set up Java 21 for Firebase Emulator Suite
         uses: actions/setup-java@v4
         with:
