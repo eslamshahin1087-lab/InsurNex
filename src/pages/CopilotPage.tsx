@@ -132,6 +132,10 @@ export default function CopilotPage() {
     const requestScope = sessionScopeKey;
     const conversationId = activeId;
     const requestSequence = ++messageLoadSequenceRef.current;
+    if (sending) {
+      setLoadingMsgs(false);
+      return;
+    }
     if (!conversationId || !scope || !requestScope) {
       setMessages([]);
       setLoadingMsgs(false);
@@ -167,7 +171,7 @@ export default function CopilotPage() {
     return () => {
       cancelled = true;
     };
-  }, [activeId, scope, sessionScopeKey, isCurrentSession]);
+  }, [activeId, scope, sessionScopeKey, isCurrentSession, sending]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -229,21 +233,20 @@ export default function CopilotPage() {
     if (!scope || !user?.uid || !sessionScopeKey || !isCurrentSession(sessionScopeKey)) return;
 
     const requestScope = sessionScopeKey;
-    const deletingActiveConversation = id === activeId;
+    const deletingActiveConversation = id === activeConversationIdRef.current;
     if (deletingActiveConversation) {
       responseSequenceRef.current += 1;
       conversationCreationSequenceRef.current += 1;
       activeConversationIdRef.current = null;
+      setActiveId(null);
+      setMessages([]);
       setSending(false);
+      setLoadingMsgs(false);
     }
 
     try {
       await deleteConversation(id, scope);
       if (!isCurrentSession(requestScope)) return;
-      if (deletingActiveConversation && activeConversationIdRef.current === null) {
-        setActiveId(null);
-        setMessages([]);
-      }
       await loadConversations();
     } catch {
       if (isCurrentSession(requestScope)) setError('تعذر حذف المحادثة.');
@@ -275,7 +278,7 @@ export default function CopilotPage() {
     const requestSequence = ++responseSequenceRef.current;
     const previousHistory = messages;
     const userText = text.trim();
-    let conversationId = activeConversationIdRef.current ?? activeId;
+    let conversationId = activeConversationIdRef.current;
     let createdNewConversation = false;
 
     setSending(true);
