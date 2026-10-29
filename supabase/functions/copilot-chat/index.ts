@@ -83,7 +83,7 @@ function buildContextString(ctx?: CopilotContext): string {
 
   if (ctx.renewals && ctx.renewals.length > 0) {
     parts.push(
-      `## Upcoming renewals (server-loaded sample; ${ctx.renewals.length} items shown)\n` +
+      `## Renewal watchlist: overdue within 90 days and upcoming within 90 days (bounded sample; ${ctx.renewals.length} items shown)\n` +
         JSON.stringify(ctx.renewals.slice(0, 15), null, 2),
     );
   }
