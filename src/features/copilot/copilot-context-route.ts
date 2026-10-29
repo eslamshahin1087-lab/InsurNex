@@ -66,10 +66,6 @@ function detailIdFromContext(context: CopilotContextSelector, key: DetailSelecto
 }
 
 /**
- * Binds the stored selector to the current route. It never invents context and
- * rejects a selector from another page or another detail record.
- */
-/**
  * Stable scope key for the floating conversation. Record pages are isolated by
  * exact ID; the full Copilot route returns undefined to preserve its source
  * conversation when navigation comes from an open panel.
@@ -84,6 +80,10 @@ export function getCopilotConversationScopeKey(pathname: string): string | undef
   return expected.page + ":" + expected.detail.id;
 }
 
+/**
+ * Binds the stored selector to the current route. It never invents context and
+ * rejects a selector from another page or another detail record.
+ */
 export function resolveCopilotContextForRoute(
   pathname: string,
   context: CopilotContextSelector | undefined,
