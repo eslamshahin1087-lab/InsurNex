@@ -252,3 +252,133 @@ Deno.test("finance summary is omitted rather than mixing currencies", async () =
   });
   assert(context?.finance === undefined, "mixed-currency totals must not be surfaced as one number");
 });
+
+Deno.test("renewals selector loads expiry-ordered renewal context instead of a general page", async () => {
+  const requests: Array<{ body: Record<string, unknown>; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const body = init?.body ? JSON.parse(String(init.body)) as Record<string, unknown> : {};
+    requests.push({ body, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json([
+      doc({
+        organizationId: "org-renewals",
+        insurerName: "Renewal Insurer",
+        line: "motor",
+        expiryDate: "2027-01-15",
+        premium: 3200,
+        currency: "EGP",
+        status: "active",
+        policyNumber: "PRIVATE_POLICY_NUMBER",
+        clientName: "PRIVATE_CLIENT_NAME",
+      }),
+    ]);
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-renewals",
+    idToken: "renewal-user-token",
+    isPlatformAdmin: false,
+    requestedContext: { page: "renewals", renewals: [{ policyNumber: "FORGED_POLICY" }] },
+    fetcher,
+  });
+
+  assert(requests.length === 1, "renewal page must load policy records once");
+  assert(requests[0].authorization === "Bearer renewal-user-token", "renewal query must use caller Firebase token");
+  const structured = requests[0].body.structuredQuery as Record<string, unknown>;
+  const orderBy = (structured.orderBy as Array<{ field: { fieldPath: string }; direction: string }>)[0];
+  assert(orderBy.field.fieldPath === "expiryDate", "renewal context must order by expiry date");
+  assert(orderBy.direction === "ASCENDING", "nearest expiries must be returned first");
+  assert(JSON.stringify(structured.where).includes("org-renewals"), "renewal query must be scoped to the verified organization");
+
+  const renewals = context?.renewals as Array<Record<string, unknown>> | undefined;
+  assert(Array.isArray(renewals) && renewals.length === 1, "renewal context must be populated");
+  assert(typeof renewals[0].daysLeft === "number", "days remaining must be calculated deterministically");
+  assert(renewals[0].insurerName === "Renewal Insurer", "allow-listed renewal fields should remain");
+  assert(context?.policies === undefined, "renewals should use a dedicated renewal context section");
+  const serialized = JSON.stringify(context);
+  assert(!serialized.includes("PRIVATE_POLICY_NUMBER"), "policy identifiers must be excluded");
+  assert(!serialized.includes("PRIVATE_CLIENT_NAME"), "client names must be excluded");
+  assert(!serialized.includes("FORGED_POLICY"), "browser-supplied renewal values must be ignored");
+});
+
+Deno.test("Client 360 task context uses relatedType/relatedId schema, not a nonexistent clientId field", async () => {
+  const requests: Array<{ collectionId: string; body: Record<string, unknown> }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/documents/clients/client-123")) {
+      return Response.json({
+        name: "projects/demo/databases/(default)/documents/clients/client-123",
+        fields: {
+          organizationId: { stringValue: "org-client" },
+          type: { stringValue: "corporate" },
+          status: { stringValue: "active" },
+        },
+      });
+    }
+
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+    const structured = body.structuredQuery as Record<string, unknown>;
+    const collectionId = ((structured.from as Array<{ collectionId: string }>)[0]).collectionId;
+    requests.push({ collectionId, body });
+    if (collectionId === "tasks") {
+      return Response.json([doc({
+        organizationId: "org-client",
+        status: "open",
+        priority: "high",
+        dueDate: "2027-01-15",
+        createdAt: "2026-10-29T09:00:00Z",
+        title: "PRIVATE_TASK_TITLE",
+      })]);
+    }
+    if (collectionId === "policies") {
+      return Response.json([doc({
+        organizationId: "org-client",
+        insurerName: "Client Insurer",
+        line: "motor",
+        expiryDate: "2027-01-15",
+        premium: 3200,
+        currency: "EGP",
+        status: "active",
+      })]);
+    }
+    return Response.json([doc({
+      organizationId: "org-client",
+      insurerName: "Client Insurer",
+      currency: "EGP",
+      status: "open",
+      incidentDate: "2026-09-15",
+      claimAmount: 5000,
+    })]);
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-client",
+    idToken: "client-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "client-details",
+      client: { id: "client-123", name: "FORGED_CLIENT_NAME", phone: "FORGED_PHONE" },
+      tasks: [{ title: "FORGED_TASK" }],
+    },
+    fetcher,
+  });
+
+  assert(requests.length === 3, "Client 360 should query policies, claims, and tasks after validating the client");
+  const taskRequest = requests.find((request) => request.collectionId === "tasks");
+  assert(taskRequest !== undefined, "task context query must be made");
+  const structured = taskRequest.body.structuredQuery as Record<string, unknown>;
+  const serializedWhere = JSON.stringify(structured.where);
+  assert(serializedWhere.includes('"fieldPath":"relatedType"'), "task query must filter by relatedType");
+  assert(serializedWhere.includes('"stringValue":"client"'), "task query must select client-related tasks");
+  assert(serializedWhere.includes('"fieldPath":"relatedId"'), "task query must filter by relatedId");
+  assert(serializedWhere.includes('"stringValue":"client-123"'), "task query must use the validated client ID");
+  assert(!serializedWhere.includes('"fieldPath":"clientId"'), "task collection does not use a clientId relation field");
+
+  const tasks = context?.tasks as Array<Record<string, unknown>> | undefined;
+  assert(Array.isArray(tasks) && tasks.length === 1, "validated client task summary must be available");
+  assert(tasks[0].status === "open" && tasks[0].priority === "high", "safe task fields should remain");
+  assert(!JSON.stringify(context).includes("PRIVATE_TASK_TITLE"), "task titles must not be sent to the model");
+  assert(!JSON.stringify(context).includes("FORGED_"), "browser-supplied client or task data must be ignored");
+});
