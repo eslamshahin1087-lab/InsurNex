@@ -254,6 +254,7 @@ serve(async (req) => {
     const hasValidSupabaseApiKey = isAllowedSupabaseApiKey(apiKey, {
       legacyAnonKey: Deno.env.get('SUPABASE_ANON_KEY'),
       publishableKeysJson: Deno.env.get('SUPABASE_PUBLISHABLE_KEYS'),
+      lookupEnvironmentVariable: (name) => Deno.env.get(name) ?? undefined,
     });
     if (!hasValidSupabaseApiKey) throw new Error('INVALID_API_KEY');
 
