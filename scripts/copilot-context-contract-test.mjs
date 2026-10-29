@@ -37,7 +37,7 @@ assert.match(selector, /return \{ page, claimRef: \{ id: claimId \} \}/, 'Claim 
 assert.match(policyDetailsPage, /page: 'policy-details', policyRef: id \? \{ id \} : undefined/, 'PolicyDetailsPage must provide only its selected policy ID');
 assert.match(claimDetailsPage, /page:'claim-details',claimRef:id\?\{id\}:undefined/, 'ClaimDetailsPage must provide only its selected claim ID');
 assert.match(trustedContext, /async function getScopedDetailSelector\(/, 'Policy/Claim 360 must read records from Firestore on the server');
-assert.match(trustedContext, /collectionName: isPolicy \\? "policies" : "claims"/, 'Policy/Claim lookup must use fixed collection names');
+assert.match(trustedContext, /collectionName: isPolicy \? "policies" : "claims"/, 'Policy/Claim lookup must use fixed collection names');
 assert.match(trustedContext, /if \(data\.organizationId !== input\.organizationId\) return undefined;/, 'Policy/Claim detail must verify tenant scope');
 assert.match(sanitizer, /claim\?: SafeContextRecord/, 'Claim 360 output must pass through the sanitizer');
 assert.match(copilotHandler, /Claim 360 context/, 'Copilot system prompt must render the safe Claim 360 summary');
