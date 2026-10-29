@@ -16,6 +16,7 @@ import {
   buildTitleFromFirstMessage,
   canSendMessage,
 } from '../features/copilot/copilot-utils';
+import { getCopilotPageSessionKey } from '../features/copilot/copilot-page-session';
 import type {
   CopilotContextPayload,
   CopilotConversation,
@@ -41,6 +42,10 @@ export default function CopilotPage() {
    */
   const scope: string | null = profile?.organizationId || user?.uid || null;
   const isAdminScope = !profile?.organizationId && !!user?.uid;
+  const sessionScopeKey = useMemo(
+    () => getCopilotPageSessionKey(user?.uid, scope, incomingContext),
+    [user?.uid, scope, incomingContext],
+  );
 
   const [conversations, setConversations] = useState<CopilotConversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -52,55 +57,117 @@ export default function CopilotPage() {
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sessionScopeRef = useRef<string | null>(sessionScopeKey);
+  const responseSequenceRef = useRef(0);
+  const conversationCreationSequenceRef = useRef(0);
+  const conversationListSequenceRef = useRef(0);
+  const messageLoadSequenceRef = useRef(0);
+  const activeConversationIdRef = useRef<string | null>(null);
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeId) || null,
     [conversations, activeId],
   );
 
+  const isCurrentSession = useCallback(
+    (expectedScope: string | null) => Boolean(expectedScope && sessionScopeRef.current === expectedScope),
+    [],
+  );
+
+  // Invalidate pending reads/writes and clear visible data whenever the account,
+  // workspace, or minimized page/record context changes.
+  useEffect(() => {
+    if (sessionScopeRef.current === sessionScopeKey) return;
+    sessionScopeRef.current = sessionScopeKey;
+    responseSequenceRef.current += 1;
+    conversationCreationSequenceRef.current += 1;
+    conversationListSequenceRef.current += 1;
+    messageLoadSequenceRef.current += 1;
+    activeConversationIdRef.current = null;
+    setConversations([]);
+    setActiveId(null);
+    setMessages([]);
+    setInput('');
+    setSending(false);
+    setLoadingMsgs(false);
+    setLoadingConvs(Boolean(scope && user?.uid));
+    setError('');
+  }, [sessionScopeKey, scope, user?.uid]);
+
   const loadConversations = useCallback(async () => {
-    if (!scope || !user?.uid) {
-      setLoadingConvs(false);
+    const requestScope = sessionScopeKey;
+    const requestSequence = ++conversationListSequenceRef.current;
+    if (!scope || !user?.uid || !requestScope) {
+      if (sessionScopeRef.current === requestScope) setLoadingConvs(false);
       return;
     }
     setLoadingConvs(true);
     try {
       const rows = await listConversations(scope, user.uid);
+      if (
+        !isCurrentSession(requestScope) ||
+        requestSequence !== conversationListSequenceRef.current
+      ) return;
       setConversations(rows);
     } catch {
-      
-      setError('تعذر تحميل المحادثات.');
+      if (
+        isCurrentSession(requestScope) &&
+        requestSequence === conversationListSequenceRef.current
+      ) {
+        setError('تعذر تحميل المحادثات.');
+      }
     } finally {
-      setLoadingConvs(false);
+      if (
+        isCurrentSession(requestScope) &&
+        requestSequence === conversationListSequenceRef.current
+      ) setLoadingConvs(false);
     }
-  }, [scope, user?.uid]);
+  }, [scope, user?.uid, sessionScopeKey, isCurrentSession]);
 
   useEffect(() => {
     void loadConversations();
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!activeId || !scope) {
+    const requestScope = sessionScopeKey;
+    const conversationId = activeId;
+    const requestSequence = ++messageLoadSequenceRef.current;
+    if (!conversationId || !scope || !requestScope) {
       setMessages([]);
+      setLoadingMsgs(false);
       return;
     }
+
     let cancelled = false;
     setLoadingMsgs(true);
     (async () => {
       try {
-        const rows = await listMessages(activeId, scope);
-        if (!cancelled) setMessages(rows);
+        const rows = await listMessages(conversationId, scope);
+        if (
+          !cancelled &&
+          isCurrentSession(requestScope) &&
+          requestSequence === messageLoadSequenceRef.current &&
+          activeConversationIdRef.current === conversationId
+        ) setMessages(rows);
       } catch {
-        
-        if (!cancelled) setError('تعذر تحميل الرسائل.');
+        if (
+          !cancelled &&
+          isCurrentSession(requestScope) &&
+          requestSequence === messageLoadSequenceRef.current &&
+          activeConversationIdRef.current === conversationId
+        ) setError('تعذر تحميل الرسائل.');
       } finally {
-        if (!cancelled) setLoadingMsgs(false);
+        if (
+          !cancelled &&
+          isCurrentSession(requestScope) &&
+          requestSequence === messageLoadSequenceRef.current
+        ) setLoadingMsgs(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [activeId, scope]);
+  }, [activeId, scope, sessionScopeKey, isCurrentSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -110,35 +177,76 @@ export default function CopilotPage() {
     textareaRef.current?.focus();
   }, [activeId]);
 
+  function handleSelectConversation(id: string) {
+    responseSequenceRef.current += 1;
+    conversationCreationSequenceRef.current += 1;
+    activeConversationIdRef.current = id;
+    setActiveId(id);
+    setMessages([]);
+    setSending(false);
+    setError('');
+  }
+
   async function handleNew() {
-    if (!scope || !user?.uid) {
+    if (!scope || !user?.uid || !sessionScopeKey || !isCurrentSession(sessionScopeKey)) {
       setError('لا يمكن إنشاء محادثة جديدة الآن.');
       return;
     }
+
+    const requestScope = sessionScopeKey;
+    const creationSequence = ++conversationCreationSequenceRef.current;
+    responseSequenceRef.current += 1;
+    activeConversationIdRef.current = null;
+    setActiveId(null);
+    setMessages([]);
+    setSending(false);
+    setInput('');
+    setError('');
+
     try {
       const id = await createConversation(scope, user.uid);
+      if (
+        !isCurrentSession(requestScope) ||
+        creationSequence !== conversationCreationSequenceRef.current
+      ) return;
+
+      activeConversationIdRef.current = id;
       setActiveId(id);
-      setMessages([]);
-      setError('');
       await loadConversations();
+      if (
+        !isCurrentSession(requestScope) ||
+        creationSequence !== conversationCreationSequenceRef.current
+      ) return;
     } catch {
-      
-      setError('تعذر بدء محادثة جديدة.');
+      if (
+        isCurrentSession(requestScope) &&
+        creationSequence === conversationCreationSequenceRef.current
+      ) setError('تعذر بدء محادثة جديدة.');
     }
   }
 
   async function handleDelete(id: string) {
-    if (!scope) return;
+    if (!scope || !user?.uid || !sessionScopeKey || !isCurrentSession(sessionScopeKey)) return;
+
+    const requestScope = sessionScopeKey;
+    const deletingActiveConversation = id === activeId;
+    if (deletingActiveConversation) {
+      responseSequenceRef.current += 1;
+      conversationCreationSequenceRef.current += 1;
+      activeConversationIdRef.current = null;
+      setSending(false);
+    }
+
     try {
       await deleteConversation(id, scope);
-      if (id === activeId) {
+      if (!isCurrentSession(requestScope)) return;
+      if (deletingActiveConversation && activeConversationIdRef.current === null) {
         setActiveId(null);
         setMessages([]);
       }
       await loadConversations();
     } catch {
-      
-      setError('تعذر حذف المحادثة.');
+      if (isCurrentSession(requestScope)) setError('تعذر حذف المحادثة.');
     }
   }
 
@@ -148,8 +256,12 @@ export default function CopilotPage() {
       return;
     }
 
-    if (!scope) {
+    if (!scope || !sessionScopeKey) {
       setError('جاري تحميل بيانات الحساب... أعد المحاولة.');
+      return;
+    }
+    if (!isCurrentSession(sessionScopeKey)) {
+      setError('جارٍ تحديث سياق المحادثة. أعد المحاولة.');
       return;
     }
 
@@ -157,43 +269,63 @@ export default function CopilotPage() {
       setError('الرسالة فارغة أو قصيرة جدًا.');
       return;
     }
-
     if (sending) return;
 
-    setError('');
+    const requestScope = sessionScopeKey;
+    const requestSequence = ++responseSequenceRef.current;
+    const previousHistory = messages;
+    const userText = text.trim();
+    let conversationId = activeConversationIdRef.current ?? activeId;
+    let createdNewConversation = false;
 
-    let conversationId = activeId;
-    if (!conversationId) {
-      try {
+    setSending(true);
+    setError('');
+    setInput('');
+
+    const isCurrentRequest = () =>
+      isCurrentSession(requestScope) &&
+      requestSequence === responseSequenceRef.current &&
+      Boolean(conversationId) &&
+      activeConversationIdRef.current === conversationId;
+
+    try {
+      if (!conversationId) {
+        const creationSequence = ++conversationCreationSequenceRef.current;
         conversationId = await createConversation(
           scope,
           user.uid,
-          buildTitleFromFirstMessage(text),
+          buildTitleFromFirstMessage(userText),
         );
+
+        if (
+          !isCurrentSession(requestScope) ||
+          requestSequence !== responseSequenceRef.current ||
+          creationSequence !== conversationCreationSequenceRef.current
+        ) return;
+
+        createdNewConversation = true;
+        activeConversationIdRef.current = conversationId;
         setActiveId(conversationId);
-      } catch {
-        
-        setError('تعذر بدء محادثة جديدة.');
-        return;
+        await loadConversations();
+        if (
+          !isCurrentSession(requestScope) ||
+          requestSequence !== responseSequenceRef.current ||
+          creationSequence !== conversationCreationSequenceRef.current
+        ) return;
       }
-    }
 
-    setSending(true);
-    const previousHistory = messages;
-    const userText = text.trim();
-    setInput('');
+      if (!conversationId || !isCurrentRequest()) return;
 
-    const optimistic: CopilotMessage = {
-      id: `local-${Date.now()}`,
-      conversationId,
-      organizationId: scope,
-      userId: user.uid,
-      role: 'user',
-      content: userText,
-    };
-    setMessages((prev) => [...prev, optimistic]);
+      const optimistic: CopilotMessage = {
+        id: `local-${Date.now()}`,
+        conversationId,
+        organizationId: scope,
+        userId: user.uid,
+        role: 'user',
+        content: userText,
+      };
+      setMessages([...previousHistory, optimistic]);
 
-    try {
       const response = await sendMessage({
         organizationId: scope,
         userId: user.uid,
@@ -203,7 +335,9 @@ export default function CopilotPage() {
         context: incomingContext,
       });
 
+      if (!isCurrentRequest()) return;
       const fresh = await listMessages(conversationId, scope);
+      if (!isCurrentRequest()) return;
       setMessages(fresh);
 
       setConversations((prev) =>
@@ -222,22 +356,27 @@ export default function CopilotPage() {
       );
 
       if (
-        activeConversation?.title === 'محادثة جديدة' ||
-        !activeConversation
+        !createdNewConversation &&
+        activeConversation?.id === conversationId &&
+        activeConversation.title === 'محادثة جديدة'
       ) {
         try {
           await updateDoc(doc(db, 'copilotConversations', conversationId), {
             title: buildTitleFromFirstMessage(userText),
           });
         } catch {
-          /* ignore */
+          /* ignore title-update failure */
         }
       }
     } catch {
-      setError('تعذر الاتصال بالمساعد الذكي الآن. تحقق من الاتصال وحاول مجددًا.');
-      setMessages(previousHistory);
+      if (isCurrentRequest()) {
+        setError('تعذر الاتصال بالمساعد الذكي الآن. تحقق من الاتصال وحاول مجددًا.');
+        setMessages(previousHistory);
+      }
     } finally {
-      setSending(false);
+      if (isCurrentSession(requestScope) && requestSequence === responseSequenceRef.current) {
+        setSending(false);
+      }
     }
   }
 
@@ -253,7 +392,7 @@ export default function CopilotPage() {
       <ConversationSidebar
         conversations={conversations}
         activeId={activeId}
-        onSelect={setActiveId}
+        onSelect={handleSelectConversation}
         onNew={handleNew}
         onDelete={handleDelete}
         loading={loadingConvs}
