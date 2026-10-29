@@ -445,6 +445,131 @@ try {
     'organization owner cannot directly read another member private Copilot conversation',
   );
 
+  const memberOwnMessageId = 'rbac-copilot-message-' + randomUUID();
+  await setDoc(doc(claimsMember.actor.db, 'copilotMessages', memberOwnMessageId), {
+    organizationId: orgA,
+    userId: claimsMember.actor.user.uid,
+    conversationId: privateConversationId,
+    role: 'user',
+    content: 'Own conversation message',
+    createdAt: serverTimestamp(),
+  });
+  check(
+    (await getDoc(doc(claimsMember.actor.db, 'copilotMessages', memberOwnMessageId))).exists(),
+    'a member can create a message in their own Copilot conversation',
+  );
+
+  const ownerConversationId = 'rbac-owner-conversation-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'copilotConversations', ownerConversationId), {
+    organizationId: orgA,
+    userId: ownerA.user.uid,
+    title: 'Owner conversation',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  const ownerOwnMessageId = 'rbac-owner-message-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'copilotMessages', ownerOwnMessageId), {
+    organizationId: orgA,
+    userId: ownerA.user.uid,
+    conversationId: ownerConversationId,
+    role: 'user',
+    content: 'Owner own conversation message',
+    createdAt: serverTimestamp(),
+  });
+  check(
+    (await getDoc(doc(ownerA.db, 'copilotMessages', ownerOwnMessageId))).exists(),
+    'an owner can create a message in their own Copilot conversation',
+  );
+
+  const invalidCopilotMessages = [
+    {
+      label: 'system-role Copilot messages are rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'system', content: 'Synthetic invalid role', createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'empty Copilot message content is rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: '', createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'oversized Copilot message content is rejected',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: 'x'.repeat(8001), createdAt: serverTimestamp(),
+      },
+    },
+    {
+      label: 'Copilot messages cannot carry unexpected sensitive fields',
+      payload: {
+        organizationId: orgA, userId: ownerA.user.uid, conversationId: ownerConversationId,
+        role: 'user', content: 'Synthetic allowlist test', createdAt: serverTimestamp(),
+        medicalDetails: 'SYNTHETIC_PRIVATE_FIELD_SENTINEL',
+      },
+    },
+  ];
+  for (const invalidMessage of invalidCopilotMessages) {
+    await expectDenied(
+      () => setDoc(doc(ownerA.db, 'copilotMessages', 'rbac-invalid-message-' + randomUUID()), invalidMessage.payload),
+      invalidMessage.label,
+    );
+  }
+
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'copilotMessages', ownerOwnMessageId), {
+      conversationId: privateConversationId,
+    }),
+    'a Copilot message cannot be moved to another conversation after creation',
+  );
+
+  await expectDenied(
+    () => setDoc(doc(claimsMember.actor.db, 'copilotMessages', 'rbac-forged-message-' + randomUUID()), {
+      organizationId: orgA,
+      userId: claimsMember.actor.user.uid,
+      conversationId: ownerConversationId,
+      role: 'user',
+      content: 'Attempt to attach a message to another member conversation',
+      createdAt: serverTimestamp(),
+    }),
+    'a member cannot attach a message to another member Copilot conversation',
+  );
+
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'copilotMessages', 'rbac-missing-parent-message-' + randomUUID()), {
+      organizationId: orgA,
+      userId: ownerA.user.uid,
+      conversationId: 'missing-conversation-' + randomUUID(),
+      role: 'user',
+      content: 'Attempt to attach a message to a missing conversation',
+      createdAt: serverTimestamp(),
+    }),
+    'a message cannot reference a missing Copilot conversation',
+  );
+
+  const foreignConversationId = 'rbac-foreign-conversation-' + randomUUID();
+  await setDoc(doc(ownerB.db, 'copilotConversations', foreignConversationId), {
+    organizationId: orgB,
+    userId: ownerB.user.uid,
+    title: 'Foreign organization conversation',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'copilotMessages', 'rbac-foreign-message-' + randomUUID()), {
+      organizationId: orgA,
+      userId: ownerA.user.uid,
+      conversationId: foreignConversationId,
+      role: 'user',
+      content: 'Attempt to attach a message to another organization',
+      createdAt: serverTimestamp(),
+    }),
+    'a tenant cannot attach a message to a Copilot conversation from another organization',
+  );
+
   const notificationA = 'rules-notification-' + randomUUID();
   await setDoc(doc(ownerA.db, 'notifications', notificationA), {
     organizationId: orgA,
