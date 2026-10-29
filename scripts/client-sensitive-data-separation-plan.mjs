@@ -159,22 +159,38 @@ function classifyFieldPath(record, fieldPath) {
   }
 
   if (fieldPath === 'individual' || fieldPath.startsWith('individual.')) {
+    const specificProfileClass = CLASS_PRIORITY.find(candidate =>
+      ['health', 'family', 'identity', 'financial', 'contact_address', 'freeform_notes'].includes(candidate)
+      && categories.includes(candidate)
+      && DESTINATIONS[candidate],
+    );
+    const sensitivityClass = specificProfileClass || 'identity_profile';
     return {
-      action: 'proposed_destination_requires_review',
-      destinationCollection: DESTINATIONS.identity_profile,
-      sensitivityClass: 'identity_profile',
+      action: sensitivityClass === 'freeform_notes'
+        ? 'manual_classification_required'
+        : 'proposed_destination_requires_review',
+      destinationCollection: DESTINATIONS[sensitivityClass],
+      sensitivityClass,
       confidence: categories.length > 0 ? 'medium' : 'low',
-      reason: 'Individual profile fields belong in a restricted profile, but nested fields must be split further when they contain medical, family, financial or free-form data.',
+      reason: 'Individual profile fields belong in a restricted profile; more-specific medical, family, identity, financial or narrative classifications take precedence over the parent profile.',
     };
   }
 
   if (fieldPath === 'corporate' || fieldPath.startsWith('corporate.')) {
+    const specificProfileClass = CLASS_PRIORITY.find(candidate =>
+      ['health', 'family', 'identity', 'financial', 'contact_address', 'freeform_notes'].includes(candidate)
+      && categories.includes(candidate)
+      && DESTINATIONS[candidate],
+    );
+    const sensitivityClass = specificProfileClass || 'corporate_profile';
     return {
-      action: 'proposed_destination_requires_review',
-      destinationCollection: DESTINATIONS.corporate_profile,
-      sensitivityClass: 'corporate_profile',
+      action: sensitivityClass === 'freeform_notes'
+        ? 'manual_classification_required'
+        : 'proposed_destination_requires_review',
+      destinationCollection: DESTINATIONS[sensitivityClass],
+      sensitivityClass,
       confidence: categories.length > 0 ? 'medium' : 'low',
-      reason: 'Corporate profile fields need a restricted profile and a field-by-field review of legal, tax and signatory information.',
+      reason: 'Corporate profile fields require a restricted profile; more-specific legal, identity, financial, medical or narrative classifications take precedence over the parent profile.',
     };
   }
 
@@ -257,7 +273,11 @@ export function buildClientSensitiveDataSeparationPlan({
       throw new Error('Inventory record is missing a document ID, organization ID, or field-path map.');
     }
 
-    const fieldPaths = [...new Set(record.fieldPaths.filter(path => typeof path === 'string' && path.length > 0))].sort();
+    const safePathPattern = /^(?:[A-Za-z0-9_-]{1,64}|\\[field\\])(?:\\[\\])*(?:\\.(?:[A-Za-z0-9_-]{1,64}|\\[field\\])(?:\\[\\])*)*$/;
+    if (!record.fieldPaths.every(path => typeof path === 'string' && safePathPattern.test(path))) {
+      throw new Error('Inventory contains an invalid field-path token; refusing to propagate it into the plan.');
+    }
+    const fieldPaths = [...new Set(record.fieldPaths)].sort();
     const fieldPlans = fieldPaths.map(fieldPath => {
       counts.totalFieldPaths += 1;
       let proposed;
