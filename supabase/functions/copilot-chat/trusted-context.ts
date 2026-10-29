@@ -17,6 +17,8 @@ const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   renewals: ["policies"],
   "client-details": [],
   "lead-details": [],
+  "policy-details": [],
+  "claim-details": [],
   finance: ["revenue", "expenses", "commissions"],
 };
 
@@ -235,6 +237,46 @@ async function getClientSelector(
   return Object.keys(client).length ? client : undefined;
 }
 
+async function getScopedDetailSelector(input: {
+  projectId: string;
+  idToken: string;
+  organizationId: string;
+  collectionName: "policies" | "claims";
+  documentId: string;
+  fetcher: typeof fetch;
+}): Promise<Record<string, unknown> | undefined> {
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(input.documentId)) return undefined;
+  const fieldsByCollection = {
+    policies: ["insurerName", "line", "startDate", "expiryDate", "premium", "currency", "status"],
+    claims: ["insurerName", "currency", "status", "incidentDate", "claimAmount"],
+  } as const;
+  const allowedFields: readonly string[] = fieldsByCollection[input.collectionName];
+  const url = new URL(
+    \`https://firestore.googleapis.com/v1/projects/\${encodeURIComponent(input.projectId)}/databases/(default)/documents/\${input.collectionName}/\${encodeURIComponent(input.documentId)}\`,
+  );
+  for (const fieldPath of ["organizationId", ...allowedFields]) {
+    url.searchParams.append("mask.fieldPaths", fieldPath);
+  }
+  const response = await input.fetcher(url.toString(), {
+    headers: { Authorization: \`Bearer \${input.idToken}\` },
+  });
+
+  if (response.status === 404 || response.status === 403) return undefined;
+  if (!response.ok) throw new Error("FIRESTORE_DETAIL_LOOKUP_FAILED");
+
+  const raw: unknown = await response.json();
+  if (!isRecord(raw)) return undefined;
+  const data = recordToMap(raw as FirestoreDocument);
+  if (data.organizationId !== input.organizationId) return undefined;
+
+  const detail: Record<string, unknown> = {};
+  for (const fieldPath of allowedFields) {
+    const value = safeScalar(data[fieldPath]);
+    if (value !== undefined) detail[fieldPath] = value;
+  }
+  return Object.keys(detail).length ? detail : undefined;
+}
+
 async function getLeadSelector(
   input: {
     projectId: string;
@@ -316,6 +358,35 @@ export async function buildAuthorizedCopilotContext(input: {
 
     // No client-supplied lead values enter the prompt.
     if (lead) output.leads = [lead];
+    return output;
+  }
+
+  if (page === "policy-details" || page === "claim-details") {
+    const isPolicy = page === "policy-details";
+    const selectorKey = isPolicy ? "policyRef" : "claimRef";
+    const rawSelector = isRecord(raw[selectorKey]) ? raw[selectorKey] : undefined;
+    const rawDocumentId = rawSelector?.id;
+    if (typeof rawDocumentId !== "string") return output;
+
+    let detail: Record<string, unknown> | undefined;
+    try {
+      detail = await getScopedDetailSelector({
+        projectId: input.projectId,
+        organizationId: input.organizationId,
+        idToken: input.idToken,
+        collectionName: isPolicy ? "policies" : "claims",
+        documentId: rawDocumentId,
+        fetcher,
+      });
+    } catch {
+      detail = undefined;
+    }
+
+    // Only server-read, field-masked data from the verified organization is returned.
+    if (detail) {
+      if (isPolicy) output.policy = detail;
+      else output.claim = detail;
+    }
     return output;
   }
 
