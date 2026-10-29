@@ -7,9 +7,11 @@ function assert(value: unknown, message: string): asserts value {
 Deno.test("accepts only publishable keys supplied by the trusted Supabase runtime", () => {
   const config = {
     publishableKeysJson: JSON.stringify({
-      default: "sb_publishable_expected",
+      default: "SUPABASE_PUBLISHABLE_KEY_DEFAULT",
       frontend: "sb_publishable_frontend",
     }),
+    lookupEnvironmentVariable: (name: string) =>
+      name === "SUPABASE_PUBLISHABLE_KEY_DEFAULT" ? "sb_publishable_expected" : undefined,
   };
 
   assert(isAllowedSupabaseApiKey("sb_publishable_expected", config), "default publishable key should be accepted");
