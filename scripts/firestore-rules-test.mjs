@@ -482,6 +482,13 @@ try {
   );
 
   await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'copilotMessages', ownerOwnMessageId), {
+      conversationId: privateConversationId,
+    }),
+    'a Copilot message cannot be moved to another conversation after creation',
+  );
+
+  await expectDenied(
     () => setDoc(doc(claimsMember.actor.db, 'copilotMessages', 'rbac-forged-message-' + randomUUID()), {
       organizationId: orgA,
       userId: claimsMember.actor.user.uid,
