@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const selector = read('src/features/copilot/copilot-context-selector.ts');
 const leadDetailsPage = read('src/pages/LeadDetailsPage.tsx');
 const trustedContext = read('supabase/functions/copilot-chat/trusted-context.ts');
+const copilotHandler = read('supabase/functions/copilot-chat/index.ts');
 const indexText = read('firestore.indexes.json').replace(/^\uFEFF/, '');
 const config = JSON.parse(indexText);
 
@@ -17,6 +18,7 @@ assert.match(trustedContext, /const MAX_RENEWAL_POLICIES = 300/, 'renewal querie
 assert.match(trustedContext, /page === "renewals" && collectionId === "policies"\s*\?\s*\{\}/, 'renewal query must not let oldest expiry dates crowd out actionable records');
 assert.match(trustedContext, /item\.daysLeft >= -90 &&\s*item\.daysLeft <= 90/, 'renewal context must be limited to the actionable 90-day past/future window');
 assert.match(trustedContext, /Math\.abs\(left\.daysLeft!\)/, 'renewal context must prioritize dates closest to action');
+assert.match(copilotHandler, /Renewal watchlist: overdue within 90 days and upcoming within 90 days/, 'Copilot prompt must describe the bounded renewal window accurately');
 assert.match(trustedContext, /fieldPath: "relatedType"/, 'Client 360 task query must use relatedType');
 assert.match(trustedContext, /fieldPath: "relatedId"/, 'Client 360 task query must use relatedId');
 assert.match(selector, /"lead-details"/, 'Lead 360 must be an allow-listed browser context page');
