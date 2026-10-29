@@ -513,3 +513,158 @@ Deno.test("Lead 360 does not return a lead from another organization", async () 
   assert(context?.page === "lead-details", "safe page label may remain after a tenant mismatch");
 });
 
+
+
+Deno.test("Policy 360 loads only allow-listed server fields for a same-tenant policy", async () => {
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    seen.push({ url, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/policies/policy-123",
+      fields: {
+        organizationId: { stringValue: "org-policy" },
+        insurerName: { stringValue: "Trusted insurer" },
+        line: { stringValue: "motor" },
+        startDate: { stringValue: "2026-01-01" },
+        expiryDate: { stringValue: "2027-01-01" },
+        premium: { doubleValue: 4500 },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "active" },
+        policyNumber: { stringValue: "PRIVATE_POLICY_NUMBER" },
+        clientId: { stringValue: "PRIVATE_CLIENT_ID" },
+        clientName: { stringValue: "PRIVATE_CLIENT_NAME" },
+        downloadUrl: { stringValue: "PRIVATE_DOCUMENT_URL" },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-policy",
+    idToken: "policy-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "policy-details",
+      policyRef: { id: "policy-123", policyNumber: "FORGED_POLICY" },
+      policy: { insurerName: "FORGED_INSURER", premium: 999999 },
+      notes: "FORGED_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(seen.length === 1, "Policy 360 should fetch only the selected policy");
+  assert(seen[0].url.includes("/documents/policies/policy-123"), "server must use the selected policy ID");
+  assert(seen[0].authorization === "Bearer policy-user-token", "policy lookup must use caller Firebase token");
+  const url = new URL(seen[0].url);
+  const mask = url.searchParams.getAll("mask.fieldPaths");
+  for (const field of ["organizationId", "insurerName", "line", "startDate", "expiryDate", "premium", "currency", "status"]) {
+    assert(mask.includes(field), "required Policy 360 field is missing from field mask: " + field);
+  }
+  for (const field of ["policyNumber", "clientId", "clientName", "downloadUrl", "notes"]) {
+    assert(!mask.includes(field), "sensitive Policy 360 field must not be requested: " + field);
+  }
+
+  const policy = context?.policy as Record<string, unknown> | undefined;
+  assert(policy?.insurerName === "Trusted insurer", "server insurer name should be used");
+  assert(policy?.premium === 4500 && policy?.currency === "EGP", "server financial fields should be used");
+  assert(policy?.status === "active", "server policy status should be used");
+  assert(!JSON.stringify(context).includes("PRIVATE_"), "private policy fields must not enter the prompt");
+  assert(!JSON.stringify(context).includes("FORGED_"), "browser-supplied policy details must be ignored");
+});
+
+Deno.test("Claim 360 loads allow-listed server fields and excludes identifiers and medical notes", async () => {
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    seen.push({ url, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/claims/claim-123",
+      fields: {
+        organizationId: { stringValue: "org-claim" },
+        insurerName: { stringValue: "Trusted insurer" },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "review" },
+        incidentDate: { stringValue: "2026-10-01" },
+        claimAmount: { doubleValue: 12000 },
+        claimNumber: { stringValue: "PRIVATE_CLAIM_NUMBER" },
+        policyNumber: { stringValue: "PRIVATE_POLICY_NUMBER" },
+        clientName: { stringValue: "PRIVATE_CLIENT_NAME" },
+        description: { stringValue: "PRIVATE_DESCRIPTION" },
+        medicalDetails: { stringValue: "PRIVATE_MEDICAL_DETAILS" },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-claim",
+    idToken: "claim-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "claim-details",
+      claimRef: { id: "claim-123", claimNumber: "FORGED_CLAIM" },
+      claim: { claimAmount: 999999, status: "forged" },
+      notes: "FORGED_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(seen.length === 1, "Claim 360 should fetch only the selected claim");
+  assert(seen[0].url.includes("/documents/claims/claim-123"), "server must use the selected claim ID");
+  assert(seen[0].authorization === "Bearer claim-user-token", "claim lookup must use caller Firebase token");
+  const url = new URL(seen[0].url);
+  const mask = url.searchParams.getAll("mask.fieldPaths");
+  for (const field of ["organizationId", "insurerName", "currency", "status", "incidentDate", "claimAmount"]) {
+    assert(mask.includes(field), "required Claim 360 field is missing from field mask: " + field);
+  }
+  for (const field of ["claimNumber", "policyNumber", "clientName", "description", "medicalDetails", "notes"]) {
+    assert(!mask.includes(field), "sensitive Claim 360 field must not be requested: " + field);
+  }
+
+  const claim = context?.claim as Record<string, unknown> | undefined;
+  assert(claim?.claimAmount === 12000 && claim?.currency === "EGP", "server claim amount/currency should be used");
+  assert(claim?.status === "review", "server claim status should be used");
+  const serialized = JSON.stringify(context);
+  for (const privateValue of ["PRIVATE_", "FORGED_"]) {
+    assert(!serialized.includes(privateValue), "private or browser-supplied claim data must not enter the prompt");
+  }
+});
+
+Deno.test("Policy and Claim 360 reject records returned for another organization", async () => {
+  const fetcher = (async (input: RequestInfo | URL) => {
+    const url = String(input);
+    const collectionName = url.includes("/documents/policies/") ? "policies" : "claims";
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/" + collectionName + "/foreign-record",
+      fields: {
+        organizationId: { stringValue: "org-other" },
+        insurerName: { stringValue: "FOREIGN_INSURER" },
+        line: { stringValue: "motor" },
+        currency: { stringValue: "EGP" },
+        status: { stringValue: "active" },
+        expiryDate: { stringValue: "2027-01-01" },
+        incidentDate: { stringValue: "2026-10-01" },
+        premium: { doubleValue: 1 },
+        claimAmount: { doubleValue: 2 },
+      },
+    });
+  }) as typeof fetch;
+
+  for (const [page, selectorKey, id] of [
+    ["policy-details", "policyRef", "foreign-policy"],
+    ["claim-details", "claimRef", "foreign-claim"],
+  ] as const) {
+    const context = await buildAuthorizedCopilotContext({
+      projectId: "demo-project",
+      organizationId: "org-current",
+      idToken: "current-user-token",
+      isPlatformAdmin: false,
+      requestedContext: { page, [selectorKey]: { id } },
+      fetcher,
+    });
+    assert(context?.policy === undefined, "foreign policy context must be omitted");
+    assert(context?.claim === undefined, "foreign claim context must be omitted");
+    assert(!JSON.stringify(context).includes("FOREIGN_INSURER"), "foreign tenant data must not enter the prompt");
+  }
+});
