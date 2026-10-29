@@ -256,7 +256,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/copilot')}
+            onClick={() => navigate('/copilot', { state: { context: activeContext } })}
             title="فتح الصفحة الكاملة"
           >
             <MessageSquare size={14} />
