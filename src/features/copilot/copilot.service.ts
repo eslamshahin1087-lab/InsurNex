@@ -22,6 +22,49 @@ import type {  CopilotConversation,
 
 const MAX_HISTORY = 20;
 
+const SAFE_COPILOT_ERROR_CODES = new Set([
+  'INVALID_TOKEN',
+  'MISSING_TOKEN',
+  'WORKSPACE_ACCESS_DENIED',
+  'ORGANIZATION_ACCESS_DENIED',
+  'INVALID_MESSAGES',
+  'TOO_MANY_MESSAGES',
+  'CONTENT_TOO_LONG',
+  'LAST_MESSAGE_MUST_BE_USER',
+  'INVALID_REQUEST_JSON',
+  'REQUEST_TOO_LARGE',
+  'METHOD_NOT_ALLOWED',
+  'COPILOT_TEMPORARILY_UNAVAILABLE',
+]);
+
+function safeCopilotErrorCode(value: unknown): string | undefined {
+  return typeof value === 'string' && SAFE_COPILOT_ERROR_CODES.has(value)
+    ? value
+    : undefined;
+}
+
+async function readSafeCopilotErrorCode(error: unknown): Promise<string> {
+  if (!error || typeof error !== 'object') return 'COPILOT_TEMPORARILY_UNAVAILABLE';
+
+  const context = (error as { context?: unknown }).context;
+  if (!context || typeof context !== 'object' || !('clone' in context)) {
+    return 'COPILOT_TEMPORARILY_UNAVAILABLE';
+  }
+
+  try {
+    const response = context as Response;
+    const body: unknown = await response.clone().json();
+    if (body && typeof body === 'object' && !Array.isArray(body)) {
+      const code = safeCopilotErrorCode((body as { error?: unknown }).error);
+      if (code) return code;
+    }
+  } catch {
+    // Never fall back to raw response text or SDK/provider error messages.
+  }
+
+  return 'COPILOT_TEMPORARILY_UNAVAILABLE';
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
   | string
@@ -165,26 +208,14 @@ export async function sendToCopilot(params: {
   });
 
   if (error) {
-    let realMessage = error.message;
-    const ctx = (error as { context?: Response }).context;
-    if (ctx) {
-      try {
-        const body = await ctx.clone().json();
-        if (body?.error) realMessage = String(body.error);
-        if (body?.message) realMessage = String(body.message);
-      } catch {
-        try {
-          const txt = await ctx.clone().text();
-          if (txt) realMessage = txt.slice(0, 300);
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-    throw new Error(`COPILOT_GATEWAY_FAILED:${realMessage}`);
+    const publicCode = await readSafeCopilotErrorCode(error);
+    throw new Error(`COPILOT_GATEWAY_FAILED:${publicCode}`);
   }
 
-  if (!data?.ok) throw new Error(data?.error || 'COPILOT_GATEWAY_REJECTED');
+  if (!data?.ok) {
+    const publicCode = safeCopilotErrorCode(data?.error) ?? 'COPILOT_TEMPORARILY_UNAVAILABLE';
+    throw new Error(`COPILOT_GATEWAY_REJECTED:${publicCode}`);
+  }
 
   return {
     reply: String(data.reply || '').trim(),
