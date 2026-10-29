@@ -169,20 +169,30 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   const handleNew = useCallback(async () => {
     if (!profile?.organizationId || !user?.uid) return;
     messageRequestSequenceRef.current += 1;
+    const creationSequence = ++conversationCreateSequenceRef.current;
+    const creationScope = conversationScopeRef.current;
     setSending(false);
     setActiveId(null);
     setMessages([]);
     setError('');
     try {
       const id = await createConversation(profile.organizationId, user.uid);
+      if (
+        creationSequence !== conversationCreateSequenceRef.current ||
+        creationScope !== conversationScopeRef.current
+      ) return;
       const rows = await listConversations(profile.organizationId, user.uid);
+      if (
+        creationSequence !== conversationCreateSequenceRef.current ||
+        creationScope !== conversationScopeRef.current
+      ) return;
       setConversations(rows);
       setActiveId(id);
-      setMessages([]);
-      setError('');
-    } catch (e) {
-      console.error(e);
-      setError('تعذر إنشاء محادثة جديدة.');
+    } catch {
+      if (
+        creationSequence === conversationCreateSequenceRef.current &&
+        creationScope === conversationScopeRef.current
+      ) setError('تعذر إنشاء محادثة جديدة.');
     }
   }, [profile?.organizationId, user?.uid]);
 
@@ -281,15 +291,20 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   async function handleDeleteCurrent() {
     if (!activeId || !profile?.organizationId) return;
     if (!window.confirm('حذف هذه المحادثة؟')) return;
+    const deletionScope = conversationScopeRef.current;
     messageRequestSequenceRef.current += 1;
+    conversationCreateSequenceRef.current += 1;
     setSending(false);
     try {
       await deleteConversation(activeId, profile.organizationId);
+      if (deletionScope !== conversationScopeRef.current) return;
       setActiveId(null);
       setMessages([]);
       await handleNew();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      if (deletionScope === conversationScopeRef.current) {
+        setError('تعذر حذف المحادثة الحالية.');
+      }
     }
   }
 
