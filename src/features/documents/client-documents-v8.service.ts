@@ -35,14 +35,17 @@ export async function listClientDocuments(
 
   const constraints = [
     where('organizationId', '==', organizationId),
+    where('relatedType', '==', 'client'),
+    where('relatedId', '==', clientId),
     ...(role === 'claims' ? [where('category', '==', 'claim')] : []),
     limit(300),
   ];
   const snapshot = await getDocs(query(collection(db, 'documents'), ...constraints));
 
-  return snapshot.docs
-    .map(item => ({ id: item.id, ...item.data() } as DocumentRecord))
-    .filter(item => item.relatedType === 'client' && item.relatedId === clientId);
+  // Scope the query to the requested client before documents are downloaded.
+  // Firestore Rules still provide authorization; query filters are minimization,
+  // not a substitute for relation-aware read Rules.
+  return snapshot.docs.map(item => ({ id: item.id, ...item.data() } as DocumentRecord));
 }
 
 function storageAreaForCategory(category: DocumentCategory): NonNullable<UploadContext['area']> {
