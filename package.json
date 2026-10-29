@@ -12,6 +12,7 @@
     "test:copilot-minimization": "node scripts/copilot-client-data-minimization-test.mjs",
     "test:copilot-session-context": "node scripts/copilot-session-context-minimization-test.mjs",
     "test:copilot-context-contract": "node scripts/copilot-context-contract-test.mjs",
+    "test:copilot-safe-errors": "node scripts/copilot-safe-errors-test.mjs",
     "test:visual-identity": "node scripts/visual-identity-quality-test.mjs",
     "test:access": "node scripts/admin-access-smoke-test.mjs",
     "test:plans": "node scripts/plan-feature-entitlements-smoke-test.mjs",
