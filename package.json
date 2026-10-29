@@ -11,6 +11,7 @@
     "test:documents-route": "node scripts/documents-route-smoke-test.mjs",
     "test:copilot-minimization": "node scripts/copilot-client-data-minimization-test.mjs",
     "test:copilot-session-context": "node scripts/copilot-session-context-minimization-test.mjs",
+    "test:copilot-full-page-session": "node scripts/copilot-full-page-session-test.mjs",
     "test:copilot-context-contract": "node scripts/copilot-context-contract-test.mjs",
     "test:copilot-safe-errors": "node scripts/copilot-safe-errors-test.mjs",
     "test:visual-identity": "node scripts/visual-identity-quality-test.mjs",
