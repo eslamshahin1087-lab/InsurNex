@@ -33,6 +33,7 @@ const COLLECTION_FIELDS: Record<CollectionKey, string[]> = {
 };
 
 const MAX_PER_COLLECTION = 20;
+const MAX_RENEWAL_POLICIES = 300;
 const MAX_FINANCE_ROWS = 500;
 const MAX_CLIENT_ID_LENGTH = 160;
 
@@ -133,23 +134,25 @@ function buildQueryBody(
       select: {
         fields: COLLECTION_FIELDS[collectionId].map((fieldPath) => ({ fieldPath })),
       },
-      orderBy: [{
-        field: {
-          fieldPath: page === "renewals" && collectionId === "policies"
-            ? "expiryDate"
-            : collectionId === "insurers"
-              ? "name"
-              : collectionId === "revenue" || collectionId === "expenses"
-                ? "date"
-                : "createdAt",
-        },
-        direction: collectionId === "insurers" || (page === "renewals" && collectionId === "policies")
-          ? "ASCENDING"
-          : "DESCENDING",
-      }],
-      limit: ["revenue", "expenses", "commissions"].includes(collectionId)
-        ? MAX_FINANCE_ROWS
-        : MAX_PER_COLLECTION,
+      ...(page === "renewals" && collectionId === "policies"
+        ? {}
+        : {
+            orderBy: [{
+              field: {
+                fieldPath: collectionId === "insurers"
+                  ? "name"
+                  : collectionId === "revenue" || collectionId === "expenses"
+                    ? "date"
+                    : "createdAt",
+              },
+              direction: collectionId === "insurers" ? "ASCENDING" : "DESCENDING",
+            }],
+          }),
+      limit: page === "renewals" && collectionId === "policies"
+        ? MAX_RENEWAL_POLICIES
+        : ["revenue", "expenses", "commissions"].includes(collectionId)
+          ? MAX_FINANCE_ROWS
+          : MAX_PER_COLLECTION,
     },
   };
 }
@@ -408,19 +411,49 @@ export async function buildAuthorizedCopilotContext(input: {
         const dayNumber = (date: string) => {
           const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
           if (!match) return undefined;
-          return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86_400_000;
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const day = Number(match[3]);
+          const timestamp = Date.UTC(year, month - 1, day);
+          const parsed = new Date(timestamp);
+          if (
+            parsed.getUTCFullYear() !== year ||
+            parsed.getUTCMonth() + 1 !== month ||
+            parsed.getUTCDate() !== day
+          ) return undefined;
+          return timestamp / 86_400_000;
         };
         const todayNumber = dayNumber(today);
-        output.renewals = mapped.map((record) => {
+        const renewalWindow = mapped.map((record) => {
           const expiryDate = typeof record.expiryDate === "string" ? record.expiryDate : "";
           const expiryNumber = dayNumber(expiryDate);
-          return {
-            ...record,
-            daysLeft: todayNumber !== undefined && expiryNumber !== undefined
-              ? expiryNumber - todayNumber
-              : undefined,
-          };
-        }).filter((record) => Object.values(record).some((value) => value !== undefined));
+          const daysLeft = todayNumber !== undefined && expiryNumber !== undefined
+            ? expiryNumber - todayNumber
+            : undefined;
+          return { record, daysLeft };
+        }).filter((item) =>
+          item.daysLeft !== undefined &&
+          item.daysLeft >= -90 &&
+          item.daysLeft <= 90 &&
+          item.record.status !== "cancelled" &&
+          typeof item.record.expiryDate === "string" &&
+          item.record.expiryDate.length > 0
+        ).sort((left, right) =>
+          Math.abs(left.daysLeft!) - Math.abs(right.daysLeft!) ||
+          left.daysLeft! - right.daysLeft!
+        );
+
+        // Mirror the renewal screen's 300-policy scan, then prioritize actionable
+        // dates (expired within 90 days or expiring within 90 days) rather than
+        // allowing old expired policies to occupy every context slot.
+        output.renewals = renewalWindow.slice(0, 15).map(({ record, daysLeft }) => ({
+          insurerName: record.insurerName,
+          line: record.line,
+          expiryDate: record.expiryDate,
+          premium: record.premium,
+          currency: record.currency,
+          daysLeft,
+        })).filter((record) => Object.values(record).some((value) => value !== undefined));
       } else {
         output.policies = mapped;
       }
