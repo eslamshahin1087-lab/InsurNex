@@ -95,6 +95,7 @@ export default function LeadDetailsPage() {
     if (!lead) return;
     setCurrentContext({
       page: 'lead-details',
+      lead: { id: lead.id },
       leads: [
         {
           name: lead.name,
