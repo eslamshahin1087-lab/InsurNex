@@ -78,7 +78,7 @@ export function getCopilotConversationScopeKey(pathname: string): string | undef
   const expected = expectedContextForPath(pathname);
   if (expected === "preserve") return undefined;
 
-  const normalizedPath = pathname.length > 1 ? pathname.replace(/\\/+$/, "") : pathname;
+  const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
   if (!expected) return "route:" + normalizedPath;
   if (!expected.detail) return expected.page;
   return expected.page + ":" + expected.detail.id;
