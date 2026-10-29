@@ -42,9 +42,23 @@ The report path above is an example. Use the actual file produced by the invento
 
 The data owner and engineering reviewer must resolve all unclassified paths and review the suggested classifications, parent splits, target schema version, relationship integrity, compatibility adapter, rollback/resume strategy, legal basis, retention and export/delete implications. Test the intended RBAC and tenant denials with synthetic data in the Firestore Emulator. A separate PR and explicit approval are required for any migration writer.
 
+## Review the generated plan locally
+
+After the planner emits its local JSON file, run the structural reviewer against that file:
+
+```sh
+node functions/scripts/client-sensitive-data-separation-review.mjs \
+  --dry-run \
+  --input "artifacts/client-sensitive-data-separation-plan-<project>-<timestamp>.json"
+```
+
+The reviewer prints only aggregate metrics and stable violation codes; it does not print client/organization IDs or field paths. A result of `review_only` means structural checks passed. It is **not** consent, legal approval, RBAC approval or authorization to migrate. A result of `blocked` must be corrected before human review.
+
 ## Regression check
 
 ```sh
 npm run test:client-sensitive-separation-plan
+npm run test:client-sensitive-separation-review
 node functions/scripts/client-sensitive-data-separation-plan.mjs --help
+node functions/scripts/client-sensitive-data-separation-review.mjs --help
 ```
