@@ -18,6 +18,8 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - `npm run test:client-sensitive-inventory` — privacy-safe sensitive-field inventory tests.
 - `npm run test:client-sensitive-separation-plan` — fail-closed field mapping proposal tests.
 - `npm run test:client-sensitive-separation-review` — plan safety and mapping invariants.
+- `npm run test:client-data-access-audit` — static audit privacy and query-scope regression tests.
+- `npm run audit:client-data-access` — source-only client-data access inventory; no cloud access.
 - `npm run lint`
 - `npm run build`
 - `npm run build --prefix functions`
@@ -29,6 +31,7 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - [Client Sensitive-Field Inventory Runbook](docs/CLIENT_SENSITIVE_DATA_INVENTORY_RUNBOOK.md)
 - [Client Sensitive-Data Separation Plan Runbook](docs/CLIENT_SENSITIVE_DATA_SEPARATION_PLAN_RUNBOOK.md)
 - [Client Sensitive-Data RBAC Matrix](docs/CLIENT_SENSITIVE_DATA_RBAC_MATRIX.md)
+- [Client Data-Access Compatibility Audit](docs/CLIENT_DATA_ACCESS_COMPATIBILITY_AUDIT.md)
 - [Master Architecture](docs/MASTER_ARCHITECTURE.md)
 - [Firestore Schema v2 Proposal](docs/FIRESTORE_SCHEMA_V2_PROPOSAL.md)
 - [AI Module Contracts](docs/AI_MODULE_CONTRACTS.md)
