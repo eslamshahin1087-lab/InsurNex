@@ -253,23 +253,61 @@ Deno.test("finance summary is omitted rather than mixing currencies", async () =
   assert(context?.finance === undefined, "mixed-currency totals must not be surfaced as one number");
 });
 
-Deno.test("renewals selector loads expiry-ordered renewal context instead of a general page", async () => {
+Deno.test("renewal context prioritizes actionable dates from a bounded org-scoped sample", async () => {
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: string) => dateParts.find((item) => item.type === type)?.value ?? "";
+  const currentDay = [part("year"), part("month"), part("day")].join("-");
+  const dateOffset = (offset: number) => {
+    const [year, month, day] = currentDay.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day + offset)).toISOString().slice(0, 10);
+  };
+
   const requests: Array<{ body: Record<string, unknown>; authorization: string | null }> = [];
-  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
+  const fetcher = (async (_input: RequestInfo | URL, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) as Record<string, unknown> : {};
     requests.push({ body, authorization: new Headers(init?.headers).get("Authorization") });
     return Response.json([
       doc({
-        organizationId: "org-renewals",
-        insurerName: "Renewal Insurer",
-        line: "motor",
-        expiryDate: "2027-01-15",
-        premium: 3200,
-        currency: "EGP",
-        status: "active",
-        policyNumber: "PRIVATE_POLICY_NUMBER",
-        clientName: "PRIVATE_CLIENT_NAME",
+        organizationId: "org-renewals", insurerName: "Soon Insurer", line: "motor",
+        expiryDate: dateOffset(2), premium: 3200, currency: "EGP", status: "active",
+        policyNumber: "PRIVATE_SOON_POLICY", clientName: "PRIVATE_CLIENT_NAME",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Recently Overdue Insurer", line: "health",
+        expiryDate: dateOffset(-4), premium: 2200, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Later Insurer", line: "property",
+        expiryDate: dateOffset(14), premium: 1500, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Stale Overdue Insurer", line: "motor",
+        expiryDate: dateOffset(-180), premium: 3000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Far Future Insurer", line: "motor",
+        expiryDate: dateOffset(200), premium: 1000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Cancelled Insurer", line: "motor",
+        expiryDate: dateOffset(1), premium: 1000, currency: "EGP", status: "cancelled",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Invalid Date Insurer", line: "motor",
+        expiryDate: "2027-02-31", premium: 1000, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-other", insurerName: "OTHER_TENANT_INSURER", line: "motor",
+        expiryDate: dateOffset(1), premium: 99999, currency: "EGP", status: "active",
+      }),
+      doc({
+        organizationId: "org-renewals", insurerName: "Missing Date Insurer", line: "motor",
+        expiryDate: "", premium: 1000, currency: "EGP", status: "active",
       }),
     ]);
   }) as typeof fetch;
@@ -283,23 +321,28 @@ Deno.test("renewals selector loads expiry-ordered renewal context instead of a g
     fetcher,
   });
 
-  assert(requests.length === 1, "renewal page must load policy records once");
+  assert(requests.length === 1, "renewal page must load a single bounded policy sample");
   assert(requests[0].authorization === "Bearer renewal-user-token", "renewal query must use caller Firebase token");
   const structured = requests[0].body.structuredQuery as Record<string, unknown>;
-  const orderBy = (structured.orderBy as Array<{ field: { fieldPath: string }; direction: string }>)[0];
-  assert(orderBy.field.fieldPath === "expiryDate", "renewal context must order by expiry date");
-  assert(orderBy.direction === "ASCENDING", "nearest expiries must be returned first");
+  assert(structured.orderBy === undefined, "renewal sample must be sorted by computed days-left, not oldest expiry first in Firestore");
+  assert(structured.limit === 300, "renewal sampling should match the renewal page's 300-policy cap");
   assert(JSON.stringify(structured.where).includes("org-renewals"), "renewal query must be scoped to the verified organization");
 
   const renewals = context?.renewals as Array<Record<string, unknown>> | undefined;
-  assert(Array.isArray(renewals) && renewals.length === 1, "renewal context must be populated");
-  assert(typeof renewals[0].daysLeft === "number", "days remaining must be calculated deterministically");
-  assert(renewals[0].insurerName === "Renewal Insurer", "allow-listed renewal fields should remain");
+  assert(Array.isArray(renewals) && renewals.length === 3, "only valid, non-cancelled dates inside the action window should be returned");
+  assert(renewals[0].daysLeft === 2, "nearest upcoming expiry should be prioritized first");
+  assert(renewals[1].daysLeft === -4, "recently overdue policy should be retained after the nearest date");
+  assert(renewals[2].daysLeft === 14, "the next upcoming expiry should follow the nearest action dates");
+  assert(!JSON.stringify(renewals).includes("Stale Overdue Insurer"), "very old expiries must not crowd out actionable renewals");
+  assert(!JSON.stringify(renewals).includes("Far Future Insurer"), "far-future expiries must not crowd out actionable renewals");
+  assert(!JSON.stringify(renewals).includes("Cancelled Insurer"), "cancelled policies must not appear in the renewal watchlist");
+  assert(!JSON.stringify(renewals).includes("Invalid Date Insurer"), "invalid dates must not appear in the renewal watchlist");
+  assert(!JSON.stringify(renewals).includes("OTHER_TENANT_INSURER"), "foreign-tenant policies must be excluded");
   assert(context?.policies === undefined, "renewals should use a dedicated renewal context section");
   const serialized = JSON.stringify(context);
-  assert(!serialized.includes("PRIVATE_POLICY_NUMBER"), "policy identifiers must be excluded");
-  assert(!serialized.includes("PRIVATE_CLIENT_NAME"), "client names must be excluded");
-  assert(!serialized.includes("FORGED_POLICY"), "browser-supplied renewal values must be ignored");
+  for (const privateValue of ["PRIVATE_SOON_POLICY", "PRIVATE_CLIENT_NAME", "FORGED_POLICY"]) {
+    assert(!serialized.includes(privateValue), "private or browser-supplied renewal data must be excluded: " + privateValue);
+  }
 });
 
 Deno.test("Client 360 task context uses relatedType/relatedId schema, not a nonexistent clientId field", async () => {
