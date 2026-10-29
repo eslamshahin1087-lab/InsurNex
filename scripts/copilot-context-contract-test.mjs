@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const selector = read('src/features/copilot/copilot-context-selector.ts');
+const leadDetailsPage = read('src/pages/LeadDetailsPage.tsx');
 const trustedContext = read('supabase/functions/copilot-chat/trusted-context.ts');
 const indexText = read('firestore.indexes.json').replace(/^\uFEFF/, '');
 const config = JSON.parse(indexText);
@@ -15,6 +16,12 @@ assert.match(trustedContext, /renewals: \["policies"\]/, 'server context builder
 assert.match(trustedContext, /page === "renewals" && collectionId === "policies"/, 'renewal queries must sort by expiry date');
 assert.match(trustedContext, /fieldPath: "relatedType"/, 'Client 360 task query must use relatedType');
 assert.match(trustedContext, /fieldPath: "relatedId"/, 'Client 360 task query must use relatedId');
+assert.match(selector, /"lead-details"/, 'Lead 360 must be an allow-listed browser context page');
+assert.match(selector, /return \{ page, lead: \{ id: leadId \} \}/, 'Lead 360 may forward only a validated lead ID');
+assert.match(leadDetailsPage, /lead: \{ id: lead\.id \}/, 'LeadDetailsPage must provide the selected lead ID');
+assert.match(trustedContext, /async function getLeadSelector\(/, 'server must fetch lead data by ID instead of trusting browser values');
+assert.match(trustedContext, /page === "lead-details"/, 'server must implement a dedicated Lead 360 context path');
+assert.match(trustedContext, /"estimatedValue"/, 'Lead 360 server projection must include the permitted estimate field');
 
 const hasIndex = (collectionGroup, fields) => config.indexes.some((index) =>
   index.collectionGroup === collectionGroup &&
