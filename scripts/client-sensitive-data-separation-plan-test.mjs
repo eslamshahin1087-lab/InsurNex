@@ -14,7 +14,7 @@ const report = {
   summary: {
     clientRecordsScanned: 2,
     recordsWithSensitiveOrPrivateFields: 2,
-    fieldPathsFound: 20,
+    fieldPathsFound: 24,
     recordsByCategory: {},
     pathPresenceCounts: {},
   },
@@ -36,6 +36,10 @@ const report = {
         'riskData',
         'riskData.health',
         'riskData.health.medications',
+        'riskData.life',
+        'riskData.life.healthStatus',
+        'riskData.life.dependents',
+        'riskData.life.annualSalary',
         'riskAssessment',
         'riskAssessment.score',
         'aiAnalysis',
@@ -55,6 +59,10 @@ const report = {
         riskData: ['risk_profile'],
         'riskData.health': ['health', 'risk_profile'],
         'riskData.health.medications': ['health', 'risk_profile'],
+        'riskData.life': ['risk_profile'],
+        'riskData.life.healthStatus': ['risk_profile'],
+        'riskData.life.dependents': ['risk_profile'],
+        'riskData.life.annualSalary': ['financial', 'risk_profile'],
         riskAssessment: ['derived_assessment'],
         'riskAssessment.score': ['derived_assessment'],
         aiAnalysis: ['derived_analysis'],
@@ -104,6 +112,12 @@ assert.equal(byPath['riskData'].action, 'split_parent_before_migration');
 assert.equal(byPath['riskData.health'].action, 'split_parent_before_migration');
 assert.equal(byPath['riskData.health.medications'].destinationCollection, 'clientMedicalProfiles');
 assert.equal(byPath['riskData.health.medications'].sensitivityClass, 'health');
+assert.equal(byPath['riskData.life'].action, 'split_parent_before_migration');
+assert.equal(byPath['riskData.life.healthStatus'].destinationCollection, 'clientMedicalProfiles');
+assert.equal(byPath['riskData.life.healthStatus'].sensitivityClass, 'health');
+assert.equal(byPath['riskData.life.dependents'].destinationCollection, 'clientSensitiveProfiles');
+assert.equal(byPath['riskData.life.dependents'].sensitivityClass, 'family');
+assert.equal(byPath['riskData.life.annualSalary'].sensitivityClass, 'financial');
 assert.equal(byPath['riskAssessment'].action, 'split_parent_before_migration');
 assert.equal(byPath['riskAssessment.score'].destinationCollection, 'aiFindings');
 assert.equal(byPath['aiAnalysis.summary'].destinationCollection, 'aiFindings');
