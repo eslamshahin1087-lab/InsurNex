@@ -16,6 +16,7 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - `npm run test:storage-inventory` — legacy storage inventory policy regression tests.
 - `npm run test:legacy-client-backfill-plan` — deterministic read-only backfill planner tests.
 - `npm run test:client-sensitive-inventory` — privacy-safe sensitive-field inventory tests.
+- `npm run test:client-sensitive-separation-plan` — fail-closed field mapping proposal tests.
 - `npm run lint`
 - `npm run build`
 - `npm run build --prefix functions`
@@ -25,6 +26,11 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - [Subscription Plan Feature Entitlements](docs/PLAN_FEATURE_ENTITLEMENTS.md)
 - [InsurNex Development Roadmap](docs/INSURNEX_DEVELOPMENT_ROADMAP.md)
 - [Client Sensitive-Field Inventory Runbook](docs/CLIENT_SENSITIVE_DATA_INVENTORY_RUNBOOK.md)
+- [Client Sensitive-Data Separation Plan Runbook](docs/CLIENT_SENSITIVE_DATA_SEPARATION_PLAN_RUNBOOK.md)
+- [Master Architecture](docs/MASTER_ARCHITECTURE.md)
+- [Firestore Schema v2 Proposal](docs/FIRESTORE_SCHEMA_V2_PROPOSAL.md)
+- [AI Module Contracts](docs/AI_MODULE_CONTRACTS.md)
+- [Phase 3 Acceptance Plan](docs/PHASE_3_ACCEPTANCE_PLAN.md)
 
 ## Firebase
 Install the Firebase CLI, authenticate locally, then from the project root run `firebase deploy` when the app is ready for production.
