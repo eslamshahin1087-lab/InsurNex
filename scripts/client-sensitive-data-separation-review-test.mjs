@@ -63,7 +63,7 @@ assert.equal(good.metrics.bySensitivityClass.financial, 1);
 
 const medicalWrong = structuredClone(validPlan);
 const medical = medicalWrong.records[0].fieldPlans.find(f => f.sourceFieldPath === 'riskData.life.healthStatus');
-medical.destinationCollection = 'clientSensitiveProfiles';
+medical.destinationCollection = 'documents';
 medical.sensitivityClass = 'risk_profile';
 const badMedical = reviewClientSensitiveDataSeparationPlan({ plan: medicalWrong });
 assert.equal(badMedical.status, 'blocked');
