@@ -382,3 +382,91 @@ Deno.test("Client 360 task context uses relatedType/relatedId schema, not a none
   assert(!JSON.stringify(context).includes("PRIVATE_TASK_TITLE"), "task titles must not be sent to the model");
   assert(!JSON.stringify(context).includes("FORGED_"), "browser-supplied client or task data must be ignored");
 });
+
+Deno.test("Lead 360 loads allow-listed fields from a verified tenant lead document", async () => {
+  const seen: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    seen.push({ url, authorization: new Headers(init?.headers).get("Authorization") });
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/leads/lead-123",
+      fields: {
+        organizationId: { stringValue: "org-lead" },
+        stage: { stringValue: "qualified" },
+        insuranceType: { stringValue: "motor" },
+        estimatedValue: { doubleValue: 25000 },
+        name: { stringValue: "PRIVATE_LEAD_NAME" },
+        companyName: { stringValue: "PRIVATE_COMPANY_NAME" },
+        email: { stringValue: "PRIVATE_EMAIL" },
+        phone: { stringValue: "PRIVATE_PHONE" },
+        notes: { stringValue: "PRIVATE_NOTES" },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-lead",
+    idToken: "lead-user-token",
+    isPlatformAdmin: false,
+    requestedContext: {
+      page: "lead-details",
+      lead: { id: "lead-123", name: "FORGED_LEAD_NAME", companyName: "FORGED_COMPANY" },
+      leads: [{ stage: "forged", estimatedValue: 999999 }],
+      notes: "FORGED_NOTES",
+    },
+    fetcher,
+  });
+
+  assert(seen.length === 1, "Lead 360 should fetch only the selected lead document");
+  assert(seen[0].url.includes("/documents/leads/lead-123"), "server must fetch the selected lead document");
+  assert(seen[0].authorization === "Bearer lead-user-token", "lead read must use the authenticated Firebase token");
+  const url = new URL(seen[0].url);
+  const maskedFields = url.searchParams.getAll("mask.fieldPaths");
+  for (const field of ["organizationId", "stage", "insuranceType", "estimatedValue"]) {
+    assert(maskedFields.includes(field), "safe Lead 360 field projection is missing: " + field);
+  }
+  for (const privateField of ["name", "companyName", "email", "phone", "notes"]) {
+    assert(!maskedFields.includes(privateField), "private field must not be requested: " + privateField);
+  }
+
+  const leads = context?.leads as Array<Record<string, unknown>> | undefined;
+  assert(Array.isArray(leads) && leads.length === 1, "Lead 360 must return one selected-lead summary");
+  assert(leads[0].stage === "qualified", "server stage should be used instead of browser stage");
+  assert(leads[0].insuranceType === "motor", "server insurance type should be used");
+  assert(leads[0].estimatedValue === 25000, "server value should be used");
+  const serialized = JSON.stringify(context);
+  for (const privateValue of ["PRIVATE_LEAD_NAME", "PRIVATE_COMPANY_NAME", "PRIVATE_EMAIL", "PRIVATE_PHONE", "PRIVATE_NOTES", "FORGED_"]) {
+    assert(!serialized.includes(privateValue), "private or forged lead data leaked into context: " + privateValue);
+  }
+});
+
+Deno.test("Lead 360 does not return a lead from another organization", async () => {
+  let calls = 0;
+  const fetcher = (async () => {
+    calls += 1;
+    return Response.json({
+      name: "projects/demo/databases/(default)/documents/leads/foreign-lead",
+      fields: {
+        organizationId: { stringValue: "org-other" },
+        stage: { stringValue: "qualified" },
+        insuranceType: { stringValue: "motor" },
+        estimatedValue: { doubleValue: 50000 },
+      },
+    });
+  }) as typeof fetch;
+
+  const context = await buildAuthorizedCopilotContext({
+    projectId: "demo-project",
+    organizationId: "org-lead",
+    idToken: "lead-user-token",
+    isPlatformAdmin: false,
+    requestedContext: { page: "lead-details", lead: { id: "foreign-lead" } },
+    fetcher,
+  });
+
+  assert(calls === 1, "selected lead should be checked once");
+  assert(context?.leads === undefined, "cross-tenant Lead 360 context must be omitted");
+  assert(context?.page === "lead-details", "safe page label may remain after a tenant mismatch");
+});
+

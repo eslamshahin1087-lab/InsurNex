@@ -54,3 +54,29 @@ Deno.test("unsupported pages and invalid IDs fail closed", () => {
   assert(buildCopilotContextSelector("raw string") === undefined, "primitive context should be ignored");
   assert(buildCopilotContextSelector(null) === undefined, "null context should be ignored");
 });
+
+Deno.test("Lead 360 browser selector sends only the validated lead document ID", () => {
+  const selector = buildCopilotContextSelector({
+    page: "lead-details",
+    lead: {
+      id: "lead_123-abc",
+      name: "PRIVATE_LEAD_NAME",
+      companyName: "PRIVATE_COMPANY",
+      email: "PRIVATE_EMAIL",
+      phone: "PRIVATE_PHONE",
+      notes: "PRIVATE_NOTES",
+    },
+    leads: [{ stage: "qualified", estimatedValue: 999999 }],
+  });
+
+  assert(JSON.stringify(selector) === JSON.stringify({ page: "lead-details", lead: { id: "lead_123-abc" } }), "only page and validated lead ID may be sent");
+});
+
+Deno.test("Lead 360 selector drops invalid lead IDs", () => {
+  const selector = buildCopilotContextSelector({
+    page: "lead-details",
+    lead: { id: "../foreign", name: "PRIVATE_LEAD_NAME" },
+  });
+
+  assert(JSON.stringify(selector) === JSON.stringify({ page: "lead-details" }), "invalid lead ID must not be forwarded");
+});
