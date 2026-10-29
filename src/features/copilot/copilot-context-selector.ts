@@ -13,6 +13,7 @@ const ALLOWED_PAGES = new Set([
   "tasks",
   "insurers",
   "finance",
+  "renewals",
   "general",
 ]);
 
