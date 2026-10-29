@@ -1,11 +1,11 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join, relative, resolve, sep } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 
 const SOURCE_ROOTS = ['src', 'functions/src', 'supabase/functions'];
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 const EXCLUDED_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', 'lib']);
-const EXCLUDED_FILE = /(?:\\.test|\\.spec)\\.[^.]+$/i;
+const EXCLUDED_FILE = /(?:\.test|\.spec)\.[^.]+$/i;
 
 const SENSITIVE_FIELD_TOKENS = [
   'nationalId',
@@ -44,17 +44,17 @@ const FIRESTORE_OPERATIONS = [
   'writeBatch',
 ];
 
-const CLIENT_COLLECTION_REFERENCE = /\\b(?:collection|doc)\\s*\\([^)]{0,180}['"`]clients['"`]/s;
-const DOCUMENT_COLLECTION_REFERENCE = /\\bcollection\\s*\\([^)]{0,180}['"`]documents['"`]/s;
-const FULL_DOCUMENT_SPREAD = /\\.\\.\\.\\s*[A-Za-z_$][\\w$]*\\.data\\s*\\(\\s*\\)/;
-const IN_MEMORY_CLIENT_DOCUMENT_FILTER = /\\.filter\\s*\\([^)]{0,500}\\brelatedType\\b[^)]{0,500}\\brelatedId\\b[^)]{0,500}\\)/s;
+const CLIENT_COLLECTION_REFERENCE = /\b(?:collection|doc)\s*\([^)]{0,180}['"`]clients['"`]/s;
+const DOCUMENT_COLLECTION_REFERENCE = /\bcollection\s*\([^)]{0,180}['"`]documents['"`]/s;
+const FULL_DOCUMENT_SPREAD = /\.\.\.\s*[A-Za-z_$][\w$]*\.data\s*\(\s*\)/;
+const IN_MEMORY_CLIENT_DOCUMENT_FILTER = /\.filter\s*\([^)]{0,500}\brelatedType\b[^)]{0,500}\brelatedId\b[^)]{0,500}\)/s;
 
 function normalizePath(value) {
   return String(value || '').split(sep).join('/');
 }
 
 function collectTokens(content, tokens) {
-  return tokens.filter(token => new RegExp('\\\\b' + token.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '\\\\b').test(content));
+  return tokens.filter(token => new RegExp('\\b' + token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(content));
 }
 
 /**
@@ -82,8 +82,8 @@ export function auditClientDataAccessFiles(files) {
     }
 
     const relationFilteredInMemory = documentCollectionReference && IN_MEMORY_CLIENT_DOCUMENT_FILTER.test(content);
-    const hasRelatedTypeQuery = /\\bwhere\\s*\\(\\s*['"`]relatedType['"`]\\s*,\\s*['"`]===?['"`]\\s*,\\s*['"`]client['"`]\\s*\\)/.test(content);
-    const hasRelatedIdQuery = /\\bwhere\\s*\\(\\s*['"`]relatedId['"`]\\s*,\\s*['"`]===?['"`]\\s*,\\s*[A-Za-z_$][\\w$]*\\s*\\)/.test(content);
+    const hasRelatedTypeQuery = /\bwhere\s*\(\s*['"`]relatedType['"`]\s*,\s*['"`]===?['"`]\s*,\s*['"`]client['"`]\s*\)/.test(content);
+    const hasRelatedIdQuery = /\bwhere\s*\(\s*['"`]relatedId['"`]\s*,\s*['"`]===?['"`]\s*,\s*[A-Za-z_$][\w$]*\s*\)/.test(content);
 
     if (relationFilteredInMemory && !(hasRelatedTypeQuery && hasRelatedIdQuery)) {
       findings.push('client_document_relation_filter_after_fetch');
@@ -137,7 +137,7 @@ export function auditClientDataAccessFiles(files) {
   };
 }
 
-async function walk(root, base = root) {
+async function walk(root) {
   let entries;
   try {
     entries = await readdir(root, { withFileTypes: true });
@@ -150,7 +150,7 @@ async function walk(root, base = root) {
   for (const entry of entries) {
     if (entry.isDirectory()) {
       if (EXCLUDED_DIRS.has(entry.name)) continue;
-      output.push(...await walk(join(root, entry.name), base));
+      output.push(...await walk(join(root, entry.name)));
       continue;
     }
     if (!entry.isFile() || !SOURCE_EXTENSIONS.has(extname(entry.name)) || EXCLUDED_FILE.test(entry.name)) continue;
@@ -186,7 +186,7 @@ function parseArgs(argv) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log('InsurNex static client-data access audit (no cloud access)\\n\\nUsage: node scripts/client-data-access-audit.mjs [--root <repo-root>]\\n\\nOutput contains source paths, field identifiers and heuristic signals only; no customer values.');
+    console.log('InsurNex static client-data access audit (no cloud access)\n\nUsage: node scripts/client-data-access-audit.mjs [--root <repo-root>]\n\nOutput contains source paths, field identifiers and heuristic signals only; no customer values.');
     return;
   }
 
