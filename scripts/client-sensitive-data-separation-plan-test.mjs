@@ -14,7 +14,7 @@ const report = {
   summary: {
     clientRecordsScanned: 2,
     recordsWithSensitiveOrPrivateFields: 2,
-    fieldPathsFound: 13,
+    fieldPathsFound: 20,
     recordsByCategory: {},
     pathPresenceCounts: {},
   },
@@ -101,8 +101,9 @@ assert.equal(byPath['individual'].action, 'split_parent_before_migration');
 assert.equal(byPath['individual.fullName'].destinationCollection, 'clientSensitiveProfiles');
 assert.equal(byPath['individual.monthlyIncome'].sensitivityClass, 'financial');
 assert.equal(byPath['riskData'].action, 'split_parent_before_migration');
-assert.equal(byPath['riskData.health'].destinationCollection, 'clientMedicalProfiles');
+assert.equal(byPath['riskData.health'].action, 'split_parent_before_migration');
 assert.equal(byPath['riskData.health.medications'].destinationCollection, 'clientMedicalProfiles');
+assert.equal(byPath['riskData.health.medications'].sensitivityClass, 'health');
 assert.equal(byPath['riskAssessment'].action, 'split_parent_before_migration');
 assert.equal(byPath['riskAssessment.score'].destinationCollection, 'aiFindings');
 assert.equal(byPath['aiAnalysis.summary'].destinationCollection, 'aiFindings');
@@ -135,5 +136,11 @@ assert.throws(() => buildClientSensitiveDataSeparationPlan({
     records: [{ documentId: 'missing-fields', organizationId: 'synthetic-org-1', fieldPaths: ['name'] }],
   },
 }), /field-path map/);
+assert.throws(() => buildClientSensitiveDataSeparationPlan({
+  inventoryReport: {
+    ...report,
+    records: [{ documentId: 'bad-token', organizationId: 'synthetic-org-1', fieldPaths: ['SENSITIVE_SENTINEL_RAW_VALUE'], pathCategories: {} }],
+  },
+}), /invalid field-path token/);
 
 console.log('Client sensitive-data separation planner tests passed.');
