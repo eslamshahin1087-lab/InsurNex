@@ -14,6 +14,7 @@ const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   leads: ["leads"],
   tasks: ["tasks"],
   insurers: ["insurers"],
+  renewals: ["policies"],
   "client-details": [],
   finance: ["revenue", "expenses", "commissions"],
 };
@@ -83,6 +84,7 @@ function buildQueryBody(
   collectionId: CollectionKey,
   organizationId: string,
   clientId?: string,
+  page?: string,
 ): Record<string, unknown> {
   const filters: Record<string, unknown>[] = [{
     fieldFilter: {
@@ -92,7 +94,24 @@ function buildQueryBody(
     },
   }];
 
-  if (clientId) {
+  if (clientId && collectionId === "tasks") {
+    filters.push(
+      {
+        fieldFilter: {
+          field: { fieldPath: "relatedType" },
+          op: "EQUAL",
+          value: { stringValue: "client" },
+        },
+      },
+      {
+        fieldFilter: {
+          field: { fieldPath: "relatedId" },
+          op: "EQUAL",
+          value: { stringValue: clientId },
+        },
+      },
+    );
+  } else if (clientId) {
     filters.push({
       fieldFilter: {
         field: { fieldPath: "clientId" },
@@ -115,13 +134,17 @@ function buildQueryBody(
       },
       orderBy: [{
         field: {
-          fieldPath: collectionId === "insurers"
-            ? "name"
-            : collectionId === "revenue" || collectionId === "expenses"
-              ? "date"
-              : "createdAt",
+          fieldPath: page === "renewals" && collectionId === "policies"
+            ? "expiryDate"
+            : collectionId === "insurers"
+              ? "name"
+              : collectionId === "revenue" || collectionId === "expenses"
+                ? "date"
+                : "createdAt",
         },
-        direction: collectionId === "insurers" ? "ASCENDING" : "DESCENDING",
+        direction: collectionId === "insurers" || (page === "renewals" && collectionId === "policies")
+          ? "ASCENDING"
+          : "DESCENDING",
       }],
       limit: ["revenue", "expenses", "commissions"].includes(collectionId)
         ? MAX_FINANCE_ROWS
@@ -137,6 +160,7 @@ async function queryCollection(
     idToken: string;
     collectionId: CollectionKey;
     clientId?: string;
+    page?: string;
     fetcher: typeof fetch;
   },
 ): Promise<Record<string, unknown>[]> {
@@ -147,7 +171,7 @@ async function queryCollection(
       Authorization: `Bearer ${input.idToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(buildQueryBody(input.collectionId, input.organizationId, input.clientId)),
+    body: JSON.stringify(buildQueryBody(input.collectionId, input.organizationId, input.clientId, input.page)),
   });
 
   if (!response.ok) {
@@ -266,6 +290,7 @@ export async function buildAuthorizedCopilotContext(input: {
         idToken: input.idToken,
         collectionId,
         clientId: page === "client-details" ? clientId : undefined,
+        page,
         fetcher,
       });
       return { collectionId, records: records as Record<string, unknown>[] | null };
@@ -300,7 +325,7 @@ export async function buildAuthorizedCopilotContext(input: {
     }
 
     if (collectionId === "policies") {
-      output.policies = records.map((record) => ({
+      const mapped = records.map((record) => ({
         insurerName: safeScalar(record.insurerName),
         line: safeScalar(record.line),
         expiryDate: safeScalar(record.expiryDate),
@@ -308,6 +333,35 @@ export async function buildAuthorizedCopilotContext(input: {
         currency: safeScalar(record.currency),
         status: safeScalar(record.status),
       })).filter((record) => Object.values(record).some((value) => value !== undefined));
+
+      if (page === "renewals") {
+        const todayParts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Africa/Cairo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date());
+        const part = (type: string) => todayParts.find((item) => item.type === type)?.value ?? "";
+        const today = `${part("year")}-${part("month")}-${part("day")}`;
+        const dayNumber = (date: string) => {
+          const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(date);
+          if (!match) return undefined;
+          return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86_400_000;
+        };
+        const todayNumber = dayNumber(today);
+        output.renewals = mapped.map((record) => {
+          const expiryDate = typeof record.expiryDate === "string" ? record.expiryDate : "";
+          const expiryNumber = dayNumber(expiryDate);
+          return {
+            ...record,
+            daysLeft: todayNumber !== undefined && expiryNumber !== undefined
+              ? expiryNumber - todayNumber
+              : undefined,
+          };
+        }).filter((record) => Object.values(record).some((value) => value !== undefined));
+      } else {
+        output.policies = mapped;
+      }
       continue;
     }
 
