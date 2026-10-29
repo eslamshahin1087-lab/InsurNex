@@ -53,6 +53,11 @@ function ownKeysAreAllowed(value, allowed) {
     Object.keys(value).every(key => allowed.has(key));
 }
 
+function hasRequiredKeys(value, required) {
+  return value && typeof value === 'object' && !Array.isArray(value) &&
+    required.every(key => Object.prototype.hasOwnProperty.call(value, key));
+}
+
 function normalize(segment) {
   return String(segment || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
 }
@@ -100,7 +105,14 @@ export function reviewClientSensitiveDataSeparationPlan({ plan }) {
     safeToMigrate: false,
   };
 
-  if (!ownKeysAreAllowed(plan, PLAN_KEYS)) {
+  const requiredPlanKeys = [
+    'schemaVersion', 'mode', 'projectId', 'generatedAt', 'sourceCollection',
+    'sourceInventorySchemaVersion', 'sourceRecordsScanned',
+    'sourceInventoryPotentiallyIncomplete', 'noCloudChangesMade',
+    'noMigrationExecuted', 'rawFieldValuesIncluded', 'humanApprovalRequired',
+    'summary', 'limitations', 'records',
+  ];
+  if (!ownKeysAreAllowed(plan, PLAN_KEYS) || !hasRequiredKeys(plan, requiredPlanKeys)) {
     add(violations, 'invalid_plan_shape_or_unexpected_fields');
     return { status: 'blocked', violations: [...violations], metrics };
   }
@@ -109,8 +121,13 @@ export function reviewClientSensitiveDataSeparationPlan({ plan }) {
       plan.sourceCollection !== 'clients' ||
       !Array.isArray(plan.records) ||
       !Number.isSafeInteger(plan.sourceRecordsScanned) ||
+      typeof plan.sourceInventoryPotentiallyIncomplete !== 'boolean' ||
       !plan.summary || typeof plan.summary !== 'object' ||
-      !Array.isArray(plan.limitations)) {
+      !Number.isSafeInteger(plan.summary.unclassifiedPaths) ||
+      !Array.isArray(plan.limitations) ||
+      typeof plan.generatedAt !== 'string' ||
+      !Number.isSafeInteger(plan.sourceInventorySchemaVersion) ||
+      !(plan.projectId === null || typeof plan.projectId === 'string')) {
     add(violations, 'invalid_plan_contract');
   }
   if (plan.noCloudChangesMade !== true) add(violations, 'cloud_change_safety_flag_missing');
@@ -142,6 +159,7 @@ export function reviewClientSensitiveDataSeparationPlan({ plan }) {
   const seenIds = new Set();
   for (const record of plan.records) {
     if (!ownKeysAreAllowed(record, RECORD_KEYS) ||
+        !hasRequiredKeys(record, ['documentId', 'organizationId', 'fieldPlans']) ||
         typeof record.documentId !== 'string' || !record.documentId ||
         typeof record.organizationId !== 'string' || !record.organizationId ||
         !Array.isArray(record.fieldPlans)) {
@@ -157,6 +175,7 @@ export function reviewClientSensitiveDataSeparationPlan({ plan }) {
     for (const field of record.fieldPlans) {
       metrics.fieldPlansReviewed += 1;
       if (!ownKeysAreAllowed(field, FIELD_KEYS) ||
+          !hasRequiredKeys(field, ['sourceFieldPath', 'action', 'destinationCollection', 'sensitivityClass', 'confidence', 'reason', 'humanApprovalRequired', 'writesPlanned']) ||
           typeof field.sourceFieldPath !== 'string' ||
           !/^(?:[A-Za-z0-9_-]{1,64}|\[field\])(?:\[\])*(?:\.(?:[A-Za-z0-9_-]{1,64}|\[field\])(?:\[\])*)*$/.test(field.sourceFieldPath) ||
           typeof field.sensitivityClass !== 'string' ||
