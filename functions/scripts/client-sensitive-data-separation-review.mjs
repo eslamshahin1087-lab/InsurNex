@@ -77,7 +77,7 @@ async function main() {
 
 main().catch(error => {
   const message = error instanceof Error ? error.message : 'Unknown error';
-  console.error('Separation-plan review failed: ' + message.replace(/[
-]/g, ' ').slice(0, 240));
+  const safeMessage = message.split(String.fromCharCode(13)).join(' ').split(String.fromCharCode(10)).join(' ').slice(0, 240);
+  console.error('Separation-plan review failed: ' + safeMessage);
   process.exitCode = 1;
 });
