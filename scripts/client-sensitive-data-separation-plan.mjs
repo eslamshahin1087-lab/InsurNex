@@ -13,18 +13,50 @@ const BASE_CONTACT_FIELDS = new Set([
 
 const MEDICAL_SEGMENTS = new Set([
   'health',
+  'healthstatus',
+  'healthinformation',
+  'healthdetails',
+  'healthconditions',
   'medical',
+  'medicalstatus',
+  'medicalhistory',
+  'medicalinformation',
+  'medicaldetails',
+  'medicalcondition',
+  'medicalconditions',
+  'medicalprofile',
+  'medicalreports',
+  'medicalclaims',
+  'medicalclaim',
+  'medicalconsumption',
+  'chroniccondition',
   'chronicconditions',
+  'medication',
   'medications',
+  'surgery',
   'surgeries',
   'diagnosis',
   'diagnoses',
   'treatment',
   'disability',
+  'disease',
+  'diseases',
   'preexistingconditions',
   'preexistingcondition',
   'smoker',
   'lastcheckup',
+]);
+
+const FAMILY_SEGMENTS = new Set([
+  'family',
+  'familydetails',
+  'familymembers',
+  'dependents',
+  'dependent',
+  'dependentdetails',
+  'spouse',
+  'children',
+  'numberofdependents',
 ]);
 
 const CLASS_PRIORITY = [
@@ -74,6 +106,11 @@ function includesMedicalSegment(path, categories) {
   return pathSegments(path).some(segment => MEDICAL_SEGMENTS.has(normalizeSegment(segment)));
 }
 
+function includesFamilySegment(path, categories) {
+  if (categories.includes('family')) return true;
+  return pathSegments(path).some(segment => FAMILY_SEGMENTS.has(normalizeSegment(segment)));
+}
+
 function categoriesFor(record, fieldPath) {
   const categories = record?.pathCategories?.[fieldPath];
   return Array.isArray(categories) ? categories.filter(item => typeof item === 'string') : [];
@@ -114,6 +151,16 @@ function classifyFieldPath(record, fieldPath) {
       sensitivityClass: 'health',
       confidence: 'high',
       reason: 'Field path indicates health or medical information; apply narrow medical access and legal/retention review.',
+    };
+  }
+
+  if (includesFamilySegment(fieldPath, categories)) {
+    return {
+      action: 'proposed_destination_requires_review',
+      destinationCollection: DESTINATIONS.family,
+      sensitivityClass: 'family',
+      confidence: 'high',
+      reason: 'Field path indicates family or dependent information; keep it outside the broad client record and review access, purpose and retention.',
     };
   }
 
