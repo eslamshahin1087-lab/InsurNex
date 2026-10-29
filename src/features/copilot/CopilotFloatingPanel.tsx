@@ -74,11 +74,30 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
   // Bind each conversation to one route/record and one authenticated workspace.
   useEffect(() => {
-    if (!profile?.organizationId || !user?.uid) return;
+    if (!profile?.organizationId || !user?.uid) {
+      if (conversationScopeRef.current !== null || identityScopeRef.current !== null) {
+        conversationCreateSequenceRef.current += 1;
+        messageRequestSequenceRef.current += 1;
+        conversationScopeRef.current = null;
+        identityScopeRef.current = null;
+        setActiveId(null);
+        setMessages([]);
+        setConversations([]);
+        setSending(false);
+        setLoadingMsgs(false);
+        setError('');
+      }
+      return;
+    }
 
     const identityScope = `${user.uid}|${profile.organizationId}`;
     const identityChanged = identityScopeRef.current !== null && identityScopeRef.current !== identityScope;
     identityScopeRef.current = identityScope;
+    if (identityChanged) {
+      // Never carry the previous account's page selector into a different login.
+      clearCurrentContext();
+      setIncomingContext(undefined);
+    }
 
     // Opening the full Copilot route is a continuation; preserve the source conversation.
     if (
@@ -170,6 +189,16 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   async function submitText(text: string) {
     if (!profile?.organizationId || !user?.uid) return;
     if (!canSendMessage(text) || sending || !activeId) return;
+
+    const expectedIdentityScope = `${user.uid}|${profile.organizationId}`;
+    const expectedConversationScope = routeConversationScopeKey === undefined
+      ? undefined
+      : `${expectedIdentityScope}|${routeConversationScopeKey}`;
+    if (
+      identityScopeRef.current !== expectedIdentityScope ||
+      (expectedConversationScope !== undefined && conversationScopeRef.current !== expectedConversationScope) ||
+      (expectedConversationScope === undefined && !conversationScopeRef.current?.startsWith(`${expectedIdentityScope}|`))
+    ) return;
 
     setSending(true);
     setError('');
