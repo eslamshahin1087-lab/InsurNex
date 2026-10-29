@@ -80,8 +80,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
         const rows = await listConversations(profile.organizationId, user.uid);
         if (cancelled) return;
         setConversations(rows);
-      } catch (e) {
-        console.error('Failed to start fresh conversation', e);
+      } catch {
         if (!cancelled) setError('تعذر بدء محادثة جديدة.');
       }
     })();
@@ -99,8 +98,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       try {
         const rows = await listMessages(activeId, profile.organizationId);
         if (!cancelled) setMessages(rows);
-      } catch (e) {
-        console.error('Failed to load messages', e);
+      } catch {
+        if (!cancelled) setError('تعذر تحميل الرسائل.');
       } finally {
         if (!cancelled) setLoadingMsgs(false);
       }
@@ -127,8 +126,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       setActiveId(id);
       setMessages([]);
       setError('');
-    } catch (e) {
-      console.error(e);
+    } catch {
       setError('تعذر إنشاء محادثة جديدة.');
     }
   }, [profile?.organizationId, user?.uid]);
@@ -183,8 +181,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
             : c,
         ),
       );
-    } catch (e) {
-      console.error('Floating copilot failed', e);
+    } catch {
       setError('تعذر الاتصال بالمساعد. حاول مرة أخرى.');
       setMessages(previousHistory);
     } finally {
@@ -207,8 +204,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       setActiveId(null);
       setMessages([]);
       await handleNew();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      setError('تعذر حذف المحادثة الحالية.');
     }
   }
 
