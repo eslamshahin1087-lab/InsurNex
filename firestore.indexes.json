@@ -282,8 +282,27 @@
                             { "fieldPath": "relatedId", "order": "ASCENDING" },
                             { "fieldPath": "createdAt", "order": "DESCENDING" }
                         ]
+                    },
+                    {
+                        "collectionGroup": "documents",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "relatedType", "order": "ASCENDING" },
+                            { "fieldPath": "relatedId", "order": "ASCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "documents",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "category", "order": "ASCENDING" },
+                            { "fieldPath": "relatedType", "order": "ASCENDING" },
+                            { "fieldPath": "relatedId", "order": "ASCENDING" }
+                        ]
                     }
-                ],
+],
     "fieldOverrides":  [
 
                        ]
