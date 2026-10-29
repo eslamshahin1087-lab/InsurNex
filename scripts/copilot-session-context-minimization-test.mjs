@@ -26,5 +26,10 @@ assert.equal(panel.includes('COPILOT_CONTEXT_CHANGE_EVENT'), true, 'floating pan
 assert.equal(routeContext.includes('detailIdFromContext(context, expected.detail.key) === expected.detail.id'), true, 'detail context must match the exact record ID from the route');
 assert.equal(store.includes('window.dispatchEvent(new Event(COPILOT_CONTEXT_CHANGE_EVENT))'), true, 'context store must notify listeners when selectors change');
 assert.equal(service.includes('context: buildCopilotContextSelector(params.context)'), true, 'gateway calls must re-minimize context before network transfer');
+assert.equal(routeContext.includes('export function getCopilotConversationScopeKey(pathname: string)'), true, 'floating conversation scope must be derived from route and record identity');
+assert.equal(panel.includes('const nextScope = `${identityScope}|${routeConversationScopeKey ?? \'route:/copilot\'}`;'), true, 'floating conversations must be scoped to user, organization, and route');
+assert.equal(panel.includes('const requestSequence = ++messageRequestSequenceRef.current;'), true, 'each Copilot request must carry an invalidation sequence');
+assert.equal(panel.includes('requestSequence !== messageRequestSequenceRef.current'), true, 'stale Copilot responses must be ignored after navigation');
+assert.equal(panel.includes('requestScope !== conversationScopeRef.current'), true, 'responses from previous records must not repopulate the current conversation');
 
 console.log('Copilot session context minimization checks passed.');
