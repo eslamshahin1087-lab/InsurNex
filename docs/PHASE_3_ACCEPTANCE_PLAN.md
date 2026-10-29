@@ -15,6 +15,8 @@
 - [ ] Build a compatibility adapter so existing pages can continue reading safe projections while migration is reviewed.
 - [ ] Define schema version, dry-run mapping, collision handling, missing references, retry/resume and rollback.
 - [ ] Generate a local proposal-only mapping with `client-sensitive-data-separation-plan.mjs`; manually review destinations, parent splits and unclassified field paths.
+- [ ] Run `client-sensitive-data-separation-review.mjs`; require a `review_only` structural result, then manually review every flagged path and the proposed RBAC matrix. A `review_only` result is not migration approval.
+- [ ] Approve the [proposed client sensitive-data RBAC matrix](CLIENT_SENSITIVE_DATA_RBAC_MATRIX.md) against actual role requirements before implementing Rules or migration writers.
 - [ ] Do not migrate real records until counts, checksums where applicable, relationship integrity and emulator denial cases pass.
 
 ## Gate C — Authorization regression suite
