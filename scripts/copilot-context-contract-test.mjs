@@ -6,8 +6,11 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const selector = read('src/features/copilot/copilot-context-selector.ts');
+const policyDetailsPage = read('src/pages/PolicyDetailsPage.tsx');
+const claimDetailsPage = read('src/pages/ClaimDetailsPage.tsx');
 const leadDetailsPage = read('src/pages/LeadDetailsPage.tsx');
 const trustedContext = read('supabase/functions/copilot-chat/trusted-context.ts');
+const sanitizer = read('supabase/functions/copilot-chat/context-sanitizer.ts');
 const copilotHandler = read('supabase/functions/copilot-chat/index.ts');
 const indexText = read('firestore.indexes.json').replace(/^\uFEFF/, '');
 const config = JSON.parse(indexText);
@@ -27,6 +30,18 @@ assert.match(leadDetailsPage, /lead: \{ id: lead\.id \}/, 'LeadDetailsPage must 
 assert.match(trustedContext, /async function getLeadSelector\(/, 'server must fetch lead data by ID instead of trusting browser values');
 assert.match(trustedContext, /page === "lead-details"/, 'server must implement a dedicated Lead 360 context path');
 assert.match(trustedContext, /"estimatedValue"/, 'Lead 360 server projection must include the permitted estimate field');
+assert.match(selector, /"policy-details"/, 'Policy 360 must be an allow-listed page');
+assert.match(selector, /"claim-details"/, 'Claim 360 must be an allow-listed page');
+assert.match(selector, /return \\{ page, policyRef: \\{ id: policyId \\} \\}/, 'Policy 360 may forward only a validated policy ID');
+assert.match(selector, /return \\{ page, claimRef: \\{ id: claimId \\} \\}/, 'Claim 360 may forward only a validated claim ID');
+assert.match(policyDetailsPage, /page: 'policy-details', policyRef: id \\? \\{ id \\} : undefined/, 'PolicyDetailsPage must provide only its selected policy ID');
+assert.match(claimDetailsPage, /page:'claim-details',claimRef:id\\?\\{id\\}:undefined/, 'ClaimDetailsPage must provide only its selected claim ID');
+assert.match(trustedContext, /async function getScopedDetailSelector\\(/, 'Policy/Claim 360 must read records from Firestore on the server');
+assert.match(trustedContext, /collectionName: isPolicy \\? "policies" : "claims"/, 'Policy/Claim lookup must use fixed collection names');
+assert.match(trustedContext, /if \\(data\\.organizationId !== input\\.organizationId\\) return undefined;/, 'Policy/Claim detail must verify tenant scope');
+assert.match(sanitizer, /claim\\?: SafeContextRecord/, 'Claim 360 output must pass through the sanitizer');
+assert.match(copilotHandler, /Claim 360 context/, 'Copilot system prompt must render the safe Claim 360 summary');
+
 
 const hasIndex = (collectionGroup, fields) => config.indexes.some((index) =>
   index.collectionGroup === collectionGroup &&
