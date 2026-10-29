@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { resolveCopilotContextForRoute } from "../../../src/features/copilot/copilot-context-route.ts";
+import { getCopilotConversationScopeKey, resolveCopilotContextForRoute } from "../../../src/features/copilot/copilot-context-route.ts";
 import type { CopilotContextSelector } from "../../../src/features/copilot/copilot-context-selector.ts";
 
 Deno.test("route context accepts the matching collection page", () => {
@@ -52,4 +52,26 @@ Deno.test("invalid encoded detail route IDs fail closed", () => {
     resolveCopilotContextForRoute("/clients/%2Fother-org", { page: "client-details", client: { id: "other-org" } }),
     undefined,
   );
+});
+
+Deno.test("conversation scope isolates different records while preserving related client routes", () => {
+  assertEquals(
+    resolveCopilotContextForRoute("/clients/client-42/insurance-analysis", { page: "client-details", client: { id: "client-42" } }),
+    { page: "client-details", client: { id: "client-42" } },
+  );
+  assertEquals(
+    getCopilotConversationScopeKey("/clients/client-42"),
+    getCopilotConversationScopeKey("/clients/client-42/insurance-analysis"),
+  );
+  assertEquals(
+    getCopilotConversationScopeKey("/clients/client-42") === getCopilotConversationScopeKey("/clients/client-43"),
+    false,
+  );
+  assertEquals(
+    getCopilotConversationScopeKey("/claims/claim-42") === getCopilotConversationScopeKey("/policies/policy-42"),
+    false,
+  );
+  assertEquals(getCopilotConversationScopeKey("/renewals"), "renewals");
+  assertEquals(getCopilotConversationScopeKey("/copilot"), undefined);
+  assertEquals(getCopilotConversationScopeKey("/settings"), "route:/settings");
 });
