@@ -1,20 +1,21 @@
 export interface SupabaseApiKeyConfig {
   legacyAnonKey?: string | null;
   publishableKeysJson?: string | null;
+  lookupEnvironmentVariable?: (name: string) => string | undefined;
+}
+
+function addPublishableKey(candidate: unknown, allowedKeys: Set<string>): void {
+  if (typeof candidate === "string" && candidate.startsWith("sb_publishable_")) {
+    allowedKeys.add(candidate);
+  }
 }
 
 /**
- * The Supabase Edge gateway cannot validate modern sb_publishable_* keys as
- * JWTs. If verify_jwt is disabled for this function, match the public API key
- * against the keys supplied by the trusted runtime environment, then continue
- * to require the caller's verified Firebase ID token and organization membership.
+ * The modern Supabase runtime exposes SUPABASE_PUBLISHABLE_KEYS as a JSON map.
+ * Depending on runtime configuration, values may be the key itself or the
+ * name of another environment variable holding it. Resolve both safely.
  */
-export function isAllowedSupabaseApiKey(
-  providedKey: string | null,
-  config: SupabaseApiKeyConfig,
-): boolean {
-  if (typeof providedKey !== "string" || !providedKey.trim()) return false;
-
+export function getConfiguredSupabaseApiKeys(config: SupabaseApiKeyConfig): Set<string> {
   const allowedKeys = new Set<string>();
   const legacyKey = config.legacyAnonKey?.trim();
   if (legacyKey) allowedKeys.add(legacyKey);
@@ -23,13 +24,16 @@ export function isAllowedSupabaseApiKey(
   if (typeof configuredPublishableKeys === "string" && configuredPublishableKeys.trim()) {
     try {
       const parsed: unknown = JSON.parse(configuredPublishableKeys);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        for (const value of Object.values(parsed)) {
-          if (typeof value === "string" && value.trim()) allowedKeys.add(value.trim());
-        }
-      } else if (Array.isArray(parsed)) {
-        for (const value of parsed) {
-          if (typeof value === "string" && value.trim()) allowedKeys.add(value.trim());
+      const values: unknown[] = Array.isArray(parsed)
+        ? parsed
+        : parsed && typeof parsed === "object"
+          ? Object.values(parsed)
+          : [];
+
+      for (const value of values) {
+        addPublishableKey(value, allowedKeys);
+        if (typeof value === "string" && config.lookupEnvironmentVariable) {
+          addPublishableKey(config.lookupEnvironmentVariable(value), allowedKeys);
         }
       }
     } catch {
@@ -37,5 +41,13 @@ export function isAllowedSupabaseApiKey(
     }
   }
 
-  return allowedKeys.has(providedKey.trim());
+  return allowedKeys;
+}
+
+export function isAllowedSupabaseApiKey(
+  providedKey: string | null,
+  config: SupabaseApiKeyConfig,
+): boolean {
+  if (typeof providedKey !== "string" || !providedKey.trim()) return false;
+  return getConfiguredSupabaseApiKeys(config).has(providedKey.trim());
 }
