@@ -137,7 +137,7 @@ export function auditClientDataAccessFiles(files) {
   };
 }
 
-async function walk(root) {
+async function walk(root, base) {
   let entries;
   try {
     entries = await readdir(root, { withFileTypes: true });
@@ -150,13 +150,13 @@ async function walk(root) {
   for (const entry of entries) {
     if (entry.isDirectory()) {
       if (EXCLUDED_DIRS.has(entry.name)) continue;
-      output.push(...await walk(join(root, entry.name)));
+      output.push(...await walk(join(root, entry.name), base));
       continue;
     }
     if (!entry.isFile() || !SOURCE_EXTENSIONS.has(extname(entry.name)) || EXCLUDED_FILE.test(entry.name)) continue;
     const absolutePath = join(root, entry.name);
     output.push({
-      path: normalizePath(relative(process.cwd(), absolutePath)),
+      path: normalizePath(relative(base, absolutePath)),
       content: await readFile(absolutePath, 'utf8'),
     });
   }
@@ -193,7 +193,7 @@ async function main() {
   const root = resolve(args.root);
   const files = [];
   for (const relativeRoot of SOURCE_ROOTS) {
-    files.push(...await walk(join(root, relativeRoot)));
+    files.push(...await walk(join(root, relativeRoot), root));
   }
   const report = auditClientDataAccessFiles(files);
   console.log(JSON.stringify(report, null, 2));
