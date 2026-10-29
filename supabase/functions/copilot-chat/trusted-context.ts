@@ -16,6 +16,7 @@ const PAGE_COLLECTIONS: Record<string, CollectionKey[]> = {
   insurers: ["insurers"],
   renewals: ["policies"],
   "client-details": [],
+  "lead-details": [],
   finance: ["revenue", "expenses", "commissions"],
 };
 
@@ -231,6 +232,45 @@ async function getClientSelector(
   return Object.keys(client).length ? client : undefined;
 }
 
+async function getLeadSelector(
+  input: {
+    projectId: string;
+    idToken: string;
+    organizationId: string;
+    leadId: string;
+    fetcher: typeof fetch;
+  },
+): Promise<Record<string, unknown> | undefined> {
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(input.leadId)) return undefined;
+  const url = new URL(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(input.projectId)}/databases/(default)/documents/leads/${encodeURIComponent(input.leadId)}`,
+  );
+  // Only read the fields required for a safe Lead 360 summary.
+  for (const fieldPath of ["organizationId", "stage", "insuranceType", "estimatedValue"]) {
+    url.searchParams.append("mask.fieldPaths", fieldPath);
+  }
+  const response = await input.fetcher(url.toString(), {
+    headers: { Authorization: `Bearer ${input.idToken}` },
+  });
+
+  if (response.status === 404 || response.status === 403) return undefined;
+  if (!response.ok) throw new Error("FIRESTORE_LEAD_LOOKUP_FAILED");
+
+  const raw: unknown = await response.json();
+  if (!isRecord(raw)) return undefined;
+  const data = recordToMap(raw as FirestoreDocument);
+  if (data.organizationId !== input.organizationId) return undefined;
+
+  const lead: Record<string, unknown> = {};
+  const stage = safeScalar(data.stage);
+  const insuranceType = safeScalar(data.insuranceType);
+  const estimatedValue = safeScalar(data.estimatedValue);
+  if (stage !== undefined) lead.stage = stage;
+  if (insuranceType !== undefined) lead.insuranceType = insuranceType;
+  if (typeof estimatedValue === "number") lead.estimatedValue = estimatedValue;
+  return Object.keys(lead).length ? lead : undefined;
+}
+
 /**
  * Loads bounded, field-projected context from Firestore using the caller's
  * Firebase ID token. The browser payload is treated only as a page hint and,
@@ -253,6 +293,28 @@ export async function buildAuthorizedCopilotContext(input: {
   // Platform admins have their own private Copilot scope and are never given
   // tenant context, even if they submit an organization page hint.
   if (input.isPlatformAdmin || !input.organizationId) return output;
+
+  if (page === "lead-details") {
+    const rawLeadId = isRecord(raw.lead) ? raw.lead.id : undefined;
+    if (typeof rawLeadId !== "string") return output;
+
+    let lead: Record<string, unknown> | undefined;
+    try {
+      lead = await getLeadSelector({
+        projectId: input.projectId,
+        organizationId: input.organizationId,
+        idToken: input.idToken,
+        leadId: rawLeadId,
+        fetcher,
+      });
+    } catch {
+      lead = undefined;
+    }
+
+    // No client-supplied lead values enter the prompt.
+    if (lead) output.leads = [lead];
+    return output;
+  }
 
   let clientId: string | undefined;
   let client: Record<string, unknown> | undefined;
