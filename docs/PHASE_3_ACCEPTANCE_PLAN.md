@@ -12,6 +12,7 @@
 - [ ] Complete privacy-safe field inventory with a bounded scan and sanitized local report. No live scan is presumed completed by CI.
 - [ ] Map each legacy client field path to: base contact profile, identity/KYC, family, medical, claim-sensitive, financial, derived AI finding, document metadata or discard/retention-review.
 - [ ] Record per-field legitimate purpose, least-privilege roles, retention classification, export/delete behavior and owner.
+- [x] Add a static client data-access compatibility audit and scope the client-document metadata query by organization + client relation (query minimization only; Firestore authorization remains separate).
 - [ ] Build a compatibility adapter so existing pages can continue reading safe projections while migration is reviewed.
 - [ ] Define schema version, dry-run mapping, collision handling, missing references, retry/resume and rollback.
 - [ ] Generate a local proposal-only mapping with `client-sensitive-data-separation-plan.mjs`; manually review destinations, parent splits and unclassified field paths.
