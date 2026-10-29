@@ -17,7 +17,7 @@ import type {  CopilotConversation,
   CopilotMessage,
 } from './copilot.types';
 import { clearCurrentContext, COPILOT_CONTEXT_CHANGE_EVENT, getCurrentContext } from './copilot-context.store';
-import { resolveCopilotContextForRoute } from './copilot-context-route';
+import { getCopilotConversationScopeKey, resolveCopilotContextForRoute } from './copilot-context-route';
 import type { CopilotContextSelector } from './copilot-context-selector';
 
 interface Props {
@@ -38,6 +38,11 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const conversationScopeRef = useRef<string | null>(null);
+  const identityScopeRef = useRef<string | null>(null);
+  const conversationCreateSequenceRef = useRef(0);
+  const messageRequestSequenceRef = useRef(0);
+  const routeConversationScopeKey = getCopilotConversationScopeKey(location.pathname);
 
   const [incomingContext, setIncomingContext] = useState<CopilotContextSelector | undefined>(
     () => resolveCopilotContextForRoute(location.pathname, getCurrentContext()),
@@ -67,28 +72,52 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
   const activeContext = resolveCopilotContextForRoute(location.pathname, incomingContext);
 
-  // Always create a fresh conversation when panel opens
+  // Bind each conversation to one route/record and one authenticated workspace.
   useEffect(() => {
     if (!profile?.organizationId || !user?.uid) return;
-    let cancelled = false;
-    (async () => {
+
+    const identityScope = `${user.uid}|${profile.organizationId}`;
+    const identityChanged = identityScopeRef.current !== null && identityScopeRef.current !== identityScope;
+    identityScopeRef.current = identityScope;
+
+    // Opening the full Copilot route is a continuation; preserve the source conversation.
+    if (
+      routeConversationScopeKey === undefined &&
+      !identityChanged &&
+      conversationScopeRef.current !== null
+    ) {
+      return;
+    }
+
+    const nextScope = `${identityScope}|${routeConversationScopeKey ?? 'route:/copilot'}`;
+    if (conversationScopeRef.current === nextScope) return;
+
+    conversationScopeRef.current = nextScope;
+    const creationSequence = ++conversationCreateSequenceRef.current;
+    // An answer requested for the previous record/workspace must not repopulate this chat.
+    messageRequestSequenceRef.current += 1;
+    setSending(false);
+    setLoadingMsgs(false);
+    setActiveId(null);
+    setMessages([]);
+    setError('');
+
+    void (async () => {
       try {
         const id = await createConversation(profile.organizationId, user.uid);
-        if (cancelled) return;
+        if (creationSequence !== conversationCreateSequenceRef.current) return;
         setActiveId(id);
 
         const rows = await listConversations(profile.organizationId, user.uid);
-        if (cancelled) return;
+        if (creationSequence !== conversationCreateSequenceRef.current) return;
         setConversations(rows);
-      } catch (e) {
-        console.error('Failed to start fresh conversation', e);
-        if (!cancelled) setError('تعذر بدء محادثة جديدة.');
+      } catch {
+        if (creationSequence === conversationCreateSequenceRef.current) {
+          setError('تعذر بدء محادثة جديدة.');
+        }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [profile?.organizationId, user?.uid]);
+  }, [routeConversationScopeKey, profile?.organizationId, user?.uid]);
 
   // Load messages
   useEffect(() => {
@@ -120,6 +149,11 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
   const handleNew = useCallback(async () => {
     if (!profile?.organizationId || !user?.uid) return;
+    messageRequestSequenceRef.current += 1;
+    setSending(false);
+    setActiveId(null);
+    setMessages([]);
+    setError('');
     try {
       const id = await createConversation(profile.organizationId, user.uid);
       const rows = await listConversations(profile.organizationId, user.uid);
@@ -139,6 +173,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
 
     setSending(true);
     setError('');
+    const requestSequence = ++messageRequestSequenceRef.current;
+    const requestScope = conversationScopeRef.current;
     const previousHistory = messages;
     const userText = text.trim();
     setInput('');
@@ -166,7 +202,16 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
         context: latestContext,
       });
 
+      if (
+        requestSequence !== messageRequestSequenceRef.current ||
+        requestScope !== conversationScopeRef.current
+      ) return;
+
       const fresh = await listMessages(activeId, profile.organizationId);
+      if (
+        requestSequence !== messageRequestSequenceRef.current ||
+        requestScope !== conversationScopeRef.current
+      ) return;
       setMessages(fresh);
 
       setConversations((prev) =>
@@ -185,10 +230,15 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
       );
     } catch (e) {
       console.error('Floating copilot failed', e);
-      setError('تعذر الاتصال بالمساعد. حاول مرة أخرى.');
-      setMessages(previousHistory);
+      if (
+        requestSequence === messageRequestSequenceRef.current &&
+        requestScope === conversationScopeRef.current
+      ) {
+        setError('تعذر الاتصال بالمساعد. حاول مرة أخرى.');
+        setMessages(previousHistory);
+      }
     } finally {
-      setSending(false);
+      if (requestSequence === messageRequestSequenceRef.current) setSending(false);
     }
   }
 
@@ -202,6 +252,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
   async function handleDeleteCurrent() {
     if (!activeId || !profile?.organizationId) return;
     if (!window.confirm('حذف هذه المحادثة؟')) return;
+    messageRequestSequenceRef.current += 1;
+    setSending(false);
     try {
       await deleteConversation(activeId, profile.organizationId);
       setActiveId(null);
