@@ -21,7 +21,8 @@
     "test:storage-gateway": "node scripts/document-storage-policy-test.mjs",
     "test:storage-inventory": "node --check functions/scripts/legacy-storage-dry-run.mjs && node scripts/legacy-storage-inventory-test.mjs",
     "test:legacy-client-backfill-plan": "node --check functions/scripts/legacy-client-document-backfill-plan.mjs && node scripts/legacy-client-document-backfill-plan-test.mjs",
-    "test:client-sensitive-inventory": "node --check functions/scripts/client-sensitive-data-inventory.mjs && node scripts/client-sensitive-data-inventory-test.mjs"
+    "test:client-sensitive-inventory": "node --check functions/scripts/client-sensitive-data-inventory.mjs && node scripts/client-sensitive-data-inventory-test.mjs",
+    "test:client-sensitive-separation-plan": "node --check functions/scripts/client-sensitive-data-separation-plan.mjs && node scripts/client-sensitive-data-separation-plan-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

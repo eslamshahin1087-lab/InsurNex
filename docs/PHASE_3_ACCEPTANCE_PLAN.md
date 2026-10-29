@@ -2,18 +2,19 @@
 **Current position as of 2026-10-28:** use this plan as an execution checklist, not a claim that all listed work is completed.
 
 ## Gate A — Establish exact baseline
-- [ ] Review PR #60 (privacy-safe sensitive field-presence inventory) and CI on its current head.
+- [x] Review PR #60 (privacy-safe sensitive field-presence inventory) and CI on its current head; the code is merged. The actual inventory run remains a separate operator task.
 - [ ] Confirm phase-2D legacy client document access PR status and tests; compare deployed endpoint state separately.
 - [ ] Run CI on the exact candidate commit: access, plans, PWA, document-storage policy, storage inventory, legacy backfill plan, sensitive inventory, lint, app build, Functions build, Firestore emulator suite, Deno type-check and secrets scan.
 - [ ] Capture exact commit SHA and CI run URL in the release record.
 - [ ] Keep production deploy, bulk data migration and secret changes out of this gate.
 
 ## Gate B — Field separation design (no data writes)
-- [ ] Complete privacy-safe field inventory with a bounded scan and sanitized local report.
+- [ ] Complete privacy-safe field inventory with a bounded scan and sanitized local report. No live scan is presumed completed by CI.
 - [ ] Map each legacy client field path to: base contact profile, identity/KYC, family, medical, claim-sensitive, financial, derived AI finding, document metadata or discard/retention-review.
 - [ ] Record per-field legitimate purpose, least-privilege roles, retention classification, export/delete behavior and owner.
 - [ ] Build a compatibility adapter so existing pages can continue reading safe projections while migration is reviewed.
 - [ ] Define schema version, dry-run mapping, collision handling, missing references, retry/resume and rollback.
+- [ ] Generate a local proposal-only mapping with `client-sensitive-data-separation-plan.mjs`; manually review destinations, parent splits and unclassified field paths.
 - [ ] Do not migrate real records until counts, checksums where applicable, relationship integrity and emulator denial cases pass.
 
 ## Gate C — Authorization regression suite
