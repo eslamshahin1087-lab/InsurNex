@@ -22,6 +22,9 @@ assert.match(edge, /console\.error\('copilot-chat request failed', \{ status, co
 assert.equal(edge.includes('console.error(err)'), false, 'raw request exception objects must not be logged');
 assert.equal(panel.includes('console.'), false, 'floating Copilot must not write raw client exceptions or context to the browser console');
 assert.equal(panel.includes('catch (e)'), false, 'floating Copilot should not bind raw exception objects when it does not inspect them');
+assert.doesNotMatch(panel, /console\\.(?:log|warn|error)\\s*\\(/, 'floating Copilot must never log client errors to the browser console');
+assert.doesNotMatch(panel, /setError\\s*\\(\\s*(?:e|err|error)\\.(?:message|stack)/i, 'raw exception messages and stack traces must never be shown to users');
+assert.doesNotMatch(panel, /catch\\s*\\(\\s*(?:e|err|error)\\s*\\)/, 'unused raw exceptions must not be captured in UI error handlers');
 for (const publicMessage of [
   'تعذر بدء محادثة جديدة.',
   'تعذر تحميل الرسائل.',
