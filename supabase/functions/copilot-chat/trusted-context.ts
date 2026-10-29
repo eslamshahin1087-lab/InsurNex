@@ -252,13 +252,13 @@ async function getScopedDetailSelector(input: {
   } as const;
   const allowedFields: readonly string[] = fieldsByCollection[input.collectionName];
   const url = new URL(
-    \`https://firestore.googleapis.com/v1/projects/\${encodeURIComponent(input.projectId)}/databases/(default)/documents/\${input.collectionName}/\${encodeURIComponent(input.documentId)}\`,
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(input.projectId)}/databases/(default)/documents/${input.collectionName}/${encodeURIComponent(input.documentId)}`,
   );
   for (const fieldPath of ["organizationId", ...allowedFields]) {
     url.searchParams.append("mask.fieldPaths", fieldPath);
   }
   const response = await input.fetcher(url.toString(), {
-    headers: { Authorization: \`Bearer \${input.idToken}\` },
+    headers: { Authorization: `Bearer ${input.idToken}` },
   });
 
   if (response.status === 404 || response.status === 403) return undefined;
