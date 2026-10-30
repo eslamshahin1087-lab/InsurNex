@@ -63,7 +63,7 @@ service cloud.firestore {
         && getAfter(invitationPath(orgId, getAfter(userDocumentPath(uid)).data.acceptedInvitationId)).data.invitedEmail == request.auth.token.email;
     }
     function canReadBusinessCollection(collection, data){
-      return (collection == 'clients' && roleIs(['owner','admin','broker','claims']))
+      return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker','claims']))
         || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
         || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
@@ -306,7 +306,7 @@ service cloud.firestore {
       // sensitive identity/family fields are separated into independently secured documents.
       allow read: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
-        && roleIs(['owner','admin','broker','claims']);
+        && roleIs(['owner','admin','broker']);
       allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
@@ -321,7 +321,7 @@ service cloud.firestore {
         && roleIs(['owner','admin','broker']);
 
       match /timeline/{eventId} {
-        allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker','claims']);
+        allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);
         allow create: if canAccessClient(clientId)
           && roleIs(['owner','admin','broker'])
           && request.resource.data.by == request.auth.uid;
