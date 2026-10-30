@@ -33,4 +33,22 @@ for (const fn of manifest.functions) {
 for (const fn of manifest.functions.filter((item) => item.slug.startsWith('cron-'))) {
   assert.ok(fn.observedRisks.some((risk) => risk.includes('SUPABASE_SERVICE_ROLE_KEY')));
 }
-console.log('Deployed Edge Function snapshot integrity passed (5 active functions; archive only, no deployment).');
+const policyCronSource = await readFile(resolve(root, 'supabase/functions/cron-policy-check/index.ts'), 'utf8');
+const documentCronSource = await readFile(resolve(root, 'supabase/functions/cron-document-check/index.ts'), 'utf8');
+const cronAuthSource = await readFile(resolve(root, 'supabase/functions/_shared/cron-auth.ts'), 'utf8');
+const supabaseConfig = await readFile(resolve(root, 'supabase/config.toml'), 'utf8');
+
+for (const [label, source] of [
+  ['policy cron', policyCronSource],
+  ['document cron', documentCronSource],
+]) {
+  assert.match(source, /isCronRequestAuthorized\(request, CRON_SECRET\)/, label + ' must validate the dedicated cron secret');
+  assert.doesNotMatch(source, /SUPABASE_SERVICE_ROLE_KEY|SERVICE_ROLE_KEY|Authorization.*Bearer/i,
+    label + ' must not accept the Supabase service-role key or a generic bearer credential');
+  assert.match(source, /stableNotificationId\(/, label + ' must use deterministic notification IDs');
+}
+assert.match(cronAuthSource, /x-cron-secret/, 'cron auth helper must read the dedicated header');
+assert.match(supabaseConfig, /\[functions\.cron-policy-check\][\s\S]*?verify_jwt = false/);
+assert.match(supabaseConfig, /\[functions\.cron-document-check\][\s\S]*?verify_jwt = false/);
+
+console.log('Deployed Edge Function snapshot integrity and cron hardening source checks passed (archive only; no deployment).');
