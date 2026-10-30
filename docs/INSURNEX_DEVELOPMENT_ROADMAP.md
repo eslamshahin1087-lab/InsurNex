@@ -1,7 +1,24 @@
 # InsurNex Development Roadmap
 
-**Last updated:** 2026-10-29  
-**Release posture:** continue on isolated branches and reviewed pull requests. No production deployment, data migration, or live-secret change is authorized by this roadmap.
+**Last updated:** 2026-10-30  
+**Audited baseline:** `main` at `5c9c924fdf2033215f94c5c1b64d71ede7ff70ee`.  
+**Release posture:** isolated branches and reviewed pull requests. No production deployment, billing-plan change, live-secret change or data migration is authorized by this roadmap.
+
+## Phase 0 — Repository governance and technical baseline
+
+**Status:** baseline captured in [Phase 0 Technical Baseline](PHASE_0_TECHNICAL_BASELINE_2026-10-30.md); execution plan in [Master Execution Backlog](MASTER_EXECUTION_BACKLOG.md). This phase is documentation and planning only; it does not change application behavior, visual identity, runtime configuration or production data.
+
+Verified checks on the audited `main` SHA:
+- [CI](https://github.com/eslamshahin1087-lab/InsurNex/actions/runs/40878308477) — passed.
+- [Secrets Scan](https://github.com/eslamshahin1087-lab/InsurNex/actions/runs/40878308224) — passed.
+
+Outstanding Phase 0 verification:
+- Confirm the local Cloud Shell branch/SHA and working tree before any pull or branch switch.
+- Verify live Firebase/Supabase project plan, deployed Edge Function revisions/secrets, bucket state and quotas in their consoles; source code and CI do not establish deployed parity.
+- Resolve the iNex receiving identity and endpoint export/deploy mismatch only after owner confirmation.
+- Rebase/review open PRs #31 and #36; classify old Draft documentation PRs #40 and #46 before closing or archiving.
+
+
 
 ## Current baseline
 
@@ -70,7 +87,7 @@ Acceptance gate: no remaining direct Firebase Storage calls in the audited modul
 
 ## Phase 2D — Secure compatibility access for embedded legacy client documents
 
-**Status:** implementation is in the open development PR branch `feat/secure-legacy-client-document-access-20261028`; not merged or deployed as of this roadmap update.
+**Status:** source implementation merged in PR #58 (`10e1996`) and subsequent legacy reference inventory/backfill planning changes merged in PRs #56, #57 and #59. The updated Edge Function has not been accepted in Staging; preserve this distinction between merged code and deployed service.
 
 Scope:
 1. Detect older `clients.documents[]` entries that contain Supabase signed URLs but lack an explicit storage provider.
@@ -108,7 +125,7 @@ Acceptance gate:
 
 ## Phase 3C — Proposal-only sensitive-data separation planner
 
-**Status:** implementation on isolated branch `feat/phase3-sensitive-separation-plan-20261029`; no cloud or runtime data changes.
+**Status:** proposal-only planner merged in PR #79; nested health/family classification corrected in PR #80. The operator ran a bounded read-only inventory for 14 client records and generated a local proposal/review report. No live records were migrated or changed.
 
 Scope:
 1. Consume the sanitized Phase 3B inventory JSON locally, not Firestore or Storage.
@@ -123,6 +140,18 @@ Acceptance gate:
 - The inventory is intentionally run by an authorized operator against the correct project; the report remains local and access-restricted.
 - Review all mapping counts and unclassified paths. If the inventory was capped, do not treat it as complete.
 - No migration writer is implemented in Phase 3C; any future writer needs a separate reviewed PR, reversible plan, emulator denial tests and explicit authorization.
+
+## Phase 3D — RBAC proposal and plan review
+
+**Status:** proposed role/data-class matrix and local structural plan reviewer merged in PR #81. This remains a design proposal; runtime permissions for sensitive collections are not thereby granted.
+
+## Phase 3E — Default-deny regression coverage
+
+**Status:** emulator regression coverage merged in PR #82 for proposed sensitive collections. Current test gate confirms default denial; collection-specific allow rules are still unimplemented.
+
+## Phase 3F — Client data-access source audit
+
+**Status:** static audit and query-minimization changes merged in PR #83. Client document listing now queries by tenant and client relation before download. This narrows data retrieval but does not replace Firestore authorization.
 
 ## Phase 3 — Separate sensitive customer data and enforce relationship/assignment access
 
@@ -186,17 +215,18 @@ Acceptance gate: green CI on the exact release commit, completed staging accepta
 
 ## Immediate execution order
 
-1. Review and run the Phase 3B inventory locally against the intended project, using an authorized identity and a reviewed record cap; keep the report local.
-2. Generate the Phase 3C proposal-only separation plan from that sanitized report and review every destination, parent split and unclassified field path.
-3. Audit client-field readers/writers and finalize the data-classification, purpose, retention and RBAC matrix before building a migration adapter.
-4. Design source/target reconciliation, idempotency, resume and rollback; do not write production records until separately approved.
-5. Finish Phase 2D compatibility-gateway staging checks before deployment; test cross-tenant denial and expired-link refresh.
-6. Complete audit, retention, consent and AI safeguards before claiming production-ready security.
-7. Treat production deployment, Rules/index/function changes and data migration as separate approval-gated operations.
+1. Complete Phase 0 baseline and reconcile open PRs and architecture documents.
+2. Resolve Spark-compatible backend/runtime design and verify the deployed Supabase storage gateway in Staging.
+3. Correct the iNex endpoint identity/export/deploy contract after confirming the approved receiving UID and organization.
+4. Build the backwards-compatible Client Data Access Layer and inventory every reader/writer.
+5. Implement collection-specific role/tenant/relationship rules while preserving default-deny for proposed sensitive collections.
+6. Complete audit/consent/retention/export/delete decisions before introducing sensitive-data writes.
+7. Only then design a reversible migration with source/target reconciliation, idempotency, resume and rollback; production writes require separate approval.
+8. Continue to treat deployment, Rules/index/function changes, secret changes and data migration as separate approval-gated operations.
 
 ## Phase 3A — Architecture and data contracts (2026-10-28)
 
-**Status:** design artifacts committed on branch `feat/phase3-master-architecture-20261028`; not merged and not deployed. These documents do not change Firestore data, rules, indexes, runtime behavior or secrets.
+**Status:** documentation merged to `main` through PR #61. The Master Architecture, Firestore Schema v2 proposal and AI Module Contracts remain design contracts; they do not change Firestore schema, runtime behavior, secrets or deployment configuration.
 
 - [Master Architecture](MASTER_ARCHITECTURE.md): module boundaries, data flows, trust boundaries, integration and release posture.
 - [Firestore Schema v2 Proposal](FIRESTORE_SCHEMA_V2_PROPOSAL.md): additive target record model and sensitive-data separation proposal; not yet a live schema.

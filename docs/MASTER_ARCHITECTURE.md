@@ -1,7 +1,7 @@
 # InsurNex Master Architecture
-**Status:** Architecture proposal for Phase 3+; implement behind reviewed PRs.  
-**Baseline inspected:** `main` at `f120489f5a4c86d4881f7d7862f25104aa6635bd` (2026-10-28).  
-**Non-goals of this document:** no schema migration, production deployment, provider configuration, or changes to live data.
+
+**Status:** current repository baseline + target architecture. Verified remote baseline: `main` at `5c9c924fdf2033215f94c5c1b64d71ede7ff70ee` (2026-10-30).  
+**Change policy:** implementation only through reviewed feature PRs. This document is not a deployment, schema migration or approval to change live data.
 
 ## 1. Architecture decisions
 
@@ -13,6 +13,28 @@
 6. **AI:** AI features are server-side, opt-in/feature-gated, data-minimized and evidence-linked. Authorization happens before prompt assembly. AI output is advisory and must not diagnose, settle claims, determine coverage, bind a policy, or make final suitability/underwriting decisions.
 7. **Low-cost posture:** use Firebase/Supabase free or low-cost tiers only where the selected project/account has verified availability and quotas. Do not claim AI is free until a current provider/runtime and quota are confirmed. A safe no-AI fallback is required.
 8. **Release posture:** use feature branches, CI, reviewed PRs, staging acceptance, and explicit release approval. No production deploy or live-data migration is included in this architecture change.
+
+## 1A. Current repository state — verified on 2026-10-30
+
+The following distinctions are mandatory when reading this document:
+
+- **Merged source** means code exists in `main`; it does not prove the corresponding Edge Function, Rules, indexes or Hosting build was deployed.
+- **Operator-verified local check** means a read-only report or CLI was run locally; it does not change production records.
+- **Target design** means a proposed schema, module or rule, not an active runtime capability.
+
+| Capability | Current repository state | Target/remaining gate |
+|---|---|---|
+| React/Vite Arabic RTL PWA | Existing app and regression checks are present | Preserve routes, functionality, design tokens and responsive identity during all phases. |
+| Firebase Auth + Firestore | Existing identity and business-data foundation | Complete action/role/relationship/assignment authorization. |
+| Sensitive client data | Legacy mixed fields remain in `clients`; inventory, plan, reviewer and RBAC proposal are merged | Build compatibility data layer; implement per-collection Rules; migrate only after approval and verification. |
+| Proposed sensitive collections | Emulator suite asserts default-deny | Do not grant access until a collection-specific security PR has positive and negative tests. |
+| Documents | Supabase provider/gateway source and legacy compatibility code exist | Verify deployed Edge Function, private bucket and end-to-end staging behavior; do not assume merged code is live. |
+| Copilot | Supabase Edge Function source plus legacy Firebase Functions source | Reconcile provider, cost, context authorization, data sensitivity and deployed endpoint. |
+| Firebase Functions | Legacy source remains in repository and is included in build CI | Spark projects cannot deploy new or existing Cloud Functions; select an approved deployable runtime before depending on these endpoints. |
+| iNex integration | `ingestINexLead` is exported; deploy script refers to a different name and source receiver currently reads `securepath@nex.com` | Confirm receiving UID/organization and align endpoint/caller/deploy names before enabling traffic. |
+| Client document list | Query is scoped by organization and client relationship in the merged service | Keep Firestore Rules relationship authorization; query filters alone are not authorization. |
+
+For current plan/runtime constraints, see [Phase 0 Technical Baseline](PHASE_0_TECHNICAL_BASELINE_2026-10-30.md). For the sequenced work and acceptance criteria, see [Master Execution Backlog](MASTER_EXECUTION_BACKLOG.md).
 
 ## 2. Logical module map
 
