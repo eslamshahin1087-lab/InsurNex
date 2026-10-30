@@ -75,8 +75,14 @@ check(claimPage.includes("claim.clientId&&canAccessClient360(profile?.role)"),
 check(rules.includes("allow read: if resource.data.organizationId is string")
   && rules.includes("&& roleIs(['owner','admin','broker']);"),
   'Firestore client reads are limited to Owner/Admin/Broker');
-check(!rules.includes("roleIs(['owner','admin','broker','claims']);\\n      allow create: if request.resource.data.organizationId is string"),
-  'Claims cannot read the full legacy client document');
+const clientRulesStart = rules.indexOf('match /clients/{clientId} {');
+const clientRulesEnd = rules.indexOf('\\n    }\\n', clientRulesStart);
+assert.ok(clientRulesStart >= 0 && clientRulesEnd > clientRulesStart, 'explicit client Rules block exists');
+const clientRules = rules.slice(clientRulesStart, clientRulesEnd);
+check(clientRules.includes("roleIs(['owner','admin','broker'])"),
+  'Firestore Client 360 Rules allow only Owner/Admin/Broker');
+check(!clientRules.includes("'claims'"),
+  'Claims cannot read or browse the legacy mixed-sensitivity client document');
 check(rules.includes("allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);"),
   'Client timeline reads follow the same least-privilege boundary');
 
