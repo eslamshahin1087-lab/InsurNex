@@ -68,6 +68,8 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 ### P1.4 — Enforce tenant/role/relationship/assignment RBAC
 **Priority:** P0 · **Dependencies:** P1.3 data contracts  
+**Implemented interim boundary (PR in review):** Claims is denied direct get/query/timeline access to the legacy mixed-sensitivity `clients/{clientId}` record. Claim snapshots, linked policy metadata and claim-category document metadata remain available. Client 360 UI routes/navigation and both legacy Copilot client-context policy are restricted to Owner/Admin/Broker. This is an interim deny-until-projection control, not completion of data separation.
+
 - Convert the proposed matrix into exact collection/action grants.
 - Rules and trusted endpoint checks validate Firebase identity, active membership, role, immutable organization ID, parent relationship and assignment.
 - Keep `clientSensitiveProfiles`, `clientMedicalProfiles`, `claimSensitiveDetails`, `aiFindings` and `auditLogs` deny-by-default until their own rules are approved.
