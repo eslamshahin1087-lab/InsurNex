@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "deploy": "firebase deploy --only functions:medicalClaudeAnalysis,functions:copilotChat,functions:ingestSecurePathLead"
+    "deploy": "node scripts/guard-spark-deploy.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

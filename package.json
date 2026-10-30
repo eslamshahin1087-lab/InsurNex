@@ -25,7 +25,8 @@
     "test:client-sensitive-separation-plan": "node --check functions/scripts/client-sensitive-data-separation-plan.mjs && node scripts/client-sensitive-data-separation-plan-test.mjs",
     "test:client-sensitive-separation-review": "node --check functions/scripts/client-sensitive-data-separation-review.mjs && node scripts/client-sensitive-data-separation-review-test.mjs",
     "audit:client-data-access": "node scripts/client-data-access-audit.mjs",
-    "test:client-data-access-audit": "node --check scripts/client-data-access-audit.mjs && node scripts/client-data-access-audit-test.mjs"
+    "test:client-data-access-audit": "node --check scripts/client-data-access-audit.mjs && node scripts/client-data-access-audit-test.mjs",
+    "test:spark-runtime-guard": "node scripts/spark-runtime-guard-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

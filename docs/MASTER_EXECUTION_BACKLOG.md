@@ -1,6 +1,6 @@
 # InsurNex — Master Execution Backlog
 
-**Baseline:** `main` at `5c9c924fdf2033215f94c5c1b64d71ede7ff70ee` (2026-10-30 audit).  
+**Baseline:** `main` at `6789db0bfe630b43a1557a3504c46e0b4a975216` after Phase 0 merged (2026-10-30).  
 **Delivery policy:** isolated feature branches, small PRs, CI + Secrets Scan, review before merge.  
 **Release policy:** no production deployment, billing change, secret rotation or live-data migration without a separate explicit approval.
 
@@ -35,6 +35,12 @@ This backlog is the execution source of truth. A checked source-code task means 
 | Insurer Comparison Engine | Not evidenced as implemented | Later release. |
 
 ## Phase 1 — Runtime Compatibility & Security/Data Foundation
+
+**Implementation status (2026-10-30):** Phase 1 started on branch `security/phase1-spark-runtime-guard-20261030`. The legacy Firebase Functions deployment command is being guarded because the approved Firebase Spark plan cannot deploy/update Cloud Functions. The five active Supabase Edge Functions were inventoried read-only; live/source parity gaps are documented in [Phase 1 Runtime Compatibility](PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md). This is a first safety gate, not completion of Phase 1.
+
+**Runtime audit:** [Phase 1 Runtime Compatibility](PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md).
+
+
 
 ### P1.1 — Resolve Spark-compatible runtime map
 **Priority:** P0 · **Dependencies:** Phase 0 baseline  
