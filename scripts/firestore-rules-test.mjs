@@ -408,7 +408,7 @@ try {
     { collection: 'tasks', id: protectedTaskId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
     { collection: 'rfqs', id: protectedRfqId, allowed: ['owner', 'admin', 'broker', 'sales'] },
     { collection: 'insurers', id: protectedInsurerId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
-    { collection: 'operations', id: protectedOperationId, allowed: ['owner', 'admin', 'broker', 'claims'] },
+    { collection: 'operations', id: protectedMatrixOperationId, allowed: ['owner', 'admin', 'broker', 'claims'] },
     { collection: 'revenue', id: protectedRevenueId, allowed: ['owner', 'admin', 'finance'] },
     { collection: 'expenses', id: protectedExpenseId, allowed: ['owner', 'admin', 'finance'] },
     { collection: 'commissions', id: protectedCommissionId, allowed: ['owner', 'admin', 'finance'] },
