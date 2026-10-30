@@ -21,6 +21,7 @@
 - [ ] Do not migrate real records until counts, checksums where applicable, relationship integrity and emulator denial cases pass.
 
 ## Gate C — Authorization regression suite
+- [x] Claims role is denied direct get/query and timeline access to the legacy mixed-sensitivity client document; claim/policy snapshots and claim-category document metadata remain accessible.
 - [x] Add Emulator regression checks proving all proposed sensitive collections remain default-denied for Owner, Broker, Sales, Claims, Finance, Staff and a foreign-organization owner until explicit collection-specific rules are implemented.
 - [ ] Tenant: user A cannot read/query/write/update/delete organization B records, including by known document ID.
 - [ ] Relationship integrity: client/policy/claim/document IDs must all resolve inside the same organization; swapped IDs and missing parents are denied.
