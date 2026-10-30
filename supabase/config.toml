@@ -5,3 +5,11 @@ project_id = "piloiwtdbtmfiyqxfbae"
 # caller's Firebase ID token plus organization membership in application code.
 # Modern sb_publishable_* values are not JWTs and cannot pass gateway JWT checks.
 verify_jwt = false
+
+[functions.cron-policy-check]
+# Custom CRON_SECRET is validated by the function; gateway JWT validation is disabled.
+verify_jwt = false
+
+[functions.cron-document-check]
+# Custom CRON_SECRET is validated by the function; gateway JWT validation is disabled.
+verify_jwt = false

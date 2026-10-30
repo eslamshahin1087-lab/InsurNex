@@ -89,3 +89,24 @@ The read-only security advisor reported one warning: `pg_net` is installed in th
 - Migrate or explicitly disable legacy Anthropic/Firebase callable flows while preserving the existing Copilot and deterministic analytics fallbacks.
 - Continue Phase 1 client data access adapter, collection-specific RBAC, audit controls and sensitive data separation. Proposed sensitive collections remain default-denied.
 - Do not change production functions, secrets, billing, Firestore Rules or live data as part of this PR.
+
+
+## 9. Deployed source recovery and candidate cron hardening — 2026-10-30
+
+All five active Edge Function source bundles were retrieved read-only from the configured Supabase project and archived under `supabase/deployed-snapshots/2026-10-30`. Per-file Git blob SHA values and the provider deployment bundle hash are recorded in `manifest.json`. These files are historical snapshots only and must never be used as deployment input.
+
+Verified findings from the active deployments:
+- `copilot-chat` v37 has `verify_jwt=true`, accepts caller-body business context, and does not use the repository's current server-trusted context builder. The repo `supabase/config.toml` currently has a different setting; do not redeploy until the request path is reproduced in staging.
+- `document-storage` v22 is an older inline implementation, not source-identical to the modular repository implementation. A replacement must pass exact metadata/path binding, client/policy/claim relation, signed URL expiry, upload, preview/download/delete and cross-tenant negative tests.
+- `securepath-webhook` v20 and its `deno.json` are now recovered into the archive. This is a SecurePath integration, not proof that iNex-App is configured.
+- `cron-policy-check` v7 and `cron-document-check` v7 both accept `SUPABASE_SERVICE_ROLE_KEY` as an alternate bearer credential. This is not preserved in the new candidate cron sources.
+- The live cron scheduler's current header/secret configuration was not verified. The new candidates accept only `x-cron-secret`; they must not be deployed until the scheduler is confirmed to send the dedicated `CRON_SECRET` and a staging invocation/negative test succeeds.
+
+### New versioned candidates (not deployed)
+
+- `supabase/functions/_shared/cron-auth.ts`: dedicated-header authentication, date normalization, 7/30/45/90-day bands, and deterministic notification IDs.
+- `supabase/functions/cron-policy-check/index.ts`: policy renewal notifications with transaction-based de-duplication and current policy/tenant revalidation.
+- `supabase/functions/cron-document-check/index.ts`: document expiry notifications with transaction-based de-duplication and relation-aware notification metadata.
+- `supabase/functions/_shared/cron-auth.test.ts`: authorization, date-boundary, reminder-band and deterministic-ID tests.
+
+These candidates intentionally use Firebase Admin only within the trusted Edge Function runtime. They do not accept the Supabase service-role key as an application-level cron token. Configured `verify_jwt=false` is paired with the function's own dedicated-secret validation; the deployed project configuration is not changed in this PR.
