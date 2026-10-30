@@ -1,5 +1,5 @@
 # Phase 3 Acceptance Plan — Security-First Product Completion
-**Current position as of 2026-10-28:** use this plan as an execution checklist, not a claim that all listed work is completed.
+**Current position as of 2026-10-30:** use this plan as an execution checklist, not a claim that all listed work is completed. Phase 3A documentation, Phase 3B inventory tooling, Phase 3C proposal tooling, Phase 3D RBAC proposal/reviewer, Phase 3E default-deny tests and Phase 3F static access audit are merged. Runtime data separation, collection-specific allow grants, migration and Staging acceptance remain incomplete.
 
 ## Gate A — Establish exact baseline
 - [x] Review PR #60 (privacy-safe sensitive field-presence inventory) and CI on its current head; the code is merged. The actual inventory run remains a separate operator task.

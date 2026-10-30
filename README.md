@@ -28,6 +28,8 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - [Admin and User Access Model](docs/ADMIN_ACCESS_MODEL.md)
 - [Subscription Plan Feature Entitlements](docs/PLAN_FEATURE_ENTITLEMENTS.md)
 - [InsurNex Development Roadmap](docs/INSURNEX_DEVELOPMENT_ROADMAP.md)
+- [Phase 0 Technical Baseline](docs/PHASE_0_TECHNICAL_BASELINE_2026-10-30.md)
+- [Master Execution Backlog](docs/MASTER_EXECUTION_BACKLOG.md)
 - [Client Sensitive-Field Inventory Runbook](docs/CLIENT_SENSITIVE_DATA_INVENTORY_RUNBOOK.md)
 - [Client Sensitive-Data Separation Plan Runbook](docs/CLIENT_SENSITIVE_DATA_SEPARATION_PLAN_RUNBOOK.md)
 - [Client Sensitive-Data RBAC Matrix](docs/CLIENT_SENSITIVE_DATA_RBAC_MATRIX.md)
