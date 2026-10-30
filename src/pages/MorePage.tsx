@@ -16,7 +16,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../features/auth/auth-context';
+import { useAuth, canAccessClient360 } from '../features/auth/auth-context';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 
@@ -172,7 +172,7 @@ export default function MorePage() {
               <h2>{section.title}</h2>
             </div>
             <ul className="inx-list">
-              {section.items.filter(({ to }) => !featureByPath[to] || (settings.features[featureByPath[to]] && planFeatures[featureByPath[to]])).map(({ to, label, desc, icon: Icon, tone }) => (
+              {section.items.filter(({ to }) => (to !== '/clients' || canAccessClient360(profile?.role)) && (!featureByPath[to] || (settings.features[featureByPath[to]] && planFeatures[featureByPath[to]]))).map(({ to, label, desc, icon: Icon, tone }) => (
                 <li key={to}>
                   <Link to={to} className="inx-list-item">
                     <span className={`inx-icon-circle ${tone}`}>

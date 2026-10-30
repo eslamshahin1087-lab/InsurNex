@@ -46,7 +46,7 @@ const COLLECTION_FIELDS: Record<ContextCollection, string[]> = {
 };
 
 const COLLECTION_ROLES: Record<ContextCollection, CopilotRole[]> = {
-  clients: ['owner', 'admin', 'broker', 'claims'],
+  clients: ['owner', 'admin', 'broker'],
   policies: ['owner', 'admin', 'broker', 'claims'],
   claims: ['owner', 'admin', 'broker', 'claims'],
   leads: ['owner', 'admin', 'broker', 'sales'],

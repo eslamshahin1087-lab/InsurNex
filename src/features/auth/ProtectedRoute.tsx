@@ -56,3 +56,27 @@ export default function ProtectedRoute() {
 
   return <Outlet />;
 }
+
+type OrganizationRoleRouteProps = {
+  allowedRoles: readonly string[];
+  redirectTo?: string;
+};
+
+/**
+ * A role-aware UI route boundary. Firestore Rules and trusted endpoints
+ * independently enforce the same authorization; this gate is not security.
+ */
+export function OrganizationRoleRoute({
+  allowedRoles,
+  redirectTo = '/',
+}: OrganizationRoleRouteProps) {
+  const { profile } = useAuth();
+
+  // Platform Admin has a separate surface and is not a tenant-role substitute.
+  if (!profile) return <Navigate to="/admin-panel" replace />;
+  if (!allowedRoles.includes(profile.role)) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  return <Outlet />;
+}

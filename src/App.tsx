@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider';
-import ProtectedRoute from './features/auth/ProtectedRoute';
+import ProtectedRoute, { OrganizationRoleRoute } from './features/auth/ProtectedRoute';
+import { CLIENT_360_ALLOWED_ROLES } from './features/auth/auth-context';
 import AppLayout from './layouts/AppLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminGuard from './features/admin/AdminGuard';
@@ -156,12 +157,14 @@ export default function App() {
                 <Route element={<PlatformSettingsProvider><AppLayout /></PlatformSettingsProvider>}>
                   <Route index element={<DashboardPage />} />
 
-                  {/* Clients */}
-                  <Route element={<PlatformFeatureGate feature="clients" />}>
-                    <Route path="clients" element={<ClientsPage />} />
-                    <Route path="clients/new" element={<ClientWizardPage />} />
-                    <Route path="clients/:id" element={<ClientDetailsPage />} />
-                    <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage />} />
+                  {/* Client 360 requires the full-profile capability. */}
+                  <Route element={<OrganizationRoleRoute allowedRoles={CLIENT_360_ALLOWED_ROLES} />}>
+                    <Route element={<PlatformFeatureGate feature="clients" />}>
+                      <Route path="clients" element={<ClientsPage />} />
+                      <Route path="clients/new" element={<ClientWizardPage />} />
+                      <Route path="clients/:id" element={<ClientDetailsPage />} />
+                      <Route path="clients/:id/insurance-analysis" element={<ClientInsuranceAnalysisPage />} />
+                    </Route>
                   </Route>
 
                   {/* Feature gates also apply when users type a URL directly. */}

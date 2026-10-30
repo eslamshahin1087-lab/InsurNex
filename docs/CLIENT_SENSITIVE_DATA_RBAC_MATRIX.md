@@ -31,7 +31,7 @@ Legend: **Scoped** means same-organization and resource/assignment checks still 
 
 | Data class | Owner | Admin | Broker | Sales | Claims | Finance | Staff | Platform Admin |
 |---|---|---|---|---|---|---|---|---|
-| Base client contact summary | Scoped | Scoped | Scoped | Assigned + minimal fields | Linked claim/client minimal fields | Billing projection only | Assigned + minimal fields | Deny |
+| Base client contact summary | Scoped | Scoped | Scoped | Assigned + minimal fields | Claim snapshot only; raw client record denied until a safe projection exists | Billing projection only | Assigned + minimal fields | Deny |
 | Identity/KYC and national/tax IDs | Grant | Grant | Grant per task | Deny | Grant only if claim requires it | Deny | Deny | Deny |
 | Family/dependents | Grant | Grant | Grant per documented purpose | Deny | Grant only if claim requires it | Deny | Deny | Deny |
 | Medical/health profile | Grant; no blanket browse | Grant; no blanket browse | Grant per documented purpose | Deny | Claim-linked grant only | Deny | Deny | Deny |
@@ -48,7 +48,9 @@ The matrix intentionally makes sensitive classes **deny by default**, including 
 
 As of the current `main` baseline, the proposed `clientSensitiveProfiles`, `clientMedicalProfiles`, `claimSensitiveDetails`, `aiFindings` and `auditLogs` collections are not in the generic tenant-business allow-list. Client SDK access must remain denied until a separate, reviewed Rules/endpoint implementation adds collection-specific validation. Do not add these collection names to the generic allow-list as a shortcut.
 
-The Phase 3 Emulator regression suite now asserts that Owner, Broker, Sales, Claims, Finance, Staff and an owner from another organization are denied direct gets, tenant queries and creates for each proposed collection. These tests protect the default-deny boundary; they do not establish that future access grants are already implemented.
+The Phase 3 Emulator regression suite asserts that Owner, Broker, Sales, Claims, Finance, Staff and an owner from another organization are denied direct gets, tenant queries and creates for each proposed collection. These checks protect the proposed collections' default-deny boundary; they do not grant runtime access.
+
+**Interim Claims restriction:** Claims users are denied direct reads, queries and timeline reads on the legacy `clients/{clientId}` record because that document still mixes contact, identity, medical/family, financial and narrative fields. The Claims workspace uses the client/policy snapshot already recorded on the claim and claim-category document metadata. A dedicated safe client-summary projection is a future dependency; do not re-enable raw client access merely to restore a Client 360 link.
 
 ## 4. Record and endpoint enforcement
 
