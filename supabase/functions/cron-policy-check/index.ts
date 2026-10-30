@@ -1,5 +1,5 @@
-import { cert, getApps, initializeApp } from 'npm:firebase-admin@12.7.0/app';
-import { FieldValue, getFirestore } from 'npm:firebase-admin@12.7.0/firestore';
+import { cert, getApps, initializeApp } from 'firebase-admin/app';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import {
   daysUntilUtcDate,
   isCronRequestAuthorized,

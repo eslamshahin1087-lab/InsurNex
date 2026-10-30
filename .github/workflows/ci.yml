@@ -40,8 +40,8 @@ jobs:
         run: deno check supabase/functions/copilot-chat/index.ts
       - name: Type-check candidate policy and document cron Edge Functions
         run: |
-          deno check supabase/functions/cron-policy-check/index.ts
-          deno check supabase/functions/cron-document-check/index.ts
+          deno check --config supabase/functions/cron-policy-check/deno.json supabase/functions/cron-policy-check/index.ts
+          deno check --config supabase/functions/cron-document-check/deno.json supabase/functions/cron-document-check/index.ts
       - name: Test cron authorization and reminder idempotency contracts
         run: deno test supabase/functions/_shared/cron-auth.test.ts
       - name: Verify deployed Edge Function source snapshots

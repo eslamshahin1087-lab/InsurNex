@@ -1,3 +1,6 @@
 {
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "imports": {
+    "firebase-admin/": "npm:firebase-admin@12.7.0/"
+  }
 }
