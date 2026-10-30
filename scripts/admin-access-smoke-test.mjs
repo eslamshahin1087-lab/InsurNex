@@ -76,7 +76,8 @@ check(rules.includes("allow read: if resource.data.organizationId is string")
   && rules.includes("&& roleIs(['owner','admin','broker']);"),
   'Firestore client reads are limited to Owner/Admin/Broker');
 const clientRulesStart = rules.indexOf('match /clients/{clientId} {');
-const clientRulesEnd = rules.indexOf('\\n    }\\n', clientRulesStart);
+const newline = String.fromCharCode(10);
+const clientRulesEnd = rules.indexOf(newline + '    }' + newline, clientRulesStart);
 assert.ok(clientRulesStart >= 0 && clientRulesEnd > clientRulesStart, 'explicit client Rules block exists');
 const clientRules = rules.slice(clientRulesStart, clientRulesEnd);
 check(clientRules.includes("roleIs(['owner','admin','broker'])"),
