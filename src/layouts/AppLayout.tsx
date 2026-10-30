@@ -16,8 +16,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
-import { useAuth } from '../features/auth/auth-context';
-import { canAccessClient360 } from '../features/auth/auth-context';
+import { useAuth, canAccessClient360 } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
