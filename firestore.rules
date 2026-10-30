@@ -302,8 +302,8 @@ service cloud.firestore {
 
     // ============ Clients (top-level + subcollections) ============
     match /clients/{clientId} {
-      // Sales is intentionally excluded from the full Client 360 record until
-      // sensitive identity/family fields are separated into independently secured documents.
+      // Sales and Claims are intentionally excluded from the full Client 360 record
+      // until mixed-sensitivity fields are separated into independently secured projections.
       allow read: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker']);
