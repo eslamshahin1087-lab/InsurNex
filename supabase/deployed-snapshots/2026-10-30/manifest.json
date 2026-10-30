@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-30T12:10:00.000Z",
+  "projectRef": "piloiwtdbtmfiyqxfbae",
+  "source": "Supabase Edge Function metadata/source read; read-only",
+  "deploymentState": "snapshots-only-not-deployable",
+  "functions": [
+    {
+      "slug": "copilot-chat",
+      "status": "ACTIVE",
+      "version": 37,
+      "verifyJwt": true,
+      "deployedBundleSha256": "0a8464de25beb95e32101a12c3c3a417259615f456cc0d64938d6b2523692d54",
+      "updatedAt": "2026-10-11T11:27:19.760Z",
+      "files": [
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/copilot-chat/index.ts",
+          "gitBlobSha": "5eb922f4b369719a0f8de42b6ae6cbefe1853e0e",
+          "characters": 11412,
+          "lines": 291
+        }
+      ],
+      "repositoryParity": "mismatch-or-previously-unversioned",
+      "observedRisks": [
+        "Deployed v37 accepts business context from the caller body.",
+        "Deployed v37 does not use the repository's server-side trusted-context loader.",
+        "Gemini/Groq fallback exists; review provider data terms before sensitive business context is sent."
+      ]
+    },
+    {
+      "slug": "document-storage",
+      "status": "ACTIVE",
+      "version": 22,
+      "verifyJwt": false,
+      "deployedBundleSha256": "7204db19ce4d8a34cdd546220f4ac4bdab2233e6bfd2330e2d287956aab6d3e5",
+      "updatedAt": "2026-10-21T15:42:18.987Z",
+      "files": [
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/document-storage/index.ts",
+          "gitBlobSha": "c3e705064fe4c5921fcbd04eae62439636e896e9",
+          "characters": 11671,
+          "lines": 276
+        }
+      ],
+      "repositoryParity": "mismatch-or-previously-unversioned",
+      "observedRisks": [
+        "Deployed v22 is an older inline handler and differs from the modular repository source.",
+        "Must pass staging tests for metadata/document ID/path binding before replacement."
+      ]
+    },
+    {
+      "slug": "securepath-webhook",
+      "status": "ACTIVE",
+      "version": 20,
+      "verifyJwt": false,
+      "deployedBundleSha256": "1c78ea0dfbc6f438b08956a4c44d34a985a3f48765d7b10161840bf6cea9d378",
+      "updatedAt": "2026-10-16T11:17:43.978Z",
+      "files": [
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/securepath-webhook/index.ts",
+          "gitBlobSha": "31bcb0f8bc32474b10e1f8e9a182bcf2a8ed6032",
+          "characters": 27743,
+          "lines": 968
+        },
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/securepath-webhook/deno.json",
+          "gitBlobSha": "65a034894b607ba6fea565cfb86b2e74bd8d140a",
+          "characters": 78,
+          "lines": 5
+        }
+      ],
+      "repositoryParity": "mismatch-or-previously-unversioned",
+      "observedRisks": [
+        "Source was not versioned in the repository before this snapshot.",
+        "Handler creates client/lead/timeline/notification records; preserve as reference only until contract and role scope are reviewed."
+      ]
+    },
+    {
+      "slug": "cron-policy-check",
+      "status": "ACTIVE",
+      "version": 7,
+      "verifyJwt": false,
+      "deployedBundleSha256": "9ef0311d4c54b7ea362c3c45b80d0c0c573a52e14c68acb9dd47eec425f914e5",
+      "updatedAt": "2026-10-16T11:46:59.495Z",
+      "files": [
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/cron-policy-check/index.ts",
+          "gitBlobSha": "9baf46251152ca86fd086f1e0ccc67393ff6973e",
+          "characters": 4741,
+          "lines": 141
+        }
+      ],
+      "repositoryParity": "mismatch-or-previously-unversioned",
+      "observedRisks": [
+        "Deployed v7 accepts SUPABASE_SERVICE_ROLE_KEY as a bearer alternative to CRON_SECRET.",
+        "Uses lastNotifiedAt cooldown rather than a stable event key; assess duplicate/retry semantics."
+      ]
+    },
+    {
+      "slug": "cron-document-check",
+      "status": "ACTIVE",
+      "version": 7,
+      "verifyJwt": false,
+      "deployedBundleSha256": "c3e33a6f14028b209178bced90445603e0435e2ce0c34a0dd1ae58ca81582ad4",
+      "updatedAt": "2026-10-16T11:47:07.417Z",
+      "files": [
+        {
+          "path": "supabase/deployed-snapshots/2026-10-30/cron-document-check/index.ts",
+          "gitBlobSha": "c60f29811532f96240477d3317493a6509a952df",
+          "characters": 4154,
+          "lines": 124
+        }
+      ],
+      "repositoryParity": "mismatch-or-previously-unversioned",
+      "observedRisks": [
+        "Deployed v7 accepts SUPABASE_SERVICE_ROLE_KEY as a bearer alternative to CRON_SECRET.",
+        "No stable notification deduplication key was found; repeated runs may create duplicate notifications."
+      ]
+    }
+  ]
+}
