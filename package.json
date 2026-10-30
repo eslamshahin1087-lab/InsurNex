@@ -27,7 +27,8 @@
     "audit:client-data-access": "node scripts/client-data-access-audit.mjs",
     "test:client-data-access-audit": "node --check scripts/client-data-access-audit.mjs && node scripts/client-data-access-audit-test.mjs",
     "test:spark-runtime-guard": "node scripts/spark-runtime-guard-test.mjs",
-    "test:edge-runtime-snapshots": "node scripts/deployed-edge-snapshot-integrity-test.mjs"
+    "test:edge-runtime-snapshots": "node scripts/deployed-edge-snapshot-integrity-test.mjs",
+    "test:cron-endpoints": "node scripts/cron-endpoint-security-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
