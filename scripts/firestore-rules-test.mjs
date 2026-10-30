@@ -348,7 +348,7 @@ try {
   // Additional tenant-scoped fixtures for the complete role/read matrix.
   const protectedRfqId = 'rbac-rfq-' + randomUUID();
   const protectedInsurerId = 'rbac-insurer-' + randomUUID();
-  const protectedOperationId = 'rbac-operation-' + randomUUID();
+  const protectedMatrixOperationId = 'rbac-operation-' + randomUUID();
   const protectedNotificationId = 'rbac-notification-' + randomUUID();
   const protectedExpenseId = 'rbac-expense-' + randomUUID();
   const protectedCommissionId = 'rbac-commission-' + randomUUID();
@@ -361,7 +361,7 @@ try {
     organizationId: orgA, name: 'Synthetic Insurer', status: 'active',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
-  await setDoc(doc(ownerA.db, 'operations', protectedOperationId), {
+  await setDoc(doc(ownerA.db, 'operations', protectedMatrixOperationId), {
     organizationId: orgA, kind: 'policy_issuance', status: 'request',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
