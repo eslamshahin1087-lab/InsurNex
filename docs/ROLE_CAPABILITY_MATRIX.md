@@ -55,6 +55,27 @@ The draft implementation now adds a client-side Firestore Rules-constrained invi
 
 Phase 1 CI and Firestore Emulator regression tests passed for PR #48. This is not a claim of complete production security. There is no append-only audit-log implementation yet; invitation and role changes are not fully audited until a trusted audit sink is implemented.
 
+## Current Firestore Rules read-capability coverage (2026-10-30)
+
+The merged Rules currently enforce the following same-organization top-level read capabilities. This table describes current runtime Rules, not the broader target policy above. Assignment-level restrictions are not yet enforced for every collection.
+
+| Collection | Current allowed roles |
+|---|---|
+| `clients` | Owner, Admin, Broker |
+| `policies` | Owner, Admin, Broker, Claims |
+| `claims`, `claimActivities` | Owner, Admin, Broker, Claims |
+| `leads`, `leadActivities`, `rfqs` | Owner, Admin, Broker, Sales |
+| `tasks`, `notifications` | All organization roles |
+| `insurers` | All organization roles |
+| `operations`, `operationEvents`, `operationAttachments`, `operationsEmailDirectory` | Owner, Admin, Broker, Claims |
+| `documents` | Owner, Admin, Broker; Claims only when `category == claim` |
+| `revenue`, `expenses`, `commissions` | Owner, Admin, Finance |
+| Copilot conversations/messages | Owning user only, with parent-conversation checks |
+
+Sales and Claims do not have direct access to the legacy mixed-sensitivity `clients` record. Claims access to linked policy metadata and claim-category documents is currently organization-scoped; per-claim assignment checks are a future gate. Finance can read finance collections, not full client profiles or claim narratives.
+
+A current Emulator read matrix is being expanded to test each allowed/denied direct get and tenant-scoped query, as well as role-appropriate create paths. A green test means these exact Rules passed against the demo emulator; it does not certify staging/production configuration.
+
 ## Required tests
 
 - Every role: allowed and denied reads/writes for every data collection.

@@ -252,6 +252,7 @@ try {
   const claimsMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-claims', 'claims');
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
   const staffMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-staff', 'staff');
+  const adminMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-admin', 'admin');
 
   // Phase 3 proposed sensitive collections remain closed until a dedicated,
   // collection-specific rules PR explicitly enables the approved role matrix.
@@ -265,6 +266,7 @@ try {
   ];
   const sensitiveCollectionActors = [
     { label: 'owner', actor: ownerA, organizationId: orgA },
+    { label: 'admin', actor: adminMember.actor, organizationId: orgA },
     { label: 'broker', actor: brokerMember.actor, organizationId: orgA },
     { label: 'sales', actor: salesMember.actor, organizationId: orgA },
     { label: 'claims', actor: claimsMember.actor, organizationId: orgA },
@@ -343,6 +345,40 @@ try {
     name: 'Identity evidence', uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
   });
 
+  // Additional tenant-scoped fixtures for the complete role/read matrix.
+  const protectedRfqId = 'rbac-rfq-' + randomUUID();
+  const protectedInsurerId = 'rbac-insurer-' + randomUUID();
+  const protectedOperationId = 'rbac-operation-' + randomUUID();
+  const protectedNotificationId = 'rbac-notification-' + randomUUID();
+  const protectedExpenseId = 'rbac-expense-' + randomUUID();
+  const protectedCommissionId = 'rbac-commission-' + randomUUID();
+
+  await setDoc(doc(ownerA.db, 'rfqs', protectedRfqId), {
+    organizationId: orgA, clientId: protectedClientId, status: 'draft',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'insurers', protectedInsurerId), {
+    organizationId: orgA, name: 'Synthetic Insurer', status: 'active',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'operations', protectedOperationId), {
+    organizationId: orgA, kind: 'policy_issuance', status: 'request',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'notifications', protectedNotificationId), {
+    organizationId: orgA, title: 'Synthetic role test notification',
+    message: 'No customer data', type: 'task', read: false,
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'expenses', protectedExpenseId), {
+    organizationId: orgA, amount: 250, category: 'test',
+    status: 'pending', currency: 'EGP', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'commissions', protectedCommissionId), {
+    organizationId: orgA, commissionAmount: 125, status: 'pending',
+    currency: 'EGP', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+
   const protectedTimelineId = 'rbac-client-timeline-' + randomUUID();
   await setDoc(doc(ownerA.db, 'clients', protectedClientId, 'timeline', protectedTimelineId), {
     organizationId: orgA,
@@ -352,6 +388,134 @@ try {
     by: ownerA.user.uid,
     at: serverTimestamp(),
   });
+
+  // Explicit read matrix: every allowed and denied path is exercised both by
+  // known document ID and by a tenant-scoped query against the Firestore Rules Emulator.
+  const roleActors = {
+    owner: ownerA,
+    admin: adminMember.actor,
+    broker: brokerMember.actor,
+    sales: salesMember.actor,
+    claims: claimsMember.actor,
+    finance: financeMember.actor,
+    staff: staffMember.actor,
+  };
+  const readCases = [
+    { collection: 'clients', id: protectedClientId, allowed: ['owner', 'admin', 'broker'] },
+    { collection: 'policies', id: protectedPolicyId, allowed: ['owner', 'admin', 'broker', 'claims'] },
+    { collection: 'claims', id: protectedClaimId, allowed: ['owner', 'admin', 'broker', 'claims'] },
+    { collection: 'leads', id: protectedLeadId, allowed: ['owner', 'admin', 'broker', 'sales'] },
+    { collection: 'tasks', id: protectedTaskId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
+    { collection: 'rfqs', id: protectedRfqId, allowed: ['owner', 'admin', 'broker', 'sales'] },
+    { collection: 'insurers', id: protectedInsurerId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
+    { collection: 'operations', id: protectedOperationId, allowed: ['owner', 'admin', 'broker', 'claims'] },
+    { collection: 'revenue', id: protectedRevenueId, allowed: ['owner', 'admin', 'finance'] },
+    { collection: 'expenses', id: protectedExpenseId, allowed: ['owner', 'admin', 'finance'] },
+    { collection: 'commissions', id: protectedCommissionId, allowed: ['owner', 'admin', 'finance'] },
+    { collection: 'notifications', id: protectedNotificationId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
+  ];
+
+  for (const testCase of readCases) {
+    const allowedRoles = new Set(testCase.allowed);
+    for (const [role, actor] of Object.entries(roleActors)) {
+      const recordRef = doc(actor.db, testCase.collection, testCase.id);
+      const queryRef = query(
+        collection(actor.db, testCase.collection),
+        where('organizationId', '==', orgA),
+        limit(50),
+      );
+      if (allowedRoles.has(role)) {
+        check((await getDoc(recordRef)).exists(),
+          role + ' can read ' + testCase.collection + ' by known document ID');
+        const querySnapshot = await getDocs(queryRef);
+        check(querySnapshot.docs.some((item) => item.id === testCase.id),
+          role + ' can query ' + testCase.collection + ' within its organization');
+      } else {
+        await expectDenied(
+          () => getDoc(recordRef),
+          role + ' cannot read ' + testCase.collection + ' by known document ID',
+        );
+        await expectDenied(
+          () => getDocs(queryRef),
+          role + ' cannot query ' + testCase.collection + ' in its organization',
+        );
+      }
+    }
+  }
+
+  // Claims can access only claim-category document metadata; a broader query
+  // would include identity/medical categories and must be rejected.
+  check((await getDoc(doc(claimsMember.actor.db, 'documents', protectedClaimDocumentId))).exists(),
+    'claims can read claim-category document metadata by ID');
+  await expectDenied(
+    () => getDocs(query(
+      collection(claimsMember.actor.db, 'documents'),
+      where('organizationId', '==', orgA),
+      where('category', '==', 'identity'),
+      limit(50),
+    )),
+    'claims cannot query identity-category document metadata',
+  );
+  await expectDenied(
+    () => getDocs(query(
+      collection(claimsMember.actor.db, 'documents'),
+      where('organizationId', '==', orgA),
+      limit(50),
+    )),
+    'claims cannot query mixed-category document metadata without a claim-category filter',
+  );
+
+  // Action-level checks complement read checks: each operational role can
+  // create/update only the records assigned to its capability group.
+  const salesCreatedLeadId = 'rbac-sales-created-lead-' + randomUUID();
+  await setDoc(doc(salesMember.actor.db, 'leads', salesCreatedLeadId), {
+    organizationId: orgA, name: 'Synthetic sales lead', stage: 'new',
+    createdBy: salesMember.actor.user.uid, createdAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(salesMember.actor.db, 'leads', salesCreatedLeadId))).exists(),
+    'sales can create a lead in its own organization');
+  const claimsCreatedClaimId = 'rbac-claims-created-claim-' + randomUUID();
+  await setDoc(doc(claimsMember.actor.db, 'claims', claimsCreatedClaimId), {
+    organizationId: orgA, clientId: protectedClientId, policyId: protectedPolicyId,
+    claimNumber: 'RBAC-CLAIMS-CREATE', status: 'new',
+    createdBy: claimsMember.actor.user.uid, createdAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(claimsMember.actor.db, 'claims', claimsCreatedClaimId))).exists(),
+    'claims can create a claim record in its own organization');
+  const financeCreatedExpenseId = 'rbac-finance-created-expense-' + randomUUID();
+  await setDoc(doc(financeMember.actor.db, 'expenses', financeCreatedExpenseId), {
+    organizationId: orgA, amount: 75, category: 'test',
+    currency: 'EGP', status: 'pending',
+    createdBy: financeMember.actor.user.uid, createdAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(financeMember.actor.db, 'expenses', financeCreatedExpenseId))).exists(),
+    'finance can create an expense in its own organization');
+  const staffCreatedTaskId = 'rbac-staff-created-task-' + randomUUID();
+  await setDoc(doc(staffMember.actor.db, 'tasks', staffCreatedTaskId), {
+    organizationId: orgA, title: 'Synthetic assigned task',
+    status: 'open', createdBy: staffMember.actor.user.uid,
+  });
+  check((await getDoc(doc(staffMember.actor.db, 'tasks', staffCreatedTaskId))).exists(),
+    'staff can create an operational task in its own organization');
+
+  await expectDenied(
+    () => setDoc(doc(salesMember.actor.db, 'policies', 'rbac-sales-forged-policy-' + randomUUID()), {
+      organizationId: orgA, policyNumber: 'FORGED', createdBy: salesMember.actor.user.uid,
+    }),
+    'sales cannot create an insurance policy',
+  );
+  await expectDenied(
+    () => setDoc(doc(financeMember.actor.db, 'claims', 'rbac-finance-forged-claim-' + randomUUID()), {
+      organizationId: orgA, claimNumber: 'FORGED', createdBy: financeMember.actor.user.uid,
+    }),
+    'finance cannot create a claim',
+  );
+  await expectDenied(
+    () => setDoc(doc(staffMember.actor.db, 'revenue', 'rbac-staff-forged-revenue-' + randomUUID()), {
+      organizationId: orgA, amount: 999999, createdBy: staffMember.actor.user.uid,
+    }),
+    'staff cannot create financial records',
+  );
 
   check((await getDoc(doc(brokerMember.actor.db, 'clients', protectedClientId))).exists(),
     'broker can read the organization client record');
