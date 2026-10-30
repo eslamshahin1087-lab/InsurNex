@@ -2,13 +2,18 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
-const [app, guard, adminLogin, rules, settings, subscriptionGate] = await Promise.all([
+const [app, guard, adminLogin, rules, settings, subscriptionGate, authContext, protectedRoute, appLayout, morePage, claimPage] = await Promise.all([
   read('../src/App.tsx'),
   read('../src/features/admin/AdminGuard.tsx'),
   read('../src/pages/AdminLoginPage.tsx'),
   read('../firestore.rules'),
   read('../src/features/admin/platform-settings.service.ts'),
   read('../src/features/subscription/SubscriptionGate.tsx'),
+  read('../src/features/auth/auth-context.ts'),
+  read('../src/features/auth/ProtectedRoute.tsx'),
+  read('../src/layouts/AppLayout.tsx'),
+  read('../src/pages/MorePage.tsx'),
+  read('../src/pages/ClaimDetailsPage.tsx'),
 ]);
 
 function check(condition, message) {
@@ -49,5 +54,30 @@ check(settings.includes('DEFAULT_PLATFORM_SETTINGS.features[feature.key]'),
 // Subscription enforcement is intentionally retained; this is not an admin/user feature toggle.
 check(subscriptionGate.includes('isExpired(subscription)'), 'subscription expiry enforcement remains in place');
 check(subscriptionGate.includes('to="/subscription"'), 'expired subscriptions are routed to the subscription page');
+
+// Client 360 is a restricted capability while the legacy client document
+// still contains mixed-sensitivity fields. Verify route, navigation and rules
+// all use the same Owner/Admin/Broker boundary.
+check(authContext.includes("CLIENT_360_ALLOWED_ROLES = ['owner', 'admin', 'broker']"),
+  'Client 360 allowed roles are explicit and least-privileged');
+check(authContext.includes('CLIENT_360_ALLOWED_ROLES as readonly string[]).includes(role)'),
+  'Client 360 role check fails closed for unknown roles');
+check(protectedRoute.includes('allowedRoles.includes(profile.role)'),
+  'direct Client 360 routes enforce the tenant role capability');
+check(app.includes('OrganizationRoleRoute allowedRoles={CLIENT_360_ALLOWED_ROLES}'),
+  'all Client 360 routes are wrapped in the role gate');
+check(appLayout.includes("item.to !== '/clients' || canAccessClient360(profile?.role)"),
+  'primary CRM navigation is hidden for roles without Client 360 access');
+check(morePage.includes("to !== '/clients' || canAccessClient360(profile?.role)"),
+  'More menu CRM entry is hidden for roles without Client 360 access');
+check(claimPage.includes("claim.clientId&&canAccessClient360(profile?.role)"),
+  'Claims workspace does not expose a direct Client 360 link');
+check(rules.includes("allow read: if resource.data.organizationId is string")
+  && rules.includes("&& roleIs(['owner','admin','broker']);"),
+  'Firestore client reads are limited to Owner/Admin/Broker');
+check(!rules.includes("roleIs(['owner','admin','broker','claims']);\\n      allow create: if request.resource.data.organizationId is string"),
+  'Claims cannot read the full legacy client document');
+check(rules.includes("allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);"),
+  'Client timeline reads follow the same least-privilege boundary');
 
 console.log('Admin/user access smoke tests passed.');
