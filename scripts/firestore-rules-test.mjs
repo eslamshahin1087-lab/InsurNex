@@ -318,6 +318,7 @@ try {
   });
   await setDoc(doc(ownerA.db, 'claims', protectedClaimId), {
     organizationId: orgA, clientId: protectedClientId, policyId: protectedPolicyId,
+    clientName: 'RBAC fixture client', policyNumber: 'RBAC-POLICY',
     claimNumber: 'RBAC-CLAIM', status: 'review', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
   await setDoc(doc(ownerA.db, 'leads', protectedLeadId), {
@@ -341,8 +342,20 @@ try {
     name: 'Identity evidence', uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
   });
 
+  const protectedTimelineId = 'rbac-client-timeline-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'clients', protectedClientId, 'timeline', protectedTimelineId), {
+    organizationId: orgA,
+    clientId: protectedClientId,
+    type: 'created',
+    title: 'Synthetic Client Timeline Event',
+    by: ownerA.user.uid,
+    at: serverTimestamp(),
+  });
+
   check((await getDoc(doc(brokerMember.actor.db, 'clients', protectedClientId))).exists(),
     'broker can read the organization client record');
+  check((await getDoc(doc(brokerMember.actor.db, 'clients', protectedClientId, 'timeline', protectedTimelineId))).exists(),
+    'broker can read the timeline of an authorized client');
   await expectDenied(
     () => getDoc(doc(salesMember.actor.db, 'clients', protectedClientId)),
     'sales cannot read full Client 360 records containing sensitive identity fields',
@@ -353,10 +366,28 @@ try {
     () => getDoc(doc(salesMember.actor.db, 'claims', protectedClaimId)),
     'sales cannot read claims',
   );
+  await expectDenied(
+    () => getDoc(doc(claimsMember.actor.db, 'clients', protectedClientId)),
+    'claims cannot read the legacy mixed-sensitivity client record by known document ID',
+  );
+  await expectDenied(
+    () => getDocs(query(
+      collection(claimsMember.actor.db, 'clients'),
+      where('organizationId', '==', orgA),
+      limit(50),
+    )),
+    'claims cannot query the legacy mixed-sensitivity clients collection',
+  );
+  await expectDenied(
+    () => getDoc(doc(claimsMember.actor.db, 'clients', protectedClientId, 'timeline', protectedTimelineId)),
+    'claims cannot read unrestricted Client 360 timeline events',
+  );
   check((await getDoc(doc(claimsMember.actor.db, 'claims', protectedClaimId))).exists(),
     'claims role can read claim records in its own organization');
   check((await getDoc(doc(claimsMember.actor.db, 'policies', protectedPolicyId))).exists(),
     'claims role can read linked policy metadata within its organization');
+  check((await getDoc(doc(claimsMember.actor.db, 'documents', protectedClaimDocumentId))).exists(),
+    'claims retains access to claim-category document metadata without raw Client 360 access');
   // New Supabase metadata must declare the bound-path key version and may not persist URLs.
   const unversionedSupabaseId = 'rbac-unversioned-storage-' + randomUUID();
   await expectDenied(
