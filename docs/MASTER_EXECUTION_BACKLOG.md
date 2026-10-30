@@ -36,6 +36,9 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 ## Phase 1 — Runtime Compatibility & Security/Data Foundation
 
+**Implementation status (2026-10-30):** Phase 1 started on branch `security/phase1-spark-runtime-guard-20261030`. The legacy Firebase Functions deployment command is being guarded because the approved Firebase Spark plan cannot deploy/update Cloud Functions. The five active Supabase Edge Functions were inventoried read-only; live/source parity gaps are documented in [Phase 1 Runtime Compatibility](PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md). This is a first safety gate, not completion of Phase 1.
+## Phase 1 — Runtime Compatibility & Security/Data Foundation
+
 ### P1.1 — Resolve Spark-compatible runtime map
 **Priority:** P0 · **Dependencies:** Phase 0 baseline  
 - Inventory every Firebase Functions caller, export, secret, deploy script and client import.
