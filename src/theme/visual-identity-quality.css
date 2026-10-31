@@ -97,3 +97,253 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* Brand refresh: navy structure, InsurNex gold accents, and calmer surfaces. */
+:root {
+  --inx-brand-navy: #071b37;
+  --inx-brand-blue: #1e4272;
+  --inx-brand-gold: #d6a447;
+  --inx-brand-gold-soft: #fbf5e8;
+}
+
+#root .mobile-shell {
+  --app-gold: var(--inx-brand-gold);
+  background-color: var(--app-bg) !important;
+}
+
+#root .mobile-shell .app-header {
+  border-bottom-color: var(--app-line) !important;
+  box-shadow: 0 3px 14px rgba(7, 27, 55, 0.045);
+}
+
+#root .mobile-shell .s8-brand {
+  gap: 8px !important;
+}
+
+#root .mobile-shell .s8-brand > img[data-logo-variant="lockup"] {
+  width: 84px !important;
+  max-width: 84px !important;
+  max-height: 64px !important;
+}
+
+#root .mobile-shell .s8-hello strong {
+  color: var(--app-text, var(--inx-text)) !important;
+  font-size: 12px;
+}
+
+#root .mobile-shell .s8-hello small {
+  color: #61748c !important;
+}
+
+#root .mobile-shell .s8-actions {
+  gap: 6px !important;
+}
+
+#root .mobile-shell .s8-actions > button,
+#root .mobile-shell .s8-actions > a {
+  border-color: #dbe4ef !important;
+  box-shadow: 0 2px 7px rgba(7, 27, 55, 0.07) !important;
+}
+
+#root .mobile-shell .s8-actions > button:hover,
+#root .mobile-shell .s8-actions > a:hover {
+  color: var(--inx-brand-blue) !important;
+  border-color: var(--inx-brand-gold) !important;
+  background: var(--inx-brand-gold-soft) !important;
+}
+
+#root .mobile-shell .view-mode-toggle:focus-visible,
+#root .mobile-shell :is(button, a, input, select, textarea):focus-visible {
+  outline-color: var(--inx-brand-gold) !important;
+}
+
+#root .mobile-shell > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+#root .mobile-shell > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"] {
+  color: var(--inx-brand-navy) !important;
+  background: linear-gradient(145deg, #fffdf8, var(--inx-brand-gold-soft)) !important;
+  box-shadow: inset 0 0 0 1px rgba(214, 164, 71, 0.32) !important;
+}
+
+#root .mobile-shell .inx-shortcut-card {
+  border-color: var(--app-line) !important;
+  background: var(--app-surface, #fff) !important;
+  box-shadow: 0 4px 14px rgba(7, 27, 55, 0.055) !important;
+}
+
+#root .mobile-shell .inx-shortcut-card:hover,
+#root .mobile-shell .inx-shortcut-card:focus-visible {
+  border-color: var(--inx-brand-gold) !important;
+  box-shadow: 0 8px 20px rgba(7, 27, 55, 0.10) !important;
+}
+
+#root .mobile-shell .inx-shortcut-card .inx-3d-icon {
+  color: var(--inx-brand-blue) !important;
+  background: linear-gradient(145deg, #fffdf8, #f5f0e5) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 3px 8px rgba(7, 27, 55, 0.08) !important;
+}
+
+#root .mobile-shell .inx-hero-panel {
+  border: 1px solid rgba(214, 164, 71, 0.28);
+  box-shadow: 0 16px 34px rgba(7, 27, 55, 0.16) !important;
+}
+
+#root .mobile-shell .inx-hero-panel .hero-head .title-group .dot {
+  box-shadow: 0 0 0 4px rgba(214, 164, 71, 0.16);
+}
+
+#root .mobile-shell :is(.inx-card, .inx-chart-card, .inx-kpi, .op80-panel, .notification-card, .task-card) {
+  border-color: var(--app-line);
+  box-shadow: 0 5px 18px rgba(7, 27, 55, 0.045);
+}
+
+/* Show the full shortcut set as a tidy grid instead of a clipped carousel. */
+#root .mobile-shell .inx-shortcut-row.inx-shortcut-carousel {
+  display: block !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 2px 0 6px !important;
+}
+
+#root .mobile-shell .inx-shortcut-carousel .inx-shortcut-track {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .mobile-shell .inx-shortcut-carousel .inx-shortcut-sequence {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  width: 100%;
+}
+
+#root .mobile-shell .inx-shortcut-carousel .inx-shortcut-sequence[aria-hidden="true"] {
+  display: none !important;
+}
+
+#root .mobile-shell .inx-shortcut-carousel .inx-shortcut-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 76px !important;
+  padding: 9px 5px !important;
+  border-radius: 16px !important;
+  gap: 6px !important;
+  white-space: normal !important;
+}
+
+#root .mobile-shell .inx-shortcut-carousel .inx-shortcut-card .label {
+  white-space: normal !important;
+  text-align: center;
+  line-height: 1.3 !important;
+}
+
+#root img[data-logo-variant] {
+  box-shadow: none !important;
+}
+
+#root .landing-brand > img[data-logo-variant="lockup"] {
+  width: 104px !important;
+  max-width: 104px !important;
+  max-height: 72px !important;
+}
+
+#root .landing-footer-brand > img[data-logo-variant="lockup"] {
+  width: 92px !important;
+  max-width: 92px !important;
+  max-height: 66px !important;
+}
+
+#root .auth-panel img[data-logo-variant="lockup"] {
+  width: 112px !important;
+  max-width: 112px !important;
+  max-height: 82px !important;
+}
+
+#root .admin-sidebar-brand img[data-logo-variant="mark"] {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain !important;
+}
+
+@media (min-width: 700px) {
+  body:has(#root .mobile-shell.view-mode-mobile) {
+    background: #edf1f6 !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile {
+    margin-block: 18px !important;
+    min-height: calc(100dvh - 36px) !important;
+    border: 1px solid #dfe6ef !important;
+    border-radius: 26px !important;
+    box-shadow: 0 18px 52px rgba(7, 27, 55, 0.12) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-header {
+    border-bottom-color: #dfe6ef !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+    width: 240px !important;
+    max-width: 240px !important;
+    padding-inline: 14px !important;
+    border-inline-start-color: #e3e9f0 !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"] {
+    position: relative;
+    color: var(--inx-brand-navy) !important;
+    background: linear-gradient(90deg, var(--inx-brand-gold-soft), #fff) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 9px;
+    inset-inline-start: 0;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--inx-brand-gold);
+  }
+
+  #root .mobile-shell.view-mode-desktop .inx-shortcut-carousel .inx-shortcut-sequence {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  #root .mobile-shell.view-mode-desktop .inx-shortcut-carousel .inx-shortcut-card {
+    min-height: 90px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #root .mobile-shell .s8-brand > img[data-logo-variant="lockup"] {
+    width: 68px !important;
+    max-width: 68px !important;
+    max-height: 54px !important;
+  }
+
+  #root .mobile-shell .s8-hello {
+    display: none !important;
+  }
+
+  #root .mobile-shell .s8-actions {
+    gap: 5px !important;
+  }
+
+  #root .mobile-shell .inx-shortcut-carousel .inx-shortcut-sequence {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+    transition: none !important;
+  }
+}
