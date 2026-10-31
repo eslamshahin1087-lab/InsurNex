@@ -13,7 +13,7 @@ export default function Logo({
 }: LogoProps) {
   return (
     <img
-      src="/branding/insurnex-logo-exact.png"
+      src="/branding/logo-light.png"
       alt={alt}
       data-logo-variant={variant}
       {...rest}
