@@ -347,3 +347,282 @@
     transition: none !important;
   }
 }
+
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell .inx-shortcut-card,
+  #root .mobile-shell .app-tabbar a,
+  #root .mobile-shell .s8-actions button {
+    transition: none !important;
+  }
+}
+
+
+/* Compact horizontal logo lockup for application headers and marketing surfaces. */
+#root .inx-logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-width: 0;
+  direction: rtl;
+  text-decoration: none;
+}
+
+#root .inx-logo-lockup .inx-logo-symbol,
+#root .admin-sidebar-brand .inx-logo-mark {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+#root .inx-logo-mark > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#root .inx-logo-mark .inx-logo-mark-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] #root .inx-logo-mark .inx-logo-mark-light {
+  display: none;
+}
+
+:root[data-theme="dark"] #root .inx-logo-mark .inx-logo-mark-dark {
+  display: block;
+}
+
+#root .inx-logo-wordmark {
+  color: var(--app-text, var(--inx-text, #10253f));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#root .inx-logo-wordmark > span {
+  color: var(--inx-brand-gold, #c9973e);
+}
+
+#root .s8-brand > .inx-logo-lockup {
+  width: 148px;
+}
+
+#root .landing-brand > .inx-logo-lockup {
+  width: 192px;
+  gap: 10px;
+}
+
+#root .landing-brand .inx-logo-symbol {
+  width: 48px;
+  height: 48px;
+}
+
+#root .landing-brand .inx-logo-wordmark {
+  font-size: 29px;
+}
+
+#root .landing-footer-brand > .inx-logo-lockup {
+  width: 170px;
+  gap: 9px;
+}
+
+#root .landing-footer-brand .inx-logo-symbol {
+  width: 42px;
+  height: 42px;
+}
+
+#root .landing-footer-brand .inx-logo-wordmark {
+  font-size: 25px;
+}
+
+#root .auth-panel .inx-logo-lockup {
+  width: 100%;
+  justify-content: center;
+  margin: 0 auto 24px;
+  gap: 12px;
+}
+
+#root .auth-panel .inx-logo-symbol {
+  width: 54px;
+  height: 54px;
+}
+
+#root .auth-panel .inx-logo-wordmark {
+  font-size: 34px;
+}
+
+#root .admin-sidebar-brand .inx-logo-mark {
+  width: 42px;
+  height: 42px;
+}
+
+#root .mobile-shell .s8-header {
+  direction: rtl;
+}
+
+#root .mobile-shell.view-mode-desktop {
+  direction: rtl !important;
+  width: min(100%, 1680px) !important;
+  max-width: 1680px !important;
+  grid-template-columns: 240px minmax(0, 1fr) !important;
+}
+
+#root .mobile-shell.view-mode-desktop > .app-header {
+  direction: rtl !important;
+  grid-column: 1 / -1 !important;
+}
+
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  direction: rtl !important;
+  grid-column: 1 !important;
+  width: 240px !important;
+  max-width: 240px !important;
+}
+
+#root .mobile-shell.view-mode-desktop > .app-body {
+  direction: rtl !important;
+  grid-column: 2 !important;
+  width: min(100%, 1400px) !important;
+  max-width: 1400px !important;
+}
+
+/* The older marquee declarations use !important and kept the phone shortcuts cropped.
+   Override the full animation and sizing contract at its source. */
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  margin-block: 8px 18px !important;
+  padding: 0 !important;
+  direction: rtl !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  transform: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence:not([aria-hidden="true"]) {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence[aria-hidden="true"] {
+  display: none !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 82px !important;
+  height: auto !important;
+  flex: initial !important;
+  padding: 10px 6px !important;
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 16px !important;
+  background: var(--app-surface, var(--inx-surface, #fff)) !important;
+  box-shadow: 0 4px 14px rgba(7, 27, 55, 0.06) !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .label {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: initial !important;
+  text-align: center !important;
+  color: var(--app-text, var(--inx-text, #10253f)) !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .inx-3d-icon {
+  border: 1px solid rgba(201, 151, 62, 0.22) !important;
+  background: var(--inx-brand-gold-soft, #fbf5e8) !important;
+  color: var(--inx-brand-blue, #1e4272) !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 1024px) {
+  #root .mobile-shell.view-mode-desktop .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence:not([aria-hidden="true"]) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    min-height: 92px !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-header {
+    justify-content: space-between !important;
+    padding-inline: clamp(24px, 3vw, 48px) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .s8-brand > .inx-logo-lockup {
+    width: 168px;
+  }
+}
+
+@media (max-width: 480px) {
+  #root .mobile-shell .s8-brand > .inx-logo-lockup {
+    width: 112px;
+    gap: 6px;
+  }
+
+  #root .mobile-shell .s8-brand .inx-logo-symbol {
+    width: 34px;
+    height: 34px;
+  }
+
+  #root .mobile-shell .s8-brand .inx-logo-wordmark {
+    font-size: 18px;
+  }
+
+  #root .mobile-shell .s8-hello strong {
+    max-width: 72px;
+  }
+
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence:not([aria-hidden="true"]) {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell .s8-hello {
+    display: none !important;
+  }
+
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    min-height: 76px !important;
+  }
+}
+
+:root[data-theme="dark"] #root .inx-logo-wordmark {
+  color: var(--inx-text, #e8eff8);
+}
