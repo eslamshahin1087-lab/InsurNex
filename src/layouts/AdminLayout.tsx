@@ -62,7 +62,7 @@ export default function AdminLayout() {
     <div className="admin-shell" dir="rtl">
       <aside className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <div className="admin-sidebar-brand">
-          <Logo alt="InsurNex" />
+          <Logo alt="InsurNex" variant="mark" />
           <div>
             <strong>InsurNex</strong>
             <small>Admin Panel</small>

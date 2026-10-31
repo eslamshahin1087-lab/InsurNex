@@ -347,3 +347,12 @@
     transition: none !important;
   }
 }
+
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell .inx-shortcut-card,
+  #root .mobile-shell .app-tabbar a,
+  #root .mobile-shell .s8-actions button {
+    transition: none !important;
+  }
+}
