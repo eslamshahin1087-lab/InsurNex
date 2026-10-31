@@ -108,8 +108,6 @@
 }
 
 #root .mobile-shell {
-  --app-bg: #f3f6fa;
-  --app-line: #e1e8f0;
   --app-gold: var(--inx-brand-gold);
   background-color: var(--app-bg) !important;
 }
@@ -130,7 +128,7 @@
 }
 
 #root .mobile-shell .s8-hello strong {
-  color: var(--inx-brand-navy) !important;
+  color: var(--app-text, var(--inx-text)) !important;
   font-size: 12px;
 }
 
