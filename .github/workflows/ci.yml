@@ -86,6 +86,8 @@ jobs:
         run: npm run audit:client-data-access
       - name: Client data-access projection and RBAC regression tests
         run: npm run test:client-data-access-projection
+      - name: P1-E typed client data contracts and safe document metadata projection
+        run: npm run test:client-data-contracts
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
