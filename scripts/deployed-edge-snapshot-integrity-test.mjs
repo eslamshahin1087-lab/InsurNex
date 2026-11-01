@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 const root = process.cwd();
 const manifest = JSON.parse(await readFile(resolve(root, 'supabase/deployed-snapshots/2026-10-30/manifest.json'), 'utf8'));
 
-assert.equal(manifest.schemaVersion, 1);
+assert.equal(manifest.schemaVersion, 2);
 assert.equal(manifest.deploymentState, 'snapshots-only-not-deployable');
 assert.equal(manifest.projectRef, 'piloiwtdbtmfiyqxfbae');
 assert.equal(manifest.functions.length, 5);
