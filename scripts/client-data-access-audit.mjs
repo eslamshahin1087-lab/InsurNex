@@ -32,17 +32,9 @@ const SENSITIVE_FIELD_TOKENS = [
   'notes',
 ];
 
-const FIRESTORE_OPERATIONS = [
-  'addDoc',
-  'setDoc',
-  'updateDoc',
-  'deleteDoc',
-  'getDoc',
-  'getDocs',
-  'onSnapshot',
-  'runTransaction',
-  'writeBatch',
-];
+const FIRESTORE_READ_OPERATIONS = ['getDoc', 'getDocs', 'onSnapshot'];
+const FIRESTORE_WRITE_OPERATIONS = ['addDoc', 'setDoc', 'updateDoc', 'deleteDoc', 'runTransaction', 'writeBatch'];
+const FIRESTORE_OPERATIONS = [...FIRESTORE_READ_OPERATIONS, ...FIRESTORE_WRITE_OPERATIONS];
 
 const CLIENT_COLLECTION_REFERENCE = /\b(?:collection|doc)\s*\([^)]{0,180}['"`]clients['"`]/s;
 const DOCUMENT_COLLECTION_REFERENCE = /\bcollection\s*\([^)]{0,180}['"`]documents['"`]/s;
@@ -54,9 +46,43 @@ function normalizePath(value) {
 }
 
 function collectTokens(content, tokens) {
-  return tokens.filter(token => new RegExp('\\b' + token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(content));
+  return tokens.filter(token => new RegExp("\\b" + token + "\\b").test(content));
 }
 
+function collectLineSignals(content) {
+  const lines = content.split(/\r?\n/);
+  const signals = new Map();
+  const add = (line, signal) => {
+    if (!signals.has(line)) signals.set(line, new Set());
+    signals.get(line).add(signal);
+  };
+
+  lines.forEach((line, index) => {
+    const lineNumber = index + 1;
+    if (/\b(?:collection|doc)\s*\([^)]{0,180}["']clients["']/.test(line)) {
+      add(lineNumber, 'clients_collection_reference');
+    }
+    if (/\bcollection\s*\([^)]{0,180}["']documents["']/.test(line)) {
+      add(lineNumber, 'documents_collection_reference');
+    }
+    if (/["']clients\//.test(line)) add(lineNumber, 'clients_document_path_reference');
+
+    for (const operation of FIRESTORE_OPERATIONS) {
+      if (new RegExp("\\b" + operation + "\\s*\\(").test(line)) {
+        add(lineNumber, 'firestore_operation:' + operation);
+      }
+    }
+    for (const field of SENSITIVE_FIELD_TOKENS) {
+      if (new RegExp("\\b" + field + "\\b").test(line)) {
+        add(lineNumber, 'sensitive_field_identifier:' + field);
+      }
+    }
+  });
+
+  return [...signals.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([line, values]) => ({ line, signals: [...values].sort() }));
+}
 /**
  * Static, heuristic source audit. It reads source files only; it does not load
  * Firestore, Storage, customer documents, environment values or secrets.
@@ -72,6 +98,18 @@ export function auditClientDataAccessFiles(files) {
     const documentCollectionReference = DOCUMENT_COLLECTION_REFERENCE.test(content);
     const sensitiveFieldSignals = collectTokens(content, SENSITIVE_FIELD_TOKENS);
     const firestoreOperations = collectTokens(content, FIRESTORE_OPERATIONS);
+    const firestoreReadOperations = firestoreOperations.filter(token => FIRESTORE_READ_OPERATIONS.includes(token));
+    const firestoreWriteOperations = firestoreOperations.filter(token => FIRESTORE_WRITE_OPERATIONS.includes(token));
+    const clientAccessClassification = !clientCollectionReference
+      ? 'no_client_collection_reference_detected'
+      : firestoreReadOperations.length > 0 && firestoreWriteOperations.length > 0
+        ? 'mixed_read_write_candidate'
+        : firestoreReadOperations.length > 0
+          ? 'read_candidate'
+          : firestoreWriteOperations.length > 0
+            ? 'write_candidate'
+            : 'collection_reference_without_operation_signal';
+    const lineSignals = collectLineSignals(content);
     const findings = [];
 
     if (clientCollectionReference && sensitiveFieldSignals.length > 0) {
@@ -106,6 +144,11 @@ export function auditClientDataAccessFiles(files) {
       clientCollectionReference,
       documentCollectionReference,
       firestoreOperations,
+      firestoreReadOperations,
+      firestoreWriteOperations,
+      clientAccessClassification,
+      operationScope: 'file-level-heuristic-not-proven-callsite-dataflow',
+      lineSignals,
       sensitiveFieldSignals,
       findings,
     });
@@ -124,6 +167,10 @@ export function auditClientDataAccessFiles(files) {
       relevantFiles: results.length,
       filesReferencingClientsCollection: results.filter(item => item.clientCollectionReference).length,
       filesWithSensitiveFieldSignals: results.filter(item => item.sensitiveFieldSignals.length > 0).length,
+      filesWithClientReadCandidates: results.filter(item => item.clientAccessClassification === 'read_candidate' || item.clientAccessClassification === 'mixed_read_write_candidate').length,
+      filesWithClientWriteCandidates: results.filter(item => item.clientAccessClassification === 'write_candidate' || item.clientAccessClassification === 'mixed_read_write_candidate').length,
+      filesWithClientMixedReadWriteCandidates: results.filter(item => item.clientAccessClassification === 'mixed_read_write_candidate').length,
+      lineLevelSignalCount: results.reduce((total, item) => total + item.lineSignals.length, 0),
       filesWithFindings: results.filter(item => item.findings.length > 0).length,
       fullDocumentSnapshotSpreadFiles: results.filter(item => item.findings.includes('full_document_snapshot_spread')).length,
       inMemoryDocumentRelationFilterFindings: results.filter(item => item.findings.includes('client_document_relation_filter_after_fetch')).length,
