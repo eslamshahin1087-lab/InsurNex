@@ -48,6 +48,10 @@ jobs:
         run: npm run test:cron-endpoints
       - name: Verify deployed Edge Function source snapshots
         run: npm run test:edge-runtime-snapshots
+      - name: Generate runtime snapshot provenance report
+        run: npm run audit:runtime-provenance
+      - name: Verify runtime provenance reproducibility and drift classification
+        run: npm run test:runtime-provenance
       - name: Copilot context minimization regression tests
         run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts supabase/functions/copilot-chat/trusted-context.test.ts supabase/functions/copilot-chat/client-context-selector.test.ts supabase/functions/copilot-chat/api-key-authorization.test.ts supabase/functions/copilot-chat/copilot-context-route.test.ts
       - name: Copilot context contract and Firestore index regression checks
