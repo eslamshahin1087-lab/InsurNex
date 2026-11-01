@@ -64,11 +64,8 @@ export async function getLegacyClientWorkspace(
   const snapshot = await getDoc(doc(db, 'clients', clientId));
   if (!snapshot.exists()) return null;
 
-  return projectLegacyClientWorkspace(
-    snapshot.id,
-    snapshot.data() as Record<string, unknown>,
-    scope,
-  ) as InsuranceClient;
+  const legacyRecord = snapshot.data() as unknown as InsuranceClient;
+  return projectLegacyClientWorkspace(snapshot.id, legacyRecord, scope);
 }
 
 export type { ClientAccessScope, ClientBaseSummary } from './client-access.policy.js';
