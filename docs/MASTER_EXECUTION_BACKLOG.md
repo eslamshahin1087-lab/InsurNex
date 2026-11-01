@@ -29,7 +29,7 @@ This backlog is the execution source of truth. A checked source-code task means 
 | Documents | Source integration merged | Supabase gateway source and client service exist; staging deployment/acceptance is not proven. |
 | Finance/Analytics | Partially implemented | Dashboard and analytics use bounded samples in some paths; true totals need a reliable aggregation approach. |
 | AI/Copilot | Partially implemented | Copilot Edge Function plus legacy Firebase Functions/Anthropic code; provider, privacy and Spark compatibility need resolution. |
-| iNex-App ingress | Present but inconsistent | Export name, deploy script name and receiver account do not match; must be corrected after identity verification. |
+| iNex-App ingress | Source implementation merged; runtime activation pending | iNex-App PR #21 and InsurNex PR #95 are merged. The existing authenticated Worker route now creates the lead/activity/follow-up task/notification idempotently. Receiver UID/email/organization and Worker environment still require live verification; no Worker deployment or secret change is included. |
 | Sensitive-data split | Design and review tooling merged | Field inventory/plan/review and RBAC proposal exist; no runtime split or migration. |
 | Client Portal | Not evidenced as implemented | Later release. |
 | Insurer Comparison Engine | Not evidenced as implemented | Later release. |
@@ -53,15 +53,15 @@ This backlog is the execution source of truth. A checked source-code task means 
 **Acceptance:** no production feature depends on a Function that cannot be deployed under the selected plan; every migrated endpoint has auth, tenant, capability, idempotency, rate and error tests.
 
 ### P1.2 — Correct iNex-App lead ingress contract
-**Priority:** P0 · **Dependencies:** P1.1; verify receiver identity in target Firebase project  
-- Confirm approved receiving UID, email, active profile and organization with owner.
-- Align source-app endpoint URL, function/Edge Function name, secret header/signature, payload schema, deploy command and monitoring event.
-- Keep only `leads:create` and optional `leadEvents:create`; no broad database credentials or human-user password.
-- Add replay protection, idempotency, rate limits, schema validation and sanitized logs.
-**Acceptance:** duplicate delivery creates one lead; foreign/unknown receiver and invalid signature are rejected; no source credential enters browser code.
+**Priority:** P0 · **Dependencies:** P1.1; verify receiver identity in target Firebase project
+
+**Source status:** implemented and merged on 2026-11-01 through iNex-App PR #21 and InsurNex PR #95. The existing iNex-authenticated Cloudflare Worker path remains backward compatible and now creates the Lead, Activity, follow-up Task and in-app Notification. Source consent evidence and deterministic IDs are required; Worker writes are restricted in code to four create-only InsurNex collections.
+
+**Activation remains pending:** verify the receiving UID/email, active profile, organization, membership and role in the live InsurNex Firebase project; verify Cloudflare Worker variables/secret and the target service-account IAM boundary; perform an approved synthetic staging registration. No Worker deployment or secret/configuration mutation is included in the merge.
 
 ### P1.3 — Build Client Data Access Layer (compatibility-first)
 **Priority:** P0 · **Dependencies:** field inventory, separation plan, RBAC matrix  
+**Implementation started:** P1-E adapter candidate is developed on `feat/phase1-client-data-access-adapter-20261101`. The Clients index now consumes an allowlisted base projection; Client 360 reads pass through a role/active-user/tenant preflight. This does not create field-level security because the backing legacy Firestore document remains mixed-sensitivity. See `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md`.  
 - Catalog all readers/writers of `clients`, `individual`, `corporate`, `riskData`, `riskAssessment`, `aiAnalysis`, `documents` and notes.
 - Introduce typed repository interfaces for base client summary, restricted profile, medical profile, claim-sensitive fields, document references and AI findings.
 - Preserve legacy reads behind an adapter; write new data only after destination collection Rules and endpoint authorization are ready.
