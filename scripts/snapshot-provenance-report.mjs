@@ -18,7 +18,7 @@ const EXPECTED_FUNCTIONS = [
 
 function gitBlobSha(bytes) {
   const header = Buffer.concat([
-    Buffer.from('blob ' + bytes.length + ' ', 'utf8'),
+    Buffer.from('blob ' + bytes.length, 'utf8'),
     Buffer.from([0]),
   ]);
   return createHash('sha1').update(header).update(bytes).digest('hex');
