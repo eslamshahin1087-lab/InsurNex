@@ -7,7 +7,7 @@ import { authorizeCopilotWorkspace } from './workspace-authorization.ts';
 import { buildAuthorizedCopilotContext } from './trusted-context.ts';
 import { isAllowedSupabaseApiKey } from './api-key-authorization.ts';
 import { verifyFirebaseIdToken } from './firebase-token-verification.ts';
-import { buildCopilotProviderUnavailableReply, runCopilotProviderCascade } from './provider-routing.ts';
+import { buildCopilotProviderUnavailableReply, runCopilotProviderCascade, type CopilotProviderAttempt } from './provider-routing.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
 const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY') ?? '';
@@ -216,7 +216,7 @@ async function callAI(
   systemPrompt: string,
   messages: ChatMessage[],
 ): Promise<{ reply: string; provider: string }> {
-  const providers = [];
+  const providers: CopilotProviderAttempt[] = [];
   if (GROQ_API_KEY) {
     providers.push({
       name: `groq:${GROQ_MODEL}`,
