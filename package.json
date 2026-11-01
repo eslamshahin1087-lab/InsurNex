@@ -33,7 +33,8 @@
     "test:client-data-access-projection": "node --test scripts/client-data-access-projection-test.mjs",
     "test:cron-endpoints": "node scripts/cron-endpoint-security-test.mjs",
     "audit:runtime-provenance": "node scripts/snapshot-provenance-report.mjs",
-    "test:runtime-provenance": "node scripts/snapshot-provenance-report-test.mjs"
+    "test:runtime-provenance": "node scripts/snapshot-provenance-report-test.mjs",
+    "test:copilot-runtime-parity": "node scripts/copilot-runtime-parity-contract-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
