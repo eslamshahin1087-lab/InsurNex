@@ -277,14 +277,20 @@ serve(async (req) => {
       idToken: firebaseToken,
       requestedScope: requestBody.organizationId,
     });
-    const loadedContext = await buildAuthorizedCopilotContext({
-      projectId: FIREBASE_PROJECT_ID,
-      organizationId: workspace.organizationId,
-      idToken: firebaseToken,
-      isPlatformAdmin: workspace.scopeType === 'platform-admin',
-      requestedContext: requestBody.context,
-    });
-    const context = sanitizeCopilotContext(loadedContext);
+    // When AI providers are deliberately disabled, do not query Firestore
+    // business context at all. Authentication/workspace checks still run, but
+    // the deterministic fallback needs only the user's language.
+    const hasConfiguredProvider = Boolean(GROQ_API_KEY || GEMINI_API_KEY);
+    const loadedContext = hasConfiguredProvider
+      ? await buildAuthorizedCopilotContext({
+          projectId: FIREBASE_PROJECT_ID,
+          organizationId: workspace.organizationId,
+          idToken: firebaseToken,
+          isPlatformAdmin: workspace.scopeType === 'platform-admin',
+          requestedContext: requestBody.context,
+        })
+      : undefined;
+    const context = hasConfiguredProvider ? sanitizeCopilotContext(loadedContext) : undefined;
 
     const systemPrompt = SYSTEM_PROMPT + buildContextString(context);
     const { reply, provider } = await callAI(systemPrompt, messages);
