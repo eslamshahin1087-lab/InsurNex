@@ -29,7 +29,8 @@
     "test:spark-runtime-guard": "node scripts/spark-runtime-guard-test.mjs",
     "test:edge-runtime-snapshots": "node scripts/deployed-edge-snapshot-integrity-test.mjs",
     "test:inex-ingress-contract": "node scripts/inex-ingress-contract-test.mjs",
-    "test:inex-lead-integration": "node scripts/inex-lead-integration-contract-test.mjs"
+    "test:inex-lead-integration": "node scripts/inex-lead-integration-contract-test.mjs",
+    "test:client-data-access-projection": "node --test scripts/client-data-access-projection-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
