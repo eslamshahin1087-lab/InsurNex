@@ -20,7 +20,7 @@ assert.match(edge, /publishableKeysJson: Deno\.env\.get\('SUPABASE_PUBLISHABLE_K
   'the server must resolve the trusted runtime publishable-key map');
 assert.match(edge, /legacyAnonKey: Deno\.env\.get\('SUPABASE_ANON_KEY'\)/,
   'the legacy anon key remains supported only while explicitly configured');
-assert.match(sharedApiKey, /return getConfiguredSupabaseApiKeys\\(config\\)\\.has\\(providedKey\\.trim\\(\\)\\)/,
+assert.equal(sharedApiKey.includes('return getConfiguredSupabaseApiKeys(config).has(providedKey.trim());'), true,
   'only explicitly configured Supabase keys may pass the gate');
 
 assert.match(edge, /user\.disabled === true/,
