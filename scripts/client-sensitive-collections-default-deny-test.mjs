@@ -75,7 +75,7 @@ for (const collectionName of proposedDefaultDenyCollections) {
   );
 }
 
-assert.match(adapterDocs, /does not create field-level security/i);
+assert.match(adapterDocs, /not field-level authorization/i);
 assert.match(adapterDocs, /does not migrate, redact, rewrite, delete or export customer data/i);
 assert.match(adapterDocs, /Sales\/Claims\/Finance\/Staff remain denied/i);
 
