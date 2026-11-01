@@ -34,7 +34,7 @@ for (const invariant of [
 }
 
 assert.ok(contract.includes('fDGjCCaVCGXbPoH18sMI7DRbpQI2'), 'Requested receiver UID must remain explicit in the proposed contract.');
-assert.ok(contract.includes('leads@insurnex.com') === false, 'Do not treat an email address as runtime verification evidence.');
+assert.ok(!contract.includes('Receiver account is verified'), 'The contract must not claim that the receiver account is verified.');
 assert.ok(contract.includes('not active') === false, 'The contract must not make claims about the receiver account state.');
 assert.ok(gates.includes('Firebase Functions remain build/test-only legacy source'));
 assert.ok(gates.includes('No Firebase Cloud Functions deployment on Spark'));
