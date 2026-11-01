@@ -97,7 +97,6 @@ export type ClientMedicalProfileRecord =
 export type ClientClaimSensitiveData = Pick<
   Claim,
   | 'claimNumber'
-  | 'clientId'
   | 'policyId'
   | 'policyNumber'
   | 'insurerId'
