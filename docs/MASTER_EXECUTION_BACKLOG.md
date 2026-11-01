@@ -69,7 +69,9 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 **P1-E call-site inventory merged (PR #101):** `docs/P1_E_CLIENT_DATA_ACCESS_CALLSITE_INVENTORY_2026-11-01.md` extends the static inventory with file-level read/write classifications and line-number signals, and adds a CI guard to keep proposed sensitive collections default-denied. This remains heuristic review evidence, not a complete call graph or approval to split data.
 
-**P1-E typed contract candidate:** `docs/P1_E_TYPED_CLIENT_DATA_CONTRACTS_2026-11-01.md` on branch `feat/p1e-typed-client-data-contracts-20261101` introduces candidate typed projections for identity, family, financial, address, medical, claim-sensitive, document metadata and AI findings. It adds pure envelope/scope validation and a safe document metadata projection that excludes signed URLs/storage paths/free text. It does not read or write Firestore or open proposed collections.
+**P1-E typed contracts merged (PR #102):** `docs/P1_E_TYPED_CLIENT_DATA_CONTRACTS_2026-11-01.md` defines candidate projections for identity, family, financial, address, medical, claim-sensitive, document metadata and AI findings, with pure envelope/scope validation and a safe document metadata projection.
+
+**P1-E sensitive-access policy candidate:** `docs/P1_E_SENSITIVE_ACCESS_GRANT_POLICY_2026-11-01.md` on branch `feat/p1e-sensitive-access-policy-20261101` adds a pure fail-closed evaluator for time-limited, purpose-bound, independently approved and audited read grants. It deliberately does not resolve role capabilities, write audit records, read Firestore or enable the proposed collections. A trusted audit sink and capability resolver remain prerequisites.
 - Catalog all readers/writers of `clients`, `individual`, `corporate`, `riskData`, `riskAssessment`, `aiAnalysis`, `documents` and notes.
 - Introduce typed repository interfaces for base client summary, restricted profile, medical profile, claim-sensitive fields, document references and AI findings.
 - Preserve legacy reads behind an adapter; write new data only after destination collection Rules and endpoint authorization are ready.
