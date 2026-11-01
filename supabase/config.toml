@@ -13,3 +13,7 @@ verify_jwt = false
 [functions.cron-document-check]
 # Custom CRON_SECRET is validated by the function; gateway JWT validation is disabled.
 verify_jwt = false
+
+[functions.document-storage]
+# Firebase identity, tenant membership and the Supabase publishable key are validated in the handler.
+verify_jwt = false

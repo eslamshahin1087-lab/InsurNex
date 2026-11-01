@@ -15,6 +15,7 @@ import {
   roleCanAccessLegacyClientDocument,
   legacyObjectMetadataMatches,
 } from './access-policy.mjs';
+import { isAllowedSupabaseApiKey } from '../_shared/api-key-authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,49 @@ function errorResponse(error: string, status = 400): Response {
   return jsonResponse({ ok: false, error }, status);
 }
 
+function authorizationFailure(error: unknown): Response {
+  if (error instanceof Error && error.message === 'FIRESTORE_LOOKUP_UNAVAILABLE') {
+    return errorResponse('AUTHORIZATION_TEMPORARILY_UNAVAILABLE', 503);
+  }
+  return errorResponse('AUTHORIZATION_CHECK_FAILED', 403);
+}
+
+async function readLimitedRequestBody(req: Request): Promise<string> {
+  const declaredLength = Number(req.headers.get('content-length') ?? 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_REQUEST_BODY_BYTES) {
+    throw new Error('REQUEST_TOO_LARGE');
+  }
+  if (!req.body) return '';
+
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_REQUEST_BODY_BYTES) {
+        await reader.cancel();
+        throw new Error('REQUEST_TOO_LARGE');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}
+
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const FIREBASE_API_KEY = Deno.env.get('FIREBASE_API_KEY') ?? Deno.env.get('FIREBASE_WEB_API_KEY') ?? '';
@@ -42,6 +86,11 @@ const FIREBASE_PROJECT_ID = Deno.env.get('FIREBASE_PROJECT_ID') ?? '';
 const DEFAULT_BUCKET = Deno.env.get('DOCUMENT_BUCKET') ?? 'insurnex-documents';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_REQUEST_BODY_BYTES = 64 * 1024;
+const FIREBASE_TOKEN_TIMEOUT_MS = 10_000;
+const FIRESTORE_READ_TIMEOUT_MS = 10_000;
+const DOWNLOAD_URL_TTL_SECONDS = 15 * 60;
+const MAX_FIREBASE_TOKEN_LENGTH = 16_384;
 const ALLOWED_MIME = new Set([
   'application/pdf',
   'image/jpeg',
@@ -77,18 +126,36 @@ interface FirestoreDocument {
 }
 
 async function verifyFirebaseToken(token: string): Promise<FirebaseUser> {
-  if (!FIREBASE_API_KEY) throw new Error('FIREBASE_API_KEY_NOT_CONFIGURED');
-  const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(FIREBASE_API_KEY)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken: token }),
-    },
-  );
+  if (!FIREBASE_API_KEY) throw new Error('FIREBASE_VERIFICATION_UNAVAILABLE');
+  if (!token || token.length > MAX_FIREBASE_TOKEN_LENGTH) throw new Error('FIREBASE_TOKEN_INVALID');
+
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(FIREBASE_API_KEY)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: token }),
+        signal: AbortSignal.timeout(FIREBASE_TOKEN_TIMEOUT_MS),
+      },
+    );
+  } catch {
+    throw new Error('FIREBASE_VERIFICATION_UNAVAILABLE');
+  }
+
+  if (res.status === 429 || res.status >= 500) {
+    throw new Error('FIREBASE_VERIFICATION_UNAVAILABLE');
+  }
   if (!res.ok) throw new Error('FIREBASE_TOKEN_INVALID');
-  const data = await res.json();
-  const user = data?.users?.[0];
+
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error('FIREBASE_VERIFICATION_UNAVAILABLE');
+  }
+  const user = (data as { users?: Array<{ localId?: string; disabled?: boolean; email?: string; displayName?: string }> })?.users?.[0];
   if (!user?.localId || user.disabled === true) throw new Error('FIREBASE_TOKEN_INVALID');
   return { uid: user.localId, email: user.email, name: user.displayName };
 }
@@ -131,11 +198,24 @@ async function readCallerVisibleDocument(path: string, token: string): Promise<F
   if (!FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID_NOT_CONFIGURED');
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
   const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(FIREBASE_PROJECT_ID)}/databases/(default)/documents/${encodedPath}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(FIRESTORE_READ_TIMEOUT_MS),
+    });
+  } catch {
+    throw new Error('FIRESTORE_LOOKUP_UNAVAILABLE');
+  }
   if (res.status === 404) return null;
+  if (res.status === 429 || res.status >= 500) throw new Error('FIRESTORE_LOOKUP_UNAVAILABLE');
   if (res.status === 401 || res.status === 403) throw new Error('FIRESTORE_ACCESS_DENIED');
   if (!res.ok) throw new Error('FIRESTORE_LOOKUP_FAILED');
-  return await res.json() as FirestoreDocument;
+  try {
+    return await res.json() as FirestoreDocument;
+  } catch {
+    throw new Error('FIRESTORE_LOOKUP_FAILED');
+  }
 }
 
 type AuthorizedDocument = {
@@ -262,8 +342,8 @@ async function authorizeDocumentAccess(
     return { ok: true, document: parsed };
   } catch (error) {
     // Do not disclose upstream errors or document metadata to the caller.
-    console.error('Document authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return { ok: false, response: errorResponse('AUTHORIZATION_CHECK_FAILED', 403) };
+    console.error('Document authorization failed');
+    return { ok: false, response: authorizationFailure(error) };
   }
 }
 
@@ -355,8 +435,8 @@ async function authorizeOperationAttachmentAccess(
     }
     return { ok: true, attachment: parsed };
   } catch (error) {
-    console.error('Operation attachment authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return { ok: false, response: errorResponse('AUTHORIZATION_CHECK_FAILED', 403) };
+    console.error('Operation attachment authorization failed');
+    return { ok: false, response: authorizationFailure(error) };
   }
 }
 
@@ -381,7 +461,7 @@ async function handleOperationAttachmentSignUpload(body: Record<string, unknown>
   if (!access.ok) return access.response;
   const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUploadUrl(access.attachment.path);
   if (error || !data?.token || !data?.path) {
-    console.error('Create operation attachment signed upload URL failed:', error?.message ?? 'NO_URL');
+    console.error('Create operation attachment signed upload URL failed');
     return errorResponse('SIGN_UPLOAD_FAILED', 500);
   }
   return jsonResponse({ ok: true, provider: 'supabase', bucket: DEFAULT_BUCKET, path: data.path, token: data.token });
@@ -394,12 +474,12 @@ async function handleOperationAttachmentSignDownload(body: Record<string, unknow
   const path = typeof body.path === 'string' ? body.path : '';
   const access = await authorizeOperationAttachmentAccess(organizationId, operationId, attachmentId, path, user, token, 'read');
   if (!access.ok) return access.response;
-  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUrl(access.attachment.path, 60 * 60);
+  const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUrl(access.attachment.path, DOWNLOAD_URL_TTL_SECONDS);
   if (error || !data?.signedUrl) {
-    console.error('Create operation attachment signed URL failed:', error?.message ?? 'NO_URL');
+    console.error('Create operation attachment signed URL failed');
     return errorResponse('SIGNED_URL_FAILED', 500);
   }
-  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.attachment.path });
+  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.attachment.path, expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS });
 }
 
 
@@ -450,13 +530,15 @@ async function handleOperationAttachmentCleanup(body: Record<string, unknown>, u
     }
     const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([path]);
     if (error) {
-      console.error('Cleanup pending operation attachment failed:', error.message);
+      console.error('Cleanup pending operation attachment failed');
       return errorResponse('CLEANUP_FAILED', 500);
     }
     return jsonResponse({ ok: true });
   } catch (error) {
-    console.error('Pending operation attachment cleanup failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return errorResponse('CLEANUP_FAILED', 500);
+    console.error('Pending operation attachment cleanup failed');
+    return error instanceof Error && error.message === 'FIRESTORE_LOOKUP_UNAVAILABLE'
+      ? errorResponse('AUTHORIZATION_TEMPORARILY_UNAVAILABLE', 503)
+      : errorResponse('CLEANUP_FAILED', 500);
   }
 }
 
@@ -469,7 +551,7 @@ async function handleOperationAttachmentDelete(body: Record<string, unknown>, us
   if (!access.ok) return access.response;
   const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([access.attachment.path]);
   if (error) {
-    console.error('Delete operation attachment failed:', error.message);
+    console.error('Delete operation attachment failed');
     return errorResponse('DELETE_FAILED', 500);
   }
   return jsonResponse({ ok: true });
@@ -494,7 +576,7 @@ async function handleSignUpload(body: Record<string, unknown>, user: FirebaseUse
 
   const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET).createSignedUploadUrl(access.document.path);
   if (error || !data?.token || !data?.path) {
-    console.error('Create signed upload URL failed:', error?.message ?? 'NO_URL');
+    console.error('Create signed upload URL failed');
     return errorResponse('SIGN_UPLOAD_FAILED', 500);
   }
   return jsonResponse({
@@ -515,12 +597,12 @@ async function handleSignDownload(body: Record<string, unknown>, user: FirebaseU
   if (!access.ok) return access.response;
 
   const { data, error } = await adminClient().storage.from(DEFAULT_BUCKET)
-    .createSignedUrl(access.document.path, 60 * 60); // 1 hour
+    .createSignedUrl(access.document.path, DOWNLOAD_URL_TTL_SECONDS);
   if (error || !data?.signedUrl) {
-    console.error('Create signed download URL failed:', error?.message ?? 'NO_URL');
+    console.error('Create signed download URL failed');
     return errorResponse('SIGNED_URL_FAILED', 500);
   }
-  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.document.path });
+  return jsonResponse({ ok: true, signedUrl: data.signedUrl, path: access.document.path, expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS });
 }
 
 /**
@@ -605,7 +687,7 @@ async function handleLegacyClientSignDownload(
     const storage = adminClient().storage.from(DEFAULT_BUCKET);
     const { data: fileInfo, error: infoError } = await storage.info(parsed.path);
     if (infoError || !fileInfo) {
-      console.error('Legacy client document metadata lookup failed:', infoError?.message ?? 'NO_FILE_INFO');
+      console.error('Legacy client document metadata lookup failed');
       return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
     }
 
@@ -635,7 +717,7 @@ async function handleLegacyClientSignDownload(
 
     const { data, error } = await storage.createSignedUrl(parsed.path, 15 * 60);
     if (error || !data?.signedUrl) {
-      console.error('Create legacy client document signed URL failed:', error?.message ?? 'NO_URL');
+      console.error('Create legacy client document signed URL failed');
       return errorResponse('LEGACY_CLIENT_DOCUMENT_UNAVAILABLE', 404);
     }
 
@@ -646,8 +728,8 @@ async function handleLegacyClientSignDownload(
       fileName: parsed.filename,
     });
   } catch (error) {
-    console.error('Legacy client document authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return errorResponse('AUTHORIZATION_CHECK_FAILED', 403);
+    console.error('Legacy client document authorization failed');
+    return authorizationFailure(error);
   }
 }
 
@@ -660,7 +742,7 @@ async function handleDelete(body: Record<string, unknown>, user: FirebaseUser, t
 
   const { error } = await adminClient().storage.from(DEFAULT_BUCKET).remove([access.document.path]);
   if (error) {
-    console.error('Delete document failed:', error.message);
+    console.error('Delete document failed');
     return errorResponse('DELETE_FAILED', 500);
   }
   return jsonResponse({ ok: true });
@@ -685,14 +767,26 @@ serve(async (req: Request) => {
 
   if (req.method !== 'POST') return errorResponse('METHOD_NOT_ALLOWED', 405);
 
+  const apiKey = req.headers.get('apikey');
+  const hasValidSupabaseApiKey = isAllowedSupabaseApiKey(apiKey, {
+    legacyAnonKey: Deno.env.get('SUPABASE_ANON_KEY'),
+    publishableKeysJson: Deno.env.get('SUPABASE_PUBLISHABLE_KEYS'),
+    lookupEnvironmentVariable: (name) => Deno.env.get(name) ?? undefined,
+  });
+  if (!hasValidSupabaseApiKey) return errorResponse('API_KEY_INVALID', 401);
+
   let body: Record<string, unknown>;
   try {
-    const parsed: unknown = await req.json();
+    const rawBody = await readLimitedRequestBody(req);
+    const parsed: unknown = JSON.parse(rawBody);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return errorResponse('INVALID_JSON', 400);
     }
     body = parsed as Record<string, unknown>;
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'REQUEST_TOO_LARGE') {
+      return errorResponse('REQUEST_TOO_LARGE', 413);
+    }
     return errorResponse('INVALID_JSON', 400);
   }
 
@@ -703,8 +797,10 @@ serve(async (req: Request) => {
   try {
     user = await verifyFirebaseToken(token);
   } catch (error) {
-    console.error('Firebase token verification failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return errorResponse('AUTH_INVALID', 401);
+    console.error('Firebase token verification failed');
+    return error instanceof Error && error.message === 'FIREBASE_VERIFICATION_UNAVAILABLE'
+      ? errorResponse('AUTHENTICATION_TEMPORARILY_UNAVAILABLE', 503)
+      : errorResponse('AUTH_INVALID', 401);
   }
 
   try {
@@ -720,7 +816,9 @@ serve(async (req: Request) => {
       default: return errorResponse('UNKNOWN_ACTION', 400);
     }
   } catch (error) {
-    console.error('Document storage operation failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return errorResponse('INTERNAL_ERROR', 500);
+    console.error('Document storage operation failed');
+    return error instanceof Error && error.message === 'FIRESTORE_LOOKUP_UNAVAILABLE'
+      ? errorResponse('AUTHORIZATION_TEMPORARILY_UNAVAILABLE', 503)
+      : errorResponse('INTERNAL_ERROR', 500);
   }
 });
