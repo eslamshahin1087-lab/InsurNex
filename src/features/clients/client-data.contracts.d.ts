@@ -182,10 +182,10 @@ export const CLIENT_SENSITIVE_PROFILE_KINDS: readonly ClientSensitiveProfileKind
 export const CLIENT_DOCUMENT_METADATA_FIELDS: readonly (keyof ClientDocumentMetadataProjection | string)[];
 
 export function isClientScopedRecordEnvelope(value: unknown): value is ClientScopedRecordEnvelope<ClientScopedProfileKind, Record<string, unknown>>;
-export function assertClientRecordMatchesScope<T extends ClientScopedRecordEnvelope<ClientScopedProfileKind, Record<string, unknown>>>(
+export function assertClientRecordMatchesScope(
   value: unknown,
   expected: ClientScopedRecordExpectedScope,
-): T;
+): ClientScopedRecordEnvelope<ClientScopedProfileKind, Record<string, unknown>>;
 export function projectClientDocumentMetadata(
   documentId: string,
   source: unknown,
