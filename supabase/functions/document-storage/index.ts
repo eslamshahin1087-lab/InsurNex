@@ -728,8 +728,8 @@ async function handleLegacyClientSignDownload(
       fileName: parsed.filename,
     });
   } catch (error) {
-    console.error('Legacy client document authorization failed:', error instanceof Error ? error.message : 'UNKNOWN');
-    return errorResponse('AUTHORIZATION_CHECK_FAILED', 403);
+    console.error('Legacy client document authorization failed');
+    return authorizationFailure(error);
   }
 }
 
