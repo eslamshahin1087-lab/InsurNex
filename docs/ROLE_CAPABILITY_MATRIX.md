@@ -72,7 +72,7 @@ The merged Rules currently enforce the following same-organization top-level rea
 | `revenue`, `expenses`, `commissions` | Owner, Admin, Finance |
 | Copilot conversations/messages | Owning user only, with parent-conversation checks |
 
-Sales and Claims do not have direct access to the legacy mixed-sensitivity `clients` record. Claims access to linked policy metadata and claim-category documents is currently organization-scoped; per-claim assignment checks are a future gate. Finance can read finance collections, not full client profiles or claim narratives.
+Sales and Claims do not have direct access to the legacy mixed-sensitivity `clients` record. Claims access to linked policy metadata and claim-category documents is currently organization-scoped; per-claim assignment checks are a future gate. Finance can read finance collections, not full client profiles or claim narratives. The new P1-E compatibility adapter keeps this same role boundary, preflights active profile/role/tenant before client reads, and returns an allowlisted base summary to the Clients index. The Client 360 compatibility read remains Owner/Admin/Broker only. This is application-level data minimization, not Firestore field-level redaction; the entire legacy document is still returned by Firestore to an authorized Client 360 reader until sensitive fields are physically separated or served through a trusted projection.
 
 A current Emulator read matrix is being expanded to test each allowed/denied direct get and tenant-scoped query, as well as role-appropriate create paths. A green test means these exact Rules passed against the demo emulator; it does not certify staging/production configuration.
 
