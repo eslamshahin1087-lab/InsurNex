@@ -142,9 +142,10 @@ const implementation = await readFile(
   new URL('../src/features/clients/client-sensitive-access.policy.js', import.meta.url),
   'utf8',
 );
-assert.doesNotMatch(implementation, /from ['"]firebase\\/firestore['"]/);
-assert.doesNotMatch(implementation, /\\b(?:addDoc|setDoc|updateDoc|deleteDoc|getDoc|getDocs)\\s*\\(/);
-assert.doesNotMatch(implementation, /fetch\\s*\\(/);
-assert.match(implementation, /CLIENT_SENSITIVE_GRANT_MAX_TTL_MS = 15 \\* 60 \\* 1000/);
+assert.equal(implementation.includes("firebase/firestore"), false);
+for (const databaseOperation of ['addDoc(', 'setDoc(', 'updateDoc(', 'deleteDoc(', 'getDoc(', 'getDocs(', 'fetch(']) {
+  assert.equal(implementation.includes(databaseOperation), false, databaseOperation + ' must not be present in the pure evaluator');
+}
+assert.ok(implementation.includes('CLIENT_SENSITIVE_GRANT_MAX_TTL_MS = 15 * 60 * 1000'));
 
 console.log('P1-E sensitive access fail-closed grant policy tests passed.');
