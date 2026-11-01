@@ -62,6 +62,8 @@ Turn the Phase 1 runtime compatibility findings into a verifiable, operator-led 
 
 ### P1-E — Client data-access compatibility
 
+**Initial source adapter candidate:** documented in `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md` on the current feature branch. It adds an allowlisted base summary and guarded Client 360 compatibility read; it does not change Firestore Rules or claim field-level redaction.
+
 1. Inventory all readers and writers of legacy mixed-sensitivity client records.
 2. Define explicit typed projections for base contact, identity/KYC, family, medical, finance, claim-sensitive, document metadata and AI findings.
 3. Introduce read-only adapters first, using synthetic fixtures.

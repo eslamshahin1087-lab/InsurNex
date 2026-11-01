@@ -8,7 +8,7 @@ This index supplements (and does not replace) `PHASE_1_RUNTIME_COMPATIBILITY_202
 | P1-B Cron hardening | Dedicated secret, replay/retry safety, idempotency | Deno tests + scheduler header evidence | High |
 | P1-C Copilot parity | Trusted context, auth, provider and privacy parity | Synthetic negative tests + staging results | Critical |
 | P1-D Document gateway | Metadata-bound paths and lifecycle | Staging upload/download/delete and tenant denial | Critical |
-| P1-E Client adapter | Read-only data projections first | Role/field contract tests with synthetic data | Critical |
+| P1-E Client adapter | Read-only data projections first; initial adapter candidate on `feat/phase1-client-data-access-adapter-20261101` | Synthetic role/field projection tests + CI + call-site audit | Critical |
 
 ## Operating rules
 

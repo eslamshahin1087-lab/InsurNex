@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
-import { listClients } from '../features/clients/client.service';
-import type { InsuranceClient } from '../types/client';
+import { listClientSummaries, type ClientBaseSummary } from '../features/clients/client-data-access.service';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
@@ -64,7 +63,7 @@ export default function ClientsPage() {
   const { profile } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const [clients, setClients] = useState<InsuranceClient[]>([]);
+  const [clients, setClients] = useState<ClientBaseSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<ClientFilter>('all');
@@ -76,7 +75,7 @@ export default function ClientsPage() {
     }
     setLoading(true);
     try {
-      const data = await listClients(profile.organizationId);
+      const data = await listClientSummaries(profile);
       setClients(data);
     } finally {
       setLoading(false);

@@ -71,6 +71,11 @@ export async function createClient(
   return ref.id;
 }
 
+/**
+ * @deprecated UI code should use listClientSummaries(profile) from
+ * client-data-access.service.ts so broad list state receives only the
+ * allowlisted base projection. Kept temporarily for compatibility.
+ */
 export async function listClients(
   organizationId: string,
 ): Promise<InsuranceClient[]> {
@@ -85,6 +90,11 @@ export async function listClients(
   );
 }
 
+/**
+ * @deprecated UI code should use getLegacyClientWorkspace(profile, id) from
+ * client-data-access.service.ts so role, active status and tenant checks run
+ * before the legacy mixed-sensitivity record is fetched.
+ */
 export async function getClient(
   id: string,
 ): Promise<InsuranceClient | null> {

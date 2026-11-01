@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
-import { getClient } from '../features/clients/client.service';
+import { getLegacyClientWorkspace } from '../features/clients/client-data-access.service';
 import ClientEditForm from '../features/clients/ClientEditForm';
 import ClientDocumentsPanel from '../features/documents/ClientDocumentsPanel';
 import ClientTimeline from '../features/clients/ClientTimeline';
@@ -179,7 +179,7 @@ export default function ClientDetailsPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await getClient(id);
+      const data = await getLegacyClientWorkspace(profile, id);
       if (!data) {
         setClient(null);
         setRelations(EMPTY_RELATIONS);
