@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   CLIENT_SENSITIVE_ACCESS_ACTIONS,
   CLIENT_SENSITIVE_DATA_CLASSES,
@@ -135,5 +136,15 @@ assert.equal(
   evaluateClientSensitiveReadAccess({ actor, grant, resource, action: 'write', now }).reason,
   'ACTION_NOT_SUPPORTED',
 );
+
+
+const implementation = await readFile(
+  new URL('../src/features/clients/client-sensitive-access.policy.js', import.meta.url),
+  'utf8',
+);
+assert.doesNotMatch(implementation, /from ['"]firebase\\/firestore['"]/);
+assert.doesNotMatch(implementation, /\\b(?:addDoc|setDoc|updateDoc|deleteDoc|getDoc|getDocs)\\s*\\(/);
+assert.doesNotMatch(implementation, /fetch\\s*\\(/);
+assert.match(implementation, /CLIENT_SENSITIVE_GRANT_MAX_TTL_MS = 15 \\* 60 \\* 1000/);
 
 console.log('P1-E sensitive access fail-closed grant policy tests passed.');
