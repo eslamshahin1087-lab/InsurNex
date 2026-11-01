@@ -111,7 +111,8 @@
         "path": null,
         "gitBlobSha": null,
         "parity": "not-present-in-main",
-        "note": "The archived deployed source has no corresponding canonical function source path in the compared main commit."
+        "note": "The archived deployed source has no corresponding canonical function source path in the compared main commit.",
+        "snapshotGitBlobSha": null
       }
     },
     {
