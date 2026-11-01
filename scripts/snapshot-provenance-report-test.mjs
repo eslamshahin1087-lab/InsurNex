@@ -26,6 +26,7 @@ assert.equal(report.summary.canonicalMatches, 0);
 assert.equal(report.summary.canonicalMismatches, 4);
 assert.equal(report.summary.canonicalNotPresent, 1);
 assert.equal(report.summary.configurationRevisionUnavailable, 5);
+assert.equal(report.canonicalSourceComparison.commitSha, 'ca08aaeee376855d839111d1cf711506452bb6c7');
 
 const expectedParity = {
   'copilot-chat': 'mismatch',
