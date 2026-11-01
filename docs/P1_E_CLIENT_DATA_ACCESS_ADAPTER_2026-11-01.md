@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-01  
 **Implementation branch:** `feat/phase1-client-data-access-adapter-20261101`  
-**Status:** source implementation proposed for review; no data migration or authorization-rule change.
+**Status:** merged in PR #96 on 2026-11-01; no data migration or authorization-rule change.
 
 ## 1. Verified current boundary
 
