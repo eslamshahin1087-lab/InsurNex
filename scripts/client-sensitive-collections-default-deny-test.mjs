@@ -77,6 +77,6 @@ for (const collectionName of proposedDefaultDenyCollections) {
 
 assert.match(adapterDocs, /not field-level authorization/i);
 assert.match(adapterDocs, /does not migrate, redact, rewrite, delete or export customer data/i);
-assert.match(adapterDocs, /Sales\/Claims\/Finance\/Staff remain denied/i);
+assert.match(adapterDocs, /Sales, Claims, Finance and Staff do not have direct read access/i);
 
 console.log('Client data separation guard passed: sensitive collections remain default-denied and legacy Client 360 RBAC is unchanged.');
