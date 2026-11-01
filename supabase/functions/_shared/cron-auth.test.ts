@@ -3,6 +3,7 @@ import {
   daysUntilUtcDate,
   isCronRequestAuthorized,
   normalizeDateOnly,
+  reminderPriority,
   renewalReminderWindow,
   stableNotificationId,
 } from './cron-auth.ts';
@@ -72,4 +73,30 @@ Deno.test('notification ids are deterministic and distinguish reminder windows',
   assert(first === repeated, 'same resource/date/window must produce the same id');
   assert(first !== differentWindow, 'different reminder window must produce a separate id');
   assert(first !== differentExpiry, 'different expiry date must produce a separate id');
+});
+
+
+Deno.test('reminder priority is consistent with the reminder window', () => {
+  assert(reminderPriority(7) === 'urgent', '7-day reminder must be urgent');
+  assert(reminderPriority(30) === 'high', '30-day reminder must be high');
+  assert(reminderPriority(45) === 'medium', '45-day reminder must be medium');
+  assert(reminderPriority(90) === 'normal', '90-day reminder must be normal');
+});
+
+Deno.test('stable notification ids reject malformed resource identifiers and expiry dates', async () => {
+  let invalidIdRejected = false;
+  try {
+    await stableNotificationId('policy', '../policy', '2026-11-29', 30);
+  } catch {
+    invalidIdRejected = true;
+  }
+  assert(invalidIdRejected, 'path-like resource identifiers must be rejected');
+
+  let invalidDateRejected = false;
+  try {
+    await stableNotificationId('document', 'document-123', '2026-02-30', 7);
+  } catch {
+    invalidDateRejected = true;
+  }
+  assert(invalidDateRejected, 'invalid calendar expiry dates must be rejected');
 });
