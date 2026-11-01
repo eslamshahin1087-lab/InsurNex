@@ -6,6 +6,8 @@ import { sanitizeCopilotContext, type SanitizedCopilotContext } from './context-
 import { authorizeCopilotWorkspace } from './workspace-authorization.ts';
 import { buildAuthorizedCopilotContext } from './trusted-context.ts';
 import { isAllowedSupabaseApiKey } from './api-key-authorization.ts';
+import { verifyFirebaseIdToken } from './firebase-token-verification.ts';
+import { buildCopilotProviderUnavailableReply, runCopilotProviderCascade, type CopilotProviderAttempt } from './provider-routing.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
 const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY') ?? '';
@@ -14,6 +16,7 @@ const FIREBASE_PROJECT_ID = Deno.env.get('FIREBASE_PROJECT_ID') ?? 'insurnex-8a9
 
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.8-flash';
 const GROQ_MODEL = Deno.env.get('GROQ_MODEL') ?? 'openai/gpt-oss-120b';
+const PROVIDER_TIMEOUT_MS = 15_000;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -137,17 +140,7 @@ function buildContextString(ctx?: CopilotContext): string {
 }
 
 async function verifyFirebaseToken(idToken: string): Promise<{ uid: string }> {
-  const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken }),
-  });
-  if (!res.ok) throw new Error('INVALID_TOKEN');
-  const data = await res.json();
-  const user = data?.users?.[0];
-  if (!user?.localId) throw new Error('INVALID_TOKEN');
-  return { uid: user.localId };
+  return verifyFirebaseIdToken({ apiKey: FIREBASE_API_KEY, idToken });
 }
 
 function validateMessages(messages: unknown): ChatMessage[] {
@@ -182,9 +175,9 @@ async function callGemini(systemPrompt: string, messages: ChatMessage[]): Promis
       contents,
       generationConfig: { maxOutputTokens: 1500, temperature: 0.3 },
     }),
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
   });
   if (!res.ok) {
-    console.error('Gemini provider request failed', res.status);
     throw new Error(`GEMINI_FAILED:${res.status}`);
   }
   const data = await res.json();
@@ -208,9 +201,9 @@ async function callGroq(systemPrompt: string, messages: ChatMessage[]): Promise<
       max_tokens: 1500,
       temperature: 0.3,
     }),
+    signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
   });
   if (!res.ok) {
-    console.error('Groq provider request failed', res.status);
     throw new Error(`GROQ_FAILED:${res.status}`);
   }
   const data = await res.json();
@@ -223,23 +216,25 @@ async function callAI(
   systemPrompt: string,
   messages: ChatMessage[],
 ): Promise<{ reply: string; provider: string }> {
+  const providers: CopilotProviderAttempt[] = [];
   if (GROQ_API_KEY) {
-    try {
-      const reply = await callGroq(systemPrompt, messages);
-      return { reply, provider: `groq:${GROQ_MODEL}` };
-    } catch (e) {
-      console.warn('Groq provider failed; trying configured fallback');
-    }
+    providers.push({
+      name: `groq:${GROQ_MODEL}`,
+      run: () => callGroq(systemPrompt, messages),
+    });
   }
   if (GEMINI_API_KEY) {
-    try {
-      const reply = await callGemini(systemPrompt, messages);
-      return { reply, provider: `gemini:${GEMINI_MODEL}` };
-    } catch (e) {
-      console.error('Gemini fallback provider failed');
-    }
+    providers.push({
+      name: `gemini:${GEMINI_MODEL}`,
+      run: () => callGemini(systemPrompt, messages),
+    });
   }
-  throw new Error('ALL_PROVIDERS_FAILED');
+
+  const result = await runCopilotProviderCascade(
+    providers,
+    buildCopilotProviderUnavailableReply(messages),
+  );
+  return { reply: result.reply, provider: result.provider };
 }
 
 serve(async (req) => {
@@ -282,14 +277,20 @@ serve(async (req) => {
       idToken: firebaseToken,
       requestedScope: requestBody.organizationId,
     });
-    const loadedContext = await buildAuthorizedCopilotContext({
-      projectId: FIREBASE_PROJECT_ID,
-      organizationId: workspace.organizationId,
-      idToken: firebaseToken,
-      isPlatformAdmin: workspace.scopeType === 'platform-admin',
-      requestedContext: requestBody.context,
-    });
-    const context = sanitizeCopilotContext(loadedContext);
+    // When AI providers are deliberately disabled, do not query Firestore
+    // business context at all. Authentication/workspace checks still run, but
+    // the deterministic fallback needs only the user's language.
+    const hasConfiguredProvider = Boolean(GROQ_API_KEY || GEMINI_API_KEY);
+    const loadedContext = hasConfiguredProvider
+      ? await buildAuthorizedCopilotContext({
+          projectId: FIREBASE_PROJECT_ID,
+          organizationId: workspace.organizationId,
+          idToken: firebaseToken,
+          isPlatformAdmin: workspace.scopeType === 'platform-admin',
+          requestedContext: requestBody.context,
+        })
+      : undefined;
+    const context = hasConfiguredProvider ? sanitizeCopilotContext(loadedContext) : undefined;
 
     const systemPrompt = SYSTEM_PROMPT + buildContextString(context);
     const { reply, provider } = await callAI(systemPrompt, messages);
@@ -301,17 +302,21 @@ serve(async (req) => {
     const message = err instanceof Error ? err.message : 'UNKNOWN';
     const authenticationError = message === 'INVALID_API_KEY' || message === 'INVALID_TOKEN' || message === 'MISSING_TOKEN';
     const scopeErrors = new Set(['WORKSPACE_ACCESS_DENIED', 'ORGANIZATION_ACCESS_DENIED']);
+    const unavailableErrors = new Set(['TOKEN_VERIFICATION_UNAVAILABLE']);
     const clientErrors = new Set([
       'INVALID_MESSAGES', 'TOO_MANY_MESSAGES', 'CONTENT_TOO_LONG',
       'LAST_MESSAGE_MUST_BE_USER', 'INVALID_REQUEST_JSON', 'REQUEST_TOO_LARGE',
     ]);
-    const status = authenticationError ? 401
+    const status = unavailableErrors.has(message) ? 503
+      : authenticationError ? 401
       : scopeErrors.has(message) ? 403
       : clientErrors.has(message) ? 400
       : 500;
-    const publicError = authenticationError || scopeErrors.has(message) || clientErrors.has(message)
-      ? message
-      : 'COPILOT_TEMPORARILY_UNAVAILABLE';
+    const publicError = unavailableErrors.has(message)
+      ? 'AUTHENTICATION_TEMPORARILY_UNAVAILABLE'
+      : authenticationError || scopeErrors.has(message) || clientErrors.has(message)
+        ? message
+        : 'COPILOT_TEMPORARILY_UNAVAILABLE';
     console.error('copilot-chat request failed', { status, code: publicError });
     return new Response(JSON.stringify({ ok: false, error: publicError }), {
       status,

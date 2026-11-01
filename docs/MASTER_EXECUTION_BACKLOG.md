@@ -153,7 +153,8 @@ This backlog is the execution source of truth. A checked source-code task means 
 ### P5.4 — Copilot provider and privacy controls
 - Remove/disable paid fallback paths unless explicitly approved; enforce budgets, quota handling, request limits and schema validation.
 - Do not submit sensitive data to consumer unpaid AI services.
-**Acceptance:** provider-off and quota-exhausted fallback tests pass; no sensitive field enters an unapproved prompt; all Copilot citations resolve to authorized resources.
+**P1-C source candidate:** `docs/P1_C_COPILOT_RUNTIME_PARITY_2026-11-01.md` adds disabled Firebase-account rejection, bounded token-verification/provider timeouts, a deterministic bilingual no-AI fallback, and synthetic tests for provider-off, quota/transport failure and disabled accounts. It does not enable or approve Gemini/Groq provider terms, change secrets, or prove live deployment parity.
+**Acceptance:** provider-off and quota-exhausted fallback tests pass; no sensitive field enters an unapproved prompt; all Copilot citations resolve to authorized resources; staging parity is independently verified.
 
 ## Phase 6 — Insurer and External Integration
 

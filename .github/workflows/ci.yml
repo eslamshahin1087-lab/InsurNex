@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -54,6 +56,10 @@ jobs:
         run: npm run test:runtime-provenance
       - name: Copilot context minimization regression tests
         run: deno test supabase/functions/copilot-chat/context-sanitizer.test.ts supabase/functions/copilot-chat/workspace-authorization.test.ts supabase/functions/copilot-chat/trusted-context.test.ts supabase/functions/copilot-chat/client-context-selector.test.ts supabase/functions/copilot-chat/api-key-authorization.test.ts supabase/functions/copilot-chat/copilot-context-route.test.ts
+      - name: Copilot provider-off, quota fallback and Firebase disabled-account tests
+        run: deno test supabase/functions/copilot-chat/provider-routing.test.ts supabase/functions/copilot-chat/firebase-token-verification.test.ts
+      - name: Copilot runtime parity source contract checks
+        run: npm run test:copilot-runtime-parity
       - name: Copilot context contract and Firestore index regression checks
         run: npm run test:copilot-context-contract
       - name: Copilot gateway safe-error regression checks

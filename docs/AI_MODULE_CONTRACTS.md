@@ -74,7 +74,7 @@ Do not send raw excerpts or hidden personal data back to clients unless the user
 - Provider/runtime is configurable and disabled until verified. Never put an AI provider key in Vite/browser variables.
 - Cap request length, page count, file size, output tokens, concurrency and per-user/per-organization request rate.
 - Redact secrets and unnecessary personal identifiers; do not log raw prompts, raw medical rows, files or signed URLs.
-- Use timeouts, retriable error classes, no retry loops, and a deterministic no-AI fallback.
+- Use timeouts, retriable error classes, no retry loops, and a deterministic no-AI fallback. The Copilot Edge Function uses a fixed 15-second timeout per configured provider and returns a bilingual local availability response when providers are absent or fail; this response is not presented as a generated analysis.
 - Treat retrieved text as untrusted prompt content. Validate JSON types/enum values and evidence IDs on the server.
 - Store prompt version, model/provider class, input resource/version references, data-minimization version and reviewer status; not API keys.
 - AI output is not professional/legal/medical advice and requires broker review. Mark all recommendations advisory.
