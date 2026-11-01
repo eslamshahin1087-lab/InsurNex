@@ -35,7 +35,8 @@
     "audit:runtime-provenance": "node scripts/snapshot-provenance-report.mjs",
     "test:runtime-provenance": "node scripts/snapshot-provenance-report-test.mjs",
     "test:copilot-runtime-parity": "node scripts/copilot-runtime-parity-contract-test.mjs",
-    "test:document-storage-runtime": "node scripts/document-storage-runtime-contract-test.mjs"
+    "test:document-storage-runtime": "node scripts/document-storage-runtime-contract-test.mjs",
+    "test:client-sensitive-default-deny": "node scripts/client-sensitive-collections-default-deny-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -72,15 +72,18 @@ Turn the Phase 1 runtime compatibility findings into a verifiable, operator-led 
 
 ### P1-E — Client data-access compatibility
 
-**Initial source adapter candidate:** documented in `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md` on the current feature branch. It adds an allowlisted base summary and guarded Client 360 compatibility read; it does not change Firestore Rules or claim field-level redaction.
+**Initial adapter merged (PR #96):** `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md` records the allowlisted Clients base summary and guarded Client 360 compatibility read. It does not change Firestore Rules or create field-level security.
 
-1. Inventory all readers and writers of legacy mixed-sensitivity client records.
-2. Define explicit typed projections for base contact, identity/KYC, family, medical, finance, claim-sensitive, document metadata and AI findings.
-3. Introduce read-only adapters first, using synthetic fixtures.
-4. Preserve legacy writes until the destination authorization contract is implemented and reviewed.
-5. Keep proposed collections default-denied.
+**Current follow-up candidate:** `docs/P1_E_CLIENT_DATA_ACCESS_CALLSITE_INVENTORY_2026-11-01.md` on branch `feat/p1e-client-data-access-callsite-inventory-20261101` extends the static audit with file-level read/write signals and line-number identifiers, and adds a default-deny guard for proposed sensitive collections.
 
-**Acceptance:** role-based projections return only permitted fields, existing pages keep required safe behavior, and no customer records are migrated.
+1. Review every production read/write call-site from the static inventory; the new report is heuristic and not AST/data-flow proof.
+2. Approve separately typed contracts for base contact, identity/KYC, family, medical, financial, claim-sensitive, document metadata and AI findings.
+3. Define collection-specific Rules/trusted writer endpoints only after the data-owner field/role/purpose/retention matrix is approved.
+4. Introduce read-only adapters first, using synthetic fixtures.
+5. Preserve legacy writes until the destination authorization contract is implemented and reviewed.
+6. Keep proposed collections default-denied.
+
+**Acceptance:** role-based projections return only permitted fields, existing pages keep required safe behavior, every known read/write path is reviewed, Emulator positive/negative tests cover each approved role and no customer records are migrated.
 
 ## Required evidence before any staging deployment
 

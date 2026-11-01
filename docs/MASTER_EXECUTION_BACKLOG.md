@@ -61,11 +61,13 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 **Activation remains pending:** verify the receiving UID/email, active profile, organization, membership and role in the live InsurNex Firebase project; verify Cloudflare Worker variables/secret and the target service-account IAM boundary; perform an approved synthetic staging registration. No Worker deployment or secret/configuration mutation is included in the merge.
 
-**P1-D source candidate (2026-11-01):** `docs/P1_D_DOCUMENT_GATEWAY_RUNTIME_PARITY_2026-11-01.md` adds explicit handler-side Supabase API-key allowlisting for the `verify_jwt=false` gateway, 10-second Firebase/Firestore timeouts, a 64 KiB control-request limit, a Firebase token length cap, 15-minute new download URL TTLs and CI contract checks. Deployed v22 was only observed in the dated archive; live version/configuration and actual upload object reconciliation remain Staging acceptance items. No deployment or bucket/rules/data change is included.
+**P1-D source merged (PR #100):** `docs/P1_D_DOCUMENT_GATEWAY_RUNTIME_PARITY_2026-11-01.md` adds explicit handler-side Supabase API-key allowlisting for the `verify_jwt=false` gateway, 10-second Firebase/Firestore timeouts, a 64 KiB control-request limit, a Firebase token length cap, 15-minute new download URL TTLs and CI contract checks. Deployed v22 was only observed in the dated archive; live version/configuration and actual upload object reconciliation remain Staging acceptance items. No deployment or bucket/rules/data change is included.
 
 ### P1.3 — Build Client Data Access Layer (compatibility-first)
 **Priority:** P0 · **Dependencies:** field inventory, separation plan, RBAC matrix  
-**Implementation started:** P1-E adapter candidate is developed on `feat/phase1-client-data-access-adapter-20261101`. The Clients index now consumes an allowlisted base projection; Client 360 reads pass through a role/active-user/tenant preflight. This does not create field-level security because the backing legacy Firestore document remains mixed-sensitivity. See `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md`.  
+**P1-E adapter merged (PR #96):** the Clients index consumes an allowlisted base projection; Client 360 reads pass through a role/active-user/tenant preflight. This does not create field-level security because the backing legacy Firestore document remains mixed-sensitivity. See `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md`.
+
+**P1-E follow-up candidate (2026-11-01):** `docs/P1_E_CLIENT_DATA_ACCESS_CALLSITE_INVENTORY_2026-11-01.md` extends the static inventory with file-level read/write classifications and line-number signals, and adds a CI guard to keep proposed sensitive collections default-denied. This remains heuristic review evidence, not a complete call graph or approval to split data. No Rules, record or migration changes are included.
 - Catalog all readers/writers of `clients`, `individual`, `corporate`, `riskData`, `riskAssessment`, `aiAnalysis`, `documents` and notes.
 - Introduce typed repository interfaces for base client summary, restricted profile, medical profile, claim-sensitive fields, document references and AI findings.
 - Preserve legacy reads behind an adapter; write new data only after destination collection Rules and endpoint authorization are ready.
@@ -74,7 +76,7 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 ### P1.4 — Enforce tenant/role/relationship/assignment RBAC
 **Priority:** P0 · **Dependencies:** P1.3 data contracts  
-**Implemented interim boundary (PR in review):** Claims is denied direct get/query/timeline access to the legacy mixed-sensitivity `clients/{clientId}` record. Claim snapshots, linked policy metadata and claim-category document metadata remain available. Client 360 UI routes/navigation and both legacy Copilot client-context policy are restricted to Owner/Admin/Broker. This is an interim deny-until-projection control, not completion of data separation.
+**Implemented interim boundary (PR #86, with RBAC regression coverage in PR #88):** Claims is denied direct get/query/timeline access to the legacy mixed-sensitivity `clients/{clientId}` record. Claim snapshots, linked policy metadata and claim-category document metadata remain available. Client 360 UI routes/navigation and both legacy Copilot client-context policy are restricted to Owner/Admin/Broker. This is an interim deny-until-projection control, not completion of data separation.
 
 - Convert the proposed matrix into exact collection/action grants.
 - Rules and trusted endpoint checks validate Firebase identity, active membership, role, immutable organization ID, parent relationship and assignment.
