@@ -3,7 +3,7 @@
 **Date:** 2026-11-01  
 **Branch:** `feat/p1e-client-data-access-callsite-inventory-20261101`  
 **Base:** `main` at `381bcc409ef2663ac77b0a1782078060b9568707` after PR #100  
-**Status:** static source-inventory enhancement and default-deny regression guard; no Firestore Rules change, no collection rollout and no migration.
+**Status:** merged in PR #101 on 2026-11-01; static source-inventory enhancement and default-deny regression guard. No Firestore Rules change, collection rollout or migration.
 
 ## 1. Current runtime boundary
 
