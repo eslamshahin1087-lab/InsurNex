@@ -40,7 +40,7 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 **Runtime audit:** [Phase 1 Runtime Compatibility](PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md).
 
-**P1-A update (2026-11-01):** a manifest v2 and deterministic runtime-provenance report candidate are being added in `docs/P1_A_RUNTIME_PROVENANCE_2026-11-01.md`. The five archived functions are compared against canonical source at main commit `ca08aaeee376855d839111d1cf711506452bb6c7`; four differ and `securepath-webhook` has no canonical source path in that baseline. Provider configuration revision remains explicitly unavailable because the original read-only metadata capture did not return it. This is repository provenance evidence, not live deployment acceptance.
+**P1-A update (2026-11-01):** PR #98 merged the manifest v2 and deterministic runtime-provenance report described in `docs/P1_A_RUNTIME_PROVENANCE_2026-11-01.md`. The five archived functions are compared against canonical source at main commit `ca08aaeee376855d839111d1cf711506452bb6c7`; four differ and `securepath-webhook` has no canonical source path in that baseline. Provider configuration revision remains explicitly unavailable because the original read-only metadata capture did not return it. This is repository provenance evidence, not live deployment acceptance.
 
 **Implementation update (2026-10-30):** PR #85 merged the fail-closed Spark deployment guard; PR #86 merged an interim Claims deny boundary for the legacy mixed-sensitivity Client 360 record. This branch recovers all five active Supabase Edge Function source bundles as non-deployable snapshots and adds tested, non-deployed cron candidates that reject the service-role bearer fallback. This is progress, not completion of Phase 1.
 
@@ -60,6 +60,8 @@ This backlog is the execution source of truth. A checked source-code task means 
 **Source status:** implemented and merged on 2026-11-01 through iNex-App PR #21 and InsurNex PR #95. The existing iNex-authenticated Cloudflare Worker path remains backward compatible and now creates the Lead, Activity, follow-up Task and in-app Notification. Source consent evidence and deterministic IDs are required; Worker writes are restricted in code to four create-only InsurNex collections.
 
 **Activation remains pending:** verify the receiving UID/email, active profile, organization, membership and role in the live InsurNex Firebase project; verify Cloudflare Worker variables/secret and the target service-account IAM boundary; perform an approved synthetic staging registration. No Worker deployment or secret/configuration mutation is included in the merge.
+
+**P1-D source candidate (2026-11-01):** `docs/P1_D_DOCUMENT_GATEWAY_RUNTIME_PARITY_2026-11-01.md` adds explicit handler-side Supabase API-key allowlisting for the `verify_jwt=false` gateway, 10-second Firebase/Firestore timeouts, a 64 KiB control-request limit, a Firebase token length cap, 15-minute new download URL TTLs and CI contract checks. Deployed v22 was only observed in the dated archive; live version/configuration and actual upload object reconciliation remain Staging acceptance items. No deployment or bucket/rules/data change is included.
 
 ### P1.3 — Build Client Data Access Layer (compatibility-first)
 **Priority:** P0 · **Dependencies:** field inventory, separation plan, RBAC matrix  
@@ -153,7 +155,7 @@ This backlog is the execution source of truth. A checked source-code task means 
 ### P5.4 — Copilot provider and privacy controls
 - Remove/disable paid fallback paths unless explicitly approved; enforce budgets, quota handling, request limits and schema validation.
 - Do not submit sensitive data to consumer unpaid AI services.
-**P1-C source candidate:** `docs/P1_C_COPILOT_RUNTIME_PARITY_2026-11-01.md` adds disabled Firebase-account rejection, bounded token-verification/provider timeouts, a deterministic bilingual no-AI fallback, and synthetic tests for provider-off, quota/transport failure and disabled accounts. It does not enable or approve Gemini/Groq provider terms, change secrets, or prove live deployment parity.
+**P1-C source merged (PR #99):** `docs/P1_C_COPILOT_RUNTIME_PARITY_2026-11-01.md` records disabled Firebase-account rejection, bounded token-verification/provider timeouts, a deterministic bilingual no-AI fallback, and synthetic tests for provider-off, quota/transport failure and disabled accounts. It does not enable or approve Gemini/Groq provider terms, change secrets, or prove live deployment parity.
 **Acceptance:** provider-off and quota-exhausted fallback tests pass; no sensitive field enters an unapproved prompt; all Copilot citations resolve to authorized resources; staging parity is independently verified.
 
 ## Phase 6 — Insurer and External Integration
