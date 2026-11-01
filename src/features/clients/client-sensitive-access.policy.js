@@ -42,7 +42,7 @@ function timestampMillis(value) {
   if (value instanceof Date) return value.getTime();
   if (typeof value === 'number') return value;
   if (typeof value === 'string' && value.trim()) return Date.parse(value);
-  if (isPlainRecord(value) && typeof value.toMillis === 'function') {
+  if (value && typeof value === 'object' && typeof value.toMillis === 'function') {
     try { return Number(value.toMillis()); } catch { return Number.NaN; }
   }
   if (isPlainRecord(value) && typeof value.seconds === 'number') {
