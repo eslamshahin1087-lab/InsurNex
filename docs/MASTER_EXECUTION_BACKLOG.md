@@ -65,7 +65,9 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 ### P1.3 — Build Client Data Access Layer (compatibility-first)
 **Priority:** P0 · **Dependencies:** field inventory, separation plan, RBAC matrix  
-**Implementation started:** P1-E adapter candidate is developed on `feat/phase1-client-data-access-adapter-20261101`. The Clients index now consumes an allowlisted base projection; Client 360 reads pass through a role/active-user/tenant preflight. This does not create field-level security because the backing legacy Firestore document remains mixed-sensitivity. See `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md`.  
+**P1-E adapter merged (PR #96):** the Clients index consumes an allowlisted base projection; Client 360 reads pass through a role/active-user/tenant preflight. This does not create field-level security because the backing legacy Firestore document remains mixed-sensitivity. See `docs/P1_E_CLIENT_DATA_ACCESS_ADAPTER_2026-11-01.md`.
+
+**P1-E follow-up candidate (2026-11-01):** `docs/P1_E_CLIENT_DATA_ACCESS_CALLSITE_INVENTORY_2026-11-01.md` extends the static inventory with file-level read/write classifications and line-number signals, and adds a CI guard to keep proposed sensitive collections default-denied. This remains heuristic review evidence, not a complete call graph or approval to split data. No Rules, record or migration changes are included.
 - Catalog all readers/writers of `clients`, `individual`, `corporate`, `riskData`, `riskAssessment`, `aiAnalysis`, `documents` and notes.
 - Introduce typed repository interfaces for base client summary, restricted profile, medical profile, claim-sensitive fields, document references and AI findings.
 - Preserve legacy reads behind an adapter; write new data only after destination collection Rules and endpoint authorization are ready.
