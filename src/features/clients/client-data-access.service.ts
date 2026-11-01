@@ -70,3 +70,5 @@ export async function getLegacyClientWorkspace(
     scope,
   ) as InsuranceClient;
 }
+
+export type { ClientAccessScope, ClientBaseSummary } from './client-access.policy.js';
