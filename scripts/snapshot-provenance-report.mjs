@@ -17,10 +17,15 @@ const EXPECTED_FUNCTIONS = [
 ];
 
 function gitBlobSha(bytes) {
-  return createHash('sha1')
-    .update(Buffer.from('blob ' + bytes.length + '\\0', 'utf8'))
-    .update(bytes)
-    .digest('hex');
+  const header = Buffer.concat([
+    Buffer.from('blob ' + bytes.length + ' ', 'utf8'),
+    Buffer.from([0]),
+  ]);
+  return createHash('sha1').update(header).update(bytes).digest('hex');
+}
+
+function sha256(bytes) {
+  return createHash('sha256').update(bytes).digest('hex');
 }
 
 function assertSecretScreened(content, label) {
@@ -29,7 +34,7 @@ function assertSecretScreened(content, label) {
     [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, 'private key'],
     [/AIza[0-9A-Za-z_-]{30,}/, 'Google API key'],
     [/sb_secret_[A-Za-z0-9_-]{20,}/, 'Supabase secret key'],
-    [/eyJ[A-Za-z0-9_-]{20,}\\.[A-Za-z0-9_-]{20,}\\.[A-Za-z0-9_-]{10,}/, 'JWT-like token'],
+    [/eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}/, 'JWT-like token'],
   ];
   for (const [pattern, description] of patterns) {
     assert.doesNotMatch(text, pattern, label + ' contains a possible ' + description);
@@ -40,10 +45,13 @@ function assertSafeArchivePath(filePath) {
   assert.equal(typeof filePath, 'string');
   assert.ok(filePath.startsWith(ARCHIVE_ROOT), 'snapshot path is outside the dated archive');
   assert.equal(path.isAbsolute(filePath), false, 'absolute snapshot path is forbidden');
-  const normalized = path.posix.normalize(filePath);
-  assert.equal(normalized, filePath, 'snapshot path must be normalized');
+  assert.equal(path.posix.normalize(filePath), filePath, 'snapshot path must be normalized');
   assert.equal(filePath.includes('..'), false, 'snapshot path traversal is forbidden');
   assert.ok(filePath.endsWith('.ts') || filePath.endsWith('.json'), 'unexpected snapshot file type');
+}
+
+function lineCount(text) {
+  return (text.match(/\n/g) || []).length + 1;
 }
 
 const manifestBytes = await readFile(MANIFEST_PATH);
@@ -114,16 +122,16 @@ for (const fn of [...manifest.functions].sort((a, b) => a.slug.localeCompare(b.s
     const actualGitBlobSha = gitBlobSha(bytes);
     assert.equal(actualGitBlobSha, file.gitBlobSha, 'Git blob SHA mismatch: ' + file.path);
     assert.equal(text.length, file.characters, 'character count mismatch: ' + file.path);
-    assert.equal(text.split(/\\r?\\n/).length, file.lines, 'line count mismatch: ' + file.path);
+    assert.equal(lineCount(text), file.lines, 'line count mismatch: ' + file.path);
     assertSecretScreened(bytes, file.path);
 
     reportFiles.push({
       path: file.path,
       bytes: bytes.length,
       characters: text.length,
-      lines: text.split(/\\r?\\n/).length,
+      lines: lineCount(text),
       gitBlobSha: actualGitBlobSha,
-      sha256: createHash('sha256').update(bytes).digest('hex'),
+      sha256: sha256(bytes),
     });
     summary.snapshotFileCount += 1;
     summary.secretScreenedFileCount += 1;
@@ -183,7 +191,7 @@ const report = {
 };
 
 if (process.argv.includes('--json')) {
-  process.stdout.write(JSON.stringify(report, null, 2) + '\\n');
+  process.stdout.write(JSON.stringify(report, null, 2) + String.fromCharCode(10));
 } else {
   process.stdout.write(
     [
@@ -195,6 +203,6 @@ if (process.argv.includes('--json')) {
       'Canonical source not present in main: ' + summary.canonicalNotPresent,
       'Configuration revisions unavailable in captured metadata: ' + summary.configurationRevisionUnavailable,
       'Secret-screened files: ' + summary.secretScreenedFileCount,
-    ].join('\\n') + '\\n',
+    ].join(String.fromCharCode(10)) + String.fromCharCode(10),
   );
 }
