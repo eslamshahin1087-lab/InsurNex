@@ -33,8 +33,8 @@ export function projectClientBaseSummary(
   data: Record<string, unknown>,
   scope: ClientAccessScope,
 ): ClientBaseSummary;
-export function projectLegacyClientWorkspace<T extends Record<string, unknown>>(
+export function projectLegacyClientWorkspace<T extends { organizationId: string }>(
   documentId: string,
   data: T,
   scope: ClientAccessScope,
-): { id: string } & T;
+): T & { id: string };
