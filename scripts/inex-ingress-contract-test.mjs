@@ -38,6 +38,6 @@ assert.ok(!contract.includes('Receiver account is verified'), 'The contract must
 assert.ok(contract.includes('not active') === false, 'The contract must not make claims about the receiver account state.');
 assert.ok(gates.includes('Firebase Cloud Functions remain build/test-only legacy source'));
 assert.ok(gates.includes('No Firebase Cloud Functions deployment on Spark') || gates.includes('Firebase Cloud Functions remain build/test-only legacy source'));
-assert.ok(gates.includes('consumer free-tier generative APIs'));
+assert.ok(gates.includes('Do not send identifiable client, policy, claim, national-ID, contact, or medical data to consumer free-tier generative AI'));
 
 console.log('iNex ingress contract and Spark safety gates: PASS');
