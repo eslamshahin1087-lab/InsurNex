@@ -88,6 +88,8 @@ jobs:
         run: npm run test:client-data-access-projection
       - name: P1-E typed client data contracts and safe document metadata projection
         run: npm run test:client-data-contracts
+      - name: P1-E fail-closed sensitive access grant policy
+        run: npm run test:client-sensitive-access-policy
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
