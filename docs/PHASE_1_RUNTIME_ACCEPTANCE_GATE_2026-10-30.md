@@ -58,11 +58,15 @@ Turn the Phase 1 runtime compatibility findings into a verifiable, operator-led 
 
 ### P1-D — Document-storage runtime parity
 
+**Source implementation candidate:** `docs/P1_D_DOCUMENT_GATEWAY_RUNTIME_PARITY_2026-11-01.md` on branch `feat/p1d-document-gateway-runtime-parity-20261101`. The candidate makes `verify_jwt=false` explicit and validates the trusted Supabase API-key allowlist in the handler, retains Firebase-token Firestore authorization reads, adds 10-second Firebase/Firestore timeouts, caps control requests at 64 KiB and Firebase tokens at 16 KiB, and limits new download URLs to 15 minutes. Source and policy regression tests are added to CI.
+
 1. Compare deployed and canonical implementations before replacement.
 2. Require document ID input; resolve bucket/path and metadata server-side.
 3. Bind every operation to tenant, actor, resource relationship and category.
 4. Enforce file size/type, upload lifecycle, signed URL TTL and deletion semantics.
 5. Exercise upload, list, preview/download, delete, legacy reference and cross-tenant denial.
+
+**Still pending:** the dated snapshot records deployed v22, but no fresh read-only live metadata check is part of this PR. Staging must verify actual uploaded object MIME/size against metadata after upload, real URL expiry, role/tenant denials, legacy and operation lifecycle, and rollback before a separate deployment proposal.
 
 **Acceptance:** staging evidence proves correct object binding and denial cases; no reusable signed URL or arbitrary storage path is persisted or accepted.
 
