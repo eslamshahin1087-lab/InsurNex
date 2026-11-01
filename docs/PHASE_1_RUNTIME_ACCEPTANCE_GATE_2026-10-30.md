@@ -46,13 +46,15 @@ Turn the Phase 1 runtime compatibility findings into a verifiable, operator-led 
 
 ### P1-C — Copilot runtime parity
 
+**Source implementation candidate:** `docs/P1_C_COPILOT_RUNTIME_PARITY_2026-11-01.md` on branch `feat/p1c-copilot-runtime-parity-20261101`. It adds explicit disabled-account rejection, bounded Firebase token verification, 15-second provider timeouts, a deterministic bilingual local fallback and Deno tests for provider-off, quota/transport failure and disabled accounts. No provider secret/configuration or deployed function is changed.
+
 1. Compare deployed `copilot-chat` behavior to canonical source at request, auth, context selection, authorization, provider and response boundaries.
 2. Verify that browser-supplied business context is never trusted as authorization evidence.
 3. Validate Firebase identity, active organization membership, capability and record relationship before context loading.
 4. Confirm sensitive data is excluded from consumer free-tier AI requests and logs.
 5. Reproduce gateway JWT configuration only in a dedicated staging project.
 
-**Acceptance:** positive and negative synthetic tests cover expired/invalid tokens, wrong organization, role restrictions, forged IDs, route changes and provider-off/quota-exhausted fallback.
+**Acceptance:** positive and negative synthetic tests cover expired/invalid/disabled tokens, wrong organization, role restrictions, forged IDs, route changes and provider-off/quota-exhausted fallback. Staging parity and provider privacy/cost approval remain separate gates.
 
 ### P1-D — Document-storage runtime parity
 
