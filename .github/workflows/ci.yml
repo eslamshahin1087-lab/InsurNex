@@ -66,6 +66,8 @@ jobs:
         run: npm run test:client-data-access-audit
       - name: Client data-access static inventory
         run: npm run audit:client-data-access
+      - name: Client data-access projection and RBAC regression tests
+        run: npm run test:client-data-access-projection
       - run: npm run lint
       - run: npm run build
       - name: Build Firebase Functions
