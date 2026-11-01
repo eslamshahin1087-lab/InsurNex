@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "capturedAt": "2026-10-30T12:10:00.000Z",
   "projectRef": "piloiwtdbtmfiyqxfbae",
   "source": "Supabase Edge Function metadata/source read; read-only",
@@ -25,7 +25,20 @@
         "Deployed v37 accepts business context from the caller body.",
         "Deployed v37 does not use the repository's server-side trusted-context loader.",
         "Gemini/Groq fallback exists; review provider data terms before sensitive business context is sent."
-      ]
+      ],
+      "observedAt": "2026-10-30T12:10:00.000Z",
+      "configurationObservation": {
+        "gatewayVerifyJwt": true,
+        "source": "deployed function metadata at capture time",
+        "revision": null,
+        "revisionStatus": "not-returned-by-read-only-metadata-capture"
+      },
+      "canonicalSourceComparison": {
+        "path": "supabase/functions/copilot-chat/index.ts",
+        "gitBlobSha": "35b69480aa6f94b3c1667c98931cebe5c6ccddb9",
+        "snapshotGitBlobSha": "5eb922f4b369719a0f8de42b6ae6cbefe1853e0e",
+        "parity": "mismatch"
+      }
     },
     {
       "slug": "document-storage",
@@ -46,7 +59,20 @@
       "observedRisks": [
         "Deployed v22 is an older inline handler and differs from the modular repository source.",
         "Must pass staging tests for metadata/document ID/path binding before replacement."
-      ]
+      ],
+      "observedAt": "2026-10-30T12:10:00.000Z",
+      "configurationObservation": {
+        "gatewayVerifyJwt": false,
+        "source": "deployed function metadata at capture time",
+        "revision": null,
+        "revisionStatus": "not-returned-by-read-only-metadata-capture"
+      },
+      "canonicalSourceComparison": {
+        "path": "supabase/functions/document-storage/index.ts",
+        "gitBlobSha": "12ce882e4efd0112b029fc35bcaaa7805b6f8870",
+        "snapshotGitBlobSha": "c3e705064fe4c5921fcbd04eae62439636e896e9",
+        "parity": "mismatch"
+      }
     },
     {
       "slug": "securepath-webhook",
@@ -73,7 +99,20 @@
       "observedRisks": [
         "Source was not versioned in the repository before this snapshot.",
         "Handler creates client/lead/timeline/notification records; preserve as reference only until contract and role scope are reviewed."
-      ]
+      ],
+      "observedAt": "2026-10-30T12:10:00.000Z",
+      "configurationObservation": {
+        "gatewayVerifyJwt": false,
+        "source": "deployed function metadata at capture time",
+        "revision": null,
+        "revisionStatus": "not-returned-by-read-only-metadata-capture"
+      },
+      "canonicalSourceComparison": {
+        "path": null,
+        "gitBlobSha": null,
+        "parity": "not-present-in-main",
+        "note": "The archived deployed source has no corresponding canonical function source path in the compared main commit."
+      }
     },
     {
       "slug": "cron-policy-check",
@@ -94,7 +133,20 @@
       "observedRisks": [
         "Deployed v7 accepts SUPABASE_SERVICE_ROLE_KEY as a bearer alternative to CRON_SECRET.",
         "Uses lastNotifiedAt cooldown rather than a stable event key; assess duplicate/retry semantics."
-      ]
+      ],
+      "observedAt": "2026-10-30T12:10:00.000Z",
+      "configurationObservation": {
+        "gatewayVerifyJwt": false,
+        "source": "deployed function metadata at capture time",
+        "revision": null,
+        "revisionStatus": "not-returned-by-read-only-metadata-capture"
+      },
+      "canonicalSourceComparison": {
+        "path": "supabase/functions/cron-policy-check/index.ts",
+        "gitBlobSha": "821c74a85682f9df7cb4d3f3890e17bb21d7265d",
+        "snapshotGitBlobSha": "9baf46251152ca86fd086f1e0ccc67393ff6973e",
+        "parity": "mismatch"
+      }
     },
     {
       "slug": "cron-document-check",
@@ -115,7 +167,28 @@
       "observedRisks": [
         "Deployed v7 accepts SUPABASE_SERVICE_ROLE_KEY as a bearer alternative to CRON_SECRET.",
         "No stable notification deduplication key was found; repeated runs may create duplicate notifications."
-      ]
+      ],
+      "observedAt": "2026-10-30T12:10:00.000Z",
+      "configurationObservation": {
+        "gatewayVerifyJwt": false,
+        "source": "deployed function metadata at capture time",
+        "revision": null,
+        "revisionStatus": "not-returned-by-read-only-metadata-capture"
+      },
+      "canonicalSourceComparison": {
+        "path": "supabase/functions/cron-document-check/index.ts",
+        "gitBlobSha": "9ff99341c87691532f6396e50cea769ef39cf6a5",
+        "snapshotGitBlobSha": "c60f29811532f96240477d3317493a6509a952df",
+        "parity": "mismatch"
+      }
     }
-  ]
+  ],
+  "canonicalSourceComparison": {
+    "repository": "eslamshahin1087-lab/InsurNex",
+    "branch": "main",
+    "commitSha": "ca08aaeee376855d839111d1cf711506452bb6c7",
+    "comparedAt": "2026-11-01",
+    "comparisonType": "git-blob-sha",
+    "scope": "Repository source comparison only; this is not a live deployment or provider configuration check."
+  }
 }
