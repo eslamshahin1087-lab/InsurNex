@@ -36,6 +36,15 @@ export interface Lead {
   estimatedValue: number;
   assignedTo: string;
   assignedToName?: string;
+  /** Trusted source metadata for inbound integrations such as iNex-App. */
+  sourceSystem?: string;
+  sourceExternalId?: string;
+  sourceSchemaVersion?: number;
+  sourceEvent?: string;
+  clientType?: 'individual' | 'corporate' | string;
+  consentToContact?: boolean;
+  consentCapturedAt?: unknown;
+  consentNoticeVersion?: string;
   notes?: string;
   lostReason?: string;
   clientId?: string;
