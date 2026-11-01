@@ -31,7 +31,9 @@
     "test:inex-ingress-contract": "node scripts/inex-ingress-contract-test.mjs",
     "test:inex-lead-integration": "node scripts/inex-lead-integration-contract-test.mjs",
     "test:client-data-access-projection": "node --test scripts/client-data-access-projection-test.mjs",
-    "test:cron-endpoints": "node scripts/cron-endpoint-security-test.mjs"
+    "test:cron-endpoints": "node scripts/cron-endpoint-security-test.mjs",
+    "audit:runtime-provenance": "node scripts/snapshot-provenance-report.mjs",
+    "test:runtime-provenance": "node scripts/snapshot-provenance-report-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

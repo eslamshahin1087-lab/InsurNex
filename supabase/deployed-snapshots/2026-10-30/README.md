@@ -23,4 +23,4 @@ These files are read-only source snapshots returned by the Supabase project meta
 | `cron-policy-check` | 7 | disabled | Accepts the Supabase service-role key as an alternate cron bearer |
 | `cron-document-check` | 7 | disabled | Same service-role bearer fallback; no stable notification deduplication key found |
 
-See `manifest.json` and [Phase 1 Runtime Compatibility](../../../docs/PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md) for metadata and acceptance gates.
+See `manifest.json` for capture-time metadata and canonical-source comparison. Run `npm run audit:runtime-provenance` to produce a deterministic report with per-file Git blob SHA-1 and SHA-256 computed from the committed archive bytes. This repository comparison is not a live deployment check. The provider did not return a configuration revision in the original read-only capture; that field is explicitly `null`, not inferred. See [Phase 1 Runtime Compatibility](../../../docs/PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md) for acceptance gates.

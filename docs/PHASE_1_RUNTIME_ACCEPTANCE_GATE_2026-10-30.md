@@ -22,6 +22,10 @@ Turn the Phase 1 runtime compatibility findings into a verifiable, operator-led 
 
 ### P1-A — Runtime provenance and drift control
 
+**Implementation candidate:** see `docs/P1_A_RUNTIME_PROVENANCE_2026-11-01.md` and branch `feat/phase1-runtime-provenance-drift-control-20261101`. Manifest v2 records per-function observation time, gateway JWT observation source, explicit unavailable configuration revision, and canonical source comparison anchored to main commit `ca08aaeee376855d839111d1cf711506452bb6c7`. Deterministic Git blob/SHA-256 reporting, secret-screening and archive-only regression tests are added to CI.
+
+**Remaining acceptance limitation:** the captured provider metadata did not return a configuration revision, and no fresh live metadata query or staging operation is part of this PR. P1-A repository provenance is implemented as a candidate; provider configuration provenance remains pending authorized read-only observation.
+
 1. Preserve deployed source archives as historical evidence only.
 2. Record function slug, deployed version, deployment bundle hash, source-file hashes, gateway JWT setting, configuration revision and observation timestamp.
 3. Distinguish canonical source, deployed snapshot and candidate replacement in every report.

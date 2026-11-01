@@ -40,6 +40,8 @@ This backlog is the execution source of truth. A checked source-code task means 
 
 **Runtime audit:** [Phase 1 Runtime Compatibility](PHASE_1_RUNTIME_COMPATIBILITY_2026-10-30.md).
 
+**P1-A update (2026-11-01):** a manifest v2 and deterministic runtime-provenance report candidate are being added in `docs/P1_A_RUNTIME_PROVENANCE_2026-11-01.md`. The five archived functions are compared against canonical source at main commit `ca08aaeee376855d839111d1cf711506452bb6c7`; four differ and `securepath-webhook` has no canonical source path in that baseline. Provider configuration revision remains explicitly unavailable because the original read-only metadata capture did not return it. This is repository provenance evidence, not live deployment acceptance.
+
 **Implementation update (2026-10-30):** PR #85 merged the fail-closed Spark deployment guard; PR #86 merged an interim Claims deny boundary for the legacy mixed-sensitivity Client 360 record. This branch recovers all five active Supabase Edge Function source bundles as non-deployable snapshots and adds tested, non-deployed cron candidates that reject the service-role bearer fallback. This is progress, not completion of Phase 1.
 
 

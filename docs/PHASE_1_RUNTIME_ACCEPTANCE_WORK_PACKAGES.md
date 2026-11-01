@@ -4,7 +4,7 @@ This index supplements (and does not replace) `PHASE_1_RUNTIME_COMPATIBILITY_202
 
 | Work package | Scope | Exit evidence | Risk |
 |---|---|---|---|
-| P1-A Runtime provenance | Snapshot manifest, checksums, canonical-vs-deployed distinction | Integrity and secret-screen tests | Medium |
+| P1-A Runtime provenance | Manifest v2, per-function observations, canonical drift comparison, Git blob + SHA-256 deterministic report | Snapshot integrity, reproducibility, archive-path and secret-screen tests; provider config revision remains unavailable | Medium |
 | P1-B Cron hardening | Dedicated secret, replay/retry safety, idempotency | Deno tests + scheduler header evidence | High |
 | P1-C Copilot parity | Trusted context, auth, provider and privacy parity | Synthetic negative tests + staging results | Critical |
 | P1-D Document gateway | Metadata-bound paths and lifecycle | Staging upload/download/delete and tenant denial | Critical |
