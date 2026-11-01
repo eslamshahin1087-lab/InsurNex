@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   CLIENT_BASE_SUMMARY_FIELDS,
   LEGACY_CLIENT_READ_ROLES,
@@ -160,4 +161,19 @@ test('Client 360 legacy workspace remains available to authorized roles without 
     () => projectLegacyClientWorkspace('client-1', legacyClient, { ...scope, role: 'claims' }),
     (error) => error.code === 'CLIENT_ACCESS_DENIED',
   );
+});
+
+test('Client list and Client 360 routes use the new read adapter', () => {
+  const clientsPage = readFileSync(new URL('../src/pages/ClientsPage.tsx', import.meta.url), 'utf8');
+  const clientDetailsPage = readFileSync(new URL('../src/pages/ClientDetailsPage.tsx', import.meta.url), 'utf8');
+  const legacyService = readFileSync(new URL('../src/features/clients/client.service.ts', import.meta.url), 'utf8');
+
+  assert.ok(clientsPage.includes('listClientSummaries(profile)'));
+  assert.ok(clientsPage.includes('ClientBaseSummary[]'));
+  assert.equal(clientsPage.includes("import { listClients } from '../features/clients/client.service'"), false);
+
+  assert.ok(clientDetailsPage.includes('getLegacyClientWorkspace(profile, id)'));
+  assert.equal(clientDetailsPage.includes("import { getClient } from '../features/clients/client.service'"), false);
+
+  assert.ok(legacyService.includes('@deprecated'));
 });
