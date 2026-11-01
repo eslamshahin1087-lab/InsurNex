@@ -367,6 +367,25 @@ export default function LeadDetailsPage() {
               {LEAD_SOURCE_LABELS[lead.source]}
             </div>
             <small className="inx-kpi-label">المصدر</small>
+            {lead.sourceSystem === 'iNex-App' && (
+              <small
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  marginTop: 5,
+                  padding: '3px 9px',
+                  borderRadius: 999,
+                  background: 'rgba(30, 66, 114, 0.10)',
+                  color: 'var(--inx-blue)',
+                  fontWeight: 800,
+                  fontSize: 10,
+                }}
+                title={lead.consentToContact ? 'تم تسجيل موافقة مشاركة بيانات التواصل' : 'مصدر السجل: iNex'}
+              >
+                iNex · وارد من التطبيق
+              </small>
+            )}
           </article>
         </div>
 

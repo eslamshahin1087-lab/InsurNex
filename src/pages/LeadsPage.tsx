@@ -759,6 +759,24 @@ export default function LeadsPage() {
                       >
                         {LEAD_STAGE_LABELS[l.stage]}
                       </span>
+                      {l.sourceSystem === 'iNex-App' && (
+                        <span
+                          title="مصدر العميل: تطبيق iNex"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '2px 8px',
+                            borderRadius: 999,
+                            border: '1px solid rgba(30, 66, 114, 0.18)',
+                            background: 'rgba(30, 66, 114, 0.08)',
+                            color: 'var(--inx-blue)',
+                            fontSize: 10,
+                            fontWeight: 800,
+                          }}
+                        >
+                          iNex
+                        </span>
+                      )}
                     </div>
                     {l.companyName && (
                       <small
