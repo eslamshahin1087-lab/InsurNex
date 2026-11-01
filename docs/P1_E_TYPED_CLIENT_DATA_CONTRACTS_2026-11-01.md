@@ -3,7 +3,7 @@
 **Date:** 2026-11-01  
 **Branch:** `feat/p1e-typed-client-data-contracts-20261101`  
 **Base:** `main` after PR #101  
-**Status:** type and pure projection candidate; no collection access enabled, no migration and no Firestore Rules change.
+**Status:** merged in PR #102 on 2026-11-01; type and pure projection contracts only. No collection access enabled, no migration and no Firestore Rules change.
 
 ## 1. Purpose
 
