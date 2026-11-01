@@ -53,7 +53,7 @@ The existing read-only inventory, proposal planner and reviewer remain the sourc
 - Health/medical -> `clientMedicalProfiles` (proposal only).
 - Derived risk assessment and AI analysis -> `aiFindings` (proposal only).
 - Document references -> existing `documents` metadata, after manual relationship and private-storage reconciliation.
-- Free-form notes and unknown fields -> manual human classification; do not guess a destination.
+- Free-form notes receive `manual_classification_required`; the planner currently labels `clientSensitiveProfiles` as a candidate destination, but that is not approval to move the field. Unknown fields remain unclassified with no destination.
 
 This is not an approved role matrix. Proposed read/write roles, purpose, retention, export/delete handling, data-owner approval and legal basis remain unresolved. `claimSensitiveDetails` and `auditLogs` also remain default-denied and are not enabled by this work.
 
