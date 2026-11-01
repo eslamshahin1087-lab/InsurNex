@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -146,7 +147,14 @@ for (const fn of [...manifest.functions].sort((a, b) => a.slug.localeCompare(b.s
   } else {
     assert.ok(canonical.path.startsWith('supabase/functions/'));
     assert.match(canonical.gitBlobSha, /^[a-f0-9]{40}$/);
-    const canonicalBytes = await readFile(path.resolve(ROOT, canonical.path));
+    // Compare against the pinned canonical commit, not the current feature
+    // branch working tree. This lets the same gate validate PRs that intentionally
+    // change an Edge Function while preserving the historical baseline report.
+    const canonicalBytes = execFileSync(
+      'git',
+      ['show', comparison.commitSha + ':' + canonical.path],
+      { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 },
+    );
     const actualCanonicalSha = gitBlobSha(canonicalBytes);
     assert.equal(
       actualCanonicalSha,
