@@ -106,5 +106,5 @@ export function projectLegacyClientWorkspace(documentId, data, scope) {
     throw error;
   }
 
-  return { id: documentId, ...data };
+  return { ...data, id: documentId };
 }
