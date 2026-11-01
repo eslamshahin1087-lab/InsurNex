@@ -72,6 +72,8 @@ jobs:
         run: |
           npm ci --prefix functions
           npm run build --prefix functions
+      - name: Verify iNex ingress contract and Spark safety gates
+        run: npm run test:inex-ingress-contract
       - name: Verify Firebase Functions deployment is blocked under Spark
         run: npm run test:spark-runtime-guard
       - name: Legacy Firebase Copilot context security regression tests
