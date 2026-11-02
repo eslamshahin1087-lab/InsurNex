@@ -38,7 +38,9 @@
     "test:document-storage-runtime": "node scripts/document-storage-runtime-contract-test.mjs",
     "test:client-sensitive-default-deny": "node scripts/client-sensitive-collections-default-deny-test.mjs",
     "test:client-data-contracts": "node scripts/client-data-contracts-test.mjs",
-    "test:client-sensitive-access-policy": "node scripts/client-sensitive-access-policy-test.mjs"
+    "test:client-sensitive-access-policy": "node scripts/client-sensitive-access-policy-test.mjs",
+    "audit:client-data-review": "node scripts/client-data-access-review.mjs",
+    "test:client-data-review": "node scripts/client-data-access-review-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
