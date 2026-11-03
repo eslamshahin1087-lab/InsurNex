@@ -5,6 +5,7 @@ import {
   doc,
   getDocs,
   limit,
+  startAfter,
   orderBy,
   query,
   serverTimestamp,
@@ -12,6 +13,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { computeFinancialSummary } from './financial-metrics';
 import type {
   CommissionEntry,
   ExpenseEntry,
@@ -117,30 +119,51 @@ export async function deleteCommission(id: string): Promise<void> {
 
 // ---------- Summary ----------
 
+const SUMMARY_PAGE_SIZE = 500;
+
+async function listAllOrganizationRows<T>(
+  collectionName: 'revenue' | 'expenses' | 'commissions',
+  organizationId: string,
+): Promise<T[]> {
+  const rows: T[] = [];
+  let cursor: import('firebase/firestore').QueryDocumentSnapshot | undefined;
+
+  while (true) {
+    const baseQuery = query(
+      collection(db, collectionName),
+      where('organizationId', '==', organizationId),
+    );
+    const pageQuery = cursor
+      ? query(baseQuery, startAfter(cursor), limit(SUMMARY_PAGE_SIZE))
+      : query(baseQuery, limit(SUMMARY_PAGE_SIZE));
+    const snapshot = await getDocs(pageQuery);
+
+    rows.push(...snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T));
+    if (snapshot.size < SUMMARY_PAGE_SIZE) break;
+    cursor = snapshot.docs[snapshot.docs.length - 1];
+  }
+
+  return rows;
+}
+
+/**
+ * Reads every organization-scoped financial row in pages. The 500-row cap is
+ * retained for interactive list panels, but is never used as a total source.
+ */
+export async function loadFinanceSummary(organizationId: string): Promise<FinanceSummary> {
+  if (!organizationId.trim()) throw new Error('FINANCE_ORGANIZATION_REQUIRED');
+  const [revenue, expenses, commissions] = await Promise.all([
+    listAllOrganizationRows<RevenueEntry>('revenue', organizationId),
+    listAllOrganizationRows<ExpenseEntry>('expenses', organizationId),
+    listAllOrganizationRows<CommissionEntry>('commissions', organizationId),
+  ]);
+  return computeSummary(revenue, expenses, commissions);
+}
+
 export function computeSummary(
   revenue: RevenueEntry[],
   expenses: ExpenseEntry[],
   commissions: CommissionEntry[],
 ): FinanceSummary {
-  const totalRevenue = revenue
-    .filter((r) => r.status === 'confirmed')
-    .reduce((sum, r) => sum + (r.amount || 0), 0);
-
-  const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-
-  const pendingCommissions = commissions
-    .filter((c) => c.status === 'pending')
-    .reduce((sum, c) => sum + (c.commissionAmount || 0), 0);
-
-  const receivedCommissions = commissions
-    .filter((c) => c.status === 'received')
-    .reduce((sum, c) => sum + (c.commissionAmount || 0), 0);
-
-  return {
-    totalRevenue,
-    totalExpenses,
-    netIncome: totalRevenue - totalExpenses,
-    pendingCommissions,
-    receivedCommissions,
-  };
+  return computeFinancialSummary(revenue, expenses, commissions);
 }
