@@ -11,6 +11,7 @@ import {
   COMMISSION_STATUS_LABELS,
   type CommissionEntry,
 } from './finance.types';
+import { computeFinancialSummary, formatCurrencyAmount, formatFinanceMetric } from './financial-metrics';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -49,13 +50,11 @@ export default function CommissionsPanel() {
   }, [profile?.organizationId]);
 
   const totals = useMemo(() => {
-    const pending = items
-      .filter((c) => c.status === 'pending')
-      .reduce((s, c) => s + (c.commissionAmount || 0), 0);
-    const received = items
-      .filter((c) => c.status === 'received')
-      .reduce((s, c) => s + (c.commissionAmount || 0), 0);
-    return { pending, received };
+    const summary = computeFinancialSummary([], [], items);
+    return {
+      pending: formatFinanceMetric(summary.currencies, 'pendingCommissions'),
+      received: formatFinanceMetric(summary.currencies, 'receivedCommissions'),
+    };
   }, [items]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,8 +125,7 @@ export default function CommissionsPanel() {
           <span className="eyebrow">Commissions</span>
           <h2>العمولات</h2>
           <small>
-            معلقة: {totals.pending.toLocaleString('ar-EG')} ج.م · مستلمة:{' '}
-            {totals.received.toLocaleString('ar-EG')} ج.م
+            معلقة: {totals.pending} · مستلمة: {totals.received}
           </small>
         </div>
         <button
@@ -221,7 +219,7 @@ export default function CommissionsPanel() {
           {items.map((c) => (
             <li key={c.id} className={`fin-row status-${c.status}`}>
               <div className="fin-row-main">
-                <strong>{c.commissionAmount.toLocaleString('ar-EG')} ج.م</strong>
+                <strong>{formatCurrencyAmount(c.commissionAmount, c.currency)}</strong>
                 <em className={`fin-tag fin-tag-${c.status}`}>
                   {COMMISSION_STATUS_LABELS[c.status]}
                 </em>
@@ -230,9 +228,10 @@ export default function CommissionsPanel() {
                 <span>{c.clientName || 'بدون عميل'}</span>
                 <span>•</span>
                 <span>{c.insurerName || 'بدون شركة'}</span>
+                {c.source === 'policy_issuance' && <><span>•</span><span>قيد مرتبط بوثيقة</span></>}
                 <span>•</span>
                 <span>
-                  {c.commissionRate}% من {c.premium.toLocaleString('ar-EG')}
+                  {c.commissionRate}% من {formatCurrencyAmount(c.premium, c.currency)}
                 </span>
               </div>
               <div className="fin-row-actions">
@@ -246,14 +245,16 @@ export default function CommissionsPanel() {
                     <CheckCircle2 size={15} />
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="fin-del"
-                  onClick={() => void handleDelete(c.id)}
-                  aria-label="حذف"
-                >
-                  <Trash2 size={15} />
-                </button>
+                {c.source !== 'policy_issuance' && (
+                  <button
+                    type="button"
+                    className="fin-del"
+                    onClick={() => void handleDelete(c.id)}
+                    aria-label="حذف"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
               </div>
             </li>
           ))}
