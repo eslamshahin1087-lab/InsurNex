@@ -13,12 +13,35 @@ import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../features/auth/auth-context';
 import type { AppTask } from '../types/task';
+import { setTaskStatus } from '../features/tasks/task.service';
+import {
+  getTaskDueBucket,
+  getTaskDueSummary,
+  getTodayDateKey,
+  nextTaskStatus,
+  sortTasksForDailyWork,
+} from '../features/tasks/task-workflow';
+import type { TaskDueFilter } from '../features/tasks/task-workflow';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniBarChart from '../components/charts/MiniBarChart';
 
 type Filter = 'all' | 'open' | 'urgent' | 'completed';
+
+const DUE_FILTERS: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'undated'];
+const DUE_FILTER_LABELS: Record<TaskDueFilter, string> = {
+  all: 'كل المواعيد',
+  overdue: 'متأخرة',
+  today: 'مستحقة اليوم',
+  upcoming: 'خلال 7 أيام',
+  undated: 'بلا تاريخ',
+};
+const TASK_STATUS_LABELS: Record<string, string> = {
+  open: 'مفتوحة',
+  in_progress: 'قيد التنفيذ',
+  completed: 'مكتملة',
+};
 
 const PRIORITY_LABELS: Record<string, string> = {
   low: 'منخفضة',
@@ -55,6 +78,9 @@ export default function TasksPage() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [dueFilter, setDueFilter] = useState<TaskDueFilter>('all');
+  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const today = getTodayDateKey();
 
   const load = useCallback(async () => {
     if (!profile) {
@@ -100,6 +126,30 @@ export default function TasksPage() {
     });
   }, [items]);
 
+  const dueSummary = useMemo(() => getTaskDueSummary(items, today), [items, today]);
+
+  const changeTaskStatus = useCallback(async (task: AppTask) => {
+    const organizationId = profile?.organizationId;
+    const nextStatus = nextTaskStatus(task.status);
+    if (!organizationId || !nextStatus) {
+      setError('لا يمكن تحديث هذه المهمة. تحقق من حالة المهمة والمؤسسة.');
+      return;
+    }
+
+    setUpdatingTaskId(task.id);
+    setError('');
+    try {
+      await setTaskStatus(task.id, organizationId, nextStatus);
+      setItems((current) => current.map((item) =>
+        item.id === task.id ? { ...item, status: nextStatus } : item,
+      ));
+    } catch {
+      setError('تعذر تحديث حالة المهمة. أعد تحميل القائمة وحاول مرة أخرى.');
+    } finally {
+      setUpdatingTaskId(null);
+    }
+  }, [profile]);
+
   const stats = useMemo(
     () => ({
       total: items.length,
@@ -114,7 +164,7 @@ export default function TasksPage() {
 
   const visible = useMemo(() => {
     const t = search.trim().toLowerCase();
-    return items.filter((x) => {
+    const filtered = items.filter((x) => {
       const ok =
         filter === 'all' ||
         (filter === 'open' && x.status !== 'completed') ||
@@ -122,9 +172,12 @@ export default function TasksPage() {
           x.status !== 'completed' &&
           x.priority === 'urgent') ||
         (filter === 'completed' && x.status === 'completed');
-      return ok && (!t || String(x.title || '').toLowerCase().includes(t));
+      const dueBucket = getTaskDueBucket(x.dueDate, today);
+      const dueOk = dueFilter === 'all' || dueBucket === dueFilter;
+      return ok && dueOk && (!t || String(x.title || '').toLowerCase().includes(t));
     });
-  }, [items, search, filter]);
+    return sortTasksForDailyWork(filtered, today);
+  }, [items, search, filter, dueFilter, today]);
 
   const FILTERS: Filter[] = ['all', 'open', 'urgent', 'completed'];
   const FILTER_LABELS: Record<Filter, string> = {
@@ -371,6 +424,22 @@ export default function TasksPage() {
               </button>
             ))}
           </div>
+          <div className="inx-chips" style={{ marginTop: 10 }}>
+            {DUE_FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                className={`inx-chip ${dueFilter === f ? 'active' : ''}`}
+                onClick={() => setDueFilter(f)}
+              >
+                {DUE_FILTER_LABELS[f]}
+                {f === 'overdue' ? ` (${dueSummary.overdue})`
+                  : f === 'today' ? ` (${dueSummary.today})`
+                    : f === 'upcoming' ? ` (${dueSummary.upcoming})`
+                      : f === 'undated' ? ` (${dueSummary.undated})` : ''}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="inx-section-head">
@@ -431,6 +500,27 @@ export default function TasksPage() {
                     }}
                   >
                     {t.relatedType ? `مرتبطة بـ ${t.relatedType}` : 'مهمة عامة'}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                    <span className={`inx-badge ${t.status === 'completed' ? 'inx-badge-success' : t.status === 'in_progress' ? 'inx-badge-warning' : 'inx-badge-primary'}`}>
+                      {TASK_STATUS_LABELS[t.status] || 'حالة غير معروفة'}
+                    </span>
+                    <button
+                      type="button"
+                      className="inx-chip"
+                      disabled={updatingTaskId === t.id || !nextTaskStatus(t.status)}
+                      onClick={() => void changeTaskStatus(t)}
+                      aria-label={t.status === 'open' ? `بدء المهمة: ${t.title}` : t.status === 'in_progress' ? `إتمام المهمة: ${t.title}` : `إعادة فتح المهمة: ${t.title}`}
+                      style={{ cursor: 'pointer', opacity: updatingTaskId === t.id ? 0.65 : 1 }}
+                    >
+                      {updatingTaskId === t.id ? 'جارٍ الحفظ...' : t.status === 'open' ? 'بدء العمل' : t.status === 'in_progress' ? 'إتمام المهمة' : 'إعادة فتح'}
+                    </button>
+                    {getTaskDueBucket(t.dueDate, today) === 'overdue' && t.status !== 'completed' && (
+                      <span className="inx-badge inx-badge-danger">متأخرة</span>
+                    )}
+                    {getTaskDueBucket(t.dueDate, today) === 'today' && t.status !== 'completed' && (
+                      <span className="inx-badge inx-badge-warning">مستحقة اليوم</span>
+                    )}
                   </div>
                 </div>
               </li>
