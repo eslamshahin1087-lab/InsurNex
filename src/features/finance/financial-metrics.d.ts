@@ -24,7 +24,9 @@ export interface FinancialSummaryResult {
 }
 
 export type FinanceMetricKey =
+  | 'grossPremiums'
   | 'totalRevenue'
+  | 'outstandingReceivables'
   | 'totalExpenses'
   | 'netIncome'
   | 'pendingCommissions'
