@@ -1,8 +1,6 @@
 const STORAGE_KEY = 'insurnex-view-mode';
 
-export type ViewModePreference = 'desktop' | 'mobile';
-
-export function readViewModePreference(): ViewModePreference | null {
+export function readViewModePreference() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     return stored === 'desktop' || stored === 'mobile' ? stored : null;
@@ -12,7 +10,7 @@ export function readViewModePreference(): ViewModePreference | null {
   }
 }
 
-export function writeViewModePreference(mode: ViewModePreference): boolean {
+export function writeViewModePreference(mode) {
   if (mode !== 'desktop' && mode !== 'mobile') return false;
 
   try {
