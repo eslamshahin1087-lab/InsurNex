@@ -40,7 +40,15 @@ export async function listCommissionReconciliations(
     limit(MAX_RECONCILIATION_ROWS),
   ));
   return snapshot.docs
-    .map((item) => ({ id: item.id, ...item.data() }) as CommissionReconciliation)
+    .map((item) => {
+      const row = { id: item.id, ...item.data() } as CommissionReconciliation;
+      const comparison = calculateStatementReconciliation(
+        row.expectedCommissionAmount,
+        row.statementAmount,
+        row.currency,
+      );
+      return { ...row, varianceAmount: comparison.varianceAmount };
+    })
     .sort((a, b) => b.statementDate.localeCompare(a.statementDate));
 }
 
