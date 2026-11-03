@@ -32,7 +32,9 @@ function fromMinorUnits(value, currency) {
 function newBucket(currency) {
   return {
     currency,
+    grossPremiumsMinor: 0,
     totalRevenueMinor: 0,
+    outstandingReceivablesMinor: 0,
     totalExpensesMinor: 0,
     pendingCommissionsMinor: 0,
     receivedCommissionsMinor: 0,
@@ -59,11 +61,20 @@ export function computeFinancialSummary(revenue = [], expenses = [], commissions
   const quality = {
     missingOrInvalidCurrencyRows: 0,
     invalidAmountRows: 0,
+    unclassifiedRevenueRows: 0,
   };
 
   for (const row of revenue) {
-    if (row?.status !== 'confirmed') continue;
-    addRecord(bucketMap, row, 'totalRevenueMinor', quality);
+    if (row?.status === 'cancelled') continue;
+    if (row?.type === 'premium') {
+      if (row.status === 'confirmed') addRecord(bucketMap, row, 'grossPremiumsMinor', quality);
+    } else if (row?.type === 'commission' || row?.type === 'fee') {
+      if (row.status === 'confirmed') addRecord(bucketMap, row, 'totalRevenueMinor', quality);
+    } else if (row?.type === 'outstanding') {
+      addRecord(bucketMap, row, 'outstandingReceivablesMinor', quality);
+    } else {
+      quality.unclassifiedRevenueRows += 1;
+    }
   }
 
   for (const row of expenses) {
@@ -85,7 +96,9 @@ export function computeFinancialSummary(revenue = [], expenses = [], commissions
       const totalExpenses = fromMinorUnits(bucket.totalExpensesMinor, bucket.currency);
       return {
         currency: bucket.currency,
+        grossPremiums: fromMinorUnits(bucket.grossPremiumsMinor, bucket.currency),
         totalRevenue,
+        outstandingReceivables: fromMinorUnits(bucket.outstandingReceivablesMinor, bucket.currency),
         totalExpenses,
         netIncome: fromMinorUnits(bucket.totalRevenueMinor - bucket.totalExpensesMinor, bucket.currency),
         pendingCommissions: fromMinorUnits(bucket.pendingCommissionsMinor, bucket.currency),
