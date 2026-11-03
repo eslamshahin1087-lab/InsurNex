@@ -29,7 +29,7 @@ export default function FinancePage() {
   const [loadingSummary, setLoadingSummary] = useState(true);
 
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || tab !== 'overview') return;
     let cancelled = false;
     setLoadingSummary(true);
     setSummaryError('');
@@ -54,7 +54,7 @@ export default function FinancePage() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.organizationId]);
+  }, [profile?.organizationId, tab]);
 
   // ✅ Set context for FAB — always sends, with neutral notes
   useEffect(() => {
