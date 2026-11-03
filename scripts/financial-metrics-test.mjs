@@ -59,9 +59,15 @@ const quality = computeFinancialSummary(
 );
 assert.equal(quality.dataQuality.invalidAmountRows, 1);
 assert.equal(quality.dataQuality.missingOrInvalidCurrencyRows, 1);
-assert.equal(quality.dataQuality.unclassifiedRevenueRows, 0);
+assert.equal(quality.dataQuality.unclassifiedRevenueRows, 1);
 assert.equal(quality.currencies.find((item) => item.currency === 'EGP').totalRevenue, 0);
 assert.equal(quality.currencies.find((item) => item.currency === 'UNSPECIFIED').totalExpenses, 10);
+const negativeRounding = computeFinancialSummary(
+  [{ amount: -1.005, currency: 'EGP', type: 'commission', status: 'confirmed' }],
+  [],
+  [],
+);
+assert.equal(negativeRounding.currencies[0].totalRevenue, -1.01, 'negative ledger adjustments round symmetrically to minor units');
 
 assert.match(formatCurrencyAmount(10, 'EGP'), /ج\.م|EGP/);
 assert.match(formatFinanceMetric(summary.currencies, 'netIncome'), /USD|US\$/);
