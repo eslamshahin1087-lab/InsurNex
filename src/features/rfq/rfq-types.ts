@@ -9,8 +9,10 @@ export interface RfqInsurerTarget {
   recipientEmail?: string;
   followUpAt?: string;
   quoteReceivedAt?: string;
+  preparedAt?: string;
   quoteDocumentId?: string;
   quoteRecordIds?: string[];
+  followUpTaskId?: string;
   notes?: string;
 }
 
@@ -19,6 +21,9 @@ export interface RfqRecord {
   organizationId: string;
   clientId: string;
   leadId?: string;
+  insurerIds?: string[];
+  selectedQuoteId?: string;
+  selectedInsurerId?: string;
   clientName: string;
   insuranceType: string;
   coverageAmount?:number;

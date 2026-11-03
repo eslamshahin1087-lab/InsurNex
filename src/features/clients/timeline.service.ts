@@ -25,7 +25,11 @@ export type TimelineEventType =
   | 'call'
   | 'meeting'
   | 'email'
-  | 'task';
+  | 'task'
+  | 'lead_linked'
+  | 'rfq_created'
+  | 'quote_received'
+  | 'policy_issued_from_quote';
 
 export interface TimelineEvent {
   id: string;
@@ -138,6 +142,10 @@ export function timelineIcon(type: TimelineEventType): string {
     meeting: '👥',
     email: '✉️',
     task: '✅',
+    lead_linked: '🔗',
+    rfq_created: '📨',
+    quote_received: '💰',
+    policy_issued_from_quote: '🛡️',
   };
   return map[type] || '•';
 }
@@ -156,6 +164,10 @@ export function timelineTone(type: TimelineEventType): string {
     meeting: 'purple',
     email: 'cyan',
     task: 'success',
+    lead_linked: 'primary',
+    rfq_created: 'cyan',
+    quote_received: 'success',
+    policy_issued_from_quote: 'success',
   };
   return map[type] || 'neutral';
 }

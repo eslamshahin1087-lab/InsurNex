@@ -40,8 +40,26 @@ export async function createRfq(input: CreateRfqInput): Promise<string> {
       ...(input.leadId ? { leadId: input.leadId } : {}),
       status: 'draft',
       insurers: input.insurers.map((item) => ({ ...item, status: 'draft' })),
+      insurerIds: Array.from(new Set(input.insurers.map((item) => item.insurerId))),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+    });
+
+    const timelineRef = doc(collection(db, 'clients', input.clientId, 'timeline'));
+    transaction.set(timelineRef, {
+      organizationId: input.organizationId,
+      clientId: input.clientId,
+      type: 'rfq_created',
+      title: 'إنشاء طلب تسعير جديد',
+      description: `تم إنشاء طلب ${input.insuranceType} وإرساله للتسعير من شركات التأمين المحددة.`,
+      by: input.createdBy,
+      byName: 'InsurNex',
+      at: serverTimestamp(),
+      metadata: {
+        rfqId: rfqRef.id,
+        leadId: input.leadId || '',
+        insurerIds: input.insurers.map((item) => item.insurerId),
+      },
     });
 
     if (leadSnapshot && leadRef && leadSnapshot.data().stage === 'qualified') {
@@ -84,20 +102,76 @@ export async function updateRfqDetails(
   id: string,
   input: { insuranceType: string; coverageSummary: string; documentIds: string[]; insurers: Array<{ insurerId: string; insurerName: string; status: MarketSubmissionStatus }> },
 ): Promise<void> {
-  await updateDoc(doc(db, RFQ_COLLECTION, id), { ...input, updatedAt: serverTimestamp() });
+  await updateDoc(doc(db, RFQ_COLLECTION, id), {
+    ...input,
+    insurerIds: Array.from(new Set(input.insurers.map((item) => item.insurerId))),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function updateSubmissionMeta(
   id: string,
   insurerId: string,
-  patch: Partial<{ recipientEmail: string; sentAt: string; followUpAt: string; quoteReceivedAt: string; notes: string }>,
+  patch: Partial<{ recipientEmail: string; sentAt: string; preparedAt: string; followUpAt: string; quoteReceivedAt: string; notes: string }>,
+  uid: string,
 ): Promise<void> {
+  if (!id.trim() || !insurerId.trim() || !uid.trim()) throw new Error('RFQ_FOLLOW_UP_CONTEXT_REQUIRED');
   const ref = doc(db, RFQ_COLLECTION, id);
-  const snapshot = await getDoc(ref);
-  if (!snapshot.exists()) throw new Error('RFQ_NOT_FOUND');
-  const data = snapshot.data() as RfqRecord;
-  const insurers = (data.insurers || []).map((item) => item.insurerId === insurerId ? { ...item, ...patch } : item);
-  await updateDoc(ref, { insurers, updatedAt: serverTimestamp() });
+  const cleanPatch = Object.fromEntries(
+    Object.entries(patch).filter(([, value]) => value !== undefined),
+  );
+
+  await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists()) throw new Error('RFQ_NOT_FOUND');
+    const data = snapshot.data() as RfqRecord;
+    const target = (data.insurers || []).find((item) => item.insurerId === insurerId);
+    if (!target) throw new Error('RFQ_INSURER_NOT_FOUND');
+
+    const followUpAt = typeof cleanPatch.followUpAt === 'string' ? cleanPatch.followUpAt : '';
+    const taskRef = followUpAt
+      ? doc(db, 'tasks', `rfq_followup_${encodeURIComponent(id)}_${encodeURIComponent(insurerId)}`)
+      : null;
+    const taskSnapshot = taskRef ? await transaction.get(taskRef) : null;
+
+    const insurers = (data.insurers || []).map((item) => item.insurerId === insurerId
+      ? { ...item, ...cleanPatch, ...(taskRef ? { followUpTaskId: taskRef.id } : {}) }
+      : item);
+
+    transaction.update(ref, { insurers, updatedAt: serverTimestamp() });
+
+    if (taskRef && followUpAt) {
+      const existingTask = taskSnapshot?.exists() ? taskSnapshot.data() : null;
+      transaction.set(taskRef, {
+        organizationId: data.organizationId,
+        title: `متابعة عرض سعر — ${target.insurerName}`,
+        description: `متابعة إرسال الطلب واستلام رد شركة ${target.insurerName} على طلب التسعير للعميل ${data.clientName}.`,
+        priority: 'medium',
+        status: existingTask?.status === 'in_progress' ? 'in_progress' : 'open',
+        dueDate: followUpAt,
+        assignedTo: uid,
+        relatedType: 'rfq',
+        relatedId: id,
+        relatedSubId: insurerId,
+        createdBy: existingTask?.createdBy || uid,
+        createdAt: existingTask?.createdAt || serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      const timelineRef = doc(collection(db, 'clients', data.clientId, 'timeline'));
+      transaction.set(timelineRef, {
+        organizationId: data.organizationId,
+        clientId: data.clientId,
+        type: 'task',
+        title: `جدولة متابعة عرض ${target.insurerName}`,
+        description: `موعد المتابعة المحدد: ${followUpAt}`,
+        by: uid,
+        byName: 'InsurNex',
+        at: serverTimestamp(),
+        metadata: { rfqId: id, insurerId, taskId: taskRef.id, followUpAt },
+      });
+    }
+  });
 }
 
 export async function listOrganizationRfqs(organizationId: string): Promise<RfqRecord[]> {

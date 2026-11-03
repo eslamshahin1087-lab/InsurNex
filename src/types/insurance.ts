@@ -85,6 +85,7 @@ export interface Policy {
   // ✅ حقول من النظام القديم
   rfqId?: string;
   quoteId?: string;
+  policyId?: string;
   leadId?: string;
   deductible?: number;
   paymentTerms?: string;

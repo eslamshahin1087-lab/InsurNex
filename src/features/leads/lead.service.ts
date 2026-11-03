@@ -280,13 +280,12 @@ export async function ensureLeadClientForSales(
       const client = clientSnapshot.data();
       if (client.organizationId !== org) throw new Error('CLIENT_ORG_MISMATCH');
 
+      const clientPatch: Record<string, unknown> = { updatedAt: serverTimestamp() };
+      if (!client.sourceLeadId) clientPatch.sourceLeadId = leadId;
+      if (lead.companyName?.trim() && !client.contactName) clientPatch.contactName = lead.name;
       const activated = lead.stage === 'won' && client.status !== 'active';
-      if (activated) {
-        transaction.update(existingClientRef, {
-          status: 'active',
-          updatedAt: serverTimestamp(),
-        });
-      }
+      if (activated) clientPatch.status = 'active';
+      if (Object.keys(clientPatch).length > 1) transaction.update(existingClientRef, clientPatch);
       if (lead.stage === 'won' && !lead.convertedAt) {
         transaction.update(leadRef, {
           convertedAt: serverTimestamp(),
@@ -299,9 +298,10 @@ export async function ensureLeadClientForSales(
 
     transaction.set(newClientRef, {
       organizationId: org,
-      type: lead.companyName ? 'company' : 'individual',
+      type: lead.clientType === 'corporate' || Boolean(lead.companyName?.trim()) ? 'company' : 'individual',
       status: lead.stage === 'won' ? 'active' : 'prospect',
-      name: lead.name,
+      name: lead.companyName?.trim() || lead.name,
+      ...(lead.companyName?.trim() ? { contactName: lead.name } : {}),
       email: lead.email || '',
       phone: lead.phone || '',
       notes: lead.notes || '',

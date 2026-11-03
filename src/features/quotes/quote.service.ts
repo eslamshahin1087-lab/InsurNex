@@ -74,6 +74,9 @@ export async function createQuoteOffer(input: CreateQuoteOfferInput): Promise<st
     const target = targets.find((item) => item.insurerId === input.insurerId);
     if (!target) throw new Error('INSURER_NOT_PART_OF_RFQ');
 
+    const followUpTaskRef = target.followUpTaskId ? doc(db, 'tasks', target.followUpTaskId) : null;
+    const followUpTaskSnapshot = followUpTaskRef ? await transaction.get(followUpTaskRef) : null;
+
     transaction.set(quoteRef, {
       ...input,
       leadId: rfq.leadId || '',
@@ -105,8 +108,40 @@ export async function createQuoteOffer(input: CreateQuoteOfferInput): Promise<st
 
     transaction.update(rfqRef, {
       insurers,
+      insurerIds: targets.map((item) => item.insurerId),
       status: 'quotes_received',
       updatedAt: serverTimestamp(),
+    });
+
+    if (followUpTaskRef && followUpTaskSnapshot?.exists()) {
+      const task = followUpTaskSnapshot.data();
+      if (task.organizationId === input.organizationId
+        && task.relatedType === 'rfq'
+        && task.relatedId === input.rfqId
+        && task.relatedSubId === input.insurerId
+        && task.status !== 'completed') {
+        transaction.update(followUpTaskRef, { status: 'completed', updatedAt: serverTimestamp() });
+      }
+    }
+
+    const timelineRef = doc(collection(db, 'clients', input.clientId, 'timeline'));
+    transaction.set(timelineRef, {
+      organizationId: input.organizationId,
+      clientId: input.clientId,
+      type: 'quote_received',
+      title: `استلام عرض سعر من ${input.insurerName}`,
+      description: `تم تسجيل قسط ${input.premium} ${input.currency} وعمولة ${commissionAmount} ${input.currency}.`,
+      by: input.createdBy,
+      byName: 'InsurNex',
+      at: serverTimestamp(),
+      metadata: {
+        rfqId: input.rfqId,
+        quoteId: quoteRef.id,
+        insurerId: input.insurerId,
+        premium: Number(input.premium),
+        currency: input.currency,
+        commissionAmount,
+      },
     });
   });
 
@@ -268,6 +303,7 @@ export async function issuePolicyFromSelectedQuote(
       ...(quote.deductible === null || quote.deductible === undefined ? {} : { deductible: Number(quote.deductible) }),
       paymentTerms: quote.paymentTerms || '',
       createdBy: input.uid,
+      policyId,
       issuedAt: serverTimestamp(),
       rfqId: quote.rfqId,
       quoteId: input.quoteId,
