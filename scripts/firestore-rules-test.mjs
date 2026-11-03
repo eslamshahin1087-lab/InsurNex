@@ -1034,6 +1034,32 @@ try {
     () => deleteDoc(doc(ownerA.db, 'commissions', issuedPolicyId)),
     'owner cannot delete an issued policy commission ledger row'
   );
+  const manualCommissionCollisionId = 'manual-collision-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'commissions', manualCommissionCollisionId), {
+    organizationId: orgA,
+    premium: 500,
+    commissionRate: 10,
+    commissionAmount: 50,
+    currency: 'EGP',
+    status: 'pending',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'commissions', manualCommissionCollisionId), {
+      policyId: manualCommissionCollisionId,
+      quoteId: protectedQuoteId,
+      rfqId: protectedRfqId,
+      clientId: protectedClientId,
+      clientName: 'RBAC fixture client',
+      insurerId: protectedInsurerId,
+      insurerName: 'Synthetic Insurer',
+      policyNumber: issuedPolicyNumber,
+      source: 'policy_issuance',
+    }),
+    'an existing manual commission cannot be overwritten or promoted into a policy-issued ledger row'
+  );
+
   const forgedPolicyId = 'missing-policy-' + randomUUID();
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'commissions', forgedPolicyId), {
