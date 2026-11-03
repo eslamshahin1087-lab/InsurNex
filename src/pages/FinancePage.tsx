@@ -101,30 +101,24 @@ export default function FinancePage() {
   }, [summary]);
 
   const askCopilot = () => {
-    const financeData = summary
+    const onlyCurrency = summary?.currencies.length === 1 ? summary.currencies[0] : undefined;
+    const financeData = onlyCurrency
       ? {
-          totalRevenue: summary.totalRevenue,
-          totalExpenses: summary.totalExpenses,
-          netIncome: summary.netIncome,
-          pendingCommissions: summary.pendingCommissions,
-          receivedCommissions: summary.receivedCommissions,
-          currency: 'EGP',
+          totalRevenue: onlyCurrency.totalRevenue,
+          totalExpenses: onlyCurrency.totalExpenses,
+          netIncome: onlyCurrency.netIncome,
+          pendingCommissions: onlyCurrency.pendingCommissions,
+          receivedCommissions: onlyCurrency.receivedCommissions,
+          currency: onlyCurrency.currency,
         }
-      : {
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netIncome: 0,
-          pendingCommissions: 0,
-          receivedCommissions: 0,
-          currency: 'EGP',
-        };
+      : { currency: summary?.currencies.length ? 'MULTI_CURRENCY' : 'UNSPECIFIED' };
 
     navigate('/copilot', {
       state: {
         context: {
           page: 'finance',
           finance: financeData,
-          notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. The figures above are the exact current values from Firestore.`,
+          notes: `The finance dashboard contains ${summary?.currencies.length || 0} currency bucket(s). No foreign-exchange conversion is applied; mixed-currency totals are intentionally not combined.`,
         },
       },
     });
