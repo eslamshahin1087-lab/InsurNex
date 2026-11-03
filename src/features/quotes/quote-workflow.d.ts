@@ -9,3 +9,4 @@ export function getQuoteCommissionAmount(premium: unknown, commissionRate: unkno
 export function getQuoteValidationErrors(input: unknown, today?: string): string[];
 export function compareQuoteOffers<T extends { currency?: string; premium?: number; deductible?: number | null; insurerName?: string }>(offers: T[]): T[];
 export function isQuoteOfferValid(offer: { status?: unknown; validUntil?: string }, today?: string): boolean;
+export function buildPolicyDocumentId(organizationId: string, insurerId: string, policyNumber: string): string;
