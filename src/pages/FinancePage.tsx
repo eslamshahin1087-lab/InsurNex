@@ -11,12 +11,8 @@ import { useAuth } from '../features/auth/auth-context';
 import RevenuePanel from '../features/finance/RevenuePanel';
 import ExpensesPanel from '../features/finance/ExpensesPanel';
 import CommissionsPanel from '../features/finance/CommissionsPanel';
-import {
-  computeSummary,
-  listCommissions,
-  listExpenses,
-  listRevenue,
-} from '../features/finance/finance.service';
+import { loadFinanceSummary } from '../features/finance/finance.service';
+import { formatFinanceMetric } from '../features/finance/financial-metrics';
 import type { FinanceSummary } from '../features/finance/finance.types';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import '../theme/finance.css';
@@ -36,12 +32,8 @@ export default function FinancePage() {
     setLoadingSummary(true);
     (async () => {
       try {
-        const [rev, exp, com] = await Promise.all([
-          listRevenue(profile.organizationId),
-          listExpenses(profile.organizationId),
-          listCommissions(profile.organizationId),
-        ]);
-        if (!cancelled) setSummary(computeSummary(rev, exp, com));
+        const result = await loadFinanceSummary(profile.organizationId);
+        if (!cancelled) setSummary(result);
       } catch (err) {
         console.error('Failed to load finance summary', err);
         if (!cancelled) setSummary(null);
@@ -56,28 +48,21 @@ export default function FinancePage() {
 
   // ✅ Set context for FAB — always sends, with neutral notes
   useEffect(() => {
-    const financeData = summary
+    const financeData = summary?.currencies.length === 1
       ? {
-          totalRevenue: summary.totalRevenue,
-          totalExpenses: summary.totalExpenses,
-          netIncome: summary.netIncome,
-          pendingCommissions: summary.pendingCommissions,
-          receivedCommissions: summary.receivedCommissions,
-          currency: 'EGP',
+          totalRevenue: summary.currencies[0].totalRevenue,
+          totalExpenses: summary.currencies[0].totalExpenses,
+          netIncome: summary.currencies[0].netIncome,
+          pendingCommissions: summary.currencies[0].pendingCommissions,
+          receivedCommissions: summary.currencies[0].receivedCommissions,
+          currency: summary.currencies[0].currency,
         }
-      : {
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netIncome: 0,
-          pendingCommissions: 0,
-          receivedCommissions: 0,
-          currency: 'EGP',
-        };
+      : { currency: summary?.currencies.length ? 'MULTI_CURRENCY' : 'UNSPECIFIED' };
 
     setCurrentContext({
       page: 'finance',
       finance: financeData,
-      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. The figures above are the exact current values from Firestore.`,
+      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. Financial totals are paginated across the full organization dataset and remain separated by currency; no foreign-exchange conversion is applied.`,
     });
   }, [summary, tab]);
 
@@ -87,28 +72,28 @@ export default function FinancePage() {
       {
         key: 'revenue',
         label: 'إجمالي الإيرادات',
-        value: summary.totalRevenue,
+        value: formatFinanceMetric(summary.currencies, 'totalRevenue'),
         icon: TrendingUp,
         tone: 'good',
       },
       {
         key: 'expenses',
         label: 'إجمالي المصروفات',
-        value: summary.totalExpenses,
+        value: formatFinanceMetric(summary.currencies, 'totalExpenses'),
         icon: TrendingDown,
         tone: 'bad',
       },
       {
         key: 'net',
         label: 'صافي الدخل',
-        value: summary.netIncome,
+        value: formatFinanceMetric(summary.currencies, 'netIncome'),
         icon: Wallet,
-        tone: summary.netIncome >= 0 ? 'good' : 'bad',
+        tone: 'good',
       },
       {
         key: 'pending',
         label: 'عمولات معلقة',
-        value: summary.pendingCommissions,
+        value: formatFinanceMetric(summary.currencies, 'pendingCommissions'),
         icon: Clock3,
         tone: 'warn',
       },
@@ -202,7 +187,7 @@ export default function FinancePage() {
                   <article key={key} className={`fin-kpi tone-${tone}`}>
                     <Icon size={20} />
                     <small>{label}</small>
-                    <strong>{value.toLocaleString('ar-EG')} ج.م</strong>
+                    <strong dir="auto">{value}</strong>
                   </article>
                 ))}
               </section>
