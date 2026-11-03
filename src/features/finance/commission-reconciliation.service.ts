@@ -13,6 +13,7 @@ import { listCommissions } from './finance.service';
 import {
   allocateCommissionPayment,
   calculateStatementReconciliation,
+  fromCurrencyMinorUnits,
   validateDateOnly,
   validateStatementReference,
 } from './commission-reconciliation';
@@ -111,7 +112,6 @@ export async function createCommissionReconciliation(
       statementNumber,
       statementDate,
       statementAmount: comparison.statementAmount,
-      varianceAmount: comparison.varianceAmount,
       reconciliationStatus: comparison.status,
       paymentStatus: 'unpaid',
       receivedAmount: 0,
@@ -167,7 +167,7 @@ export async function recordCommissionPayment(
       reconciliationId: input.reconciliationId,
       commissionId: reconciliation.commissionId,
       policyId: reconciliation.policyId,
-      amount: allocation.paymentMinor / (10 ** (reconciliation.currency === 'JPY' ? 0 : 2)),
+      amount: fromCurrencyMinorUnits(allocation.paymentMinor, reconciliation.currency),
       currency: reconciliation.currency,
       receivedDate,
       ...(receiptReference ? { receiptReference } : {}),
