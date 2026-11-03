@@ -159,7 +159,7 @@ export async function setQuoteOfferStatus(
     if (nextStatus === 'selected') {
       rfqPatch.selectedQuoteId = quoteId;
       rfqPatch.selectedInsurerId = quote.insurerId;
-    } else if (quote.status === 'selected') {
+    } else if (quote.status === 'selected' && rfqSnapshot.data().selectedQuoteId === quoteId) {
       rfqPatch.selectedQuoteId = '';
       rfqPatch.selectedInsurerId = '';
     }
