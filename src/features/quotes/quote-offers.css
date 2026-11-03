@@ -1,0 +1,267 @@
+.rfq-v81-intelligence {
+  display: grid;
+  gap: 16px;
+  color: var(--inx-text, #17283d);
+}
+
+.rfq-v81-intelligence > .section-heading {
+  margin: 0;
+  align-items: flex-start;
+}
+
+.rfq-v81-intelligence > .section-heading h2 {
+  margin: 4px 0 6px;
+  color: var(--inx-text, #17283d);
+  font-size: clamp(18px, 2.4vw, 22px);
+  font-weight: 800;
+}
+
+.rfq-v81-intelligence > .section-heading p {
+  max-width: 780px;
+  margin: 0;
+  color: var(--inx-muted, #66778d);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.rfq-v81-intelligence .rfq-v81-form {
+  display: grid;
+  gap: 14px;
+  padding: clamp(12px, 2vw, 18px);
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: var(--inx-radius, 16px);
+  background: var(--inx-card, var(--inx-surface, #fff));
+}
+
+.rfq-v81-intelligence .rfq-v81-form > label,
+.rfq-v81-intelligence .form-grid > label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--inx-text, #17283d);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rfq-v81-intelligence .rfq-v81-form input,
+.rfq-v81-intelligence .rfq-v81-form select,
+.rfq-v81-intelligence .rfq-v81-form textarea,
+.rfq-v81-intelligence .policy-modal input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 11px;
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: 10px;
+  background: var(--inx-bg, #f8fafc);
+  color: var(--inx-text, #17283d);
+  font: inherit;
+  font-size: 13px;
+}
+
+.rfq-v81-intelligence .rfq-v81-form textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.rfq-v81-intelligence .rfq-v81-form input:focus-visible,
+.rfq-v81-intelligence .rfq-v81-form select:focus-visible,
+.rfq-v81-intelligence .rfq-v81-form textarea:focus-visible,
+.rfq-v81-intelligence .policy-modal input:focus-visible {
+  outline: 2px solid var(--inx-blue, #1e4272);
+  outline-offset: 2px;
+}
+
+.rfq-v81-intelligence .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rfq-v81-intelligence .form-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.rfq-v81-intelligence .rfq-v81-readonly {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: 10px;
+  background: var(--inx-bg, #f8fafc);
+  color: var(--inx-muted, #66778d);
+  font-size: 12px;
+}
+
+.rfq-v81-intelligence .rfq-v81-readonly b {
+  color: var(--inx-text, #17283d);
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list {
+  display: grid;
+  gap: 12px;
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list > article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: clamp(12px, 2vw, 16px);
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: var(--inx-radius, 16px);
+  background: var(--inx-card, var(--inx-surface, #fff));
+  box-shadow: 0 5px 18px rgb(13 36 64 / 5%);
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list > article > div:first-child {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list strong {
+  color: var(--inx-text, #17283d);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list small {
+  color: var(--inx-muted, #66778d);
+  font-size: 11.5px;
+  line-height: 1.65;
+}
+
+.rfq-v81-intelligence .rfq-v81-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: 999px;
+  background: var(--inx-bg, #f8fafc);
+  color: var(--inx-text, #17283d);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rfq-v81-intelligence .rfq-v81-status.status-selected {
+  border-color: #9ac7ad;
+  background: rgb(22 138 75 / 9%);
+  color: #167447;
+}
+
+.rfq-v81-intelligence .rfq-v81-status.status-rejected {
+  border-color: #e8b3b3;
+  background: rgb(190 48 48 / 8%);
+  color: #b83232;
+}
+
+.rfq-v81-intelligence .rfq-v81-status.status-issued {
+  border-color: #8fb6dc;
+  background: rgb(30 66 114 / 9%);
+  color: var(--inx-blue, #1e4272);
+}
+
+.rfq-v81-intelligence .rfq-v81-state,
+.rfq-v81-intelligence .rfq-v81-error {
+  padding: 11px 13px;
+  border: 1px solid var(--inx-border, #dbe4ee);
+  border-radius: 11px;
+  background: var(--inx-bg, #f8fafc);
+  color: var(--inx-muted, #66778d);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.rfq-v81-intelligence .rfq-v81-error {
+  border-color: #e5b4b4;
+  background: rgb(190 48 48 / 6%);
+  color: #b83232;
+}
+
+.rfq-v81-intelligence .rfq-v81-state[role='status'] {
+  border-color: #a8c8b3;
+  background: rgb(22 138 75 / 7%);
+  color: #167447;
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list .primary-button,
+.rfq-v81-intelligence .rfq-v81-intelligence-list .rfq-v81-dropdown-trigger,
+.rfq-v81-intelligence .rfq-v81-form > form > button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rfq-v81-intelligence .rfq-v81-intelligence-list button:disabled,
+.rfq-v81-intelligence .rfq-v81-form button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.rfq-v81-intelligence .policy-modal {
+  max-width: 760px;
+  width: min(760px, calc(100vw - 28px));
+  max-height: min(88vh, 900px);
+  overflow: auto;
+}
+
+.rfq-v81-intelligence .policy-modal > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.rfq-v81-intelligence .policy-modal > header h2 {
+  margin: 4px 0;
+  color: var(--inx-text, #17283d);
+}
+
+.rfq-v81-intelligence .policy-modal .client-form footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .rfq-v81-intelligence .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rfq-v81-intelligence .form-grid .wide {
+    grid-column: auto;
+  }
+
+  .rfq-v81-intelligence .rfq-v81-intelligence-list > article {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rfq-v81-intelligence .rfq-v81-status {
+    justify-self: start;
+  }
+
+  .rfq-v81-intelligence .policy-modal {
+    max-height: 92vh;
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rfq-v81-intelligence *,
+  .rfq-v81-intelligence *::before,
+  .rfq-v81-intelligence *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

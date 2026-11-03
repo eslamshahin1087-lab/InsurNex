@@ -347,6 +347,7 @@ try {
 
   // Additional tenant-scoped fixtures for the complete role/read matrix.
   const protectedRfqId = 'rbac-rfq-' + randomUUID();
+  const protectedQuoteId = 'rbac-quote-' + randomUUID();
   const protectedInsurerId = 'rbac-insurer-' + randomUUID();
   const protectedMatrixOperationId = 'rbac-operation-' + randomUUID();
   const protectedNotificationId = 'rbac-notification-' + randomUUID();
@@ -356,6 +357,12 @@ try {
   await setDoc(doc(ownerA.db, 'rfqs', protectedRfqId), {
     organizationId: orgA, clientId: protectedClientId, status: 'draft',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'quotes', protectedQuoteId), {
+    organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
+    insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', premium: 1200,
+    currency: 'EGP', commissionRate: 10, status: 'received',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
   await setDoc(doc(ownerA.db, 'insurers', protectedInsurerId), {
     organizationId: orgA, name: 'Synthetic Insurer', status: 'active',
@@ -407,6 +414,7 @@ try {
     { collection: 'leads', id: protectedLeadId, allowed: ['owner', 'admin', 'broker', 'sales'] },
     { collection: 'tasks', id: protectedTaskId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
     { collection: 'rfqs', id: protectedRfqId, allowed: ['owner', 'admin', 'broker', 'sales'] },
+    { collection: 'quotes', id: protectedQuoteId, allowed: ['owner', 'admin', 'broker', 'sales'] },
     { collection: 'insurers', id: protectedInsurerId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
     { collection: 'operations', id: protectedMatrixOperationId, allowed: ['owner', 'admin', 'broker', 'claims'] },
     { collection: 'revenue', id: protectedRevenueId, allowed: ['owner', 'admin', 'finance'] },
@@ -474,6 +482,19 @@ try {
   });
   check((await getDoc(doc(salesMember.actor.db, 'leads', salesCreatedLeadId))).exists(),
     'sales can create a lead in its own organization');
+  const salesCreatedQuoteId = 'rbac-sales-created-quote-' + randomUUID();
+  await setDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), {
+    organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
+    insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', premium: 900,
+    currency: 'EGP', commissionRate: 5, status: 'received',
+    createdBy: salesMember.actor.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId))).exists(),
+    'sales can record insurer quotes against an RFQ in its own organization');
+  await updateDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), { status: 'shortlisted', updatedAt: serverTimestamp() });
+  check((await getDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId))).data().status === 'shortlisted',
+    'sales can update a quote status within its own organization');
+
   const claimsCreatedClaimId = 'rbac-claims-created-claim-' + randomUUID();
   await setDoc(doc(claimsMember.actor.db, 'claims', claimsCreatedClaimId), {
     organizationId: orgA, clientId: protectedClientId, policyId: protectedPolicyId,
@@ -901,6 +922,14 @@ try {
   await expectDenied(
     () => getDoc(doc(ownerB.db, 'clients', clientA)),
     'a user from another organization cannot read a client record'
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerB.db, 'quotes', 'cross-org-quote-' + randomUUID()), {
+      organizationId: orgB, rfqId: protectedRfqId, clientId: protectedClientId,
+      insurerId: 'forged-insurer', insurerName: 'Cross tenant quote', premium: 1,
+      currency: 'EGP', commissionRate: 0, status: 'received', createdBy: ownerB.user.uid,
+    }),
+    'a quote cannot reference an RFQ belonging to another organization'
   );
   await expectDenied(
     () => setDoc(doc(ownerB.db, 'clients', 'cross-org-' + randomUUID()), {

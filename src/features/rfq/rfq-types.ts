@@ -10,6 +10,7 @@ export interface RfqInsurerTarget {
   followUpAt?: string;
   quoteReceivedAt?: string;
   quoteDocumentId?: string;
+  quoteRecordIds?: string[];
   notes?: string;
 }
 
@@ -17,6 +18,7 @@ export interface RfqRecord {
   id: string;
   organizationId: string;
   clientId: string;
+  leadId?: string;
   clientName: string;
   insuranceType: string;
   coverageAmount?:number;
@@ -32,6 +34,7 @@ export interface RfqRecord {
 export interface CreateRfqInput {
   organizationId: string;
   clientId: string;
+  leadId?: string;
   clientName: string;
   insuranceType: string;
   coverageAmount?: number;
