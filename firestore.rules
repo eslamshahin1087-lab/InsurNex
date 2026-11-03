@@ -154,7 +154,24 @@ service cloud.firestore {
         && getAfter(policyPath).data.premium == data.premium
         && getAfter(policyPath).data.commissionRate == data.commissionRate
         && getAfter(policyPath).data.commissionAmount == data.commissionAmount
-        && getAfter(policyPath).data.currency == data.currency;
+        && getAfter(policyPath).data.currency == data.currency
+        && existsAfter(/databases/$(database)/documents/quotes/$(data.quoteId))
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.status == 'issued'
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyId == data.policyId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyNumber == data.policyNumber
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.rfqId == data.rfqId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.clientId == data.clientId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerId == data.insurerId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerName == data.insurerName
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.premium == data.premium
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionRate == data.commissionRate
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionAmount == data.commissionAmount
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.currency == data.currency
+        && existsAfter(/databases/$(database)/documents/rfqs/$(data.rfqId))
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.status == 'closed'
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.selectedQuoteId == data.quoteId
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.issuedPolicyId == data.policyId;
     }
     function canUpdateCommission(){
       return roleIs(['owner','admin','finance']) && (
