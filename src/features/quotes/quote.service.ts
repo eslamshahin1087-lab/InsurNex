@@ -12,6 +12,7 @@ import {
 import { db } from '../../firebase/config';
 import type { Policy, InsuranceLine } from '../../types/insurance';
 import {
+  buildPolicyDocumentId,
   canTransitionQuoteStatus,
   getQuoteCommissionAmount,
   getQuoteValidationErrors,
@@ -79,7 +80,7 @@ export async function createQuoteOffer(input: CreateQuoteOfferInput): Promise<st
       premium: Number(input.premium),
       commissionRate: Number(input.commissionRate),
       commissionAmount,
-      deductible: input.deductible === undefined || input.deductible === null || input.deductible === ''
+      deductible: input.deductible === undefined || input.deductible === null
         ? null
         : Number(input.deductible),
       currency: input.currency.trim().toUpperCase(),
@@ -135,18 +136,21 @@ export async function setQuoteOfferStatus(
     if (rfqSnapshot.data().status === 'closed') throw new Error('RFQ_ALREADY_CLOSED');
 
     if (nextStatus === 'selected') {
-      const siblingQuery = query(
-        collection(db, QUOTES),
-        where('organizationId', '==', organizationId),
-        where('rfqId', '==', quote.rfqId),
-      );
-      const siblingSnapshot = await transaction.get(siblingQuery);
-      for (const sibling of siblingSnapshot.docs) {
-        if (sibling.id !== quoteId && sibling.data().status === 'selected') {
-          transaction.update(sibling.ref, {
-            status: 'shortlisted',
-            updatedAt: serverTimestamp(),
-          });
+      const previousSelectedId = String(rfqSnapshot.data().selectedQuoteId || '');
+      if (previousSelectedId && previousSelectedId !== quoteId) {
+        const previousSelectedRef = doc(db, QUOTES, previousSelectedId);
+        const previousSelectedSnapshot = await transaction.get(previousSelectedRef);
+        if (previousSelectedSnapshot.exists()) {
+          const previousSelected = previousSelectedSnapshot.data();
+          if (previousSelected.organizationId !== organizationId || previousSelected.rfqId !== quote.rfqId) {
+            throw new Error('INVALID_SELECTED_QUOTE_REFERENCE');
+          }
+          if (previousSelected.status === 'selected') {
+            transaction.update(previousSelectedRef, {
+              status: 'shortlisted',
+              updatedAt: serverTimestamp(),
+            });
+          }
         }
       }
     }
@@ -185,8 +189,6 @@ export async function issuePolicyFromSelectedQuote(
   }
 
   const quoteRef = doc(db, QUOTES, input.quoteId);
-  const policyId = `quote_${input.quoteId}`;
-  const policyRef = doc(db, 'policies', policyId);
   const taskRef = doc(collection(db, 'tasks'));
   const quoteIssuedActivityRef = doc(collection(db, 'leadActivities'));
   const todayLocal = getTodayDateKey(new Date());
@@ -196,6 +198,8 @@ export async function issuePolicyFromSelectedQuote(
     if (!quoteSnapshot.exists()) throw new Error('QUOTE_NOT_FOUND');
     const quote = quoteSnapshot.data() as QuoteOffer;
     if (quote.organizationId !== input.organizationId) throw new Error('QUOTE_ORGANIZATION_MISMATCH');
+    const policyId = buildPolicyDocumentId(input.organizationId, quote.insurerId, policyNumber);
+    const policyRef = doc(db, 'policies', policyId);
     if (quote.status !== 'selected') throw new Error('QUOTE_NOT_SELECTED');
     if (!isQuoteOfferValid(quote, todayLocal)) throw new Error('QUOTE_EXPIRED');
 
@@ -204,17 +208,12 @@ export async function issuePolicyFromSelectedQuote(
     const rfqSnapshot = await transaction.get(rfqRef);
     const clientSnapshot = await transaction.get(clientRef);
     const policySnapshot = await transaction.get(policyRef);
-    const duplicatePolicyQuery = query(
-      collection(db, 'policies'),
-      where('organizationId', '==', input.organizationId),
-      where('insurerId', '==', quoteSnapshot.data().insurerId),
-      where('policyNumber', '==', policyNumber),
-    );
-    const duplicatePolicies = await transaction.get(duplicatePolicyQuery);
     if (!rfqSnapshot.exists()) throw new Error('RFQ_NOT_FOUND');
     if (!clientSnapshot.exists()) throw new Error('CLIENT_NOT_FOUND');
-    if (policySnapshot.exists()) throw new Error('QUOTE_ALREADY_ISSUED');
-    if (!duplicatePolicies.empty) throw new Error('POLICY_NUMBER_ALREADY_EXISTS_FOR_INSURER');
+    if (policySnapshot.exists()) {
+      if (policySnapshot.data().quoteId === input.quoteId) throw new Error('QUOTE_ALREADY_ISSUED');
+      throw new Error('POLICY_NUMBER_ALREADY_EXISTS_FOR_INSURER');
+    }
 
     const rfq = rfqSnapshot.data();
     const client = clientSnapshot.data();
