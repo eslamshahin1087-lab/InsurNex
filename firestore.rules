@@ -158,7 +158,7 @@ service cloud.firestore {
     }
     function canUpdateCommission(){
       return roleIs(['owner','admin','finance']) && (
-        resource.data.source == 'policy_issuance'
+        (resource.data.keys().hasAny(['source']) && resource.data.source == 'policy_issuance')
           ? request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','receivedDate','updatedAt'])
             && resource.data.status == 'pending'
             && request.resource.data.status == 'received'
