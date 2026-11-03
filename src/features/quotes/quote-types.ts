@@ -65,4 +65,5 @@ export interface IssuePolicyFromQuoteResult {
   policyId: string;
   policyNumber: string;
   followUpTaskId: string;
+  commissionId: string;
 }
