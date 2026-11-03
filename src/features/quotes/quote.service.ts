@@ -237,6 +237,10 @@ export async function issuePolicyFromSelectedQuote(
     if (quote.organizationId !== input.organizationId) throw new Error('QUOTE_ORGANIZATION_MISMATCH');
     const policyId = buildPolicyDocumentId(input.organizationId, quote.insurerId, policyNumber);
     const policyRef = doc(db, 'policies', policyId);
+    const commissionId = buildPolicyCommissionDocumentId(policyId);
+    const commissionRef = doc(db, 'commissions', commissionId);
+    const commissionSnapshot = await transaction.get(commissionRef);
+    if (commissionSnapshot.exists()) throw new Error('POLICY_COMMISSION_ALREADY_EXISTS');
     if (quote.status !== 'selected') throw new Error('QUOTE_NOT_SELECTED');
     if (!isQuoteOfferValid(quote, todayLocal)) throw new Error('QUOTE_EXPIRED');
 
@@ -314,9 +318,6 @@ export async function issuePolicyFromSelectedQuote(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-
-    const commissionId = buildPolicyCommissionDocumentId(policyId);
-    const commissionRef = doc(db, 'commissions', commissionId);
 
     transaction.set(policyRef, policyData);
     transaction.set(commissionRef, {
