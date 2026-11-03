@@ -21,7 +21,7 @@ function fractionDigits(currency) {
 function toMinorUnits(value, currency) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return null;
   const scale = 10 ** fractionDigits(currency);
-  const minor = Math.round((value + Math.sign(value) * Number.EPSILON) * scale);
+  const minor = Math.sign(value) * Math.round((Math.abs(value) + Number.EPSILON) * scale);
   return Number.isSafeInteger(minor) ? minor : null;
 }
 
