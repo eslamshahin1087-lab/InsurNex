@@ -15,7 +15,7 @@ export interface CommissionReconciliation {
   statementNumber: string;
   statementDate: string;
   statementAmount: number;
-  varianceAmount: number;
+  varianceAmount: number; // Derived from statementAmount - expectedCommissionAmount; not persisted.
   reconciliationStatus: ReconciliationStatus;
   paymentStatus: ReconciliationPaymentStatus;
   receivedAmount: number;
