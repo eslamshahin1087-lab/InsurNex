@@ -62,9 +62,10 @@ assert.match(formatCurrencyAmount(10, 'EGP'), /ج\.م|EGP/);
 assert.match(formatFinanceMetric(summary.currencies, 'netIncome'), /USD|US\$/);
 assert.equal(
   buildPolicyCommissionDocumentId('org_insurer_policy_123'),
-  'policy_commission_org_insurer_policy_123',
+  'org_insurer_policy_123',
 );
 assert.throws(() => buildPolicyCommissionDocumentId(''), /POLICY_ID_REQUIRED/);
-assert.throws(() => buildPolicyCommissionDocumentId('x'.repeat(1500)), /POLICY_COMMISSION_ID_TOO_LONG/);
+assert.throws(() => buildPolicyCommissionDocumentId('x'.repeat(1500)), /POLICY_COMMISSION_ID_INVALID/);
+assert.throws(() => buildPolicyCommissionDocumentId('policy/forged'), /POLICY_COMMISSION_ID_INVALID/);
 
 console.log('All financial metric contract tests passed.');
