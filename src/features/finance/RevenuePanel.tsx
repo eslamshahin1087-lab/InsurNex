@@ -106,7 +106,7 @@ export default function RevenuePanel() {
           <small>
             الأقساط المسجلة: {formatFinanceMetric(revenueMetrics.currencies, 'grossPremiums')} ·
             إيراد الوساطة والرسوم: {formatFinanceMetric(revenueMetrics.currencies, 'totalRevenue')} ·
-            المتأخرات: {formatFinanceMetric(revenueMetrics.currencies, 'outstandingReceivables')}
+            المتأخرات: {formatFinanceMetric(revenueMetrics.currencies, 'outstandingReceivables')} · إجماليات أحدث 500 قيد ظاهر
           </small>
         </div>
         <button
