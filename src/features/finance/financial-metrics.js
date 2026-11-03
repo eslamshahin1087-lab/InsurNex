@@ -127,7 +127,9 @@ export function formatFinanceMetric(currencies, metric, locale = 'ar-EG') {
 export function buildPolicyCommissionDocumentId(policyId) {
   const id = typeof policyId === 'string' ? policyId.trim() : '';
   if (!id) throw new Error('POLICY_ID_REQUIRED');
-  const documentId = 'policy_commission_' + encodeURIComponent(id);
-  if (documentId.length > 1400) throw new Error('POLICY_COMMISSION_ID_TOO_LONG');
-  return documentId;
+  // Policy IDs are already generated as Firestore-safe deterministic IDs.
+  // Reuse the same ID in the commissions collection to make policy-to-ledger
+  // cardinality enforceable in Firestore Rules without a non-transactional query.
+  if (id.includes('/') || id.length > 1200) throw new Error('POLICY_COMMISSION_ID_INVALID');
+  return id;
 }
