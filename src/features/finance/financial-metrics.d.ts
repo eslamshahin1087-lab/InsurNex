@@ -1,6 +1,8 @@
 export interface CurrencyFinanceSummary {
   currency: string;
+  grossPremiums: number;
   totalRevenue: number;
+  outstandingReceivables: number;
   totalExpenses: number;
   netIncome: number;
   pendingCommissions: number;
@@ -12,6 +14,7 @@ export interface FinancialSummaryResult {
   dataQuality: {
     missingOrInvalidCurrencyRows: number;
     invalidAmountRows: number;
+    unclassifiedRevenueRows: number;
   };
   recordCounts: {
     revenue: number;
@@ -28,7 +31,7 @@ export type FinanceMetricKey =
   | 'receivedCommissions';
 
 export function computeFinancialSummary(
-  revenue?: Array<{ amount: number; currency?: string; status: string }>,
+  revenue?: Array<{ amount: number; currency?: string; status: string; type?: 'premium' | 'commission' | 'fee' | 'outstanding' }>,
   expenses?: Array<{ amount: number; currency?: string }>,
   commissions?: Array<{ commissionAmount: number; currency?: string; status: string }>,
 ): FinancialSummaryResult;
