@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, TrendingUp } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
+import { computeFinancialSummary, formatCurrencyAmount, formatFinanceMetric } from './financial-metrics';
 import {
   createRevenue,
   deleteRevenue,
@@ -49,13 +50,10 @@ export default function RevenuePanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.organizationId]);
 
-  const totalConfirmed = useMemo(
-    () =>
-      items
-        .filter((r) => r.status === 'confirmed')
-        .reduce((s, r) => s + (r.amount || 0), 0),
-    [items],
-  );
+  const totalConfirmed = useMemo(() => {
+    const summary = computeFinancialSummary(items, [], []);
+    return formatFinanceMetric(summary.currencies, 'totalRevenue');
+  }, [items]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +103,7 @@ export default function RevenuePanel() {
         <div>
           <span className="eyebrow">Revenue</span>
           <h2>الإيرادات</h2>
-          <small>الإجمالي المؤكد: {totalConfirmed.toLocaleString('ar-EG')} ج.م</small>
+          <small>الإجمالي المؤكد: {totalConfirmed}</small>
         </div>
         <button
           type="button"
@@ -184,7 +182,7 @@ export default function RevenuePanel() {
           {items.map((r) => (
             <li key={r.id} className="fin-row">
               <div className="fin-row-main">
-                <strong>{r.amount.toLocaleString('ar-EG')} ج.م</strong>
+                <strong>{formatCurrencyAmount(r.amount, r.currency)}</strong>
                 <em className={`fin-tag fin-tag-${r.type}`}>
                   {REVENUE_TYPE_LABELS[r.type]}
                 </em>
