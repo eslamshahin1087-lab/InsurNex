@@ -110,6 +110,7 @@ export async function markCommissionReceived(id: string, receivedDate: string): 
   await updateDoc(doc(db, 'commissions', id), {
     status: 'received',
     receivedDate,
+    updatedAt: serverTimestamp(),
   });
 }
 
