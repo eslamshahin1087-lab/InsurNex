@@ -60,7 +60,9 @@ export interface CommissionEntry {
 export interface FinanceSummary {
   currencies: Array<{
     currency: string;
+    grossPremiums: number;
     totalRevenue: number;
+    outstandingReceivables: number;
     totalExpenses: number;
     netIncome: number;
     pendingCommissions: number;
@@ -69,6 +71,7 @@ export interface FinanceSummary {
   dataQuality: {
     missingOrInvalidCurrencyRows: number;
     invalidAmountRows: number;
+    unclassifiedRevenueRows: number;
   };
   recordCounts: {
     revenue: number;
