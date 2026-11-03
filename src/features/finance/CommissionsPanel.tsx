@@ -125,7 +125,7 @@ export default function CommissionsPanel() {
           <span className="eyebrow">Commissions</span>
           <h2>العمولات</h2>
           <small>
-            معلقة: {totals.pending} · مستلمة: {totals.received}
+            معلقة: {totals.pending} · مستلمة: {totals.received} · أحدث 500 قيد ظاهر
           </small>
         </div>
         <button
