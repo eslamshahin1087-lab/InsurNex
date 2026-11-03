@@ -11,6 +11,12 @@ service cloud.firestore {
         && get(clientPath(clientId)).data.organizationId is string
         && sameOrg(get(clientPath(clientId)).data.organizationId);
     }
+    function canAccessClientAfter(clientId){
+      return signedIn()
+        && existsAfter(clientPath(clientId))
+        && getAfter(clientPath(clientId)).data.organizationId is string
+        && sameOrg(getAfter(clientPath(clientId)).data.organizationId);
+    }
     function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
     function userDocumentPath(uid){ return /databases/$(database)/documents/users/$(uid); }
     function memberPath(orgId, uid){ return /databases/$(database)/documents/organizations/$(orgId)/members/$(uid); }
@@ -330,7 +336,7 @@ service cloud.firestore {
 
       match /timeline/{eventId} {
         allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);
-        allow create: if canAccessClient(clientId)
+        allow create: if canAccessClientAfter(clientId)
           && roleIs(['owner','admin','broker'])
           && request.resource.data.by == request.auth.uid;
         allow update, delete: if false;

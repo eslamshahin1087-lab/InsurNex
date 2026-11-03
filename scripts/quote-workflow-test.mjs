@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   addDaysToDateKey,
+  buildPolicyDocumentId,
   canTransitionQuoteStatus,
   compareQuoteOffers,
   getQuoteCommissionAmount,
@@ -13,6 +14,11 @@ const today = '2026-11-03';
 assert.equal(getTodayDateKey(new Date(2026, 10, 3, 12)), today);
 assert.equal(addDaysToDateKey(today, 14), '2026-11-17');
 assert.equal(addDaysToDateKey('2026-02-30', 1), '');
+assert.equal(buildPolicyDocumentId('org-a', 'insurer-a', 'POL/123'), buildPolicyDocumentId('org-a', 'insurer-a', 'POL/123'));
+assert.notEqual(buildPolicyDocumentId('org-a', 'insurer-a', 'POL/123'), buildPolicyDocumentId('org-a', 'insurer-a', 'POL/124'));
+assert.notEqual(buildPolicyDocumentId('org-a', 'insurer-a', 'POL/123'), buildPolicyDocumentId('org-b', 'insurer-a', 'POL/123'));
+assert.notEqual(buildPolicyDocumentId('org_a', 'insurer', 'n'), buildPolicyDocumentId('org', 'a_insurer', 'n'));
+assert.ok(buildPolicyDocumentId('org-a', 'insurer-a', 'POL/123').includes('POL%2F123'));
 
 assert.equal(getQuoteCommissionAmount(1250, 10), 125);
 assert.equal(getQuoteCommissionAmount(1000.55, 7.5), 75.04);

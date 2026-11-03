@@ -112,3 +112,11 @@ export function isQuoteOfferValid(offer, today = getTodayDateKey()) {
     && offer.validUntil >= today,
   );
 }
+
+export function buildPolicyDocumentId(organizationId, insurerId, policyNumber) {
+  const values = [organizationId, insurerId, policyNumber].map((value) => String(value || '').trim());
+  if (values.some((value) => !value)) throw new Error('POLICY_IDENTITY_REQUIRED');
+  const id = `issued_${values.map((value) => `${value.length}_${encodeURIComponent(value)}`).join('_')}`;
+  if (id.length > 1200) throw new Error('POLICY_IDENTITY_TOO_LONG');
+  return id;
+}

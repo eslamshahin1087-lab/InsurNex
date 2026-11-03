@@ -76,6 +76,7 @@ export async function createQuoteOffer(input: CreateQuoteOfferInput): Promise<st
 
     transaction.set(quoteRef, {
       ...input,
+      leadId: rfq.leadId || '',
       quoteNumber: input.quoteNumber?.trim() || '',
       premium: Number(input.premium),
       commissionRate: Number(input.commissionRate),
@@ -220,6 +221,7 @@ export async function issuePolicyFromSelectedQuote(
     if (rfq.organizationId !== input.organizationId || rfq.clientId !== quote.clientId) {
       throw new Error('RFQ_RELATIONSHIP_MISMATCH');
     }
+    if (rfq.selectedQuoteId !== input.quoteId) throw new Error('RFQ_SELECTED_QUOTE_MISMATCH');
     if (client.organizationId !== input.organizationId) throw new Error('CLIENT_ORGANIZATION_MISMATCH');
     if (!Array.isArray(rfq.insurers) || !rfq.insurers.some((item: { insurerId: string }) => item.insurerId === quote.insurerId)) {
       throw new Error('QUOTE_INSURER_NOT_IN_RFQ');
