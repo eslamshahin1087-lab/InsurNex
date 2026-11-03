@@ -94,13 +94,6 @@ export default function FinancePage() {
         tone: 'good',
       },
       {
-        key: 'outstanding',
-        label: 'المتأخرات المسجلة',
-        value: formatFinanceMetric(summary.currencies, 'outstandingReceivables'),
-        icon: Clock3,
-        tone: 'warn',
-      },
-      {
         key: 'expenses',
         label: 'إجمالي المصروفات',
         value: formatFinanceMetric(summary.currencies, 'totalExpenses'),
@@ -120,6 +113,13 @@ export default function FinancePage() {
         value: formatFinanceMetric(summary.currencies, 'pendingCommissions'),
         icon: Clock3,
         tone: 'warn',
+      },
+      {
+        key: 'received',
+        label: 'عمولات شركات التأمين المحصلة',
+        value: formatFinanceMetric(summary.currencies, 'receivedCommissions'),
+        icon: TrendingUp,
+        tone: 'good',
       },
     ];
   }, [summary]);
