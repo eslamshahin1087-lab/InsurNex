@@ -53,7 +53,10 @@ const zeroDecimal = computeFinancialSummary(
 assert.equal(zeroDecimal.currencies[0].grossPremiums, 124, 'zero-decimal currencies use their ISO minor-unit convention');
 
 const quality = computeFinancialSummary(
-  [{ amount: Number.NaN, currency: 'EGP', type: 'commission', status: 'confirmed' }],
+  [
+    { amount: Number.NaN, currency: 'EGP', type: 'commission', status: 'confirmed' },
+    { amount: 10, currency: 'EGP', type: 'legacy-unknown', status: 'confirmed' },
+  ],
   [{ amount: 10, currency: '', }],
   [],
 );
