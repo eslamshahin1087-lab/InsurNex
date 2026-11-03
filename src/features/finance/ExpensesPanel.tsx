@@ -95,7 +95,7 @@ export default function ExpensesPanel() {
         <div>
           <span className="eyebrow">Expenses</span>
           <h2>المصروفات</h2>
-          <small>الإجمالي: {total}</small>
+          <small>الإجمالي: {total} · أحدث 500 قيد ظاهر</small>
         </div>
         <button
           type="button"
