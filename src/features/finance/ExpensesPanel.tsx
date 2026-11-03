@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Receipt, Trash2 } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
+import { computeFinancialSummary, formatCurrencyAmount, formatFinanceMetric } from './financial-metrics';
 import {
   createExpense,
   deleteExpense,
@@ -46,10 +47,10 @@ export default function ExpensesPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.organizationId]);
 
-  const total = useMemo(
-    () => items.reduce((s, e) => s + (e.amount || 0), 0),
-    [items],
-  );
+  const total = useMemo(() => {
+    const summary = computeFinancialSummary([], items, []);
+    return formatFinanceMetric(summary.currencies, 'totalExpenses');
+  }, [items]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +95,7 @@ export default function ExpensesPanel() {
         <div>
           <span className="eyebrow">Expenses</span>
           <h2>المصروفات</h2>
-          <small>الإجمالي: {total.toLocaleString('ar-EG')} ج.م</small>
+          <small>الإجمالي: {total} · أحدث 500 قيد ظاهر</small>
         </div>
         <button
           type="button"
@@ -170,7 +171,7 @@ export default function ExpensesPanel() {
           {items.map((e) => (
             <li key={e.id} className="fin-row">
               <div className="fin-row-main">
-                <strong>{e.amount.toLocaleString('ar-EG')} ج.م</strong>
+                <strong>{formatCurrencyAmount(e.amount, e.currency)}</strong>
                 <em className={`fin-tag fin-tag-${e.category}`}>
                   {EXPENSE_CATEGORY_LABELS[e.category]}
                 </em>

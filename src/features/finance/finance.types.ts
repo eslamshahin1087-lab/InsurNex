@@ -37,6 +37,9 @@ export interface CommissionEntry {
   id: string;
   organizationId: string;
   policyId?: string;
+  quoteId?: string;
+  rfqId?: string;
+  source?: 'policy_issuance';
   policyNumber?: string;
   clientId?: string;
   clientName?: string;
@@ -55,13 +58,27 @@ export interface CommissionEntry {
 }
 
 export interface FinanceSummary {
-  totalRevenue: number;
-  totalExpenses: number;
-  netIncome: number;
-  pendingCommissions: number;
-  receivedCommissions: number;
+  currencies: Array<{
+    currency: string;
+    grossPremiums: number;
+    totalRevenue: number;
+    outstandingReceivables: number;
+    totalExpenses: number;
+    netIncome: number;
+    pendingCommissions: number;
+    receivedCommissions: number;
+  }>;
+  dataQuality: {
+    missingOrInvalidCurrencyRows: number;
+    invalidAmountRows: number;
+    unclassifiedRevenueRows: number;
+  };
+  recordCounts: {
+    revenue: number;
+    expenses: number;
+    commissions: number;
+  };
 }
-
 export const REVENUE_TYPE_LABELS: Record<RevenueType, string> = {
   premium: 'أقساط',
   commission: 'عمولات',

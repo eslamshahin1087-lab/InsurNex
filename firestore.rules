@@ -88,10 +88,102 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.rfqId == data.rfqId
         && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.clientId == data.clientId
         && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerId == data.insurerId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerName == data.insurerName
         && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.premium == data.premium
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionRate == data.commissionRate
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionAmount == data.commissionAmount
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.currency == data.currency
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.status == 'closed'
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.selectedQuoteId == data.quoteId
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.issuedPolicyId == data.policyId
+        && existsAfter(/databases/$(database)/documents/commissions/$(data.policyId))
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.policyId == data.policyId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.quoteId == data.quoteId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.rfqId == data.rfqId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.clientId == data.clientId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.insurerId == data.insurerId
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.premium == data.premium
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.commissionRate == data.commissionRate
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.commissionAmount == data.commissionAmount
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.currency == data.currency
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.source == 'policy_issuance'
+        && getAfter(/databases/$(database)/documents/commissions/$(data.policyId)).data.status == 'pending';
+    }
+    function validPolicyCommissionCreate(data, commissionId){
+      let policyPath = /databases/$(database)/documents/policies/$(data.policyId);
+      return commissionId == data.policyId
+        && data.keys().hasAll([
+          'organizationId','policyId','quoteId','rfqId','clientId','clientName',
+          'insurerId','insurerName','policyNumber','premium','commissionRate',
+          'commissionAmount','currency','status','source','createdBy','createdAt','updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'organizationId','policyId','quoteId','rfqId','clientId','clientName',
+          'insurerId','insurerName','policyNumber','premium','commissionRate',
+          'commissionAmount','currency','status','source','createdBy','createdAt','updatedAt'
+        ])
+        && data.source == 'policy_issuance'
+        && data.status == 'pending'
+        && data.createdBy == request.auth.uid
+        && data.organizationId is string
+        && data.policyId is string
+        && data.quoteId is string
+        && data.rfqId is string
+        && data.clientId is string
+        && data.clientName is string
+        && data.insurerId is string
+        && data.insurerName is string
+        && data.policyNumber is string
+        && data.premium is number && data.premium > 0
+        && data.commissionRate is number && data.commissionRate >= 0 && data.commissionRate <= 100
+        && data.commissionAmount is number && data.commissionAmount >= 0
+        && data.currency is string && data.currency.matches('^[A-Z]{3}$')
+        && data.createdAt == request.time
+        && data.updatedAt == request.time
+        && existsAfter(policyPath)
+        && getAfter(policyPath).data.organizationId == data.organizationId
+        && getAfter(policyPath).data.policyId == data.policyId
+        && getAfter(policyPath).data.quoteId == data.quoteId
+        && getAfter(policyPath).data.rfqId == data.rfqId
+        && getAfter(policyPath).data.clientId == data.clientId
+        && getAfter(policyPath).data.clientName == data.clientName
+        && getAfter(policyPath).data.insurerId == data.insurerId
+        && getAfter(policyPath).data.insurerName == data.insurerName
+        && getAfter(policyPath).data.policyNumber == data.policyNumber
+        && getAfter(policyPath).data.premium == data.premium
+        && getAfter(policyPath).data.commissionRate == data.commissionRate
+        && getAfter(policyPath).data.commissionAmount == data.commissionAmount
+        && getAfter(policyPath).data.currency == data.currency
+        && existsAfter(/databases/$(database)/documents/quotes/$(data.quoteId))
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.status == 'issued'
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyId == data.policyId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyNumber == data.policyNumber
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.rfqId == data.rfqId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.clientId == data.clientId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerId == data.insurerId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerName == data.insurerName
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.premium == data.premium
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionRate == data.commissionRate
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.commissionAmount == data.commissionAmount
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.currency == data.currency
+        && existsAfter(/databases/$(database)/documents/rfqs/$(data.rfqId))
         && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.status == 'closed'
         && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.selectedQuoteId == data.quoteId
         && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.issuedPolicyId == data.policyId;
+    }
+    function canUpdateCommission(){
+      return roleIs(['owner','admin','finance']) && (
+        (resource.data.keys().hasAny(['source']) && resource.data.source == 'policy_issuance')
+          ? request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','receivedDate','updatedAt'])
+            && resource.data.status == 'pending'
+            && request.resource.data.status == 'received'
+            && request.resource.data.receivedDate is string
+            && request.resource.data.receivedDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && request.resource.data.updatedAt == request.time
+          : !request.resource.data.keys().hasAny(['source'])
+      );
     }
     function roleIs(roles){ return hasProfile() && me().status == 'active' && me().role in roles; }
     function privileged(){ return roleIs(['owner','admin']); }
@@ -178,7 +270,7 @@ service cloud.firestore {
         && data.createdAt is timestamp;
     }
 
-    function canCreateBusinessCollection(collection, data){
+    function canCreateBusinessCollection(collection, data, docId){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']) && (!data.keys().hasAny(['policyId']) || policyCreatedFromQuote(data)))
         || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
@@ -188,7 +280,12 @@ service cloud.firestore {
         || (collection == 'insurers' && roleIs(['owner','admin','broker']))
         || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
         || (collection == 'documents' && (roleIs(['owner','admin','broker']) || (roleIs(['claims']) && data.category == 'claim')))
-        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['revenue','expenses'] && roleIs(['owner','admin','finance']))
+        || (collection == 'commissions' && (
+          (data.keys().hasAny(['source']) && data.source == 'policy_issuance'
+            && roleIs(['owner','admin','broker']) && validPolicyCommissionCreate(data, docId))
+          || (!data.keys().hasAny(['source']) && roleIs(['owner','admin','finance']))
+        ))
         || (collection == 'copilotConversations'
           && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
           && data.keys().hasAny(['userId']) && data.userId == request.auth.uid)
@@ -207,7 +304,8 @@ service cloud.firestore {
         || (collection == 'insurers' && roleIs(['owner','admin','broker']))
         || (collection in ['operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin','broker','claims']))
         || (collection == 'documents' && roleIs(['owner','admin','broker']))
-        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['revenue','expenses'] && roleIs(['owner','admin','finance']))
+        || (collection == 'commissions' && canUpdateCommission())
         || (collection in ['copilotConversations','copilotMessages']
           && roleIs(['owner','admin','broker','sales','claims','finance','staff'])
           && data.keys().hasAny(['userId']) && data.userId == request.auth.uid);
@@ -215,7 +313,9 @@ service cloud.firestore {
     function canDeleteBusinessCollection(collection, data){
       return (collection in ['clients','policies','leads','leadActivities','rfqs','tasks','documents'] && roleIs(['owner','admin','broker']))
         || (collection in ['claims','claimActivities','insurers','operations','operationEvents','operationAttachments','operationsEmailDirectory'] && roleIs(['owner','admin']))
-        || (collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance']))
+        || (collection in ['revenue','expenses'] && roleIs(['owner','admin','finance']))
+        || (collection == 'commissions' && roleIs(['owner','admin','finance'])
+          && (!data.keys().hasAny(['source']) || data.source != 'policy_issuance'))
         || (collection in ['copilotConversations','copilotMessages'] && roleIs(['owner','admin','broker','sales','claims','finance','staff']) && data.keys().hasAny(['userId']) && data.userId == request.auth.uid)
         || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']));
     }
@@ -607,7 +707,7 @@ service cloud.firestore {
           || (request.resource.data.storageKeyVersion == 2
             && request.resource.data.downloadUrl == ''
             && request.resource.data.uploadState == 'pending'))
-        && canCreateBusinessCollection(collection, request.resource.data);
+        && canCreateBusinessCollection(collection, request.resource.data, docId);
       allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'

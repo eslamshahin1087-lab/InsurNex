@@ -10,6 +10,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { buildPolicyCommissionDocumentId } from '../finance/financial-metrics';
 import type { Policy, InsuranceLine } from '../../types/insurance';
 import {
   buildPolicyDocumentId,
@@ -236,6 +237,10 @@ export async function issuePolicyFromSelectedQuote(
     if (quote.organizationId !== input.organizationId) throw new Error('QUOTE_ORGANIZATION_MISMATCH');
     const policyId = buildPolicyDocumentId(input.organizationId, quote.insurerId, policyNumber);
     const policyRef = doc(db, 'policies', policyId);
+    const commissionId = buildPolicyCommissionDocumentId(policyId);
+    const commissionRef = doc(db, 'commissions', commissionId);
+    const commissionSnapshot = await transaction.get(commissionRef);
+    if (commissionSnapshot.exists()) throw new Error('POLICY_COMMISSION_ALREADY_EXISTS');
     if (quote.status !== 'selected') throw new Error('QUOTE_NOT_SELECTED');
     if (!isQuoteOfferValid(quote, todayLocal)) throw new Error('QUOTE_EXPIRED');
 
@@ -315,6 +320,26 @@ export async function issuePolicyFromSelectedQuote(
     };
 
     transaction.set(policyRef, policyData);
+    transaction.set(commissionRef, {
+      organizationId: input.organizationId,
+      policyId,
+      quoteId: input.quoteId,
+      rfqId: quote.rfqId,
+      clientId: quote.clientId,
+      clientName: String(policyData.clientName || ''),
+      insurerId: quote.insurerId,
+      insurerName: quote.insurerName,
+      policyNumber,
+      premium: Number(quote.premium),
+      commissionRate: Number(quote.commissionRate),
+      commissionAmount: Number(quote.commissionAmount),
+      currency: quote.currency,
+      status: 'pending',
+      source: 'policy_issuance',
+      createdBy: input.uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
     transaction.update(quoteRef, {
       status: 'issued',
       policyId,
@@ -389,7 +414,7 @@ export async function issuePolicyFromSelectedQuote(
       });
     }
 
-    return { policyId, policyNumber, followUpTaskId: taskRef.id };
+    return { policyId, policyNumber, followUpTaskId: taskRef.id, commissionId };
   });
 
   return result;

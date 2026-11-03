@@ -43,7 +43,8 @@
     "test:client-data-review": "node scripts/client-data-access-review-test.mjs",
     "test:view-mode-preference": "node scripts/view-mode-preference-test.mjs",
     "test:task-workflow": "node scripts/task-workflow-test.mjs",
-    "test:quote-workflow": "node scripts/quote-workflow-test.mjs"
+    "test:quote-workflow": "node scripts/quote-workflow-test.mjs",
+    "test:financial-metrics": "node scripts/financial-metrics-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

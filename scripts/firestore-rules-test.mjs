@@ -962,6 +962,7 @@ try {
     quoteId: protectedQuoteId,
     rfqId: protectedRfqId,
     clientId: protectedClientId,
+    clientName: 'RBAC fixture client',
     insurerId: protectedInsurerId,
     insurerName: 'Synthetic Insurer',
     organizationId: orgA,
@@ -971,6 +972,26 @@ try {
     commissionAmount: 120,
     currency: 'EGP',
     status: 'active',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  issuePolicyBatch.set(doc(ownerA.db, 'commissions', issuedPolicyId), {
+    organizationId: orgA,
+    policyId: issuedPolicyId,
+    quoteId: protectedQuoteId,
+    rfqId: protectedRfqId,
+    clientId: protectedClientId,
+    clientName: 'RBAC fixture client',
+    insurerId: protectedInsurerId,
+    insurerName: 'Synthetic Insurer',
+    policyNumber: issuedPolicyNumber,
+    premium: 1200,
+    commissionRate: 10,
+    commissionAmount: 120,
+    currency: 'EGP',
+    status: 'pending',
+    source: 'policy_issuance',
     createdBy: ownerA.user.uid,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -992,6 +1013,66 @@ try {
   await issuePolicyBatch.commit();
   check((await getDoc(doc(ownerA.db, 'policies', issuedPolicyId))).exists(),
     'a selected quote can be issued only with its matching policy and closed RFQ in one atomic write');
+  check((await getDoc(doc(ownerA.db, 'commissions', issuedPolicyId))).data().source === 'policy_issuance',
+    'policy issuance creates exactly one linked commission ledger row in the same atomic write');
+  await expectDenied(
+    () => getDoc(doc(brokerMember.actor.db, 'commissions', issuedPolicyId)),
+    'broker cannot read finance-only commission ledger records'
+  );
+  await updateDoc(doc(financeMember.actor.db, 'commissions', issuedPolicyId), {
+    status: 'received',
+    receivedDate: '2026-11-03',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(financeMember.actor.db, 'commissions', issuedPolicyId))).data().status === 'received',
+    'finance can mark a policy-linked commission as received');
+  await expectDenied(
+    () => updateDoc(doc(financeMember.actor.db, 'commissions', issuedPolicyId), { commissionAmount: 9999 }),
+    'finance cannot alter the premium or commission basis of an issued policy ledger row'
+  );
+  await expectDenied(
+    () => deleteDoc(doc(ownerA.db, 'commissions', issuedPolicyId)),
+    'owner cannot delete an issued policy commission ledger row'
+  );
+  const manualCommissionCollisionId = 'manual-collision-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'commissions', manualCommissionCollisionId), {
+    organizationId: orgA,
+    premium: 500,
+    commissionRate: 10,
+    commissionAmount: 50,
+    currency: 'EGP',
+    status: 'pending',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'commissions', manualCommissionCollisionId), {
+      policyId: manualCommissionCollisionId,
+      quoteId: protectedQuoteId,
+      rfqId: protectedRfqId,
+      clientId: protectedClientId,
+      clientName: 'RBAC fixture client',
+      insurerId: protectedInsurerId,
+      insurerName: 'Synthetic Insurer',
+      policyNumber: issuedPolicyNumber,
+      source: 'policy_issuance',
+    }),
+    'an existing manual commission cannot be overwritten or promoted into a policy-issued ledger row'
+  );
+
+  const forgedPolicyId = 'missing-policy-' + randomUUID();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'commissions', forgedPolicyId), {
+      organizationId: orgA, policyId: forgedPolicyId,
+      quoteId: protectedQuoteId, rfqId: protectedRfqId, clientId: protectedClientId,
+      clientName: 'RBAC fixture client', insurerId: protectedInsurerId,
+      insurerName: 'Synthetic Insurer', policyNumber: issuedPolicyNumber,
+      premium: 1200, commissionRate: 10, commissionAmount: 120,
+      currency: 'EGP', status: 'pending', source: 'policy_issuance',
+      createdBy: ownerA.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    }),
+    'policy commission ledger cannot be forged without its matching policy in the same write'
+  );
 
   await expectDenied(
     () => setDoc(doc(ownerB.db, 'quotes', 'cross-org-quote-' + randomUUID()), {

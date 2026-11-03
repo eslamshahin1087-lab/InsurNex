@@ -36,6 +36,8 @@ jobs:
         run: npm run test:task-workflow
       - name: Quote comparison and policy issuance domain tests
         run: npm run test:quote-workflow
+      - name: Currency-safe financial metric contract tests
+        run: npm run test:financial-metrics
       - name: Document storage authorization policy regression tests
         run: npm run test:storage-gateway
       - name: Document storage runtime authorization and signed URL contract checks

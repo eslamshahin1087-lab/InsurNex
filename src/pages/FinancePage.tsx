@@ -11,12 +11,8 @@ import { useAuth } from '../features/auth/auth-context';
 import RevenuePanel from '../features/finance/RevenuePanel';
 import ExpensesPanel from '../features/finance/ExpensesPanel';
 import CommissionsPanel from '../features/finance/CommissionsPanel';
-import {
-  computeSummary,
-  listCommissions,
-  listExpenses,
-  listRevenue,
-} from '../features/finance/finance.service';
+import { loadFinanceSummary } from '../features/finance/finance.service';
+import { formatFinanceMetric } from '../features/finance/financial-metrics';
 import type { FinanceSummary } from '../features/finance/finance.types';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import '../theme/finance.css';
@@ -28,23 +24,30 @@ export default function FinancePage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('overview');
   const [summary, setSummary] = useState<FinanceSummary | null>(null);
+  const [summaryLoadedAt, setSummaryLoadedAt] = useState<Date | null>(null);
+  const [summaryError, setSummaryError] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(true);
+  const organizationId = profile?.organizationId;
 
   useEffect(() => {
-    if (!profile) return;
+    if (!organizationId || tab !== 'overview') return;
     let cancelled = false;
     setLoadingSummary(true);
+    setSummaryError('');
+    setSummaryLoadedAt(null);
     (async () => {
       try {
-        const [rev, exp, com] = await Promise.all([
-          listRevenue(profile.organizationId),
-          listExpenses(profile.organizationId),
-          listCommissions(profile.organizationId),
-        ]);
-        if (!cancelled) setSummary(computeSummary(rev, exp, com));
+        const result = await loadFinanceSummary(organizationId);
+        if (!cancelled) {
+          setSummary(result);
+          setSummaryLoadedAt(new Date());
+        }
       } catch (err) {
         console.error('Failed to load finance summary', err);
-        if (!cancelled) setSummary(null);
+        if (!cancelled) {
+          setSummary(null);
+          setSummaryError('تعذر تحميل الملخص المالي بالكامل. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.');
+        }
       } finally {
         if (!cancelled) setLoadingSummary(false);
       }
@@ -52,32 +55,25 @@ export default function FinancePage() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.organizationId]);
+  }, [organizationId, tab]);
 
   // ✅ Set context for FAB — always sends, with neutral notes
   useEffect(() => {
-    const financeData = summary
+    const financeData = summary?.currencies.length === 1
       ? {
-          totalRevenue: summary.totalRevenue,
-          totalExpenses: summary.totalExpenses,
-          netIncome: summary.netIncome,
-          pendingCommissions: summary.pendingCommissions,
-          receivedCommissions: summary.receivedCommissions,
-          currency: 'EGP',
+          totalRevenue: summary.currencies[0].totalRevenue,
+          totalExpenses: summary.currencies[0].totalExpenses,
+          netIncome: summary.currencies[0].netIncome,
+          pendingCommissions: summary.currencies[0].pendingCommissions,
+          receivedCommissions: summary.currencies[0].receivedCommissions,
+          currency: summary.currencies[0].currency,
         }
-      : {
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netIncome: 0,
-          pendingCommissions: 0,
-          receivedCommissions: 0,
-          currency: 'EGP',
-        };
+      : { currency: summary?.currencies.length ? 'MULTI_CURRENCY' : 'UNSPECIFIED' };
 
     setCurrentContext({
       page: 'finance',
       finance: financeData,
-      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. The figures above are the exact current values from Firestore.`,
+      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. Brokerage revenue excludes recorded premium volume and outstanding receivables. All metrics are paginated across the full organization dataset and grouped by currency; no foreign-exchange conversion is applied.`,
     });
   }, [summary, tab]);
 
@@ -85,61 +81,69 @@ export default function FinancePage() {
     if (!summary) return [];
     return [
       {
+        key: 'premiums',
+        label: 'الأقساط المسجلة',
+        value: formatFinanceMetric(summary.currencies, 'grossPremiums'),
+        icon: Wallet,
+        tone: 'neutral',
+      },
+      {
         key: 'revenue',
-        label: 'إجمالي الإيرادات',
-        value: summary.totalRevenue,
+        label: 'إيرادات الوساطة والرسوم',
+        value: formatFinanceMetric(summary.currencies, 'totalRevenue'),
         icon: TrendingUp,
         tone: 'good',
       },
       {
         key: 'expenses',
         label: 'إجمالي المصروفات',
-        value: summary.totalExpenses,
+        value: formatFinanceMetric(summary.currencies, 'totalExpenses'),
         icon: TrendingDown,
         tone: 'bad',
       },
       {
         key: 'net',
-        label: 'صافي الدخل',
-        value: summary.netIncome,
+        label: 'صافي دخل الوساطة',
+        value: formatFinanceMetric(summary.currencies, 'netIncome'),
         icon: Wallet,
-        tone: summary.netIncome >= 0 ? 'good' : 'bad',
+        tone: 'neutral',
       },
       {
         key: 'pending',
-        label: 'عمولات معلقة',
-        value: summary.pendingCommissions,
+        label: 'عمولات شركات التأمين المعلقة',
+        value: formatFinanceMetric(summary.currencies, 'pendingCommissions'),
         icon: Clock3,
         tone: 'warn',
+      },
+      {
+        key: 'received',
+        label: 'عمولات شركات التأمين المحصلة',
+        value: formatFinanceMetric(summary.currencies, 'receivedCommissions'),
+        icon: TrendingUp,
+        tone: 'good',
       },
     ];
   }, [summary]);
 
   const askCopilot = () => {
-    const financeData = summary
+    const onlyCurrency = summary?.currencies.length === 1 ? summary.currencies[0] : undefined;
+    const financeData = onlyCurrency
       ? {
-          totalRevenue: summary.totalRevenue,
-          totalExpenses: summary.totalExpenses,
-          netIncome: summary.netIncome,
-          pendingCommissions: summary.pendingCommissions,
-          receivedCommissions: summary.receivedCommissions,
-          currency: 'EGP',
+          totalRevenue: onlyCurrency.totalRevenue,
+          totalExpenses: onlyCurrency.totalExpenses,
+          netIncome: onlyCurrency.netIncome,
+          pendingCommissions: onlyCurrency.pendingCommissions,
+          receivedCommissions: onlyCurrency.receivedCommissions,
+          currency: onlyCurrency.currency,
         }
-      : {
-          totalRevenue: 0,
-          totalExpenses: 0,
-          netIncome: 0,
-          pendingCommissions: 0,
-          receivedCommissions: 0,
-          currency: 'EGP',
-        };
+      : { currency: summary?.currencies.length ? 'MULTI_CURRENCY' : 'UNSPECIFIED' };
 
     navigate('/copilot', {
       state: {
         context: {
           page: 'finance',
           finance: financeData,
-          notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. The figures above are the exact current values from Firestore.`,
+          notes: `The finance dashboard contains ${summary?.currencies.length || 0} currency bucket(s). No foreign-exchange conversion is applied; mixed-currency totals are intentionally not combined.`,
         },
       },
     });
@@ -194,7 +198,7 @@ export default function FinancePage() {
               <div className="fin-empty">جاري الحساب...</div>
             ) : !summary ? (
               <div className="fin-empty">
-                لا توجد بيانات كافية لعرض الملخص. أضف إيرادات أو مصروفات أولًا.
+                {summaryError || 'لا توجد بيانات مالية مسجلة بعد.'}
               </div>
             ) : (
               <section className="fin-kpis">
@@ -202,24 +206,41 @@ export default function FinancePage() {
                   <article key={key} className={`fin-kpi tone-${tone}`}>
                     <Icon size={20} />
                     <small>{label}</small>
-                    <strong>{value.toLocaleString('ar-EG')} ج.م</strong>
+                    <strong dir="auto">{value}</strong>
                   </article>
                 ))}
               </section>
             )}
 
+            {summary && (
             <section className="fin-info">
-              <h3>مصادر الإيراد</h3>
+              <h3>نطاق البيانات وجودتها</h3>
               <p>
-                يتم تصنيف الإيرادات إلى: أقساط، عمولات، رسوم، ومتأخرات. يمكنك
-                إدارة كل منها من تبويب <strong>الإيرادات</strong>.
+                يشمل الملخص جميع القيود المسجلة في المؤسسة عبر صفحات قراءة متتابعة؛
+                ولا يتم جمع العملات المختلفة أو إجراء تحويل عملات. عدد القيود:
+                الإيرادات {summary.recordCounts.revenue}، المصروفات {summary.recordCounts.expenses}،
+                والعمولات {summary.recordCounts.commissions}.
+                {summaryLoadedAt ? ` آخر تحديث: ${summaryLoadedAt.toLocaleString('ar-EG')}.` : ''}
               </p>
-              <h3>متابعة العمولات</h3>
+              {(summary.dataQuality.invalidAmountRows > 0
+                || summary.dataQuality.missingOrInvalidCurrencyRows > 0
+                || summary.dataQuality.unclassifiedRevenueRows > 0) && (
+                <p className="fin-error">
+                  تنبيه جودة البيانات: {summary.dataQuality.invalidAmountRows} قيود بقيم غير صالحة،
+                  {summary.dataQuality.missingOrInvalidCurrencyRows} قيود بعملة غير محددة،
+                  و{summary.dataQuality.unclassifiedRevenueRows} قيود إيراد غير مصنفة؛
+                  لم تُحتسب القيم غير الصالحة أو الإيرادات غير المصنفة ضمن الإيراد.
+                </p>
+              )}
+              <h3>تعريف المؤشرات</h3>
               <p>
-                يسجل النظام العمولة المتوقعة لكل وثيقة، ويتيح تعليمها
-                كمستلمة عند التحصيل الفعلي.
+                الأقساط المسجلة تمثل حجم الأقساط المدخلة وليست دخل الوسيط.
+                إيراد الوساطة يشمل قيود العمولات والرسوم المؤكدة فقط؛ والمتأخرات والعمولات
+                المستحقة من شركات التأمين معروضة بصورة مستقلة، ولا تمثل تحصيلًا نقديًا حتى
+                تأكيد استلامها.
               </p>
             </section>
+            )}
           </>
         )}
 
