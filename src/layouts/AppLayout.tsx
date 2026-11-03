@@ -24,6 +24,7 @@ import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider'
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
+import { readViewModePreference, writeViewModePreference } from './view-mode-preference';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
   { to: '/', label: 'الرئيسية', Icon: Home },
@@ -89,7 +90,7 @@ export default function AppLayout() {
     if (typeof window === 'undefined') return false;
     return window.innerWidth >= 1024 && window.matchMedia('(min-width: 1024px)').matches;
   });
-  const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(null);
+  const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(readViewModePreference);
   const viewMode = viewModeOverride ?? (isWideViewport ? 'desktop' : 'mobile');
 
   useEffect(() => {
@@ -109,7 +110,9 @@ export default function AppLayout() {
   }, []);
 
   const toggleViewMode = () => {
-    setViewModeOverride(viewMode === 'mobile' ? 'desktop' : 'mobile');
+    const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
+    writeViewModePreference(nextMode);
+    setViewModeOverride(nextMode);
   };
 
   const isCopilotPage = location.pathname === '/copilot';

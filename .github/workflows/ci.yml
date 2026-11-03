@@ -30,6 +30,8 @@ jobs:
         run: npm run test:copilot-session-context
       - name: Visual identity and responsive layout regression checks
         run: npm run test:visual-identity
+      - name: View-mode preference persistence regression tests
+        run: npm run test:view-mode-preference
       - name: Document storage authorization policy regression tests
         run: npm run test:storage-gateway
       - name: Document storage runtime authorization and signed URL contract checks
