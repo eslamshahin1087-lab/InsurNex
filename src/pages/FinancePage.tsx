@@ -27,16 +27,17 @@ export default function FinancePage() {
   const [summaryLoadedAt, setSummaryLoadedAt] = useState<Date | null>(null);
   const [summaryError, setSummaryError] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(true);
+  const organizationId = profile?.organizationId;
 
   useEffect(() => {
-    if (!profile || tab !== 'overview') return;
+    if (!organizationId || tab !== 'overview') return;
     let cancelled = false;
     setLoadingSummary(true);
     setSummaryError('');
     setSummaryLoadedAt(null);
     (async () => {
       try {
-        const result = await loadFinanceSummary(profile.organizationId);
+        const result = await loadFinanceSummary(organizationId);
         if (!cancelled) {
           setSummary(result);
           setSummaryLoadedAt(new Date());
@@ -54,7 +55,7 @@ export default function FinancePage() {
     return () => {
       cancelled = true;
     };
-  }, [profile?.organizationId, tab]);
+  }, [organizationId, tab]);
 
   // ✅ Set context for FAB — always sends, with neutral notes
   useEffect(() => {
@@ -211,6 +212,7 @@ export default function FinancePage() {
               </section>
             )}
 
+            {summary && (
             <section className="fin-info">
               <h3>نطاق البيانات وجودتها</h3>
               <p>
@@ -238,6 +240,7 @@ export default function FinancePage() {
                 تأكيد استلامها.
               </p>
             </section>
+            )}
           </>
         )}
 
