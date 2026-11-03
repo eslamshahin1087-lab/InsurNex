@@ -24,19 +24,29 @@ export default function FinancePage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('overview');
   const [summary, setSummary] = useState<FinanceSummary | null>(null);
+  const [summaryLoadedAt, setSummaryLoadedAt] = useState<Date | null>(null);
+  const [summaryError, setSummaryError] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
     let cancelled = false;
     setLoadingSummary(true);
+    setSummaryError('');
+    setSummaryLoadedAt(null);
     (async () => {
       try {
         const result = await loadFinanceSummary(profile.organizationId);
-        if (!cancelled) setSummary(result);
+        if (!cancelled) {
+          setSummary(result);
+          setSummaryLoadedAt(new Date());
+        }
       } catch (err) {
         console.error('Failed to load finance summary', err);
-        if (!cancelled) setSummary(null);
+        if (!cancelled) {
+          setSummary(null);
+          setSummaryError('تعذر تحميل الملخص المالي بالكامل. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.');
+        }
       } finally {
         if (!cancelled) setLoadingSummary(false);
       }
@@ -62,7 +72,7 @@ export default function FinancePage() {
     setCurrentContext({
       page: 'finance',
       finance: financeData,
-      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. Financial totals are paginated across the full organization dataset and remain separated by currency; no foreign-exchange conversion is applied.`,
+      notes: `The broker is currently viewing the finance dashboard. Active tab: ${tab}. Brokerage revenue excludes recorded premium volume and outstanding receivables. All metrics are paginated across the full organization dataset and grouped by currency; no foreign-exchange conversion is applied.`,
     });
   }, [summary, tab]);
 
@@ -70,11 +80,25 @@ export default function FinancePage() {
     if (!summary) return [];
     return [
       {
+        key: 'premiums',
+        label: 'الأقساط المسجلة',
+        value: formatFinanceMetric(summary.currencies, 'grossPremiums'),
+        icon: Wallet,
+        tone: 'neutral',
+      },
+      {
         key: 'revenue',
-        label: 'إجمالي الإيرادات',
+        label: 'إيرادات الوساطة والرسوم',
         value: formatFinanceMetric(summary.currencies, 'totalRevenue'),
         icon: TrendingUp,
         tone: 'good',
+      },
+      {
+        key: 'outstanding',
+        label: 'المتأخرات المسجلة',
+        value: formatFinanceMetric(summary.currencies, 'outstandingReceivables'),
+        icon: Clock3,
+        tone: 'warn',
       },
       {
         key: 'expenses',
@@ -85,14 +109,14 @@ export default function FinancePage() {
       },
       {
         key: 'net',
-        label: 'صافي الدخل',
+        label: 'صافي دخل الوساطة',
         value: formatFinanceMetric(summary.currencies, 'netIncome'),
         icon: Wallet,
-        tone: 'good',
+        tone: 'neutral',
       },
       {
         key: 'pending',
-        label: 'عمولات معلقة',
+        label: 'عمولات شركات التأمين المعلقة',
         value: formatFinanceMetric(summary.currencies, 'pendingCommissions'),
         icon: Clock3,
         tone: 'warn',
@@ -173,7 +197,7 @@ export default function FinancePage() {
               <div className="fin-empty">جاري الحساب...</div>
             ) : !summary ? (
               <div className="fin-empty">
-                لا توجد بيانات كافية لعرض الملخص. أضف إيرادات أو مصروفات أولًا.
+                {summaryError || 'لا توجد بيانات مالية مسجلة بعد.'}
               </div>
             ) : (
               <section className="fin-kpis">
@@ -188,15 +212,30 @@ export default function FinancePage() {
             )}
 
             <section className="fin-info">
-              <h3>مصادر الإيراد</h3>
+              <h3>نطاق البيانات وجودتها</h3>
               <p>
-                يتم تصنيف الإيرادات إلى: أقساط، عمولات، رسوم، ومتأخرات. يمكنك
-                إدارة كل منها من تبويب <strong>الإيرادات</strong>.
+                يشمل الملخص جميع القيود المسجلة في المؤسسة عبر صفحات قراءة متتابعة؛
+                ولا يتم جمع العملات المختلفة أو إجراء تحويل عملات. عدد القيود:
+                الإيرادات {summary.recordCounts.revenue}، المصروفات {summary.recordCounts.expenses}،
+                والعمولات {summary.recordCounts.commissions}.
+                {summaryLoadedAt ? ` آخر تحديث: ${summaryLoadedAt.toLocaleString('ar-EG')}.` : ''}
               </p>
-              <h3>متابعة العمولات</h3>
+              {(summary.dataQuality.invalidAmountRows > 0
+                || summary.dataQuality.missingOrInvalidCurrencyRows > 0
+                || summary.dataQuality.unclassifiedRevenueRows > 0) && (
+                <p className="fin-error">
+                  تنبيه جودة البيانات: {summary.dataQuality.invalidAmountRows} قيود بقيم غير صالحة،
+                  {summary.dataQuality.missingOrInvalidCurrencyRows} قيود بعملة غير محددة،
+                  و{summary.dataQuality.unclassifiedRevenueRows} قيود إيراد غير مصنفة؛
+                  لم تُحتسب القيم غير الصالحة أو الإيرادات غير المصنفة ضمن الإيراد.
+                </p>
+              )}
+              <h3>تعريف المؤشرات</h3>
               <p>
-                يسجل النظام العمولة المتوقعة لكل وثيقة، ويتيح تعليمها
-                كمستلمة عند التحصيل الفعلي.
+                الأقساط المسجلة تمثل حجم الأقساط المدخلة وليست دخل الوسيط.
+                إيراد الوساطة يشمل قيود العمولات والرسوم المؤكدة فقط؛ والمتأخرات والعمولات
+                المستحقة من شركات التأمين معروضة بصورة مستقلة، ولا تمثل تحصيلًا نقديًا حتى
+                تأكيد استلامها.
               </p>
             </section>
           </>
