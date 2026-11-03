@@ -1034,9 +1034,10 @@ try {
     () => deleteDoc(doc(ownerA.db, 'commissions', issuedPolicyId)),
     'owner cannot delete an issued policy commission ledger row'
   );
+  const forgedPolicyId = 'missing-policy-' + randomUUID();
   await expectDenied(
-    () => setDoc(doc(ownerA.db, 'commissions', 'forged-policy-ledger-' + randomUUID()), {
-      organizationId: orgA, policyId: 'missing-policy-' + randomUUID(),
+    () => setDoc(doc(ownerA.db, 'commissions', forgedPolicyId), {
+      organizationId: orgA, policyId: forgedPolicyId,
       quoteId: protectedQuoteId, rfqId: protectedRfqId, clientId: protectedClientId,
       clientName: 'RBAC fixture client', insurerId: protectedInsurerId,
       insurerName: 'Synthetic Insurer', policyNumber: issuedPolicyNumber,
