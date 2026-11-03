@@ -50,10 +50,10 @@ export default function RevenuePanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.organizationId]);
 
-  const totalConfirmed = useMemo(() => {
-    const summary = computeFinancialSummary(items, [], []);
-    return formatFinanceMetric(summary.currencies, 'totalRevenue');
-  }, [items]);
+  const revenueMetrics = useMemo(
+    () => computeFinancialSummary(items, [], []),
+    [items],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +103,11 @@ export default function RevenuePanel() {
         <div>
           <span className="eyebrow">Revenue</span>
           <h2>الإيرادات</h2>
-          <small>الإجمالي المؤكد: {totalConfirmed}</small>
+          <small>
+            الأقساط المسجلة: {formatFinanceMetric(revenueMetrics.currencies, 'grossPremiums')} ·
+            إيراد الوساطة والرسوم: {formatFinanceMetric(revenueMetrics.currencies, 'totalRevenue')} ·
+            المتأخرات: {formatFinanceMetric(revenueMetrics.currencies, 'outstandingReceivables')}
+          </small>
         </div>
         <button
           type="button"
