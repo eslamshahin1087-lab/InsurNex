@@ -62,7 +62,7 @@ export interface Policy {
   createdBy: string;
 
   // ✅ حقول جديدة لدورة الحياة
-  issuedAt?: string;              // تاريخ الإصدار الفعلي
+  issuedAt?: unknown;             // تاريخ الإصدار الفعلي
   renewedAt?: string;             // تاريخ آخر تجديد
   cancelledAt?: string;           // تاريخ الإلغاء
   cancellationReason?: string;    // سبب الإلغاء
@@ -85,6 +85,10 @@ export interface Policy {
   // ✅ حقول من النظام القديم
   rfqId?: string;
   quoteId?: string;
+  policyId?: string;
+  leadId?: string;
+  deductible?: number;
+  paymentTerms?: string;
   operationId?: string;
   documentId?: string;
 

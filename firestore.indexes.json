@@ -301,6 +301,24 @@
                             { "fieldPath": "relatedType", "order": "ASCENDING" },
                             { "fieldPath": "relatedId", "order": "ASCENDING" }
                         ]
+                    },
+                    {
+                        "collectionGroup": "quotes",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "rfqId", "order": "ASCENDING" },
+                            { "fieldPath": "createdAt", "order": "DESCENDING" }
+                        ]
+                    },
+                    {
+                        "collectionGroup": "policies",
+                        "queryScope": "COLLECTION",
+                        "fields": [
+                            { "fieldPath": "organizationId", "order": "ASCENDING" },
+                            { "fieldPath": "insurerId", "order": "ASCENDING" },
+                            { "fieldPath": "policyNumber", "order": "ASCENDING" }
+                        ]
                     }
 ],
     "fieldOverrides":  [

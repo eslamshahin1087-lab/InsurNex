@@ -29,6 +29,10 @@ const EVENT_LABELS: Record<TimelineEventType, string> = {
   meeting: 'اجتماع',
   email: 'بريد',
   task: 'مهمة',
+  lead_linked: 'ربط بفرصة بيع',
+  rfq_created: 'طلب تسعير',
+  quote_received: 'استلام عرض سعر',
+  policy_issued_from_quote: 'إصدار وثيقة',
 };
 
 export default function ClientTimeline({ clientId, organizationId }: Props) {

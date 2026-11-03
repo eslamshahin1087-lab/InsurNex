@@ -347,6 +347,7 @@ try {
 
   // Additional tenant-scoped fixtures for the complete role/read matrix.
   const protectedRfqId = 'rbac-rfq-' + randomUUID();
+  const protectedQuoteId = 'rbac-quote-' + randomUUID();
   const protectedInsurerId = 'rbac-insurer-' + randomUUID();
   const protectedMatrixOperationId = 'rbac-operation-' + randomUUID();
   const protectedNotificationId = 'rbac-notification-' + randomUUID();
@@ -354,8 +355,14 @@ try {
   const protectedCommissionId = 'rbac-commission-' + randomUUID();
 
   await setDoc(doc(ownerA.db, 'rfqs', protectedRfqId), {
-    organizationId: orgA, clientId: protectedClientId, status: 'draft',
+    organizationId: orgA, clientId: protectedClientId, insurerIds: [protectedInsurerId], status: 'draft',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerA.db, 'quotes', protectedQuoteId), {
+    organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
+    insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', premium: 1200,
+    commissionRate: 10, commissionAmount: 120, currency: 'EGP', validUntil: '2026-11-30', status: 'received',
+    createdBy: ownerA.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
   await setDoc(doc(ownerA.db, 'insurers', protectedInsurerId), {
     organizationId: orgA, name: 'Synthetic Insurer', status: 'active',
@@ -407,6 +414,7 @@ try {
     { collection: 'leads', id: protectedLeadId, allowed: ['owner', 'admin', 'broker', 'sales'] },
     { collection: 'tasks', id: protectedTaskId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
     { collection: 'rfqs', id: protectedRfqId, allowed: ['owner', 'admin', 'broker', 'sales'] },
+    { collection: 'quotes', id: protectedQuoteId, allowed: ['owner', 'admin', 'broker', 'sales'] },
     { collection: 'insurers', id: protectedInsurerId, allowed: ['owner', 'admin', 'broker', 'sales', 'claims', 'finance', 'staff'] },
     { collection: 'operations', id: protectedMatrixOperationId, allowed: ['owner', 'admin', 'broker', 'claims'] },
     { collection: 'revenue', id: protectedRevenueId, allowed: ['owner', 'admin', 'finance'] },
@@ -474,6 +482,38 @@ try {
   });
   check((await getDoc(doc(salesMember.actor.db, 'leads', salesCreatedLeadId))).exists(),
     'sales can create a lead in its own organization');
+  const salesCreatedQuoteId = 'rbac-sales-created-quote-' + randomUUID();
+  await setDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), {
+    organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
+    insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', premium: 900,
+    commissionRate: 5, commissionAmount: 45, currency: 'EGP', validUntil: '2026-11-30', status: 'received',
+    createdBy: salesMember.actor.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId))).exists(),
+    'sales can record insurer quotes against an RFQ in its own organization');
+  await updateDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), { status: 'shortlisted', updatedAt: serverTimestamp() });
+  await expectDenied(
+    () => updateDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), { premium: 1 }),
+    'an insurer quote premium cannot be edited after it is recorded'
+  );
+  await expectDenied(
+    () => setDoc(doc(salesMember.actor.db, 'quotes', 'rbac-unlisted-insurer-' + randomUUID()), {
+      organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
+      insurerId: 'insurer-not-in-rfq', insurerName: 'Unlisted', premium: 900,
+      commissionRate: 5, commissionAmount: 45, currency: 'EGP', validUntil: '2026-11-30', status: 'received',
+      createdBy: salesMember.actor.user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    }),
+    'a quote cannot be recorded for an insurer outside the RFQ target list'
+  );
+  await expectDenied(
+    () => updateDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId), {
+      status: 'issued', policyId: 'forged-policy', policyNumber: 'FORGED', issuedAt: serverTimestamp(),
+    }),
+    'a quote cannot be marked issued without its matching policy'
+  );
+  check((await getDoc(doc(salesMember.actor.db, 'quotes', salesCreatedQuoteId))).data().status === 'shortlisted',
+    'sales can update a quote status within its own organization');
+
   const claimsCreatedClaimId = 'rbac-claims-created-claim-' + randomUUID();
   await setDoc(doc(claimsMember.actor.db, 'claims', claimsCreatedClaimId), {
     organizationId: orgA, clientId: protectedClientId, policyId: protectedPolicyId,
@@ -901,6 +941,65 @@ try {
   await expectDenied(
     () => getDoc(doc(ownerB.db, 'clients', clientA)),
     'a user from another organization cannot read a client record'
+  );
+  const issuedPolicyId = 'rbac-issued-policy-' + randomUUID();
+  const issuedPolicyNumber = 'RULES-ISSUED-' + randomUUID().slice(0, 8);
+  const selectQuoteBatch = writeBatch(ownerA.db);
+  selectQuoteBatch.update(doc(ownerA.db, 'rfqs', protectedRfqId), {
+    selectedQuoteId: protectedQuoteId,
+    selectedInsurerId: protectedInsurerId,
+    updatedAt: serverTimestamp(),
+  });
+  selectQuoteBatch.update(doc(ownerA.db, 'quotes', protectedQuoteId), {
+    status: 'selected',
+    updatedAt: serverTimestamp(),
+  });
+  await selectQuoteBatch.commit();
+
+  const issuePolicyBatch = writeBatch(ownerA.db);
+  issuePolicyBatch.set(doc(ownerA.db, 'policies', issuedPolicyId), {
+    policyId: issuedPolicyId,
+    quoteId: protectedQuoteId,
+    rfqId: protectedRfqId,
+    clientId: protectedClientId,
+    insurerId: protectedInsurerId,
+    insurerName: 'Synthetic Insurer',
+    organizationId: orgA,
+    policyNumber: issuedPolicyNumber,
+    premium: 1200,
+    commissionRate: 10,
+    commissionAmount: 120,
+    currency: 'EGP',
+    status: 'active',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  issuePolicyBatch.update(doc(ownerA.db, 'quotes', protectedQuoteId), {
+    status: 'issued',
+    policyId: issuedPolicyId,
+    policyNumber: issuedPolicyNumber,
+    issuedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  issuePolicyBatch.update(doc(ownerA.db, 'rfqs', protectedRfqId), {
+    status: 'closed',
+    selectedQuoteId: protectedQuoteId,
+    selectedInsurerId: protectedInsurerId,
+    issuedPolicyId,
+    updatedAt: serverTimestamp(),
+  });
+  await issuePolicyBatch.commit();
+  check((await getDoc(doc(ownerA.db, 'policies', issuedPolicyId))).exists(),
+    'a selected quote can be issued only with its matching policy and closed RFQ in one atomic write');
+
+  await expectDenied(
+    () => setDoc(doc(ownerB.db, 'quotes', 'cross-org-quote-' + randomUUID()), {
+      organizationId: orgB, rfqId: protectedRfqId, clientId: protectedClientId,
+      insurerId: 'forged-insurer', insurerName: 'Cross tenant quote', premium: 1,
+      currency: 'EGP', commissionRate: 0, status: 'received', createdBy: ownerB.user.uid,
+    }),
+    'a quote cannot reference an RFQ belonging to another organization'
   );
   await expectDenied(
     () => setDoc(doc(ownerB.db, 'clients', 'cross-org-' + randomUUID()), {

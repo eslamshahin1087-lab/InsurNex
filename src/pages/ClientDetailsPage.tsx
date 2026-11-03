@@ -732,6 +732,8 @@ export default function ClientDetailsPage() {
             clientId={client.id}
             clientName={client.name}
             uid={profile.uid ?? ''}
+            leadId={client.sourceLeadId}
+            onPolicyIssued={() => void loadClient()}
           />
         ) : null}
 

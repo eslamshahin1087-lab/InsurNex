@@ -11,6 +11,12 @@ service cloud.firestore {
         && get(clientPath(clientId)).data.organizationId is string
         && sameOrg(get(clientPath(clientId)).data.organizationId);
     }
+    function canAccessClientAfter(clientId){
+      return signedIn()
+        && existsAfter(clientPath(clientId))
+        && getAfter(clientPath(clientId)).data.organizationId is string
+        && sameOrg(getAfter(clientPath(clientId)).data.organizationId);
+    }
     function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
     function userDocumentPath(uid){ return /databases/$(database)/documents/users/$(uid); }
     function memberPath(orgId, uid){ return /databases/$(database)/documents/organizations/$(orgId)/members/$(uid); }
@@ -19,6 +25,74 @@ service cloud.firestore {
     function me(){ return get(userPath()).data; }
     function isAdmin(){ return signedIn() && exists(adminPath(request.auth.uid)); }
     function sameOrg(orgId){ return hasProfile() && me().status == 'active' && me().organizationId == orgId; }
+    function quoteReferencesRfq(data){
+      return data.keys().hasAll(['rfqId','clientId','insurerId'])
+        && data.rfqId is string
+        && data.clientId is string
+        && data.insurerId is string
+        && existsAfter(/databases/$(database)/documents/rfqs/$(data.rfqId))
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.clientId == data.clientId
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.insurerIds is list
+        && data.insurerId in getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.insurerIds;
+    }
+    function validQuoteCreate(data){
+      return quoteReferencesRfq(data)
+        && data.status == 'received'
+        && data.premium is number && data.premium > 0
+        && data.commissionRate is number && data.commissionRate >= 0 && data.commissionRate <= 100
+        && data.commissionAmount is number && data.commissionAmount >= 0
+        && data.currency is string && data.currency.size() > 0
+        && data.validUntil is string;
+    }
+    function quoteStatusTransitionAllowed(beforeStatus, afterStatus){
+      return (beforeStatus == afterStatus && beforeStatus in ['received','shortlisted','selected'])
+        || (beforeStatus == 'received' && afterStatus in ['shortlisted','selected','rejected'])
+        || (beforeStatus == 'shortlisted' && afterStatus in ['received','selected','rejected'])
+        || (beforeStatus == 'selected' && afterStatus in ['shortlisted','rejected','issued']);
+    }
+    function quoteUpdateIsValid(quoteId){
+      return quoteReferencesRfq(request.resource.data)
+        && request.resource.data.rfqId == resource.data.rfqId
+        && request.resource.data.clientId == resource.data.clientId
+        && request.resource.data.insurerId == resource.data.insurerId
+        && request.resource.data.insurerName == resource.data.insurerName
+        && request.resource.data.premium == resource.data.premium
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.commissionRate == resource.data.commissionRate
+        && request.resource.data.commissionAmount == resource.data.commissionAmount
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','policyId','policyNumber','issuedAt','updatedAt'])
+        && quoteStatusTransitionAllowed(resource.data.status, request.resource.data.status)
+        && (request.resource.data.status != 'selected'
+          || (getAfter(/databases/$(database)/documents/rfqs/$(resource.data.rfqId)).data.selectedQuoteId == quoteId
+            && getAfter(/databases/$(database)/documents/rfqs/$(resource.data.rfqId)).data.selectedInsurerId == resource.data.insurerId))
+        && (resource.data.status != 'selected'
+          || request.resource.data.status in ['selected','issued']
+          || getAfter(/databases/$(database)/documents/rfqs/$(resource.data.rfqId)).data.selectedQuoteId != quoteId)
+        && (request.resource.data.status != 'issued'
+          || (request.resource.data.policyId is string
+            && request.resource.data.policyNumber is string
+            && existsAfter(/databases/$(database)/documents/policies/$(request.resource.data.policyId))
+            && getAfter(/databases/$(database)/documents/policies/$(request.resource.data.policyId)).data.quoteId == quoteId
+            && getAfter(/databases/$(database)/documents/policies/$(request.resource.data.policyId)).data.policyNumber == request.resource.data.policyNumber
+            && getAfter(/databases/$(database)/documents/policies/$(request.resource.data.policyId)).data.organizationId == request.resource.data.organizationId));
+    }
+    function policyCreatedFromQuote(data){
+      return data.keys().hasAll(['policyId','quoteId','rfqId','clientId','insurerId','policyNumber'])
+        && existsAfter(/databases/$(database)/documents/quotes/$(data.quoteId))
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.status == 'issued'
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyId == data.policyId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.policyNumber == data.policyNumber
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.rfqId == data.rfqId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.clientId == data.clientId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.insurerId == data.insurerId
+        && getAfter(/databases/$(database)/documents/quotes/$(data.quoteId)).data.premium == data.premium
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.status == 'closed'
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.selectedQuoteId == data.quoteId
+        && getAfter(/databases/$(database)/documents/rfqs/$(data.rfqId)).data.issuedPolicyId == data.policyId;
+    }
     function roleIs(roles){ return hasProfile() && me().status == 'active' && me().role in roles; }
     function privileged(){ return roleIs(['owner','admin']); }
     function validOrgRole(role){ return role in ['owner','admin','broker','sales','claims','finance','staff']; }
@@ -66,7 +140,7 @@ service cloud.firestore {
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker','claims']))
         || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
-        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection in ['leads','leadActivities','rfqs','quotes'] && roleIs(['owner','admin','broker','sales']))
         || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'insurers' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
@@ -106,9 +180,9 @@ service cloud.firestore {
 
     function canCreateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
-        || (collection == 'policies' && roleIs(['owner','admin','broker']))
+        || (collection == 'policies' && roleIs(['owner','admin','broker']) && (!data.keys().hasAny(['policyId']) || policyCreatedFromQuote(data)))
         || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
-        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection in ['leads','leadActivities','rfqs','quotes'] && roleIs(['owner','admin','broker','sales']) && (collection != 'quotes' || validQuoteCreate(data)))
         || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'insurers' && roleIs(['owner','admin','broker']))
@@ -127,7 +201,7 @@ service cloud.firestore {
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
         || (collection in ['claims','claimActivities'] && roleIs(['owner','admin','broker','claims']))
-        || (collection in ['leads','leadActivities','rfqs'] && roleIs(['owner','admin','broker','sales']))
+        || (collection in ['leads','leadActivities','rfqs','quotes'] && roleIs(['owner','admin','broker','sales']) && (collection != 'quotes' || quoteReferencesRfq(data)))
         || (collection == 'tasks' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'notifications' && roleIs(['owner','admin','broker','sales','claims','finance','staff']))
         || (collection == 'insurers' && roleIs(['owner','admin','broker']))
@@ -322,7 +396,7 @@ service cloud.firestore {
 
       match /timeline/{eventId} {
         allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);
-        allow create: if canAccessClient(clientId)
+        allow create: if canAccessClientAfter(clientId)
           && roleIs(['owner','admin','broker'])
           && request.resource.data.by == request.auth.uid;
         allow update, delete: if false;
@@ -492,7 +566,7 @@ service cloud.firestore {
     function isTenantBusinessCollection(collection) {
       return collection in [
         'claims', 'claimActivities', 'policies', 'tasks', 'leads', 'leadActivities',
-        'rfqs', 'insurers', 'documents', 'operations', 'operationEvents',
+        'rfqs', 'quotes', 'insurers', 'documents', 'operations', 'operationEvents',
         'operationsEmailDirectory', 'operationAttachments', 'revenue', 'expenses',
         'commissions', 'copilotConversations', 'copilotMessages', 'notifications'
       ];
@@ -548,6 +622,7 @@ service cloud.firestore {
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
         && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
+        && (collection != 'quotes' || quoteUpdateIsValid(docId))
         && (collection != 'documents' || (
           request.resource.data.category == resource.data.category
           && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)

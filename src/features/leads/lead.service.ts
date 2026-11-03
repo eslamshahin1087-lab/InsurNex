@@ -20,6 +20,7 @@ export type LeadActivityType =
   | 'stage_changed'
   | 'notes_updated'
   | 'task_created'
+  | 'client_linked'
   | 'converted';
 
 export type LeadActivity = {
@@ -246,13 +247,17 @@ export async function updateLeadNotes(
   }
 }
 
-export async function convertWonLeadToClient(
+/**
+ * Create a prospect Client 360 record for an eligible lead before the deal is
+ * won, so RFQs and quotes share a stable client identity. Idempotent by leadId.
+ */
+export async function ensureLeadClientForSales(
   leadId: string,
   org: string,
   uid: string,
 ): Promise<string> {
   const leadRef = doc(db, 'leads', leadId);
-  const clientRef = doc(collection(db, 'clients'));
+  const newClientRef = doc(collection(db, 'clients'));
 
   const result = await runTransaction(db, async (transaction) => {
     const snapshot = await transaction.get(leadRef);
@@ -266,37 +271,101 @@ export async function convertWonLeadToClient(
     } as Lead;
 
     if (lead.organizationId !== org) throw new Error('LEAD_ORG_MISMATCH');
-    if (lead.stage !== 'won') throw new Error('LEAD_NOT_WON');
-    if (lead.clientId) return { clientId: lead.clientId, created: false };
+    if (lead.stage === 'lost') throw new Error('LEAD_ALREADY_LOST');
 
-    transaction.set(clientRef, {
+    if (lead.clientId) {
+      const existingClientRef = doc(db, 'clients', lead.clientId);
+      const clientSnapshot = await transaction.get(existingClientRef);
+      if (!clientSnapshot.exists()) throw new Error('LINKED_CLIENT_NOT_FOUND');
+      const client = clientSnapshot.data();
+      if (client.organizationId !== org) throw new Error('CLIENT_ORG_MISMATCH');
+
+      const clientPatch: Record<string, unknown> = { updatedAt: serverTimestamp() };
+      if (!client.sourceLeadId) clientPatch.sourceLeadId = leadId;
+      if (lead.companyName?.trim() && !client.contactName) clientPatch.contactName = lead.name;
+      const activated = lead.stage === 'won' && client.status !== 'active';
+      if (activated) clientPatch.status = 'active';
+      if (Object.keys(clientPatch).length > 1) transaction.update(existingClientRef, clientPatch);
+      if (lead.stage === 'won' && !lead.convertedAt) {
+        transaction.update(leadRef, {
+          convertedAt: serverTimestamp(),
+          lastActivityAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      return { clientId: lead.clientId, created: false, activated };
+    }
+
+    transaction.set(newClientRef, {
       organizationId: org,
-      type: lead.companyName ? 'company' : 'individual',
-      status: 'active',
-      name: lead.name,
+      type: lead.clientType === 'corporate' || Boolean(lead.companyName?.trim()) ? 'company' : 'individual',
+      status: lead.stage === 'won' ? 'active' : 'prospect',
+      name: lead.companyName?.trim() || lead.name,
+      ...(lead.companyName?.trim() ? { contactName: lead.name } : {}),
       email: lead.email || '',
       phone: lead.phone || '',
       notes: lead.notes || '',
-      createdBy: uid,
+      assignedTo: lead.assignedTo || uid,
       sourceLeadId: leadId,
+      createdBy: uid,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
 
+    const clientTimelineRef = doc(collection(db, 'clients', newClientRef.id, 'timeline'));
+    transaction.set(clientTimelineRef, {
+      organizationId: org,
+      clientId: newClientRef.id,
+      type: 'lead_linked',
+      title: 'تم ربط ملف العميل بفرصة بيع',
+      description: 'تم إنشاء ملف عميل محتمل لبدء رحلة التسعير.',
+      by: uid,
+      byName: 'InsurNex',
+      at: serverTimestamp(),
+      metadata: { leadId },
+    });
+
     transaction.update(leadRef, {
-      clientId: clientRef.id,
-      convertedAt: serverTimestamp(),
+      clientId: newClientRef.id,
+      clientLinkedAt: serverTimestamp(),
+      ...(lead.stage === 'won' ? { convertedAt: serverTimestamp() } : {}),
       lastActivityAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
 
-    return { clientId: clientRef.id, created: true };
+    return {
+      clientId: newClientRef.id,
+      created: true,
+      activated: lead.stage === 'won',
+    };
   });
 
   if (result.created) {
-    await activity(org, leadId, 'converted', 'تم تحويل فرصة البيع إلى عميل', uid);
+    await activity(
+      org,
+      leadId,
+      result.activated ? 'converted' : 'client_linked',
+      result.activated
+        ? 'تم تحويل فرصة البيع إلى عميل نشط'
+        : 'تم إنشاء ملف عميل محتمل لبدء طلبات التسعير',
+      uid,
+    );
+  } else if (result.activated) {
+    await activity(org, leadId, 'converted', 'تم تفعيل ملف العميل بعد إغلاق الصفقة', uid);
   }
+
   return result.clientId;
+}
+
+export async function convertWonLeadToClient(
+  leadId: string,
+  org: string,
+  uid: string,
+): Promise<string> {
+  const lead = await getLead(leadId, org);
+  if (!lead) throw new Error('LEAD_NOT_FOUND');
+  if (lead.stage !== 'won') throw new Error('LEAD_NOT_WON');
+  return ensureLeadClientForSales(leadId, org, uid);
 }
 
 export async function recordLeadTaskActivity(

@@ -14,10 +14,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../features/auth/auth-context';
+import { useAuth, canAccessClient360 } from '../features/auth/auth-context';
 import { createTask } from '../features/tasks/task.service';
 import {
-  convertWonLeadToClient,
+  ensureLeadClientForSales,
   getAllowedLeadStages,
   getLead,
   listLeadActivities,
@@ -190,20 +190,24 @@ export default function LeadDetailsPage() {
     }
   }
 
-  async function convert() {
+  async function openSalesWorkspace() {
     if (!lead || !profile || !user) return;
+    if (!canAccessClient360(profile.role)) {
+      setError('ملف العميل والتسعير متاحان للأدوار المخولة بفتح Client 360 فقط.');
+      return;
+    }
+    if (!['qualified', 'quotation', 'negotiation', 'won'].includes(lead.stage)) {
+      setError('يجب تأهيل الفرصة أولاً قبل بدء طلبات التسعير.');
+      return;
+    }
     try {
       setSaving(true);
       setError('');
-      const clientId = await convertWonLeadToClient(
-        lead.id,
-        profile.organizationId,
-        user.uid,
-      );
+      const clientId = await ensureLeadClientForSales(lead.id, profile.organizationId, user.uid);
       nav(`/clients/${clientId}`);
     } catch (e) {
       console.error(e);
-      setError('تعذر تحويل العميل المحتمل إلى عميل.');
+      setError('تعذر إنشاء أو فتح ملف العميل لبدء التسعير.');
     } finally {
       setSaving(false);
     }
@@ -486,27 +490,24 @@ export default function LeadDetailsPage() {
           </>
         )}
 
-        {lead.stage === 'won' && (
+        {['qualified', 'quotation', 'negotiation', 'won'].includes(lead.stage)
+          && canAccessClient360(profile?.role) && (
           <>
             <div className="inx-section-head">
-              <h2>الصفقة مغلقة</h2>
+              <h2>{lead.stage === 'won' ? 'الصفقة مغلقة' : 'مسار المبيعات والتسعير'}</h2>
             </div>
             <div className="inx-card" style={{ marginBottom: 16 }}>
+              <p style={{ margin: '0 0 10px', color: 'var(--inx-muted)', lineHeight: 1.7 }}>
+                اربط الفرصة بملف العميل لفتح المستندات وطلبات التسعير وعروض شركات التأمين ومقارنة الأسعار وإصدار الوثيقة من العرض المختار.
+              </p>
               {lead.clientId ? (
-                <Link
-                  to={`/clients/${lead.clientId}`}
-                  className="inx-btn inx-btn-primary"
-                >
-                  فتح Client 360
+                <Link to={`/clients/${lead.clientId}`} className="inx-btn inx-btn-primary">
+                  فتح ملف العميل ومسار التسعير
                 </Link>
               ) : (
-                <button
-                  type="button"
-                  className="inx-btn inx-btn-primary"
-                  disabled={saving}
-                  onClick={() => void convert()}
-                >
-                  تحويل إلى عميل
+                <button type="button" className="inx-btn inx-btn-primary" disabled={saving}
+                  onClick={() => void openSalesWorkspace()}>
+                  إنشاء ملف العميل وبدء التسعير
                 </button>
               )}
             </div>

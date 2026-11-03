@@ -29,6 +29,11 @@ import MiniBarChart from '../components/charts/MiniBarChart';
 
 type Filter = 'all' | 'open' | 'urgent' | 'completed';
 
+const RELATED_TYPE_LABELS: Record<string, string> = {
+  general: 'عامة', client: 'العميل', policy: 'الوثيقة', renewal: 'التجديد',
+  claim: 'المطالبة', lead: 'فرصة البيع', rfq: 'طلب التسعير',
+};
+
 const DUE_FILTERS: TaskDueFilter[] = ['all', 'overdue', 'today', 'upcoming', 'undated'];
 const DUE_FILTER_LABELS: Record<TaskDueFilter, string> = {
   all: 'كل المواعيد',
@@ -499,7 +504,7 @@ export default function TasksPage() {
                       marginTop: 2,
                     }}
                   >
-                    {t.relatedType ? `مرتبطة بـ ${t.relatedType}` : 'مهمة عامة'}
+                    {t.relatedType ? `مرتبطة بـ ${RELATED_TYPE_LABELS[t.relatedType] || t.relatedType}` : 'مهمة عامة'}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                     <span className={`inx-badge ${t.status === 'completed' ? 'inx-badge-success' : t.status === 'in_progress' ? 'inx-badge-warning' : 'inx-badge-primary'}`}>
