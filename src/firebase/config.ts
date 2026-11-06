@@ -16,17 +16,31 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+const useFirebaseEmulators =
+  import.meta.env.DEV &&
+  import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
+
+// Fail closed: a local emulator session must never be pointed at a live project.
+if (
+  useFirebaseEmulators &&
+  !firebaseConfig.projectId?.startsWith('demo-')
+) {
+  throw new Error(
+    'InsurNex safety stop: Firebase Emulator mode requires a demo-* project ID.',
+  );
+}
+
 export const firebaseApp = getApps()[0] ?? initializeApp(firebaseConfig);
 
 // ============================================================
 // App Check — Disabled in DEV to avoid debug-token 403 errors
 // ============================================================
 // App Check is only initialized when:
-//   1. We're in PRODUCTION build (import.meta.env.PROD), OR
+//   1. We're in a PRODUCTION build, OR
 //   2. An explicit debug token is provided via VITE_APPCHECK_DEBUG_TOKEN
 //
-// This prevents the "exchangeDebugToken 403" error during local dev
-// which breaks Firebase Auth and blocks downstream services (Copilot).
+// This prevents local development from depending on a production App Check
+// configuration unless a developer explicitly opts into a debug token.
 
 const recaptchaEnterpriseSiteKey =
   import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
@@ -55,20 +69,29 @@ export const appCheck =
 // ============================================================
 // Firebase Services
 // ============================================================
-export const auth = getAuth(firebaseApp);
-export const db = getFirestore(firebaseApp);
-export const storage = getStorage(firebaseApp);
+// Connect each SDK service to its emulator immediately after initialization.
+// This prevents Auth from starting a project-config request against production
+// before the emulator endpoint has been attached.
 
-// ============================================================
-// Emulators (DEV only)
-// ============================================================
-if (
-  import.meta.env.DEV &&
-  import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true'
-) {
+export const auth = getAuth(firebaseApp);
+if (useFirebaseEmulators) {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', {
     disableWarnings: true,
   });
+}
+
+export const db = getFirestore(firebaseApp);
+if (useFirebaseEmulators) {
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
+}
+
+export const storage = getStorage(firebaseApp);
+if (useFirebaseEmulators) {
   connectStorageEmulator(storage, '127.0.0.1', 9199);
+}
+
+if (useFirebaseEmulators) {
+  console.info(
+    `[InsurNex] Firebase Emulator mode active for ${firebaseConfig.projectId}.`,
+  );
 }
