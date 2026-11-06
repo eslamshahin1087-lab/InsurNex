@@ -1,76 +1,62 @@
-# Logs
-logs
+# Dependencies and generated build output
+node_modules/
+dist/
+dist-ssr/
+coverage/
+
+# Environment files (keep the documented template tracked)
+.env
+.env.*
+!.env.example
+*.local
+
+# Firebase and Supabase local CLI state
+.firebase/
+supabase/.temp/
+
+# Logs and transient editor files
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# Editor and operating-system files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-.firebase/
-architecture-audit.txt
-architecture-audit.zip
-architecture.txt
-build-audit.txt
-git-audit.txt
-insurnex-ui-fix.zip
-project-state.txt
-project-tree.txt
 
-*.bak
-operations-audit.txt
-README-V1.2.txt
-
-# --- Environment files ---
-.env
-.env.local
-.env.*.local
-
-# --- Patch and rollback scripts ---
-apply-*.cmd
-rollback-*.cmd
-apply-*.ps1
-
-# --- Backups and duplicates ---
-README.txt
-patch/
-# Supabase CLI temp
-supabase/.temp/.env
-.env.local
-.env.*.local
-*.bak
-apply-*.cmd
-rollback-*.cmd
-apply-*.ps1
-README.txt
-patch/
-supabase/.temp/'@
-)
-npm
-tsc
-insurnex@0.0.0
+# Firebase Admin SDK credentials must never be committed
 *firebase-adminsdk*.json
-path-1a672-firebase-adminsdk-fbsvc-ddb42ec528.json
-# Local read-only storage inventory reports (contain organization IDs and object paths)
+
+# Local-only audit and diagnostic output
+/architecture-audit.txt
+/architecture-audit.zip
+/architecture.txt
+/build-audit.txt
+/git-audit.txt
+/insurnex-ui-fix.zip
+/operations-audit.txt
+/project-state.txt
+/project-tree.txt
+/supabase-usage.txt
+
+# Local reports may contain record identifiers, paths, or field-presence metadata
 artifacts/legacy-storage-dry-run-*.json
-
-# Local sensitive client-field inventory reports (contain record IDs and field-presence patterns)
 artifacts/client-sensitive-data-inventory-*.json
-
-# Local client data separation proposal plans (contain record IDs and field paths)
 artifacts/client-sensitive-data-separation-plan-*.json
+
+# NOTE: functions/lib is intentionally tracked because functions/package.json
+# declares lib/index.js as the deployed Firebase Functions entry point.
