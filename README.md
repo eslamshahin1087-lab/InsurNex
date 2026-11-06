@@ -24,6 +24,9 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - `npm run build`
 - `npm run build --prefix functions`
 
+## Product identity
+- [InsurNex Brand Identity System V3](docs/BRAND_IDENTITY_SYSTEM_V3.md)
+
 ## Access model
 - [Local Firebase Emulator Testing](docs/LOCAL_FIREBASE_EMULATOR_TESTING.md)
 - [Admin and User Access Model](docs/ADMIN_ACCESS_MODEL.md)
