@@ -16,6 +16,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Hosting Firebase configuration validator unit tests
+        run: npm run test:hosting-config
       - name: Firebase emulator initialization order and demo-project safety checks
         run: npm run test:firebase-emulator-bootstrap
       - name: Admin and user access boundary smoke checks
