@@ -9,6 +9,9 @@ const layout = read('src/layouts/AppLayout.tsx');
 const clients = read('src/pages/ClientsPage.tsx');
 const styles = read('src/theme/visual-identity-quality.css');
 const main = read('src/main.tsx');
+const logo = read('src/components/Logo.tsx');
+const manifest = JSON.parse(read('public/manifest.webmanifest'));
+const { statSync } = await import('node:fs');
 
 assert.match(layout, /window\.innerWidth >= 1024/, 'desktop layout must be selected using the real wide viewport');
 assert.match(layout, /window\.addEventListener\('resize', syncViewportMode/, 'layout must respond when the browser viewport changes');
@@ -51,4 +54,18 @@ assert.match(refreshedStyles, /position:\s*sticky !important/, 'desktop navigati
 assert.match(refreshedStyles, /@media \(max-width: 1023px\)/, 'mobile and tablet navigation must retain a responsive bottom bar');
 assert.match(refreshedStyles, /prefers-reduced-motion:\s*reduce/, 'motion preferences must be respected');
 
-console.log('Visual identity and responsive layout regression checks passed.');
+assert.match(logo, /BRAND_ARTWORK = '\/branding\/logo-light\.png'/,
+  'the exact supplied transparent brand artwork must be the shared logo source');
+assert.match(logo, /inx-logo-mark-artwork/,
+  'compact header and sidebar marks must use the supplied shield artwork');
+assert.equal(manifest.icons.length, 2, 'PWA manifest must expose both required icon sizes');
+for (const size of ['192x192', '512x512']) {
+  const icon = manifest.icons.find((candidate) => candidate.sizes === size);
+  assert.ok(icon, `PWA manifest must include ${size}`);
+  assert.equal(icon.src, '/branding/logo-light.png',
+    'PWA install icons must use the supplied InsurNex artwork');
+}
+assert.ok(statSync(resolve(root, 'public/branding/logo-light.png')).size > 100_000,
+  'the supplied transparent logo asset must exist and be non-empty');
+
+console.log('Visual identity, supplied logo, PWA branding and responsive layout regression checks passed.');
