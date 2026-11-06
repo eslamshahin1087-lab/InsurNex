@@ -197,3 +197,16 @@ This backlog is the execution source of truth. A checked source-code task means 
 - Required checks: full CI, Secrets Scan, type/lint/build, relevant Emulator suite, static privacy checks and documented manual/staging evidence where applicable.
 - A green PR is not a deployment authorization.
 - No production data migration or deployment is included in this backlog by default.
+
+## P1-E Runtime Access Acceptance — 2026-11-06
+
+**Status:** next execution gate; source-only planning checkpoint. The compatibility adapter, static call-site inventory, typed contracts, fail-closed sensitive-access evaluator and privacy-safe review report are merged. These are not proof of field-level runtime separation.
+
+### Acceptance sequence
+1. Run `npm run audit:client-data-access` and `npm run audit:client-data-review` on the exact reviewed source tree; manually reconcile the complete set of production readers/writers. The output is a review queue, not AST/call-graph proof.
+2. Obtain data-owner approval for per-field purpose, lawful basis, retention, export/deletion and responsible reader/writer roles.
+3. Implement a trusted audit sink and active membership/capability resolver before connecting the pure sensitive-grant evaluator to any runtime path.
+4. Only after 1–3, submit a separate collection-specific Rules + Emulator PR for one data class at a time. Proposed sensitive collections remain default-denied.
+5. Keep legacy Client 360 compatibility behind the active Owner/Admin/Broker boundary until all approved callers are migrated and parity is proven.
+
+**Release limits:** no live inventory, customer-data migration, Firestore Rules change, secrets/configuration update, deployment or production release is part of this checkpoint.
