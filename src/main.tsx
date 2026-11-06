@@ -16,6 +16,7 @@ import './theme/sprint8-3.css';
 import App from './App';
 import './theme/insurnex-design-system.css';
 import './theme/visual-identity-quality.css';
+import './theme/brand-identity-v4.css';
 import { ThemeProvider } from './theme/ThemeProvider';
 
 // Register the privacy-safe PWA worker only for production builds.
