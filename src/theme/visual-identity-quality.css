@@ -626,3 +626,654 @@
 :root[data-theme="dark"] #root .inx-logo-wordmark {
   color: var(--inx-text, #e8eff8);
 }
+
+/* =====================================================================
+   INSURNEX BRAND REFRESH V3
+   Premium brokerage workspace: midnight navy, restrained gold, calm
+   surfaces, consistent RTL navigation, and a true wide-screen layout.
+   No routes, permissions, data contracts, or business workflows change.
+   ===================================================================== */
+
+:root {
+  --inx-brand-navy: #071b37;
+  --inx-brand-blue: #244e78;
+  --inx-brand-gold: #c99a44;
+  --inx-brand-gold-soft: #fbf5e8;
+  --inx-brand-gold-ink: #805b20;
+
+  --inx-navy: #0b2038;
+  --inx-blue: #244e78;
+  --inx-cyan: #5b7fa1;
+  --inx-bg: #f4f7fb;
+  --inx-surface: #ffffff;
+  --inx-surface-2: #f7f9fc;
+  --inx-elevated: #ffffff;
+  --inx-border: #dce5ef;
+  --inx-muted: #71839a;
+  --inx-app-muted: #687d95;
+  --inx-text: #10253f;
+  --inx-text-soft: #526982;
+  --inx-info: #244e78;
+  --inx-info-bg: #edf3f9;
+  --inx-cyan-bg: #eef4f8;
+  --inx-navy-bg: #e9eff5;
+  --inx-neutral-bg: #f0f3f7;
+  --inx-neutral-text: #526273;
+  --inx-gradient: linear-gradient(128deg, #071b37 0%, #153b62 58%, #28577f 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #f9fbfd 0%, #edf3f8 100%);
+  --inx-shadow-sm: 0 2px 8px rgba(7, 27, 55, 0.045);
+  --inx-shadow: 0 8px 24px rgba(7, 27, 55, 0.065);
+  --inx-shadow-lg: 0 18px 44px rgba(7, 27, 55, 0.105);
+  --inx-shadow-app: 0 12px 34px rgba(7, 27, 55, 0.065);
+  --inx-shadow-app-strong: 0 18px 46px rgba(7, 27, 55, 0.11);
+  --inx-radius: 15px;
+  --inx-radius-lg: 20px;
+  --inx-radius-app-sm: 14px;
+  --inx-radius-app-md: 20px;
+  --inx-radius-app-lg: 26px;
+
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-info-bg);
+  --app-nav: rgba(255, 255, 255, 0.94);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --inx-brand-navy: #071729;
+  --inx-brand-blue: #6f9cc8;
+  --inx-brand-gold: #e0b96f;
+  --inx-brand-gold-soft: #302a20;
+  --inx-brand-gold-ink: #f1d7a4;
+
+  --inx-navy: #d9e7f5;
+  --inx-blue: #86b2dc;
+  --inx-cyan: #9bc0df;
+  --inx-bg: #081727;
+  --inx-surface: #10243a;
+  --inx-surface-2: #142b44;
+  --inx-elevated: #18334f;
+  --inx-border: #2a435d;
+  --inx-muted: #a9bbcf;
+  --inx-app-muted: #aec0d3;
+  --inx-text: #edf4fb;
+  --inx-text-soft: #c3d2e1;
+  --inx-info: #9bc1e4;
+  --inx-info-bg: #193650;
+  --inx-cyan-bg: #18344d;
+  --inx-navy-bg: #1b3854;
+  --inx-neutral-bg: #22364a;
+  --inx-neutral-text: #d0dce8;
+  --inx-gradient: linear-gradient(128deg, #0b2036 0%, #143858 58%, #225078 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #10243a 0%, #18334f 100%);
+  --inx-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.22);
+  --inx-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
+  --inx-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.34);
+  --inx-shadow-app: 0 12px 34px rgba(0, 0, 0, 0.24);
+  --inx-shadow-app-strong: 0 18px 46px rgba(0, 0, 0, 0.32);
+
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-info-bg);
+  --app-nav: rgba(16, 36, 58, 0.96);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
+
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Alexandria", "IBM Plex Sans Arabic", Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  text-rendering: optimizeLegibility;
+}
+
+#root .mobile-shell {
+  color: var(--app-text);
+  background: var(--app-bg) !important;
+}
+
+#root .mobile-shell .app-header {
+  min-height: 76px;
+  height: auto !important;
+  padding: 12px clamp(16px, 2.2vw, 34px) !important;
+  background: var(--app-nav) !important;
+  border-bottom: 1px solid var(--app-line) !important;
+  box-shadow: 0 4px 18px rgba(7, 27, 55, 0.045);
+  backdrop-filter: blur(18px);
+}
+
+#root .mobile-shell .s8-brand {
+  min-width: 0;
+  gap: 12px !important;
+}
+
+#root .mobile-shell .inx-logo-wordmark {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+#root .mobile-shell .inx-logo-wordmark > span {
+  color: var(--inx-brand-gold) !important;
+}
+
+#root .mobile-shell .s8-hello strong {
+  color: var(--app-text) !important;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#root .mobile-shell .s8-hello small {
+  color: var(--app-muted) !important;
+  font-size: 10px;
+}
+
+#root .mobile-shell .s8-actions {
+  gap: 8px !important;
+}
+
+#root .mobile-shell .s8-actions > button,
+#root .mobile-shell .s8-actions > a {
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--app-line) !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+#root .mobile-shell .s8-actions > button:hover,
+#root .mobile-shell .s8-actions > a:hover {
+  color: var(--inx-brand-blue) !important;
+  border-color: var(--inx-brand-gold) !important;
+  background: var(--inx-brand-gold-soft) !important;
+  transform: translateY(-1px);
+}
+
+#root .mobile-shell :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--inx-brand-gold) 72%, transparent) !important;
+  outline-offset: 3px !important;
+}
+
+#root .mobile-shell .app-body {
+  min-width: 0;
+}
+
+#root .mobile-shell .app-body .mobile-page {
+  padding-block: clamp(18px, 2.2vw, 30px);
+}
+
+#root .mobile-shell .app-body :is(.page-heading h1, .mobile-page-heading h1) {
+  color: var(--app-text);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+#root .mobile-shell .app-body :is(.page-heading p, .mobile-page-heading p) {
+  color: var(--app-muted);
+  line-height: 1.8;
+}
+
+#root .mobile-shell .inx-section-head h2,
+#root .mobile-shell .home-section h2 {
+  color: var(--app-text) !important;
+  font-weight: 800;
+}
+
+#root .mobile-shell .inx-hero-panel {
+  background: var(--inx-gradient) !important;
+  border: 1px solid rgba(201, 154, 68, 0.42) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 38px rgba(7, 27, 55, 0.17) !important;
+}
+
+#root .mobile-shell .inx-hero-panel .hero-head .title-group .dot {
+  background: var(--inx-brand-gold) !important;
+  box-shadow: 0 0 0 4px rgba(201, 154, 68, 0.2) !important;
+}
+
+#root .mobile-shell .inx-hero-panel .hero-bar > span {
+  background: linear-gradient(90deg, #f0d39a, #ffffff) !important;
+}
+
+#root .mobile-shell .inx-shortcut-card {
+  border: 1px solid var(--app-line) !important;
+  border-radius: 17px !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+#root .mobile-shell .inx-shortcut-card:hover,
+#root .mobile-shell .inx-shortcut-card:focus-visible {
+  border-color: var(--inx-brand-gold) !important;
+  box-shadow: var(--inx-shadow) !important;
+}
+
+#root .mobile-shell .inx-shortcut-card .label {
+  color: var(--app-text) !important;
+  font-weight: 700;
+}
+
+#root .mobile-shell .inx-shortcut-card .inx-3d-icon {
+  border: 1px solid rgba(201, 154, 68, 0.2) !important;
+  border-radius: 13px !important;
+  background: var(--inx-brand-gold-soft) !important;
+  color: var(--inx-brand-blue) !important;
+  box-shadow: none !important;
+}
+
+#root .mobile-shell .app-body :is(
+  .inx-card,
+  .inx-kpi:not(.inx-kpi-featured),
+  .inx-chart-card,
+  .panel,
+  .task-card,
+  .notification-card,
+  .home-kpis > a,
+  .home-feed > a,
+  .insurer-mobile-card,
+  .claim-card,
+  .action-list > a,
+  .client-hero
+) {
+  border-color: var(--app-line) !important;
+  border-radius: 18px;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+#root .mobile-shell .app-body :is(.inx-kpi:not(.inx-kpi-featured), .inx-card, .inx-chart-card, .panel) {
+  background: var(--app-surface) !important;
+  color: var(--app-text);
+}
+
+#root .mobile-shell .app-body :is(.inx-kpi, .inx-card, .inx-chart-card, .panel) :is(h1, h2, h3, strong, b) {
+  color: var(--app-text);
+}
+
+#root .mobile-shell .app-body :is(.inx-kpi, .inx-card, .inx-chart-card, .panel) :is(small, p, .muted) {
+  color: var(--app-muted);
+}
+
+#root .mobile-shell .app-body .home-hero,
+#root .mobile-shell .app-body .client-hero {
+  background: var(--inx-gradient-soft);
+}
+
+#root .mobile-shell .app-body .inx-kpi .inx-kpi-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+#root .mobile-shell .app-body .inx-list-item {
+  border-color: var(--app-line) !important;
+  border-radius: 15px !important;
+  background: var(--app-surface) !important;
+  box-shadow: none !important;
+}
+
+#root .mobile-shell .app-body .inx-list-item:hover {
+  border-color: var(--inx-brand-gold) !important;
+}
+
+#root .mobile-shell .app-body :is(.primary-button, .app-cta, .inx-btn-primary) {
+  background: var(--inx-gradient) !important;
+  border: 1px solid transparent;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(7, 27, 55, 0.16) !important;
+}
+
+#root .mobile-shell .app-body :is(.secondary-button, .inx-btn-secondary) {
+  border-color: var(--app-line) !important;
+  border-radius: 14px !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+}
+
+#root .mobile-shell .app-body :is(input, select, textarea, .input-wrap) {
+  border-color: var(--app-line);
+  border-radius: 13px;
+}
+
+#root .mobile-shell .app-body :is(input, select, textarea):focus {
+  border-color: var(--inx-brand-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--inx-brand-blue) 16%, transparent);
+}
+
+#root .mobile-shell .app-body table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+#root .mobile-shell .app-body th {
+  color: var(--app-muted);
+  font-weight: 800;
+}
+
+#root .mobile-shell .app-body td,
+#root .mobile-shell .app-body th {
+  border-color: var(--app-line);
+}
+
+#root .auth-mobile,
+#root .setup-page {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(201, 154, 68, 0.12), transparent 30%),
+    radial-gradient(circle at 88% 88%, rgba(36, 78, 120, 0.12), transparent 34%),
+    var(--app-bg, var(--inx-bg)) !important;
+}
+
+#root :is(.auth-phone-card, .auth-panel, .setup-card) {
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 24px !important;
+  background: var(--app-surface, var(--inx-surface)) !important;
+  box-shadow: var(--inx-shadow-lg) !important;
+}
+
+#root .auth-visual {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(201, 154, 68, 0.24), transparent 34%),
+    linear-gradient(132deg, #071b37 0%, #153b62 62%, #28577f 100%) !important;
+}
+
+#root .auth-panel h1,
+#root .setup-card h1 {
+  color: var(--app-text, var(--inx-text));
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+#root .auth-form .primary-button,
+#root .auth-form .app-cta {
+  background: var(--inx-gradient) !important;
+  border-radius: 14px !important;
+}
+
+/* On phone/tablet view, keep the familiar bottom navigation but refine its
+   floating surface and active state. */
+@media (max-width: 1023px) {
+  #root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+    position: fixed !important;
+    inset-block-end: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    inset-inline-start: 50% !important;
+    inset-inline-end: auto !important;
+    width: min(590px, calc(100% - 20px)) !important;
+    height: 72px !important;
+    max-width: none !important;
+    padding: 7px !important;
+    border: 1px solid var(--app-line) !important;
+    border-radius: 24px !important;
+    background: var(--app-nav) !important;
+    box-shadow: 0 12px 34px rgba(7, 27, 55, 0.16) !important;
+    backdrop-filter: blur(18px);
+    transform: translateX(-50%) !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+    min-height: 56px !important;
+    border-radius: 17px !important;
+    color: var(--app-muted) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"] {
+    color: var(--inx-brand-blue) !important;
+    background: var(--inx-brand-gold-soft) !important;
+    box-shadow: inset 0 0 0 1px rgba(201, 154, 68, 0.34) !important;
+  }
+}
+
+/* True desktop workspace: the legacy shared layout forced display:flex and a
+   phone-width shell. This explicit grid restores a full-width workspace with
+   a persistent right-side RTL navigation rail. */
+@media (min-width: 1024px) {
+  body:has(#root .mobile-shell.view-mode-desktop) {
+    background: var(--app-bg) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop {
+    display: grid !important;
+    grid-template-columns: 264px minmax(0, 1fr) !important;
+    grid-template-rows: 76px minmax(0, 1fr) !important;
+    grid-auto-flow: row;
+    align-items: stretch;
+    width: min(100%, 1760px) !important;
+    max-width: 1760px !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    margin-inline: auto !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-header {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    position: sticky !important;
+    inset-block-start: 0 !important;
+    z-index: 120 !important;
+    width: 100%;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 7px !important;
+    position: sticky !important;
+    inset-block-start: 76px !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 76px) !important;
+    padding: 22px 14px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border: 0 !important;
+    border-inline-end: 1px solid var(--app-line) !important;
+    border-radius: 0 !important;
+    background: var(--app-nav) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    backdrop-filter: none;
+    z-index: 40 !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary.inx-tabbar-6 {
+    grid-template-columns: 1fr !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    padding: 0 14px !important;
+    border-radius: 13px !important;
+    color: var(--app-muted) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-align: start;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 auto;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a span {
+    display: inline !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"] {
+    position: relative;
+    color: var(--inx-brand-blue) !important;
+    background: var(--inx-brand-gold-soft) !important;
+    box-shadow: inset 0 0 0 1px rgba(201, 154, 68, 0.32) !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 9px;
+    inset-inline-start: 0;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--inx-brand-gold);
+  }
+
+  #root .mobile-shell.view-mode-desktop > .app-body {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 76px);
+    margin: 0 !important;
+    padding: 26px clamp(24px, 3vw, 52px) 42px !important;
+    overflow-x: clip !important;
+    overflow-y: auto !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .app-body > main.mobile-page {
+    width: min(100%, 1480px);
+    margin-inline: auto;
+  }
+
+  #root .mobile-shell.view-mode-desktop .app-body .inx-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  #root .mobile-shell.view-mode-desktop .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence:not([aria-hidden="true"]) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+/* Dark mode uses the same hierarchy without retaining legacy white-only cards. */
+:root[data-theme="dark"] #root .mobile-shell .app-header,
+:root[data-theme="dark"] #root .mobile-shell > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  background: var(--app-nav) !important;
+  border-color: var(--app-line) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body :is(
+  .inx-card,
+  .inx-kpi:not(.inx-kpi-featured),
+  .inx-chart-card,
+  .panel,
+  .task-card,
+  .notification-card,
+  .home-kpis > a,
+  .home-feed > a,
+  .insurer-mobile-card,
+  .claim-card,
+  .action-list > a,
+  .client-hero,
+  .home-empty
+) {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-line) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body :is(
+  .inx-kpi,
+  .inx-card,
+  .inx-chart-card,
+  .panel,
+  .task-card,
+  .notification-card,
+  .home-kpis > a,
+  .home-feed > a,
+  .insurer-mobile-card,
+  .claim-card,
+  .action-list > a
+) :is(h1, h2, h3, strong, b, span, p, small, label, dt, dd) {
+  color: inherit;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body :is(.inx-kpi-label, .inx-kpi-value small, .home-kpis small, .home-feed small) {
+  color: var(--app-muted) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .s8-hello small {
+  color: var(--app-muted) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .inx-shortcut-card .inx-3d-icon {
+  background: var(--inx-brand-gold-soft) !important;
+  color: var(--inx-brand-gold-ink) !important;
+  border-color: rgba(224, 185, 111, 0.24) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell *,
+  #root :is(.auth-phone-card, .auth-panel, .setup-card) * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* END INSURNEX_BRAND_REFRESH_V3 */
