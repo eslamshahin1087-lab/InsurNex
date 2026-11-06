@@ -106,6 +106,8 @@ jobs:
         run: npm run test:client-sensitive-access-policy
       - run: npm run lint
       - run: npm run build
+      - name: P1-E trusted client audit foundation contract tests
+        run: npm run test:client-audit-foundation
       - name: Build Firebase Functions
         run: |
           npm ci --prefix functions
