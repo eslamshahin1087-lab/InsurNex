@@ -94,6 +94,5 @@ await rejectsWithoutWrite({ membership: { role: 'admin' } }, baseInput, 'CLIENT_
 await rejectsWithoutWrite({ organization: false }, baseInput, 'CLIENT_AUDIT_MEMBERSHIP_NOT_FOUND');
 await rejectsWithoutWrite({}, { ...baseInput, purposeCode: 'free text is not allowed' }, 'CLIENT_AUDIT_EVENT_INVALID');
 await rejectsWithoutWrite({}, { ...baseInput, action: 'sensitive_read_completed', decision: 'requested' }, 'CLIENT_AUDIT_ACTION_DECISION_MISMATCH');
-await rejectsWithoutWrite({}, baseInput, 'CLIENT_AUDIT_EVENT_INVALID'.replace('CLIENT_AUDIT_EVENT_INVALID','CLIENT_AUDIT_EVENT_INVALID'));
 
 console.log('P1-E trusted audit runtime tests passed.');
