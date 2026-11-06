@@ -1032,8 +1032,8 @@ body {
   #root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary {
     position: fixed !important;
     inset-block-end: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-    inset-inline-start: 50% !important;
-    inset-inline-end: auto !important;
+    left: 50% !important;
+    right: auto !important;
     width: min(590px, calc(100% - 20px)) !important;
     height: 72px !important;
     max-width: none !important;
@@ -1058,6 +1058,14 @@ body {
     color: var(--inx-brand-blue) !important;
     background: var(--inx-brand-gold-soft) !important;
     box-shadow: inset 0 0 0 1px rgba(201, 154, 68, 0.34) !important;
+  }
+}
+
+
+@media (min-width: 700px) and (max-width: 1023px) {
+  #root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+    width: min(456px, calc(100vw - 24px)) !important;
+    inset-block-end: 12px !important;
   }
 }
 
@@ -1248,8 +1256,24 @@ body {
   .insurer-mobile-card,
   .claim-card,
   .action-list > a
-) :is(h1, h2, h3, strong, b, span, p, small, label, dt, dd) {
-  color: inherit;
+) :is(h1, h2, h3, strong, b) {
+  color: var(--app-text);
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body :is(
+  .inx-kpi,
+  .inx-card,
+  .inx-chart-card,
+  .panel,
+  .task-card,
+  .notification-card,
+  .home-kpis > a,
+  .home-feed > a,
+  .insurer-mobile-card,
+  .claim-card,
+  .action-list > a
+) :is(small, p, label, dt, .muted) {
+  color: var(--app-muted);
 }
 
 :root[data-theme="dark"] #root .mobile-shell .app-body :is(.inx-kpi-label, .inx-kpi-value small, .home-kpis small, .home-feed small) {
