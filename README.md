@@ -4,9 +4,18 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 
 ## Local setup
 1. Use Node.js 22.
-2. Run `npm install`.
-3. Copy `.env.example` to `.env.local` and paste the Firebase Web App config values from Firebase Console.
+2. Run `npm ci`.
+3. For local development, create `.env.local` with the Firebase Web App config for the intended project.
 4. Run `npm run dev`.
+
+## Production Hosting configuration
+1. Copy `.env.example` to `.env.production.local`.
+2. Replace the Firebase placeholders with the exact Web App config from Firebase Console > Project settings > Your apps > Web app > Config. The production project ID must be `insurnex-8a9df`.
+3. Run `npm run test:hosting-config` and `npm run verify:hosting-config`.
+4. Deploy only through `npm run deploy:hosting`. The command validates the production configuration before building and deploying.
+5. Never use `.env.demo.local`, an Admin SDK private key, or a service-account JSON file for a production web build. Local `.env.*.local` files are ignored by Git.
+
+Vite embeds `VITE_*` values into the client bundle during build. They must be the public Firebase Web App configuration for the same project that serves Hosting.
 
 ## Quality checks
 - `npm run test:access` — admin/user access boundary smoke checks.
