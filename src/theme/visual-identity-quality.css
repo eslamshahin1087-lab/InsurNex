@@ -1301,3 +1301,26 @@ body {
 }
 
 /* END INSURNEX_BRAND_REFRESH_V3 */
+
+
+/* Attached InsurNex emblem: crop the shield from the exact transparent lockup
+   for compact navigation marks while keeping the complete artwork for stacked use. */
+#root .inx-logo-mark {
+  background: transparent !important;
+}
+
+#root .inx-logo-mark > .inx-logo-mark-artwork {
+  position: absolute;
+  top: -2%;
+  left: -30%;
+  display: block;
+  width: 160%;
+  height: 160%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center top;
+}
+
+#root .inx-logo-mark {
+  isolation: isolate;
+}
