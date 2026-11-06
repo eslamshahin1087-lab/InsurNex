@@ -1,4 +1,6 @@
 import { loadEnv } from 'vite';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 export const EXPECTED_FIREBASE_PROJECT_ID = 'insurnex-8a9df';
 
@@ -46,15 +48,18 @@ export function validateHostingFirebaseConfig(env) {
   return errors;
 }
 
-const env = loadEnv('production', process.cwd(), 'VITE_');
-const errors = validateHostingFirebaseConfig(env);
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : '';
+if (invokedPath === import.meta.url) {
+  const env = loadEnv('production', process.cwd(), 'VITE_');
+  const errors = validateHostingFirebaseConfig(env);
 
-if (errors.length > 0) {
-  console.error('\nInsurNex Hosting configuration check failed:');
-  for (const error of errors) console.error(`- ${error}`);
-  console.error('\nCreate .env.production.local using the exact Firebase Web App config for project insurnex-8a9df.');
-  console.error('Do not use .env.demo.local or Admin SDK/service-account credentials for production Hosting.\n');
-  process.exitCode = 1;
-} else {
-  console.log('InsurNex Hosting Firebase config is complete and targets insurnex-8a9df.');
+  if (errors.length > 0) {
+    console.error('\nInsurNex Hosting configuration check failed:');
+    for (const error of errors) console.error(`- ${error}`);
+    console.error('\nCreate .env.production.local using the exact Firebase Web App config for project insurnex-8a9df.');
+    console.error('Do not use .env.demo.local or Admin SDK/service-account credentials for production Hosting.\n');
+    process.exitCode = 1;
+  } else {
+    console.log('InsurNex Hosting Firebase config is complete and targets insurnex-8a9df.');
+  }
 }
