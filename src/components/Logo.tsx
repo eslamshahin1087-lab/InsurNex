@@ -7,15 +7,21 @@ type LogoProps = Pick<HTMLAttributes<HTMLSpanElement>, 'className' | 'id' | 'sty
   variant?: LogoVariant;
 };
 
-const MARK_LIGHT = '/branding/insurnex-mark-light.svg';
-const MARK_DARK = '/branding/insurnex-mark-dark.svg';
-const STACKED_LOGO = '/branding/logo-light.png';
+// This transparent PNG is the exact supplied InsurNex artwork already stored in
+// public/branding/logo-light.png. It is used in both themes to preserve the
+// supplied gold finish without adding a theme-dependent background rectangle.
+const BRAND_ARTWORK = '/branding/logo-light.png';
+const STACKED_LOGO = BRAND_ARTWORK;
 
 function BrandMark({ label, className = '' }: { label: string; className?: string }) {
   return (
     <span className={`inx-logo-mark ${className}`.trim()} role="img" aria-label={label}>
-      <img className="inx-logo-mark-light" src={MARK_LIGHT} alt="" aria-hidden="true" />
-      <img className="inx-logo-mark-dark" src={MARK_DARK} alt="" aria-hidden="true" />
+      <img
+        className="inx-logo-mark-artwork"
+        src={BRAND_ARTWORK}
+        alt=""
+        aria-hidden="true"
+      />
     </span>
   );
 }
