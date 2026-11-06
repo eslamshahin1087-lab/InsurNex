@@ -25,6 +25,7 @@ Smarter Insurance Brokerage platform. Clean-rebuild foundation for React + TypeS
 - `npm run build --prefix functions`
 
 ## Access model
+- [Local Firebase Emulator Testing](docs/LOCAL_FIREBASE_EMULATOR_TESTING.md)
 - [Admin and User Access Model](docs/ADMIN_ACCESS_MODEL.md)
 - [Subscription Plan Feature Entitlements](docs/PLAN_FEATURE_ENTITLEMENTS.md)
 - [InsurNex Development Roadmap](docs/INSURNEX_DEVELOPMENT_ROADMAP.md)
