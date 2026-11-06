@@ -38,7 +38,9 @@ assert.match(styles, /box-shadow: none !important/, 'logo itself must not receiv
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
 
 
-const refreshedStyles = styles.slice(styles.indexOf('INSURNEX_BRAND_REFRESH_V3'));
+const refreshSectionStart = styles.indexOf('INSURNEX BRAND REFRESH V3');
+assert.ok(refreshSectionStart >= 0, 'the premium brand refresh section must be present');
+const refreshedStyles = styles.slice(refreshSectionStart);
 assert.ok(refreshedStyles.length > 0, 'the premium brand refresh layer must be present');
 assert.match(refreshedStyles, /--inx-brand-navy:\s*#071b37/i, 'brand navy token must remain explicit');
 assert.match(refreshedStyles, /--inx-brand-gold:\s*#c99a44/i, 'restrained gold accent token must remain explicit');
