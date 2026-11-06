@@ -13,7 +13,7 @@ const REQUIRED_KEYS = [
   'VITE_FIREBASE_APP_ID',
 ];
 
-const PLACEHOLDER_PATTERN = /^(?:REPLACE_|YOUR_|<|\$\{)/i;
+const PLACEHOLDER_PATTERN = /^(?:REPLACE_|YOUR_|<|\\$\\{|fake-api-key$|demo-)/i;
 
 export function validateHostingFirebaseConfig(env) {
   const errors = [];
