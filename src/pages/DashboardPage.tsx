@@ -8,7 +8,6 @@ import {
   ListTodo,
   MoreHorizontal,
   RefreshCcw,
-  ShieldCheck,
   TrendingUp,
   Users,
   Wallet,
@@ -108,13 +107,6 @@ export default function DashboardPage() {
       notes: 'The broker is on the main dashboard.',
     });
   }, [data, profile]);
-
-  const roleLabel =
-    profile?.role === 'owner'
-      ? 'مالك المؤسسة'
-      : profile?.role === 'admin'
-      ? 'أدمن'
-      : profile?.role || 'مستخدم';
 
   const clientsPct = Math.min(
     100,
