@@ -59,13 +59,23 @@ assert.match(logo, /BRAND_ARTWORK = '\/branding\/logo-light\.png'/,
 assert.match(logo, /inx-logo-mark-artwork/,
   'compact header and sidebar marks must use the supplied shield artwork');
 assert.equal(manifest.icons.length, 2, 'PWA manifest must expose both required icon sizes');
-for (const size of ['192x192', '512x512']) {
+for (const [size, assetPath, pixels] of [
+  ['192x192', '/pwa-icon-192.png', 192],
+  ['512x512', '/pwa-icon-512.png', 512],
+]) {
   const icon = manifest.icons.find((candidate) => candidate.sizes === size);
   assert.ok(icon, `PWA manifest must include ${size}`);
-  assert.equal(icon.src, '/branding/logo-light.png',
-    'PWA install icons must use the supplied InsurNex artwork');
+  assert.equal(icon.src, assetPath,
+    `PWA install icon must use the dedicated branded ${size} app icon`);
+  assert.equal(icon.type, 'image/png', `PWA ${size} icon must be PNG`);
+  const iconFile = resolve(root, 'public', assetPath.slice(1));
+  assert.ok(statSync(iconFile).size > 1_000, `PWA ${size} icon asset must exist and be non-empty`);
+  const png = readFileSync(iconFile);
+  assert.equal(png.toString('hex', 0, 8), '89504e470d0a1a0a', `PWA ${size} icon must be a valid PNG`);
+  assert.equal(png.readUInt32BE(16), pixels, `PWA icon width must be ${pixels}px`);
+  assert.equal(png.readUInt32BE(20), pixels, `PWA icon height must be ${pixels}px`);
 }
 assert.ok(statSync(resolve(root, 'public/branding/logo-light.png')).size > 100_000,
-  'the supplied transparent logo asset must exist and be non-empty');
+  'the supplied transparent logo asset must remain available for in-app branding');
 
 console.log('Visual identity, supplied logo, PWA branding and responsive layout regression checks passed.');

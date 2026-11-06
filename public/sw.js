@@ -5,6 +5,8 @@ const STATIC_ASSETS = new Set([
   '/manifest.webmanifest',
   '/pwa-icon-192.svg',
   '/pwa-icon-512.svg',
+  '/pwa-icon-192.png',
+  '/pwa-icon-512.png',
   '/favicon.svg',
 ]);
 
