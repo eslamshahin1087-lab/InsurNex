@@ -80,12 +80,26 @@ export async function resolveTrustedClientActor(
 }
 
 /**
+ * Single trusted entry point for future server handlers. The caller supplies
+ * only the authenticated Firebase UID; actor identity and tenant scope are
+ * reloaded from Admin-SDK records before any event is appended.
+ */
+export async function recordClientAuditEvent(
+  db: Firestore,
+  authenticatedUid: string,
+  input: ClientAuditEventInput,
+): Promise<{ eventId: string }> {
+  const actor = await resolveTrustedClientActor(db, authenticatedUid);
+  return appendClientAuditEvent(db, actor, input);
+}
+
+/**
  * Append a privacy-minimized audit event using the Admin SDK.
  * This function intentionally has no update/delete/read path and is not
  * exposed as a callable endpoint. Call only after trusted authorization code.
  * Firestore client rules must keep auditLogs inaccessible to browser clients.
  */
-export async function appendClientAuditEvent(
+async function appendClientAuditEvent(
   db: Firestore,
   actor: TrustedClientActor,
   input: ClientAuditEventInput,
