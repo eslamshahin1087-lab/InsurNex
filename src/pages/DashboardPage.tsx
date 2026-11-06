@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react';
 import {
-  Bell,
-  Bot,
+  AlertTriangle,
+  Building2,
   CalendarDays,
   CheckCircle2,
+  FileText,
   ListTodo,
-  Moon,
+  MoreHorizontal,
   RefreshCcw,
-  Search,
   ShieldCheck,
-  Sun,
   TrendingUp,
+  Users,
   Wallet,
+  type LucideIcon,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import {
   loadDashboard,
   type DashboardData,
 } from '../features/dashboard/dashboard.service';
 import { setCurrentContext } from '../features/copilot/copilot-context.store';
-import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
 import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
@@ -52,15 +52,15 @@ const priorityTone: Record<string, string> = {
   urgent: 'tone-danger',
 };
 
-const shortcuts: { to: string; label: string; emoji: string; tone: string; feature: PlatformFeatureKey | null }[] = [
-  { to: '/clients', label: 'العملاء', emoji: '👥', tone: '', feature: 'clients' },
-  { to: '/policies', label: 'الوثائق', emoji: '📄', tone: 'tone-cyan', feature: 'policies' },
-  { to: '/claims', label: 'المطالبات', emoji: '⚠️', tone: 'tone-success', feature: 'claims' },
-  { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning', feature: 'renewals' },
-  { to: '/tasks', label: 'المهام', emoji: '✅', tone: '', feature: 'tasks' },
-  { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan', feature: 'insurers' },
-  { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success', feature: 'finance' },
-  { to: '/more', label: 'المزيد', emoji: '⋯', tone: 'tone-purple', feature: null },
+const shortcuts: { to: string; label: string; Icon: LucideIcon; tone: string; feature: PlatformFeatureKey | null }[] = [
+  { to: '/clients', label: 'العملاء', Icon: Users, tone: '', feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', Icon: FileText, tone: 'tone-cyan', feature: 'policies' },
+  { to: '/claims', label: 'المطالبات', Icon: AlertTriangle, tone: 'tone-warning', feature: 'claims' },
+  { to: '/renewals', label: 'التجديدات', Icon: RefreshCcw, tone: 'tone-primary', feature: 'renewals' },
+  { to: '/tasks', label: 'المهام', Icon: CheckCircle2, tone: 'tone-success', feature: 'tasks' },
+  { to: '/insurers', label: 'الشركات', Icon: Building2, tone: 'tone-cyan', feature: 'insurers' },
+  { to: '/finance', label: 'المالية', Icon: Wallet, tone: 'tone-success', feature: 'finance' },
+  { to: '/more', label: 'المزيد', Icon: MoreHorizontal, tone: 'tone-purple', feature: null },
 ];
 
 export default function DashboardPage() {
@@ -68,8 +68,6 @@ export default function DashboardPage() {
   const { settings } = usePlatformSettings();
   const { features: planFeatures } = usePlanFeatures();
   const visibleShortcuts = shortcuts.filter((item) => !item.feature || (settings.features[item.feature] && planFeatures[item.feature]));
-  const { resolvedTheme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
   const [data, setData] = useState(empty);
   const [loading, setLoading] = useState(true);
 
@@ -111,7 +109,6 @@ export default function DashboardPage() {
     });
   }, [data, profile]);
 
-  const firstName = profile?.displayName?.split(' ')[0] || 'أهلاً';
   const roleLabel =
     profile?.role === 'owner'
       ? 'مالك المؤسسة'
@@ -134,94 +131,26 @@ export default function DashboardPage() {
       : null;
 
   const clientSegments = [
-    { label: 'عملاء نشطون', value: Math.max(data.clients - 1, 0), color: '#10b981' },
-    { label: 'عملاء جدد', value: 1, color: '#1E4272' },
+    { label: 'عملاء نشطون', value: data.clients > 0 ? Math.max(data.clients - 1, 0) : 0, color: '#10b981' },
+    { label: 'عملاء جدد', value: data.clients > 0 ? 1 : 0, color: '#1E4272' },
   ];
-  if (data.clients === 0) {
-    clientSegments[0].value = 0;
-    clientSegments[1].value = 0;
-  }
 
   const renewalTrend =
     data.renewals.length > 0
       ? data.renewals.slice(0, 8).map((r) => Math.max(r.daysLeft, 0))
       : [4, 6, 5, 8, 7, 9, 11, 10];
 
-  const askCopilot = () => {
-    navigate('/copilot', {
-      state: {
-        context: {
-          page: 'dashboard',
-          stats: {
-            totalClients: data.clients,
-            activePolicies: data.activePolicies,
-            openClaims: data.openClaims,
-            upcomingRenewals: data.renewals.length,
-          },
-          notes: 'The broker is on the main dashboard.',
-        },
-      },
-    });
-  };
+
 
   return (
     <main className="mobile-page" dir="rtl">
       <div className="inx-container">
-        {/* HEADER */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 12,
-            padding: '4px 0 14px',
-            flexWrap: 'wrap',
-          }}
-        >
+        {/* PAGE HEADING — global account actions live in the application header. */}
+        <header className="inx-dashboard-heading">
           <div>
             <span className="eyebrow">InsurNex Workspace</span>
-            <h2 style={{ margin: '2px 0 4px', fontSize: 20, color: 'var(--inx-text)' }}>
-              أهلاً {firstName}
-            </h2>
-            <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-              {roleLabel}
-            </small>
-          </div>
-
-          <div className="inx-header-circular">
-            <button
-              type="button"
-              className="inx-circle-btn"
-              onClick={toggleTheme}
-              title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
-            >
-              {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
-            {(settings.features.policies && planFeatures.policies) && (
-              <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
-                <Search size={17} />
-              </Link>
-            )}
-            {(settings.features.copilot && planFeatures.copilot) && (
-              <button
-                type="button"
-                className="inx-circle-btn filled"
-                onClick={askCopilot}
-                title="اسأل InsurNex"
-              >
-                <Bot size={17} />
-              </button>
-            )}
-            {(settings.features.notifications && planFeatures.notifications) && (
-              <Link to="/notifications" className="inx-circle-btn" title="الإشعارات">
-                <Bell size={17} />
-                {data.notificationCount > 0 && (
-                  <span className="badge">
-                    {Math.min(data.notificationCount, 99)}
-                  </span>
-                )}
-              </Link>
-            )}
+            <h1>لوحة التحكم</h1>
+            <p>نظرة موحدة على العملاء والوثائق والعمليات اليومية.</p>
           </div>
         </header>
 
@@ -232,10 +161,6 @@ export default function DashboardPage() {
 
         {/* SCOPE ROW */}
         <div className="inx-scope-row" style={{ marginBottom: 14 }}>
-          <span className="inx-scope-pill">
-            <ShieldCheck size={14} />
-            {roleLabel}
-          </span>
           {(settings.features.notifications && planFeatures.notifications) && (
             <span className="inx-chip-emphasis">
               <Bell size={13} />
@@ -256,25 +181,14 @@ export default function DashboardPage() {
         )}
 
         {/* SHORTCUTS */}
-        <div className="inx-shortcut-row inx-shortcut-carousel" style={{ marginBottom: 18 }}>
+        <div className="inx-shortcut-row inx-shortcut-carousel" style={{ marginBottom: 22 }}>
           <div className="inx-shortcut-track">
             <div className="inx-shortcut-sequence">
-              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
+              {visibleShortcuts.map(({ to, label, Icon, tone }) => (
                 <Link key={to} to={to} className="inx-shortcut-card">
-                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
-                  <span className="label">{label}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="inx-shortcut-sequence" aria-hidden="true">
-              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
-                <Link
-                  key={`inx-carousel-copy-${to}`}
-                  to={to}
-                  className="inx-shortcut-card"
-                  tabIndex={-1}
-                >
-                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
+                  <span className={`inx-3d-icon ${tone}`}>
+                    <Icon size={19} strokeWidth={1.85} aria-hidden="true" />
+                  </span>
                   <span className="label">{label}</span>
                 </Link>
               ))}
@@ -536,10 +450,10 @@ export default function DashboardPage() {
               gap: 10,
             }}
           >
-            {(settings.features.clients && planFeatures.clients) && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
-            {(settings.features.policies && planFeatures.policies) && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
-            {(settings.features.claims && planFeatures.claims) && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
-            {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
+            {(settings.features.clients && planFeatures.clients) && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm"><Users size={17} /></span><span className="label">إضافة عميل</span></Link>}
+            {(settings.features.policies && planFeatures.policies) && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan"><FileText size={17} /></span><span className="label">إضافة وثيقة</span></Link>}
+            {(settings.features.claims && planFeatures.claims) && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning"><AlertTriangle size={17} /></span><span className="label">إضافة مطالبة</span></Link>}
+            {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success"><ListTodo size={17} /></span><span className="label">إضافة مهمة</span></Link>}
           </div>
           </>
         )}
