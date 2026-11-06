@@ -45,7 +45,10 @@
     "test:task-workflow": "node scripts/task-workflow-test.mjs",
     "test:quote-workflow": "node scripts/quote-workflow-test.mjs",
     "test:financial-metrics": "node scripts/financial-metrics-test.mjs",
-    "test:firebase-emulator-bootstrap": "node scripts/firebase-emulator-bootstrap-test.mjs"
+    "test:firebase-emulator-bootstrap": "node scripts/firebase-emulator-bootstrap-test.mjs",
+    "test:hosting-config": "node scripts/hosting-config-validation-test.mjs",
+    "verify:hosting-config": "node scripts/validate-firebase-hosting-config.mjs",
+    "deploy:hosting": "npm run verify:hosting-config && npm run build && npx --yes firebase-tools deploy --only hosting --project insurnex-8a9df"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
