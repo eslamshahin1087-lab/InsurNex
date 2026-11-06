@@ -197,3 +197,5 @@ This backlog is the execution source of truth. A checked source-code task means 
 - Required checks: full CI, Secrets Scan, type/lint/build, relevant Emulator suite, static privacy checks and documented manual/staging evidence where applicable.
 - A green PR is not a deployment authorization.
 - No production data migration or deployment is included in this backlog by default.
+
+**P1-E trusted audit foundation (in progress):** branch `feat/p1e-trusted-audit-foundation-20261106` adds an internal Admin-SDK audit writer and server-derived tenant actor resolver. The resolver requires an active profile plus matching active organization membership and excludes Platform Admin. Audit events are allowlisted, purpose-coded and omit free text, PII, medical values, signed URLs and document contents. The writer only creates `auditLogs` documents; no read/update/delete API or callable endpoint is exposed. This is a foundation module, not yet wired to a sensitive-data reader and not permission to open `auditLogs` or any proposed sensitive collection. Runtime tests and reviewed integration remain required.
