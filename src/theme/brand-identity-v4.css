@@ -1,0 +1,332 @@
+/* InsurNex Brand Identity V4
+   Official gold artwork, a single dashboard action layer, consistent iconography,
+   and a balanced four-column quick-access grid. No workflow or permission changes. */
+
+:root {
+  --inx-brand-navy: #071b37;
+  --inx-brand-blue: #244e78;
+  --inx-brand-gold: #c99a44;
+  --inx-brand-gold-soft: #fbf5e8;
+  --inx-brand-gold-line: rgba(201, 154, 68, 0.34);
+}
+
+:root[data-theme="dark"] {
+  --inx-brand-navy: #071729;
+  --inx-brand-blue: #86b2dc;
+  --inx-brand-gold: #e0b96f;
+  --inx-brand-gold-soft: #302a20;
+  --inx-brand-gold-line: rgba(224, 185, 111, 0.3);
+}
+
+/* The supplied horizontal logo is the only lockup in application headers.
+   Do not rebuild the wordmark from text or add a second synthetic shield. */
+#root img.inx-logo-lockup[data-logo-variant="lockup"] {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 176px !important;
+  max-width: 176px !important;
+  height: auto !important;
+  max-height: 42px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+#root img.inx-logo-mark[data-logo-variant="mark"] {
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 46px !important;
+  height: 46px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#root img.inx-logo-stacked[data-logo-variant="stacked"] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border: 0;
+  box-shadow: none;
+}
+
+#root .mobile-shell .s8-brand {
+  min-width: 0;
+  gap: 12px !important;
+}
+
+#root .mobile-shell .s8-brand > img.inx-logo-lockup[data-logo-variant="lockup"] {
+  width: 176px !important;
+  max-width: 176px !important;
+  max-height: 42px !important;
+}
+
+@media (max-width: 1023px) {
+  #root .mobile-shell .s8-brand > img.inx-logo-lockup[data-logo-variant="lockup"] {
+    width: 148px !important;
+    max-width: 148px !important;
+    max-height: 38px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #root .mobile-shell .s8-brand > img.inx-logo-lockup[data-logo-variant="lockup"] {
+    width: 126px !important;
+    max-width: 126px !important;
+    max-height: 34px !important;
+  }
+}
+
+#root .landing-brand > img.inx-logo-lockup[data-logo-variant="lockup"] {
+  width: 218px !important;
+  max-width: 218px !important;
+  max-height: 56px !important;
+}
+
+#root .landing-footer-brand > img.inx-logo-lockup[data-logo-variant="lockup"] {
+  width: 184px !important;
+  max-width: 184px !important;
+  max-height: 48px !important;
+}
+
+#root .auth-panel > img.inx-logo-lockup[data-logo-variant="lockup"] {
+  width: 176px !important;
+  max-width: 176px !important;
+  max-height: 48px !important;
+  margin: 0 auto 22px !important;
+}
+
+/* Dashboard title is a page heading, not a second greeting/action toolbar. */
+#root .mobile-shell .inx-dashboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+  margin: 2px 0 18px;
+  padding: 2px 0 14px;
+  border-bottom: 1px solid var(--app-line);
+}
+
+#root .mobile-shell .inx-dashboard-heading .eyebrow {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: var(--inx-brand-blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#root .mobile-shell .inx-dashboard-heading h1 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: clamp(21px, 2.4vw, 28px);
+  line-height: 1.35;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+#root .mobile-shell .inx-dashboard-heading p {
+  margin: 5px 0 0;
+  color: var(--app-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+#root .mobile-shell .inx-scope-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#root .mobile-shell .inx-scope-row .inx-scope-pill,
+#root .mobile-shell .inx-scope-row .inx-chip-emphasis {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid var(--app-line);
+  border-radius: 999px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 11px;
+  font-weight: 750;
+  box-shadow: var(--inx-shadow-sm);
+}
+
+#root .mobile-shell .inx-scope-row .inx-chip-emphasis {
+  border-color: rgba(36, 78, 120, 0.14);
+  background: var(--inx-info-bg);
+  color: var(--inx-info);
+}
+
+/* Four deliberate columns prevent the last two shortcuts from floating alone.
+   The duplicate carousel copy has been removed from DashboardPage.tsx. */
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel {
+  display: block !important;
+  width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin-block: 10px 22px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-track {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 104px !important;
+  padding: 14px 10px !important;
+  border: 1px solid var(--app-line) !important;
+  border-radius: 18px !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+  text-decoration: none !important;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card:hover,
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--inx-brand-gold) !important;
+  box-shadow: var(--inx-shadow) !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .inx-3d-icon {
+  display: grid !important;
+  width: 42px !important;
+  height: 42px !important;
+  place-items: center !important;
+  border: 1px solid var(--inx-brand-gold-line) !important;
+  border-radius: 14px !important;
+  background: var(--inx-brand-gold-soft) !important;
+  color: var(--inx-brand-blue) !important;
+  box-shadow: none !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .inx-3d-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 1.8 !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .label {
+  display: block;
+  max-width: 100%;
+  color: var(--app-text) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel + .inx-hero-panel {
+  margin-top: 2px;
+}
+
+#root .mobile-shell .app-body .inx-section-head {
+  margin: 24px 0 12px;
+}
+
+#root .mobile-shell .app-body .inx-section-head h2 {
+  color: var(--app-text);
+  font-size: 17px;
+  font-weight: 820;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-card .inx-3d-icon.sm {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-card .inx-3d-icon.sm svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+/* Use a balanced 2-column quick-action area on compact mobile screens. */
+@media (max-width: 420px) {
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-sequence {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    min-height: 92px !important;
+  }
+
+  #root .mobile-shell .inx-dashboard-heading {
+    margin-bottom: 14px;
+  }
+
+  #root .mobile-shell .inx-dashboard-heading p {
+    max-width: 30ch;
+  }
+}
+
+/* Keep one clear application action surface and strong focus visibility. */
+#root .mobile-shell .app-body :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--inx-brand-gold) 72%, transparent) !important;
+  outline-offset: 3px !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-dashboard-heading {
+  border-color: var(--app-line);
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-line) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card .inx-3d-icon {
+  background: var(--inx-brand-gold-soft) !important;
+  color: var(--inx-brand-gold) !important;
+  border-color: var(--inx-brand-gold-line) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell .app-body .inx-shortcut-row.inx-shortcut-carousel .inx-shortcut-card {
+    transition: none !important;
+  }
+}
+
+/* END INSURNEX BRAND IDENTITY V4 */
