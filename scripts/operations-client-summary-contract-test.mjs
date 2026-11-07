@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -61,4 +61,40 @@ for (const sensitiveField of [
   );
 }
 
+const pagesRoot = resolve(root, 'src/pages');
+function collectPageSources(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const absolutePath = resolve(directory, entry.name);
+    if (entry.isDirectory()) return collectPageSources(absolutePath);
+    return /\\.tsx?$/.test(entry.name) ? [absolutePath] : [];
+  });
+}
+
+const deprecatedClientReaders = new Set([
+  'listClients',
+  'getClient',
+  'activateIssuedClientV978',
+]);
+const pageFiles = collectPageSources(pagesRoot);
+for (const pageFile of pageFiles) {
+  const source = readFileSync(pageFile, 'utf8');
+  const legacyServiceImports = source.matchAll(
+    /import\\s*\\{([^}]+)\\}\\s*from\\s*['"][^'"]*features\\/clients\\/client\\.service['"]/gs,
+  );
+  for (const match of legacyServiceImports) {
+    const importedNames = match[1]
+      .split(',')
+      .map((name) => name.trim().replace(/^type\\s+/, '').split(/\\s+as\\s+/)[0])
+      .filter(Boolean);
+    for (const importedName of importedNames) {
+      assert.equal(
+        deprecatedClientReaders.has(importedName),
+        false,
+        pageFile.replace(root + '/', '') + ' must not import deprecated full-record reader ' + importedName,
+      );
+    }
+  }
+}
+
+assert.ok(pageFiles.length > 0, 'page-level legacy reader guard must inspect the application pages');
 console.log('Operations client summary data-access regression tests passed.');
