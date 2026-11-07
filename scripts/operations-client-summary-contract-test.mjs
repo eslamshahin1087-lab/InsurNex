@@ -66,7 +66,7 @@ function collectPageSources(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = resolve(directory, entry.name);
     if (entry.isDirectory()) return collectPageSources(absolutePath);
-    return /\\.tsx?$/.test(entry.name) ? [absolutePath] : [];
+    return /\.tsx?$/.test(entry.name) ? [absolutePath] : [];
   });
 }
 
@@ -79,12 +79,12 @@ const pageFiles = collectPageSources(pagesRoot);
 for (const pageFile of pageFiles) {
   const source = readFileSync(pageFile, 'utf8');
   const legacyServiceImports = source.matchAll(
-    /import\\s*\\{([^}]+)\\}\\s*from\\s*['"][^'"]*features\\/clients\\/client\\.service['"]/gs,
+    /import\s*\{([^}]+)\}\s*from\s*['"][^'"]*features\/clients\/client\.service['"]/gs,
   );
   for (const match of legacyServiceImports) {
     const importedNames = match[1]
       .split(',')
-      .map((name) => name.trim().replace(/^type\\s+/, '').split(/\\s+as\\s+/)[0])
+      .map((name) => name.trim().replace(/^type\s+/, '').split(/\s+as\s+/)[0])
       .filter(Boolean);
     for (const importedName of importedNames) {
       assert.equal(
