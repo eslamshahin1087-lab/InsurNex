@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   PRODUCTION_HOSTING_DEPLOY_OPT_IN,
   PRODUCTION_HOSTING_PROJECT_ID,
@@ -35,5 +37,27 @@ assert.ok(
   validateProductionHostingDeploy(conflictingProject).some((error) => error.includes('conflicting project context')),
   'a conflicting active Firebase project must block deployment even when approval is present',
 );
+
+const guardScriptPath = fileURLToPath(new URL('./guard-production-hosting-deploy.mjs', import.meta.url));
+const blockedCliEnv = { ...process.env };
+delete blockedCliEnv[PRODUCTION_HOSTING_DEPLOY_OPT_IN];
+delete blockedCliEnv.GCLOUD_PROJECT;
+const blockedCli = spawnSync(process.execPath, [guardScriptPath], {
+  env: blockedCliEnv,
+  encoding: 'utf8',
+});
+assert.equal(blockedCli.status, 1, 'guard CLI must exit before deployment when approval is absent');
+assert.match(blockedCli.stderr, /deployment guard blocked execution/);
+
+const approvedCli = spawnSync(process.execPath, [guardScriptPath], {
+  env: {
+    ...blockedCliEnv,
+    [PRODUCTION_HOSTING_DEPLOY_OPT_IN]: 'true',
+    GCLOUD_PROJECT: PRODUCTION_HOSTING_PROJECT_ID,
+  },
+  encoding: 'utf8',
+});
+assert.equal(approvedCli.status, 0, approvedCli.stderr);
+assert.match(approvedCli.stdout, /Explicit production Hosting deployment approval confirmed/);
 
 console.log('Production Hosting deployment authorization guard tests passed.');
