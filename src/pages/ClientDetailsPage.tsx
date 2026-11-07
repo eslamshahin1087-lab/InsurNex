@@ -341,9 +341,9 @@ export default function ClientDetailsPage() {
   }
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-client360-page" dir="rtl">
       <div className="inx-container">
-        <header className="inx-section-head" style={{ marginTop: 0 }}>
+        <header className="inx-section-head inx-client360-header" style={{ marginTop: 0 }}>
           <div>
             <Link
               to="/clients"
@@ -358,7 +358,7 @@ export default function ClientDetailsPage() {
               عرض شامل لبيانات العميل ووثائقه ومطالباته ومهامه وتفاعلاته.
             </small>
           </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div className="inx-client360-actions" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <button
               type="button"
               className="inx-btn inx-btn-primary"
@@ -389,15 +389,15 @@ export default function ClientDetailsPage() {
           </div>
         )}
 
-        <section className="inx-card inx-card-lg" style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+        <section className="inx-card inx-card-lg inx-client360-profile-card" style={{ marginBottom: 16 }}>
+          <div className="inx-client360-profile-row" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
             <div className="inx-avatar" style={{ width: 64, height: 64, fontSize: 20, borderRadius: 16 }}>
               {initials(client.name)}
             </div>
-            <div style={{ flex: 1, minWidth: 200 }}>
+            <div className="inx-client360-identity" style={{ flex: 1, minWidth: 200 }}>
               <span className="eyebrow">Insurance CRM</span>
               <h2 style={{ margin: '4px 0 8px', color: 'var(--inx-text)' }}>{client.name}</h2>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="inx-client360-contact-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <span className="inx-badge inx-badge-neutral">
                   {client.type === 'company' ? <Building2 size={12} /> : <UserRound size={12} />}
                   {clientTypeLabel(client.type)}
@@ -410,12 +410,12 @@ export default function ClientDetailsPage() {
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {client.phone && (
-                <a href={`tel:${client.phone}`} className="inx-icon-btn" title="اتصال">
+                <a href={`tel:${client.phone}`} className="inx-icon-btn" title="اتصال" aria-label={`الاتصال بـ ${client.name}`}>
                   <Phone size={18} />
                 </a>
               )}
               {client.email && (
-                <a href={`mailto:${client.email}`} className="inx-icon-btn" title="بريد">
+                <a href={`mailto:${client.email}`} className="inx-icon-btn" title="بريد" aria-label={`إرسال بريد إلى ${client.name}`}>
                   <Mail size={18} />
                 </a>
               )}
@@ -423,7 +423,7 @@ export default function ClientDetailsPage() {
           </div>
         </section>
 
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-client360-operational-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-icon-circle tone-cyan"><ShieldCheck size={18} /></span>
@@ -458,6 +458,7 @@ export default function ClientDetailsPage() {
           <h2>بيانات العميل</h2>
         </div>
         <div
+          className="inx-client360-info-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -465,7 +466,7 @@ export default function ClientDetailsPage() {
             marginBottom: 16,
           }}
         >
-          <article className="inx-card">
+          <article className="inx-card inx-client360-info-card">
             <div className="inx-card-head">
               <h3>الملف الشخصي</h3>
               <UserRound size={18} style={{ color: 'var(--inx-muted)' }} />
@@ -510,7 +511,7 @@ export default function ClientDetailsPage() {
             </ul>
           </article>
 
-          <article className="inx-card">
+          <article className="inx-card inx-client360-info-card">
             <div className="inx-card-head">
               <h3>بيانات التواصل</h3>
               <Phone size={18} style={{ color: 'var(--inx-muted)' }} />
@@ -552,7 +553,7 @@ export default function ClientDetailsPage() {
           <h2>الملخص المالي</h2>
           <CircleDollarSign size={20} style={{ color: 'var(--inx-muted)' }} />
         </div>
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-client360-financial-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-value">{relations.policies.length}</div>
             <small className="inx-kpi-label">إجمالي الوثائق</small>
@@ -586,7 +587,7 @@ export default function ClientDetailsPage() {
             <small>لم يتم إضافة وثيقة لهذا العميل بعد.</small>
           </div>
         ) : (
-          <ul className="inx-list">
+          <ul className="inx-list inx-client360-policy-list">
             {relations.policies.map((policy) => (
               <li key={policy.id}>
                 <Link to="/policies" className="inx-list-item">
@@ -625,7 +626,7 @@ export default function ClientDetailsPage() {
             <small>لم يتم فتح مطالبة لهذا العميل بعد.</small>
           </div>
         ) : (
-          <ul className="inx-list">
+          <ul className="inx-list inx-client360-claims-list">
             {relations.claims.map((claim) => (
               <li key={claim.id}>
                 <Link to={`/claims/${claim.id}`} className="inx-list-item">
@@ -664,7 +665,7 @@ export default function ClientDetailsPage() {
             <small>لم يتم إضافة مهام لهذا العميل بعد.</small>
           </div>
         ) : (
-          <ul className="inx-list">
+          <ul className="inx-list inx-client360-tasks-list">
             {relations.tasks.map((task) => (
               <li key={task.id}>
                 <Link to="/tasks" className="inx-list-item">
@@ -695,7 +696,7 @@ export default function ClientDetailsPage() {
               <h2>التجديدات القريبة</h2>
               <span className="inx-badge inx-badge-warning">{renewals.length}</span>
             </div>
-            <ul className="inx-list">
+            <ul className="inx-list inx-client360-renewals-list">
               {renewals.map((policy) => (
                 <li key={policy.id}>
                   <Link to="/renewals" className="inx-list-item">
@@ -741,7 +742,7 @@ export default function ClientDetailsPage() {
           <h2>الملاحظات</h2>
           <StickyNote size={20} style={{ color: 'var(--inx-muted)' }} />
         </div>
-        <article className="inx-card">
+        <article className="inx-card inx-client360-notes">
           {client.notes ? (
             <p style={{ margin: 0, color: 'var(--inx-text)', lineHeight: 1.7 }}>{client.notes}</p>
           ) : (
