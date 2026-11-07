@@ -1,3 +1,6 @@
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
 export const PRODUCTION_HOSTING_PROJECT_ID = 'insurnex-8a9df';
 export const PRODUCTION_HOSTING_DEPLOY_OPT_IN = 'INSURNEX_ALLOW_PRODUCTION_HOSTING_DEPLOY';
 
@@ -22,7 +25,7 @@ export function validateProductionHostingDeploy(env = process.env) {
   return errors;
 }
 
-const invokedPath = process.argv[1] ? new URL(`file://${process.argv[1]}`).href : '';
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : '';
 if (invokedPath === import.meta.url) {
   const errors = validateProductionHostingDeploy();
 
