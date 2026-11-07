@@ -29,7 +29,7 @@ const ROLE_DATA_CLASS_ELIGIBILITY: Readonly<
     'contact_address',
     'medical',
     'claim_sensitive',
-  ]),
+  ] as const),
   admin: Object.freeze([
     'identity',
     'family',
@@ -37,7 +37,7 @@ const ROLE_DATA_CLASS_ELIGIBILITY: Readonly<
     'contact_address',
     'medical',
     'claim_sensitive',
-  ]),
+  ] as const),
   broker: Object.freeze([
     'identity',
     'family',
@@ -45,16 +45,16 @@ const ROLE_DATA_CLASS_ELIGIBILITY: Readonly<
     'contact_address',
     'medical',
     'claim_sensitive',
-  ]),
+  ] as const),
   claims: Object.freeze([
     'identity',
     'family',
     'medical',
     'claim_sensitive',
-  ]),
-  sales: Object.freeze([]),
-  finance: Object.freeze([]),
-  staff: Object.freeze([]),
+  ] as const),
+  sales: Object.freeze([] as const),
+  finance: Object.freeze([] as const),
+  staff: Object.freeze([] as const),
 });
 
 /**
