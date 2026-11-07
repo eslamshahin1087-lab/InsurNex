@@ -381,7 +381,6 @@ export default function NotificationsPage() {
                     {when(n) && (
                       <div
                         className="inx-notification-time"
-                        className="inx-notification-time"
                         style={{
                           fontSize: 11.5,
                           color: 'var(--inx-muted)',
