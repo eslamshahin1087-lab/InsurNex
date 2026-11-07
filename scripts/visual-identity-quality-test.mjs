@@ -52,6 +52,8 @@ for (const className of ['inx-dashboard-header', 'inx-dashboard-scope-row', 'inx
 assert.match(dashboardStyles, /\.mobile-shell\.view-mode-mobile/, 'dashboard styles must be scoped to mobile view');
 assert.match(dashboardStyles, /@media \(max-width: 380px\)/, 'dashboard must handle narrow phone screens');
 assert.match(dashboardStyles, /min-width: 44px/, 'dashboard header actions must retain accessible touch width');
+assert.match(dashboardStyles, /min-height: 44px/, 'dashboard header actions must retain accessible touch height');
+assert.doesNotMatch(dashboardStyles, /view-mode-desktop/, 'dashboard mobile styles must not override desktop presentation');
 assert.match(dashboardStyles, /prefers-reduced-motion:\s*reduce/, 'dashboard styles must respect reduced motion');
 assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
