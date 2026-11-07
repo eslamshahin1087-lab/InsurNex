@@ -1,3 +1,4 @@
+import '../../theme/client-edit.css';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Save, X } from 'lucide-react';
 import {
@@ -95,7 +96,7 @@ export default function ClientEditForm({
   return (
     <div className="client-edit-backdrop" role="presentation">
       <section
-        className="client-edit-sheet"
+        className="client-edit-sheet insurnex-client-edit-sheet"
         dir="rtl"
         role="dialog"
         aria-modal="true"
@@ -118,7 +119,7 @@ export default function ClientEditForm({
           </button>
         </header>
 
-        <form onSubmit={submit}>
+        <form className="insurnex-client-edit-form" onSubmit={submit}>
           <div className="client-edit-grid">
             <label>
               <span>اسم العميل *</span>
@@ -218,12 +219,12 @@ export default function ClientEditForm({
           </div>
 
           {error && (
-            <p className="client-edit-error" role="alert">
+            <p className="client-edit-error" id="client-edit-error" role="alert">
               {error}
             </p>
           )}
 
-          <footer>
+          <footer className="insurnex-client-edit-footer">
             <button
               type="button"
               className="secondary-button"
