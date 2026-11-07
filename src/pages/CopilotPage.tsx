@@ -337,6 +337,9 @@ export default function CopilotPage() {
 
 
 
+        <p className="copilot-privacy-notice" role="note">
+          قد تُرسل رسالتك إلى مزوّد ذكاء اصطناعي خارجي. لا تكتب أسماء العملاء أو أرقام الهوية أو بيانات الاتصال أو المعلومات الطبية أو تفاصيل الوثائق والمطالبات.
+        </p>
         <div className="copilot-input">
           <textarea
             ref={textareaRef}

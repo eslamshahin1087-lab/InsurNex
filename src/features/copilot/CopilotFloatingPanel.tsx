@@ -19,6 +19,7 @@ import type {  CopilotConversation,
 import { clearCurrentContext, COPILOT_CONTEXT_CHANGE_EVENT, getCurrentContext } from './copilot-context.store';
 import { getCopilotConversationScopeKey, resolveCopilotContextForRoute } from './copilot-context-route';
 import type { CopilotContextSelector } from './copilot-context-selector';
+import '../../theme/copilot.css';
 
 interface Props {
   onClose: () => void;
@@ -410,6 +411,9 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
         </div>
       )}
 
+      <p className="copilot-privacy-notice" role="note">
+        قد تُرسل رسالتك إلى مزوّد ذكاء اصطناعي خارجي. لا تكتب أسماء العملاء أو أرقام الهوية أو بيانات الاتصال أو المعلومات الطبية أو تفاصيل الوثائق والمطالبات.
+      </p>
       <div className="copilot-floating-input">
         <textarea
           ref={textareaRef}

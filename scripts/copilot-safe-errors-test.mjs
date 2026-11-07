@@ -17,9 +17,9 @@ assert.equal(service.includes('realMessage'), false, 'untrusted message text mus
 assert.equal(service.includes('error.message'), false, 'SDK/provider message text must not be forwarded');
 assert.equal(service.includes('String(body.message)'), false, 'backend message bodies must not be shown verbatim');
 
-assert.match(edge, /const publicError = unavailableErrors\\.has\\(message\\)[\\s\\S]*?AUTHENTICATION_TEMPORARILY_UNAVAILABLE[\\s\\S]*?authenticationError \\|\\| scopeErrors\\.has\\(message\\) \\|\\| clientErrors\\.has\\(message\\)/, 'Edge Function must return only recognized public errors, including the safe token-verification outage code');
+assert.match(edge, /const publicError = configurationErrors\\.has\\(message\\)[\\s\\S]*?COPILOT_CONFIGURATION_UNAVAILABLE[\\s\\S]*?AUTHENTICATION_TEMPORARILY_UNAVAILABLE[\\s\\S]*?authenticationError \\|\\| scopeErrors\\.has\\(message\\) \\|\\| clientErrors\\.has\\(message\\)/, 'Edge Function must return only recognized public errors, including safe authentication and configuration failures');
 assert.ok(edge.includes("const unavailableErrors = new Set(['TOKEN_VERIFICATION_UNAVAILABLE'])"), 'verification outage must be classified separately');
-assert.ok(edge.includes("const status = unavailableErrors.has(message) ? 503"), 'token-verification provider outages must return HTTP 503');
+assert.ok(edge.includes("const status = unavailableErrors.has(message) || configurationErrors.has(message) ? 503"), 'token-verification and missing-runtime-configuration failures must return HTTP 503');
 assert.ok(edge.includes("'AUTHENTICATION_TEMPORARILY_UNAVAILABLE'"), 'verification outage must use a safe public error code');
 assert.match(edge, /console\.error\('copilot-chat request failed', \{ status, code: publicError \}\)/, 'request logs must include only status and safe error code');
 assert.equal(edge.includes('console.error(err)'), false, 'raw request exception objects must not be logged');

@@ -36,6 +36,7 @@ const SAFE_COPILOT_ERROR_CODES = new Set([
   'REQUEST_TOO_LARGE',
   'METHOD_NOT_ALLOWED',
   'COPILOT_TEMPORARILY_UNAVAILABLE',
+  'COPILOT_CONFIGURATION_UNAVAILABLE',
 ]);
 
 function safeCopilotErrorCode(value: unknown): string | undefined {
