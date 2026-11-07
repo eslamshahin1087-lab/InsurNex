@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const layout = read('src/layouts/AppLayout.tsx');
 const clients = read('src/pages/ClientsPage.tsx');
 const styles = read('src/theme/visual-identity-quality.css');
+const mobileExperience = read('src/theme/mobile-experience.css');
 const main = read('src/main.tsx');
 const logo = read('src/components/Logo.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
@@ -39,6 +40,15 @@ assert.match(styles, /grid-template-columns: 240px minmax\(0, 1fr\)/, 'desktop s
 assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be legible');
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
+assert.ok(main.indexOf('mobile-experience.css') > main.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
+assert.match(mobileExperience, /env\\(safe-area-inset-top, 0px\\)/,
+  'mobile header must respect the top safe area on supported devices');
+assert.match(mobileExperience, /min-width: 44px !important/,
+  'mobile header actions must meet the 44px minimum touch width');
+assert.match(mobileExperience, /min-height: 44px !important/,
+  'mobile header actions and primary navigation must meet the 44px minimum touch height');
+assert.match(mobileExperience, /prefers-reduced-motion:\\s*reduce/,
+  'mobile navigation must respect reduced-motion preferences');
 
 
 const refreshSectionStart = styles.indexOf('INSURNEX BRAND REFRESH V3');
