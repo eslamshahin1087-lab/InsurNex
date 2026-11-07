@@ -72,7 +72,7 @@ async function expectDenied(operation, message) {
   console.log('PASS denied: ' + message);
 }
 
-async function createOwnerWorkspace(actor, organizationName) {
+async function createOwnerWorkspace(actor, organizationName, membershipExtras = {}) {
   const uid = actor.user.uid;
   const organizationId = 'org_' + uid;
   const batch = writeBatch(actor.db);
@@ -100,13 +100,14 @@ async function createOwnerWorkspace(actor, organizationName) {
     role: 'owner',
     status: 'active',
     createdAt: serverTimestamp(),
+    ...membershipExtras,
   });
   await batch.commit();
   return organizationId;
 }
 
 
-async function acceptMemberViaInvitation(owner, organizationId, label, role) {
+async function acceptMemberViaInvitation(owner, organizationId, label, role, options = {}) {
   const invitee = await makeActor(label);
   const email = String(invitee.user.email || '').toLowerCase();
   const invitationId = 'invite-' + randomUUID().replace(/-/g, '');
@@ -166,7 +167,15 @@ async function acceptMemberViaInvitation(owner, organizationId, label, role) {
     status: 'active',
     invitedBy: owner.user.uid,
     createdAt: serverTimestamp(),
+    ...(options.membershipExtras || {}),
   });
+  if (options.expectCommitDenied) {
+    await expectDenied(
+      () => batch.commit(),
+      label + ' cannot inject trusted sensitive capabilities during invitation acceptance',
+    );
+    return { actor: invitee, invitationId, organizationId };
+  }
   await batch.commit();
 
   const profile = await getDoc(doc(invitee.db, 'users', invitee.user.uid));
@@ -176,6 +185,14 @@ async function acceptMemberViaInvitation(owner, organizationId, label, role) {
 }
 
 try {
+  const forgedOwner = await makeActor('owner-capability-forgery');
+  await expectDenied(
+    () => createOwnerWorkspace(forgedOwner, 'Forged Owner Workspace', {
+      clientSensitiveCapabilities: ['client.sensitive.read.medical'],
+    }),
+    'new owner cannot self-grant sensitive capabilities during workspace creation',
+  );
+
   const ownerA = await makeActor('owner-a');
   const orgA = await createOwnerWorkspace(ownerA, 'InsurNex Rules Test A');
   check((await getDoc(doc(ownerA.db, 'users', ownerA.user.uid))).exists(), 'owner onboarding batch creates its own profile');
@@ -253,6 +270,10 @@ try {
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
   const staffMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-staff', 'staff');
   const adminMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-admin', 'admin');
+  await acceptMemberViaInvitation(ownerA, orgA, 'invited-capability-forgery', 'broker', {
+    membershipExtras: { clientSensitiveCapabilities: ['client.sensitive.read.medical'] },
+    expectCommitDenied: true,
+  });
 
   // Phase 3 proposed sensitive collections remain closed until a dedicated,
   // collection-specific rules PR explicitly enables the approved role matrix.
