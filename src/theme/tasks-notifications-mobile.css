@@ -1,0 +1,451 @@
+/*
+ * InsurNex Tasks & Notifications — mobile-first responsive presentation.
+ * Existing Firestore queries, workflow transitions and notification state remain unchanged.
+ */
+
+/* Tasks page */
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-tasks-page,
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-notifications-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 14px 14px calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-tasks-page > .inx-container,
+#root .mobile-shell.view-mode-mobile .insurnex-notifications-page > .inx-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 2px 0 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header > div:first-child,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header > div:first-child {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header h2,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header h2 {
+  font-size: clamp(19px, 5vw, 22px) !important;
+  line-height: 1.35;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header small,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header small {
+  display: block;
+  font-size: 11px !important;
+  line-height: 1.55;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header .inx-header-circular,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header .inx-header-circular {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-header .inx-circle-btn,
+#root .mobile-shell.view-mode-mobile .inx-notifications-header .inx-circle-btn {
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 14px;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-kpis,
+#root .mobile-shell.view-mode-mobile .inx-notifications-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-kpis .inx-kpi,
+#root .mobile-shell.view-mode-mobile .inx-notifications-kpis .inx-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 96px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-kpis .inx-kpi-value,
+#root .mobile-shell.view-mode-mobile .inx-notifications-kpis .inx-kpi-value {
+  max-width: 100%;
+  margin-top: auto;
+  font-size: clamp(21px, 6vw, 27px) !important;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-kpis .inx-kpi-label,
+#root .mobile-shell.view-mode-mobile .inx-notifications-kpis .inx-kpi-label {
+  margin-top: 5px;
+  font-size: 10px !important;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-charts,
+#root .mobile-shell.view-mode-mobile .inx-notifications-charts {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-chart-card,
+#root .mobile-shell.view-mode-mobile .inx-notifications-chart-card {
+  min-width: 0;
+  padding: 13px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-chart-card .chart-head,
+#root .mobile-shell.view-mode-mobile .inx-notifications-chart-card .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-chart-card > div:not(.chart-head),
+#root .mobile-shell.view-mode-mobile .inx-notifications-chart-card > div:not(.chart-head) {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-chart-card .inx-donut-legend,
+#root .mobile-shell.view-mode-mobile .inx-notifications-chart-card .inx-donut-legend {
+  flex: 1 1 110px !important;
+  min-width: 110px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-toolbar,
+#root .mobile-shell.view-mode-mobile .inx-notifications-toolbar {
+  min-width: 0;
+  margin-bottom: 14px !important;
+  padding: 10px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-search,
+#root .mobile-shell.view-mode-mobile .inx-notifications-search {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  padding: 5px 11px !important;
+  border-color: var(--inx-border) !important;
+  border-radius: 13px !important;
+  background: var(--inx-bg) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-search input,
+#root .mobile-shell.view-mode-mobile .inx-notifications-search input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-search:focus-within,
+#root .mobile-shell.view-mode-mobile .inx-notifications-search:focus-within {
+  border-color: var(--inx-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--inx-blue) 14%, transparent);
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-status-filters,
+#root .mobile-shell.view-mode-mobile .inx-tasks-due-filters,
+#root .mobile-shell.view-mode-mobile .inx-notifications-filters {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 7px !important;
+  max-width: 100%;
+  padding: 9px 1px 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-status-filters::-webkit-scrollbar,
+#root .mobile-shell.view-mode-mobile .inx-tasks-due-filters::-webkit-scrollbar,
+#root .mobile-shell.view-mode-mobile .inx-notifications-filters::-webkit-scrollbar {
+  display: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-status-filters .inx-chip,
+#root .mobile-shell.view-mode-mobile .inx-tasks-due-filters .inx-chip,
+#root .mobile-shell.view-mode-mobile .inx-notifications-filters .inx-chip {
+  flex: 0 0 auto;
+  min-width: 62px;
+  min-height: 44px !important;
+  padding: 9px 12px !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-list,
+#root .mobile-shell.view-mode-mobile .inx-notifications-list {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-list > li,
+#root .mobile-shell.view-mode-mobile .inx-notifications-list > li {
+  min-width: 0;
+  margin: 0;
+}
+
+/* Task cards */
+#root .mobile-shell.view-mode-mobile .inx-task-list-item {
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 10px !important;
+  min-width: 0;
+  padding: 12px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-icon-circle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-list-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-list-copy > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-list-copy > div:first-child b {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-list-copy > small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-list-item .inx-list-copy > div:not(:first-child) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 10.5px !important;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-item-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px !important;
+  min-width: 0;
+  margin-top: 9px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-item-actions .inx-badge {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-item-actions .inx-task-status-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  min-height: 44px;
+  padding: 9px 12px !important;
+  border-radius: 12px !important;
+  font-size: 11px;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-task-item-actions .inx-task-status-action:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+/* Notification cards */
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item {
+  display: grid !important;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 10px !important;
+  min-width: 0;
+  padding: 12px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item.is-unread {
+  border-color: color-mix(in srgb, var(--inx-blue) 35%, var(--inx-border));
+  background: color-mix(in srgb, var(--inx-blue) 6%, var(--inx-surface));
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-icon-circle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-list-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-list-copy > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-list-copy > div:first-child b {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-list-copy > small {
+  display: block;
+  margin-top: 4px;
+  color: var(--inx-muted);
+  font-size: 11px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-notification-list-item .inx-notification-time {
+  display: block;
+  margin-top: 6px;
+  color: var(--inx-muted);
+  font-size: 10px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-list-heading,
+#root .mobile-shell.view-mode-mobile .inx-notifications-list-heading {
+  align-items: center;
+  gap: 8px;
+  margin: 17px 0 10px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-list-heading h2,
+#root .mobile-shell.view-mode-mobile .inx-notifications-list-heading h2 {
+  margin: 0;
+  font-size: 14px !important;
+  font-weight: 800;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-tasks-list-heading small,
+#root .mobile-shell.view-mode-mobile .inx-notifications-list-heading small {
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-tasks-page .inx-empty,
+#root .mobile-shell.view-mode-mobile .insurnex-notifications-page .inx-empty {
+  min-width: 0;
+  padding: 18px 14px !important;
+  border-radius: 17px !important;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-tasks-page,
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-notifications-page {
+    padding-inline: 10px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-tasks-kpis .inx-kpi,
+  #root .mobile-shell.view-mode-mobile .inx-notifications-kpis .inx-kpi {
+    min-height: 88px;
+    padding: 9px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-task-list-item,
+  #root .mobile-shell.view-mode-mobile .inx-notification-list-item {
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-task-item-actions .inx-task-status-action {
+    min-width: 92px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-tasks-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-notifications-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-tasks-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-notifications-page *::before {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
