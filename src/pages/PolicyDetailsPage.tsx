@@ -273,11 +273,11 @@ export default function PolicyDetailsPage() {
   const isExpired = daysLeft < 0 && policy.status === 'active';
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-policy-details-page" dir="rtl">
       <div className="inx-container">
 
         {/* Header */}
-        <header style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0 16px', flexWrap: 'wrap' }}>
+        <header className="inx-policy-details-header" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0 16px', flexWrap: 'wrap' }}>
           <button onClick={() => navigate(-1)} className="inx-circle-btn" title="رجوع">
             <ArrowRight size={20} />
           </button>
@@ -302,7 +302,7 @@ export default function PolicyDetailsPage() {
         </header>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div className="inx-policy-details-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
           {policy.status === 'active' && (
             <button onClick={() => setShowRenewModal(true)} className="inx-btn inx-btn-primary">
               <RefreshCw size={16} /> تجديد
@@ -331,7 +331,7 @@ export default function PolicyDetailsPage() {
         </div>
 
         {/* Info Cards */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 20 }}>
+        <div className="inx-kpi-grid inx-policy-details-kpis" style={{ marginBottom: 20 }}>
           <InfoCard
             icon={<UserRound size={18} />}
             label="العميل"
@@ -364,7 +364,7 @@ export default function PolicyDetailsPage() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--inx-border)', marginBottom: 20, overflowX: 'auto' }}>
+        <div className="inx-policy-tabs" role="tablist" aria-label="أقسام الوثيقة" style={{ display: 'flex', borderBottom: '1px solid var(--inx-border)', marginBottom: 20, overflowX: 'auto' }}>
           {[
             { key: 'overview', label: 'نظرة عامة', icon: <ShieldCheck size={16} /> },
             { key: 'documents', label: `الوثائق (${documents.length})`, icon: <FileText size={16} /> },
@@ -372,6 +372,10 @@ export default function PolicyDetailsPage() {
           ].map((tab) => (
             <button
               key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              className="inx-policy-tab"
               onClick={() => setActiveTab(tab.key as any)}
               style={{
                 padding: '12px 16px',
@@ -393,11 +397,11 @@ export default function PolicyDetailsPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="inx-card" style={{ padding: 20, marginBottom: 40 }}>
+        <div className="inx-card inx-policy-tab-panel" role="tabpanel" style={{ padding: 20, marginBottom: 40 }}>
 
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
+            <div className="inx-policy-overview" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
               <div>
                 <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: 12, color: 'var(--inx-text)' }}>
                   معلومات الوثيقة
@@ -450,9 +454,9 @@ export default function PolicyDetailsPage() {
                   <b>لا توجد وثائق مرتبطة</b>
                 </div>
               ) : (
-                <ul className="inx-list">
+                <ul className="inx-list inx-policy-documents">
                   {documents.map((doc) => (
-                    <li key={doc.id} className="inx-list-item">
+                    <li key={doc.id} className="inx-list-item inx-policy-document-row">
                       <span className="inx-icon-circle tone-cyan"><FileText size={18} /></span>
                       <div className="inx-list-copy">
                         <b>{doc.name}</b>
@@ -489,10 +493,11 @@ export default function PolicyDetailsPage() {
                   <b>لا يوجد سجل تجديد لهذه الوثيقة</b>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="inx-policy-history" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {history.map((p) => (
                     <div
                       key={p.id}
+                      className="inx-policy-history-row"
                       style={{
                         padding: 16,
                         border: `1px solid ${p.id === policy.id ? 'var(--inx-blue)' : 'var(--inx-border)'}`,
@@ -532,9 +537,9 @@ export default function PolicyDetailsPage() {
 
       {/* Cancel Dialog */}
       {showCancelDialog && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div className="inx-card" style={{ width: '100%', maxWidth: 400, padding: 24 }}>
-            <h3 style={{ fontWeight: 'bold', marginBottom: 12, color: 'var(--inx-text)' }}>إلغاء الوثيقة</h3>
+        <div className="inx-policy-cancel-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div className="inx-card inx-policy-cancel-dialog" role="dialog" aria-modal="true" aria-labelledby="inx-policy-cancel-title" style={{ width: '100%', maxWidth: 400, padding: 24 }}>
+            <h3 id="inx-policy-cancel-title" style={{ fontWeight: 'bold', marginBottom: 12, color: 'var(--inx-text)' }}>إلغاء الوثيقة</h3>
             <p style={{ color: 'var(--inx-muted)', fontSize: '0.9rem', marginBottom: 16 }}>
               هل أنت متأكد من إلغاء الوثيقة {policy.policyNumber}؟
             </p>

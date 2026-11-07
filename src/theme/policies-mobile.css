@@ -1,0 +1,784 @@
+/*
+ * InsurNex Policies & Renewals — mobile-first presentation layer.
+ * All page styles are scoped to mobile view and preserve existing data services.
+ */
+
+/* Shared policy and renewal page framing */
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-policies-page,
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-renewals-page,
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-policy-details-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 14px 14px calc(38px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policies-page > .inx-container,
+#root .mobile-shell.view-mode-mobile .insurnex-renewals-page > .inx-container,
+#root .mobile-shell.view-mode-mobile .insurnex-policy-details-page > .inx-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header {
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 2px 0 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header > div:first-child,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header > div:first-child {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header h2,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header h2 {
+  font-size: clamp(19px, 5vw, 22px) !important;
+  line-height: 1.35;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header small,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header small {
+  display: block;
+  line-height: 1.55;
+  font-size: 11px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header .inx-header-circular,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header .inx-header-circular {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-header .inx-circle-btn,
+#root .mobile-shell.view-mode-mobile .inx-renewals-header .inx-circle-btn,
+#root .mobile-shell.view-mode-mobile .inx-policy-details-header .inx-circle-btn {
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 14px;
+  touch-action: manipulation;
+}
+
+/* Portfolio KPI cards */
+#root .mobile-shell.view-mode-mobile .inx-policies-kpis,
+#root .mobile-shell.view-mode-mobile .inx-renewals-kpis,
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-kpis .inx-kpi,
+#root .mobile-shell.view-mode-mobile .inx-renewals-kpis .inx-kpi,
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 98px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-kpis .inx-kpi-value,
+#root .mobile-shell.view-mode-mobile .inx-renewals-kpis .inx-kpi-value,
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi-value {
+  max-width: 100%;
+  margin-top: auto;
+  font-size: clamp(21px, 6vw, 27px) !important;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-kpis .inx-kpi-label,
+#root .mobile-shell.view-mode-mobile .inx-renewals-kpis .inx-kpi-label,
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi-label {
+  margin-top: 5px;
+  font-size: 10px !important;
+  line-height: 1.4;
+}
+
+/* Charts stack vertically without forcing horizontal overflow */
+#root .mobile-shell.view-mode-mobile .inx-policies-charts,
+#root .mobile-shell.view-mode-mobile .inx-renewals-charts {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-chart-card,
+#root .mobile-shell.view-mode-mobile .inx-renewals-chart-card {
+  min-width: 0;
+  padding: 13px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-chart-card .chart-head,
+#root .mobile-shell.view-mode-mobile .inx-renewals-chart-card .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-chart-card > div:not(.chart-head),
+#root .mobile-shell.view-mode-mobile .inx-renewals-chart-card > div:not(.chart-head) {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-chart-card .inx-donut-legend,
+#root .mobile-shell.view-mode-mobile .inx-renewals-chart-card .inx-donut-legend {
+  flex: 1 1 110px !important;
+  min-width: 110px !important;
+}
+
+/* Search and horizontally scrollable filters */
+#root .mobile-shell.view-mode-mobile .inx-policies-toolbar,
+#root .mobile-shell.view-mode-mobile .inx-renewals-toolbar {
+  min-width: 0;
+  margin-bottom: 14px !important;
+  padding: 10px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-search,
+#root .mobile-shell.view-mode-mobile .inx-renewals-search {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  padding: 5px 11px !important;
+  border-color: var(--inx-border) !important;
+  border-radius: 13px !important;
+  background: var(--inx-bg) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-search input,
+#root .mobile-shell.view-mode-mobile .inx-renewals-search input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-filters,
+#root .mobile-shell.view-mode-mobile .inx-renewals-filters {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 7px !important;
+  max-width: 100%;
+  padding: 9px 1px 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-filters::-webkit-scrollbar,
+#root .mobile-shell.view-mode-mobile .inx-renewals-filters::-webkit-scrollbar {
+  display: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-filters .inx-chip,
+#root .mobile-shell.view-mode-mobile .inx-renewals-filters .inx-chip {
+  flex: 0 0 auto;
+  min-width: 58px;
+  min-height: 44px !important;
+  padding: 9px 13px !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+/* Policy and renewal list cards */
+#root .mobile-shell.view-mode-mobile .inx-policies-list,
+#root .mobile-shell.view-mode-mobile .inx-renewals-list {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policies-list > li,
+#root .mobile-shell.view-mode-mobile .inx-renewals-list > li {
+  min-width: 0;
+  margin: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item {
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px !important;
+  min-width: 0;
+  min-height: 78px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-list-copy,
+#root .mobile-shell.view-mode-mobile .inx-renewal-item .inx-list-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-list-copy b,
+#root .mobile-shell.view-mode-mobile .inx-renewal-item .inx-list-copy b {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-list-copy small {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-list-copy > div:not(:first-child) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 9px !important;
+  min-width: 0;
+  font-size: 10px !important;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-list-copy > div:not(:first-child) > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-list-item .inx-icon-circle,
+#root .mobile-shell.view-mode-mobile .inx-renewal-item .inx-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-item {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch !important;
+  gap: 9px !important;
+  min-width: 0;
+  padding: 11px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-main-row {
+  align-items: center;
+  gap: 9px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-main-row > b {
+  flex: 0 0 auto;
+  max-width: 110px;
+  text-align: left;
+  font-size: 11px !important;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px !important;
+  min-width: 0;
+  font-size: 10px !important;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-meta > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px !important;
+  min-width: 0;
+  margin-top: 2px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-renewal-actions .inx-renewal-action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 7px !important;
+  border-radius: 12px !important;
+  font-size: 10px !important;
+  white-space: normal;
+}
+
+/* Policy detail page */
+#root .mobile-shell.view-mode-mobile .inx-policy-details-header {
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 2px 0 13px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-header > div {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-header h2 {
+  font-size: 17px !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-actions .inx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px 8px;
+  border-radius: 13px;
+  font-size: 11px;
+  white-space: normal;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi {
+  min-height: 106px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi-value {
+  font-size: clamp(14px, 4.4vw, 19px) !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-tabs {
+  display: flex;
+  gap: 4px;
+  max-width: 100%;
+  margin-bottom: 12px !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 104px;
+  min-height: 46px;
+  padding: 9px 11px !important;
+  border-radius: 12px 12px 0 0;
+  font-size: 11px;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-tab[aria-selected="true"] {
+  background: var(--inx-navy-bg, var(--inx-bg));
+  font-weight: 800 !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-tab-panel {
+  min-width: 0;
+  padding: 13px !important;
+  margin-bottom: 28px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-overview {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 17px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-overview h3 {
+  font-size: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-overview dl {
+  min-width: 0;
+  gap: 9px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-overview dl > div {
+  align-items: flex-start !important;
+  gap: 12px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-overview dl > div > span {
+  min-width: 0;
+  max-width: 58%;
+  overflow-wrap: anywhere;
+  font-size: 11px !important;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-documents {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-document-row {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 28px 44px;
+  align-items: center;
+  gap: 8px !important;
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px !important;
+  border-radius: 14px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-document-row .inx-list-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-document-row .inx-list-copy b {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-document-row .inx-list-copy small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-document-row .inx-circle-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0 !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-history {
+  display: grid !important;
+  gap: 8px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-history-row {
+  min-width: 0;
+  padding: 12px !important;
+  border-radius: 14px !important;
+  gap: 9px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-history-row > div {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-cancel-backdrop {
+  align-items: flex-end !important;
+  justify-content: center;
+  padding: 8px 8px calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-cancel-dialog {
+  width: 100% !important;
+  max-width: 520px !important;
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  padding: 16px !important;
+  border-radius: 20px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-cancel-dialog textarea {
+  box-sizing: border-box;
+  min-height: 104px;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-policy-cancel-dialog button {
+  min-width: 92px;
+  min-height: 44px;
+}
+
+/* Add policy modal */
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-backdrop {
+  align-items: flex-end !important;
+  justify-content: center;
+  padding: 8px 8px calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-y: auto !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal {
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 720px !important;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px) !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border-radius: 23px 23px 15px 15px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal > header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 4 !important;
+  padding: 12px 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .client-form {
+  padding: 0 12px 12px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .form-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 11px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .form-grid label,
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .form-grid .wide {
+  min-width: 0;
+  grid-column: auto !important;
+  font-size: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .form-grid :is(input, select, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 11px !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .form-grid textarea {
+  min-height: 106px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal .insurer-dropdown-menu {
+  max-height: min(42dvh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal form > footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  margin: 14px -12px -12px !important;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  background: var(--app-elevated, var(--inx-surface)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal form > footer button {
+  min-width: 0;
+  min-height: 48px;
+  font-size: 12px;
+}
+
+/* Renewal modal */
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-backdrop {
+  align-items: flex-end !important;
+  justify-content: center;
+  padding: 8px 8px calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow: hidden;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-dialog {
+  display: flex !important;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 560px !important;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px) !important;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 23px 23px 15px 15px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-header {
+  flex: 0 0 auto;
+  gap: 10px;
+  padding: 12px 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-header h2 {
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-header .inx-circle-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-body {
+  flex: 1 1 auto !important;
+  min-height: 0;
+  padding: 12px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-form {
+  gap: 12px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-form label {
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-form .inx-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 11px !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-form textarea.inx-input {
+  min-height: 104px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-form > div[style*="grid-template-columns"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 11px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  flex: 0 0 auto;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-renew-policy-footer .inx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 9px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-policies-page,
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-renewals-page,
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-policy-details-page {
+    padding-inline: 10px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-policies-kpis .inx-kpi,
+  #root .mobile-shell.view-mode-mobile .inx-renewals-kpis .inx-kpi,
+  #root .mobile-shell.view-mode-mobile .inx-policy-details-kpis .inx-kpi {
+    min-height: 90px;
+    padding: 9px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-policy-details-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-policy-document-row {
+    grid-template-columns: 30px minmax(0, 1fr) 24px 40px;
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-policy-document-row .inx-circle-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-renewal-actions,
+  #root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal form > footer,
+  #root .mobile-shell.view-mode-mobile .insurnex-renew-policy-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-policies-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-renewals-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-policy-details-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-policy-create-modal *,
+  #root .mobile-shell.view-mode-mobile .insurnex-renew-policy-dialog *,
+  #root .mobile-shell.view-mode-mobile .inx-policy-cancel-dialog * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

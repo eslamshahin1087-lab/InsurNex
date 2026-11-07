@@ -233,10 +233,11 @@ export default function RenewalsPage() {
   const stageBarLabels = STAGES.map((s) => STAGE_LABELS[s]);
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-renewals-page" dir="rtl">
       <div className="inx-container">
         {/* ============ HEADER ============ */}
         <header
+          className="inx-renewals-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -282,7 +283,7 @@ export default function RenewalsPage() {
         </header>
 
         {/* ============ KPI GRID ============ */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-renewals-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-danger">🚨</span>
@@ -318,6 +319,7 @@ export default function RenewalsPage() {
         {/* ============ CHARTS ROW ============ */}
         {items.length > 0 && (
           <div
+            className="inx-renewals-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -325,7 +327,7 @@ export default function RenewalsPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-renewals-chart-card">
               <div className="chart-head">
                 <span className="label">توزيع التجديدات</span>
                 <span className="value">{items.length}</span>
@@ -362,7 +364,7 @@ export default function RenewalsPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-renewals-chart-card">
               <div className="chart-head">
                 <span className="label">مراحل التجديد</span>
                 <span className="delta up">↑ مباشر</span>
@@ -396,8 +398,9 @@ export default function RenewalsPage() {
         )}
 
         {/* ============ SEARCH + FILTERS ============ */}
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-renewals-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-renewals-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -412,6 +415,7 @@ export default function RenewalsPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في التجديدات برقم الوثيقة أو العميل أو شركة التأمين"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث برقم الوثيقة، العميل، الشركة"
@@ -425,10 +429,11 @@ export default function RenewalsPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-renewals-filters" role="group" aria-label="تصفية التجديدات حسب موعد الاستحقاق">
             <button
               type="button"
               className={`inx-chip ${stage === 'all' ? 'active' : ''}`}
+              aria-pressed={stage === 'all'}
               onClick={() => setStage('all')}
             >
               الكل ({items.length})
@@ -438,6 +443,7 @@ export default function RenewalsPage() {
                 key={s}
                 type="button"
                 className={`inx-chip ${stage === s ? 'active' : ''}`}
+                aria-pressed={stage === s}
                 onClick={() => setStage(s)}
               >
                 {STAGE_LABELS[s]} ({counts[s]})
@@ -447,7 +453,7 @@ export default function RenewalsPage() {
         </div>
 
         {/* ============ LIST ============ */}
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-renewals-list-heading">
           <h2>قائمة التجديدات</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {visible.length} وثيقة
@@ -487,18 +493,18 @@ export default function RenewalsPage() {
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-renewals-list">
             {visible.map((item) => (
               <li key={item.id}>
                 <div
-                  className="inx-list-item"
+                  className="inx-list-item inx-renewal-item"
                   style={{
                     flexDirection: 'column',
                     alignItems: 'stretch',
                     gap: 8,
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="inx-renewal-main-row" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className={`inx-icon-circle tone-${stageTone(item.stage)}`}>
                       {stageIcon(item.stage)}
                     </span>
@@ -536,6 +542,7 @@ export default function RenewalsPage() {
                     </b>
                   </div>
                   <div
+                    className="inx-renewal-meta"
                     style={{
                       display: 'flex',
                       flexWrap: 'wrap',
@@ -553,6 +560,7 @@ export default function RenewalsPage() {
                     <span>{formatMoney(item.premium, item.currency)}</span>
                   </div>
                   <div
+                    className="inx-renewal-actions"
                     style={{
                       display: 'flex',
                       gap: 6,
@@ -563,20 +571,20 @@ export default function RenewalsPage() {
                     {item.clientId && (
                       <Link
                         to={`/clients/${item.clientId}`}
-                        className="inx-btn inx-btn-secondary inx-btn-sm"
+                        className="inx-btn inx-btn-secondary inx-btn-sm inx-renewal-action-link"
                       >
                         <UserRound size={13} /> Client 360 <ChevronLeft size={13} />
                       </Link>
                     )}
                     <Link
                       to="/policies"
-                      className="inx-btn inx-btn-secondary inx-btn-sm"
+                      className="inx-btn inx-btn-secondary inx-btn-sm inx-renewal-action-link"
                     >
                       <FileText size={13} /> الوثيقة
                     </Link>
                     <Link
                       to="/tasks"
-                      className="inx-btn inx-btn-ghost inx-btn-sm"
+                      className="inx-btn inx-btn-ghost inx-btn-sm inx-renewal-action-link"
                     >
                       <ListTodo size={13} /> مهمة
                     </Link>
