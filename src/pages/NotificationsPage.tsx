@@ -133,9 +133,10 @@ export default function NotificationsPage() {
   const typeBarLabels = Object.keys(typeCounts).slice(0, 6);
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-notifications-page" dir="rtl">
       <div className="inx-container">
         <header
+          className="inx-notifications-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -174,7 +175,7 @@ export default function NotificationsPage() {
           </div>
         </header>
 
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-notifications-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-cyan">🔔</span>
@@ -209,6 +210,7 @@ export default function NotificationsPage() {
 
         {items.length > 0 && (
           <div
+            className="inx-notifications-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -284,8 +286,9 @@ export default function NotificationsPage() {
           </div>
         )}
 
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-notifications-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-notifications-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -300,6 +303,7 @@ export default function NotificationsPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في الإشعارات بالعناوين والمحتوى"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث في الإشعارات"
@@ -313,12 +317,13 @@ export default function NotificationsPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-notifications-filters" role="group" aria-label="تصفية الإشعارات حسب حالة القراءة">
             {FILTERS.map((f) => (
               <button
                 key={f}
                 type="button"
                 className={`inx-chip ${filter === f ? 'active' : ''}`}
+                aria-pressed={filter === f}
                 onClick={() => setFilter(f)}
               >
                 {FILTER_LABELS[f]}
@@ -327,7 +332,7 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-notifications-list-heading">
           <h2>قائمة الإشعارات</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {visible.length} إشعار
@@ -335,7 +340,7 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <div className="inx-empty">
+          <div className="inx-empty" role="alert">
             <Bell size={28} />
             <b>{error}</b>
           </div>
@@ -351,10 +356,10 @@ export default function NotificationsPage() {
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-notifications-list" aria-label="قائمة الإشعارات">
             {visible.map((n) => (
               <li key={n.id}>
-                <div className="inx-list-item">
+                <div className={`inx-list-item inx-notification-list-item ${isRead(n) ? 'is-read' : 'is-unread'}`}>
                   <span className={`inx-icon-circle ${isRead(n) ? '' : 'tone-danger'}`}>
                     {isRead(n) ? <Bell size={18} /> : <BellRing size={18} />}
                   </span>
@@ -375,6 +380,7 @@ export default function NotificationsPage() {
                     <small>{text(n)}</small>
                     {when(n) && (
                       <div
+                        className="inx-notification-time"
                         style={{
                           fontSize: 11.5,
                           color: 'var(--inx-muted)',

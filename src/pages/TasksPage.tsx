@@ -240,9 +240,10 @@ export default function TasksPage() {
   ];
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-tasks-page" dir="rtl">
       <div className="inx-container">
         <header
+          className="inx-tasks-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -281,7 +282,7 @@ export default function TasksPage() {
           </div>
         </header>
 
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-tasks-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-cyan">📝</span>
@@ -314,6 +315,7 @@ export default function TasksPage() {
 
         {items.length > 0 && (
           <div
+            className="inx-tasks-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -321,7 +323,7 @@ export default function TasksPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-tasks-chart-card">
               <div className="chart-head">
                 <span className="label">توزيع الأولويات</span>
                 <span className="value">{items.length}</span>
@@ -358,7 +360,7 @@ export default function TasksPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-tasks-chart-card">
               <div className="chart-head">
                 <span className="label">المهام حسب الأولوية</span>
                 <span className="delta up">↑ مباشر</span>
@@ -388,8 +390,9 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-tasks-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-tasks-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -404,6 +407,7 @@ export default function TasksPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في المهام بالعنوان"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث في المهام"
@@ -417,24 +421,26 @@ export default function TasksPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-tasks-status-filters" role="group" aria-label="تصفية المهام حسب الحالة">
             {FILTERS.map((f) => (
               <button
                 key={f}
                 type="button"
                 className={`inx-chip ${filter === f ? 'active' : ''}`}
+                aria-pressed={filter === f}
                 onClick={() => setFilter(f)}
               >
                 {FILTER_LABELS[f]}
               </button>
             ))}
           </div>
-          <div className="inx-chips" style={{ marginTop: 10 }}>
+          <div className="inx-chips inx-tasks-due-filters" role="group" aria-label="تصفية المهام حسب موعد الاستحقاق" style={{ marginTop: 10 }}>
             {DUE_FILTERS.map((f) => (
               <button
                 key={f}
                 type="button"
                 className={`inx-chip ${dueFilter === f ? 'active' : ''}`}
+                aria-pressed={dueFilter === f}
                 onClick={() => setDueFilter(f)}
               >
                 {DUE_FILTER_LABELS[f]}
@@ -447,7 +453,7 @@ export default function TasksPage() {
           </div>
         </div>
 
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-tasks-list-heading">
           <h2>قائمة المهام</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {visible.length} مهمة
@@ -455,7 +461,7 @@ export default function TasksPage() {
         </div>
 
         {error && (
-          <div className="inx-empty">
+          <div className="inx-empty" role="alert">
             <TriangleAlert size={28} />
             <b>{error}</b>
           </div>
@@ -471,9 +477,9 @@ export default function TasksPage() {
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-tasks-list" aria-label="قائمة المهام">
             {visible.map((t) => (
-              <li key={t.id} className="inx-list-item">
+              <li key={t.id} className="inx-list-item inx-task-list-item">
                 <span className={`inx-icon-circle tone-${priorityTone(t.priority)}`}>
                   <ListTodo size={18} />
                 </span>
@@ -506,13 +512,14 @@ export default function TasksPage() {
                   >
                     {t.relatedType ? `مرتبطة بـ ${RELATED_TYPE_LABELS[t.relatedType] || t.relatedType}` : 'مهمة عامة'}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                  <div className="inx-task-item-actions" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                     <span className={`inx-badge ${t.status === 'completed' ? 'inx-badge-success' : t.status === 'in_progress' ? 'inx-badge-warning' : 'inx-badge-primary'}`}>
                       {TASK_STATUS_LABELS[t.status] || 'حالة غير معروفة'}
                     </span>
                     <button
                       type="button"
-                      className="inx-chip"
+                      className="inx-chip inx-task-status-action"
+                      aria-busy={updatingTaskId === t.id}
                       disabled={updatingTaskId === t.id || !nextTaskStatus(t.status)}
                       onClick={() => void changeTaskStatus(t)}
                       aria-label={t.status === 'open' ? `بدء المهمة: ${t.title}` : t.status === 'in_progress' ? `إتمام المهمة: ${t.title}` : `إعادة فتح المهمة: ${t.title}`}
