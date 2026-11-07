@@ -842,3 +842,24 @@
   .copilot-messages { padding: 7px; }
 }
 /* END INSURNEX_COPILOT_COMPOSER_FIX_V5_1 */
+
+/* Copilot privacy notice — visible in the full-page and floating composers. */
+.copilot-privacy-notice {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 7px 11px;
+  color: var(--inx-muted);
+  background: color-mix(in srgb, var(--inx-blue, #3b82f6) 7%, var(--inx-surface, #fff));
+  border: 1px solid color-mix(in srgb, var(--inx-blue, #3b82f6) 18%, transparent);
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.copilot-floating .copilot-privacy-notice {
+  margin: 0 12px 6px;
+  font-size: 10px;
+}
+@media (max-width: 520px) {
+  .copilot-privacy-notice { font-size: 10px; }
+}
