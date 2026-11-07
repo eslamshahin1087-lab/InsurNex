@@ -1,0 +1,176 @@
+/*
+ * InsurNex CRM — mobile-first client list and search presentation.
+ * Styles are scoped to the mobile shell; client data and access logic are untouched.
+ */
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-clients-page {
+  width: 100%; max-width: 100%; min-width: 0; margin-inline: auto;
+  padding: 14px 14px calc(34px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#root .mobile-shell.view-mode-mobile .insurnex-clients-page > .inx-container {
+  width: 100%; max-width: 100%; min-width: 0; margin-inline: auto;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header {
+  align-items: center !important; gap: 10px !important; padding: 2px 0 16px !important;
+  flex-wrap: wrap !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header > div:first-child {
+  flex: 1 1 125px; min-width: 0;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header h2 {
+  font-size: clamp(19px, 5vw, 22px) !important; line-height: 1.35;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header .eyebrow {
+  color: var(--inx-brand-gold-ink, var(--inx-brand-gold, #c99a44)); font-weight: 800;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header .inx-header-circular {
+  display: flex; flex: 0 0 auto; align-items: center; gap: 5px;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header .inx-circle-btn {
+  display: inline-grid; flex: 0 0 44px; place-items: center;
+  width: 44px; min-width: 44px; height: 44px; min-height: 44px;
+  padding: 0; border: 1px solid var(--app-line, var(--inx-border));
+  border-radius: 14px; background: var(--app-surface, var(--inx-surface));
+  color: var(--app-text, var(--inx-text)); box-shadow: none; touch-action: manipulation;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-header .inx-circle-btn.filled {
+  border-color: transparent; background: var(--inx-gradient); color: #fff;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis {
+  display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 9px !important; margin-bottom: 14px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi {
+  display: flex; flex-direction: column; align-items: flex-start;
+  min-width: 0; min-height: 106px; padding: 12px !important; border-radius: 17px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi-head { margin-bottom: 7px; }
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi .inx-3d-icon {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi-value {
+  margin-top: auto; font-size: clamp(22px, 6vw, 27px) !important;
+  line-height: 1.15; font-variant-numeric: tabular-nums;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi-label {
+  margin-top: 4px; font-size: 10.5px !important; line-height: 1.35;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-charts {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important; min-width: 0; margin-bottom: 14px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-chart-card {
+  min-width: 0; padding: 13px !important; border-radius: 17px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-chart-card .chart-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-donut {
+  justify-content: center !important; align-items: center;
+  gap: 12px !important; min-width: 0;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-donut-legend {
+  flex: 1 1 110px !important; min-width: 110px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-toolbar {
+  min-width: 0; padding: 11px !important; border-radius: 17px !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-search {
+  box-sizing: border-box; min-width: 0; min-height: 48px; padding-inline: 12px !important;
+  border-color: var(--app-line, var(--inx-border)) !important;
+  border-radius: 13px !important; background: var(--app-bg, var(--inx-bg)) !important;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-search input {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px;
+  padding: 0; font-size: 14px !important; appearance: none;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-search:focus-within {
+  border-color: var(--app-blue, var(--inx-blue)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-blue, var(--inx-blue)) 14%, transparent);
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-filters {
+  display: flex !important; flex-wrap: nowrap !important; align-items: center;
+  gap: 7px !important; max-width: 100%; padding: 1px 1px 4px;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain;
+  touch-action: pan-x; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-filters::-webkit-scrollbar { display: none; }
+#root .mobile-shell.view-mode-mobile .inx-clients-filters .inx-chip {
+  flex: 0 0 auto; min-width: 58px; min-height: 44px !important;
+  padding: 9px 13px !important; border-radius: 12px !important;
+  font-size: 11.5px !important; touch-action: manipulation; white-space: nowrap;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-list-heading {
+  align-items: center; gap: 8px; margin: 17px 0 10px;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-list-heading h2 {
+  margin: 0; font-size: 14px !important; font-weight: 800;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-list-heading small {
+  font-size: 11px !important; font-variant-numeric: tabular-nums;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-list {
+  display: grid; gap: 8px; padding: 0; margin: 0; list-style: none;
+}
+#root .mobile-shell.view-mode-mobile .inx-clients-list > li { min-width: 0; margin: 0; }
+#root .mobile-shell.view-mode-mobile .inx-client-list-item {
+  display: grid !important; grid-template-columns: 42px minmax(0, 1fr) 18px;
+  align-items: center; gap: 10px !important; min-width: 0; min-height: 78px;
+  padding: 11px !important; border-radius: 16px !important; text-decoration: none;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-avatar {
+  display: grid; flex: 0 0 42px; place-items: center; width: 42px; height: 42px;
+  margin: 0; border-radius: 14px; font-size: 12px; font-weight: 800;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-list-copy {
+  min-width: 0; width: 100%;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-list-copy > div:first-child {
+  display: flex !important; align-items: center; flex-wrap: wrap;
+  gap: 6px !important; min-width: 0;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-list-copy > div:first-child b {
+  min-width: 0; max-width: 100%; overflow-wrap: anywhere;
+  font-size: 12px; line-height: 1.35;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-badge {
+  flex: 0 0 auto; font-size: 9px !important; line-height: 1.35;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-list-copy > small {
+  display: block; margin-block: 3px 5px; color: var(--app-muted, var(--inx-muted)); font-size: 10px;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-client-contact {
+  display: flex; flex-wrap: wrap; gap: 5px 9px !important;
+  min-width: 0; font-size: 10px !important; line-height: 1.4;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-client-contact > span {
+  display: inline-flex; align-items: center; min-width: 0; max-width: 100%;
+  gap: 4px; overflow-wrap: anywhere;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-list-chevron {
+  width: 16px; height: 16px; flex: 0 0 16px; opacity: .65;
+}
+#root .mobile-shell.view-mode-mobile .inx-client-list-item:focus-visible {
+  outline: 2px solid var(--app-blue, var(--inx-blue)); outline-offset: 2px;
+}
+#root .mobile-shell.view-mode-mobile .insurnex-clients-page .inx-empty {
+  min-height: 170px; padding: 20px 14px !important; border-radius: 18px !important; text-align: center;
+}
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-clients-page { padding-inline: 11px !important; }
+  #root .mobile-shell.view-mode-mobile .inx-clients-header .inx-header-circular { gap: 3px; }
+  #root .mobile-shell.view-mode-mobile .inx-clients-kpis .inx-kpi { padding: 10px !important; min-height: 98px; }
+  #root .mobile-shell.view-mode-mobile .inx-clients-toolbar { padding: 9px !important; }
+  #root .mobile-shell.view-mode-mobile .inx-client-list-item {
+    grid-template-columns: 38px minmax(0, 1fr) 16px; gap: 8px !important; padding: 9px !important;
+  }
+  #root .mobile-shell.view-mode-mobile .inx-client-list-item .inx-avatar { width: 38px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-clients-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-clients-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-clients-page *::after {
+    scroll-behavior: auto !important; animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important; transition-duration: .01ms !important;
+  }
+}
