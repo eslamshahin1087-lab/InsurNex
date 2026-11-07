@@ -8,6 +8,7 @@ import {
 
 assert.equal(isMedicalGeminiAllowed(), false, 'external medical AI must be disabled when no flags are set');
 assert.equal(isMedicalGeminiAllowed(null), false, 'invalid policy input must fail closed');
+assert.equal(isMedicalGeminiAllowed('true'), false, 'non-object policy input must fail closed');
 assert.equal(
   isMedicalGeminiAllowed({ [MEDICAL_GEMINI_ENABLE_FLAG]: 'true' }),
   false,
