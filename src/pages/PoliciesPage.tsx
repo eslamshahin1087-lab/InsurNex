@@ -209,10 +209,11 @@ export default function PoliciesPage() {
   }, [items]);
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-policies-page" dir="rtl">
       <div className="inx-container">
         {/* ============ HEADER ============ */}
         <header
+          className="inx-policies-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -263,7 +264,7 @@ export default function PoliciesPage() {
         </header>
 
         {/* ============ KPI GRID ============ */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-policies-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-cyan">📋</span>
@@ -297,6 +298,7 @@ export default function PoliciesPage() {
         {/* ============ CHARTS ROW ============ */}
         {items.length > 0 && (
           <div
+            className="inx-policies-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -304,7 +306,7 @@ export default function PoliciesPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-policies-chart-card">
               <div className="chart-head">
                 <span className="label">حالة الوثائق</span>
                 <span className="value">
@@ -343,7 +345,7 @@ export default function PoliciesPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-policies-chart-card">
               <div className="chart-head">
                 <span className="label">توزيع خطوط التأمين</span>
                 <span className="delta up">↑ مباشر</span>
@@ -375,8 +377,9 @@ export default function PoliciesPage() {
         )}
 
         {/* ============ SEARCH + FILTERS ============ */}
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-policies-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-policies-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -391,6 +394,7 @@ export default function PoliciesPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في الوثائق برقم الوثيقة أو العميل أو شركة التأمين"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث برقم الوثيقة، العميل، الشركة، نوع التغطية"
@@ -404,12 +408,13 @@ export default function PoliciesPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-policies-filters" role="group" aria-label="تصفية الوثائق حسب الحالة">
             {FILTERS.map((item) => (
               <button
                 key={item}
                 type="button"
                 className={`inx-chip ${filter === item ? 'active' : ''}`}
+                aria-pressed={filter === item}
                 onClick={() => setFilter(item)}
               >
                 {FILTER_LABELS[item]}
@@ -419,7 +424,7 @@ export default function PoliciesPage() {
         </div>
 
         {/* ============ LIST ============ */}
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-policies-list-heading">
           <h2>قائمة الوثائق</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {visible.length} وثيقة
@@ -469,13 +474,13 @@ export default function PoliciesPage() {
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-policies-list">
             {visible.map((policy) => (
               <li key={policy.id}>
                 {/* ✅ العنصر الآن قابل للنقر — ينقل إلى صفحة التفاصيل */}
                 <Link
                   to={`/policies/${policy.id}`}
-                  className="inx-list-item"
+                  className="inx-list-item inx-policy-list-item"
                   style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
                 >
                   <span className="inx-icon-circle tone-cyan">
