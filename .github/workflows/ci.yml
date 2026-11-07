@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - name: Hosting Firebase configuration validator unit tests
         run: npm run test:hosting-config
+      - name: Explicit production Hosting deployment authorization guard
+        run: npm run test:production-hosting-guard
       - name: Firebase emulator initialization order and demo-project safety checks
         run: npm run test:firebase-emulator-bootstrap
       - name: Admin and user access boundary smoke checks
