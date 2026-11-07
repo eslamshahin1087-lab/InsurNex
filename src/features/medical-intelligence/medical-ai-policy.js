@@ -8,6 +8,7 @@ export const MEDICAL_GEMINI_TERMS_APPROVAL_FLAG = 'VITE_MEDICAL_GEMINI_PROVIDER_
  */
 export function isMedicalGeminiAllowed(env) {
   if (!env || typeof env !== 'object') return false;
-  return env[MEDICAL_GEMINI_ENABLE_FLAG] === 'true'
-    && env[MEDICAL_GEMINI_TERMS_APPROVAL_FLAG] === 'true';
+  const values = env;
+  return values[MEDICAL_GEMINI_ENABLE_FLAG] === 'true'
+    && values[MEDICAL_GEMINI_TERMS_APPROVAL_FLAG] === 'true';
 }
