@@ -337,6 +337,9 @@ export default function CopilotPage() {
 
 
 
+        <p className="copilot-privacy-notice" role="note">
+          لا ترسل أسماء العملاء أو أرقام الهوية أو بيانات الاتصال أو المعلومات الطبية أو محتوى الوثائق.
+        </p>
         <div className="copilot-input">
           <textarea
             ref={textareaRef}
