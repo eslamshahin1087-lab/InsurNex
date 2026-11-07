@@ -49,7 +49,8 @@
     "test:hosting-config": "node scripts/hosting-config-validation-test.mjs",
     "verify:hosting-config": "node scripts/validate-firebase-hosting-config.mjs",
     "deploy:hosting": "npm run verify:hosting-config && npm run build && npx --yes firebase-tools deploy --only hosting --project insurnex-8a9df",
-    "test:client-audit-foundation": "node functions/scripts/client-audit-foundation-test.mjs"
+    "test:client-audit-foundation": "node functions/scripts/client-audit-foundation-test.mjs",
+    "test:client-capability-resolver": "node functions/scripts/client-capability-resolver-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
