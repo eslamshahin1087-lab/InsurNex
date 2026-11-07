@@ -61,11 +61,11 @@ for (const sensitiveField of [
   );
 }
 
-const pagesRoot = resolve(root, 'src/pages');
-function collectPageSources(directory) {
+const sourceRoot = resolve(root, 'src');
+function collectSourceFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = resolve(directory, entry.name);
-    if (entry.isDirectory()) return collectPageSources(absolutePath);
+    if (entry.isDirectory()) return collectSourceFiles(absolutePath);
     return /\.tsx?$/.test(entry.name) ? [absolutePath] : [];
   });
 }
@@ -75,11 +75,11 @@ const deprecatedClientReaders = new Set([
   'getClient',
   'activateIssuedClientV978',
 ]);
-const pageFiles = collectPageSources(pagesRoot);
-for (const pageFile of pageFiles) {
-  const source = readFileSync(pageFile, 'utf8');
+const sourceFiles = collectSourceFiles(sourceRoot);
+for (const sourceFile of sourceFiles) {
+  const source = readFileSync(sourceFile, 'utf8');
   const legacyServiceImports = source.matchAll(
-    /import\s*\{([^}]+)\}\s*from\s*['"][^'"]*features\/clients\/client\.service['"]/gs,
+    /import\s*\{([^}]+)\}\s*from\s*['"][^'"]*client\.service['"]/gs,
   );
   for (const match of legacyServiceImports) {
     const importedNames = match[1]
@@ -90,11 +90,11 @@ for (const pageFile of pageFiles) {
       assert.equal(
         deprecatedClientReaders.has(importedName),
         false,
-        pageFile.replace(root + '/', '') + ' must not import deprecated full-record reader ' + importedName,
+        sourceFile.replace(root + '/', '') + ' must not import deprecated full-record reader ' + importedName,
       );
     }
   }
 }
 
-assert.ok(pageFiles.length > 0, 'page-level legacy reader guard must inspect the application pages');
+assert.ok(sourceFiles.length > 0, 'legacy reader guard must inspect application source files');
 console.log('Operations client summary data-access regression tests passed.');
