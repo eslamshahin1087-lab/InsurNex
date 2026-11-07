@@ -241,7 +241,7 @@ export default function ClientsPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-clients-chart-card">
               <div className="chart-head">
                 <span className="label">توزيع العملاء</span>
                 <span className="value">{statistics.total}</span>
@@ -278,7 +278,7 @@ export default function ClientsPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-clients-chart-card">
               <div className="chart-head">
                 <span className="label">مؤشرات التصنيف</span>
                 <span className="delta up">↗ صاعد</span>
