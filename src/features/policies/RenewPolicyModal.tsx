@@ -103,6 +103,8 @@ export default function RenewPolicyModal({
 
   return (
     <div
+      className="insurnex-renew-policy-backdrop"
+      role="presentation"
       style={{
         position: 'fixed',
         inset: 0,
@@ -117,7 +119,10 @@ export default function RenewPolicyModal({
       dir="rtl"
     >
       <div
-        className="inx-card"
+        className="inx-card insurnex-renew-policy-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="insurnex-renew-policy-title"
         style={{
           width: '100%',
           maxWidth: 500,
@@ -130,6 +135,7 @@ export default function RenewPolicyModal({
       >
         {/* Header */}
         <div
+          className="insurnex-renew-policy-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -140,7 +146,7 @@ export default function RenewPolicyModal({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <RefreshCw className="text-[var(--inx-blue)]" size={20} />
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--inx-text)' }}>
+            <h2 id="insurnex-renew-policy-title" style={{ margin: 0, fontSize: '1.1rem', color: 'var(--inx-text)' }}>
               تجديد البوليصة
             </h2>
           </div>
@@ -150,7 +156,7 @@ export default function RenewPolicyModal({
         </div>
 
         {/* Body */}
-        <div style={{ padding: 20, overflowY: 'auto', flex: 1 }}>
+        <div className="insurnex-renew-policy-body" style={{ padding: 20, overflowY: 'auto', flex: 1 }}>
           <div
             style={{
               background: 'var(--inx-bg-light)',
@@ -166,7 +172,7 @@ export default function RenewPolicyModal({
             <strong>{policy.clientName}</strong>. سيتم أرشفة البوليصة القديمة تلقائياً.
           </div>
 
-          <form id="renew-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form id="renew-form" className="insurnex-renew-policy-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <label style={{ display: 'block', marginBottom: 6, fontSize: '0.9rem', color: 'var(--inx-text)' }}>
                 رقم البوليصة الجديد *
@@ -287,6 +293,7 @@ export default function RenewPolicyModal({
 
         {/* Footer */}
         <div
+          className="insurnex-renew-policy-footer"
           style={{
             display: 'flex',
             justifyContent: 'flex-end',
