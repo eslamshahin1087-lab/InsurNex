@@ -35,6 +35,22 @@ assert.match(edge, /FIREBASE_VERIFICATION_UNAVAILABLE/,
   'Firebase provider outages must be distinguishable from invalid credentials');
 assert.match(edge, /FIRESTORE_LOOKUP_UNAVAILABLE/,
   'Firestore availability failures must be distinguishable from access denial');
+assert.match(edge, /FIREBASE_PROJECT_ID_NOT_CONFIGURED/,
+  'missing Firebase project binding must be classified as a service-availability failure');
+assert.match(edge, /\['FIRESTORE_LOOKUP_UNAVAILABLE', 'FIREBASE_PROJECT_ID_NOT_CONFIGURED'\]\.includes\(error\.message\)/,
+  'Firestore outages and missing test-project binding must return the same generic temporary-unavailable response');
+
+assert.match(edge, /if \(req\.method === 'OPTIONS'\) return new Response\('ok', \{ headers: corsHeaders \}\)/,
+  'browser CORS preflight must be answered before authentication');
+assert.match(edge, /if \(req\.method === 'GET' && new URL\(req\.url\)\.searchParams\.get\('ping'\) === '1'\)/,
+  'the unauthenticated liveness response must be restricted to GET /?ping=1');
+const livenessGuardIndex = edge.indexOf("req.method === 'GET' && new URL(req.url).searchParams.get('ping') === '1'");
+const postGuardIndex = edge.indexOf("if (req.method !== 'POST') return errorResponse('METHOD_NOT_ALLOWED', 405)");
+const apiKeyGuardIndex = edge.indexOf("const apiKey = req.headers.get('apikey')");
+assert.ok(
+  livenessGuardIndex >= 0 && postGuardIndex > livenessGuardIndex && apiKeyGuardIndex > postGuardIndex,
+  'non-GET health requests must fall through to the POST-only, API-key-protected operation path',
+);
 
 assert.match(edge, /MAX_REQUEST_BODY_BYTES = 64 \* 1024/,
   'metadata/control requests must have a bounded body size');
