@@ -1,0 +1,351 @@
+/*
+ * InsurNex Client 360 — mobile-first responsive presentation.
+ * This layer changes layout only; it does not change client data or authorization.
+ */
+
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-client360-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 14px 14px calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page > .inx-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-header > div:first-child {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-header h2 {
+  margin: 4px 0;
+  font-size: clamp(18px, 5vw, 22px) !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-header > div:first-child > small {
+  display: block;
+  max-width: 100%;
+  line-height: 1.6;
+  font-size: 11px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  width: 100%;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-actions .inx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  font-size: 11px !important;
+  white-space: normal;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-actions .inx-btn:first-child {
+  grid-column: 1 / -1;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-profile-card {
+  padding: 15px !important;
+  border-radius: 19px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-profile-row {
+  display: grid !important;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center !important;
+  gap: 11px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-profile-row > .inx-avatar {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 16px !important;
+  font-size: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-identity {
+  min-width: 0 !important;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-identity h2 {
+  margin: 3px 0 7px !important;
+  font-size: 16px !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-identity > div {
+  gap: 6px !important;
+  flex-wrap: wrap;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-contact-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 8px !important;
+  margin-top: 2px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-contact-actions .inx-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 13px;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-operational-kpis,
+#root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-operational-kpis .inx-kpi,
+#root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis .inx-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 94px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-operational-kpis .inx-kpi-value,
+#root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis .inx-kpi-value {
+  margin-top: auto;
+  max-width: 100%;
+  font-size: clamp(20px, 5.5vw, 25px) !important;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis .inx-kpi-value[style] {
+  font-size: clamp(14px, 4vw, 18px) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-operational-kpis .inx-kpi-label,
+#root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis .inx-kpi-label {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px !important;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 17px 0 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-section-head h2 {
+  margin: 0;
+  font-size: 14px !important;
+  font-weight: 800;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-card {
+  min-width: 0;
+  padding: 13px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-card .inx-card-head {
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-card .inx-card-head h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-list {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-list .inx-list-item {
+  min-height: 48px;
+  min-width: 0;
+  padding: 9px 2px;
+  gap: 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-list .inx-list-copy {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-info-list .inx-list-copy b {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list > li {
+  min-width: 0;
+  margin: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-item {
+  display: grid !important;
+  grid-template-columns: 36px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 9px !important;
+  min-width: 0;
+  min-height: 70px;
+  padding: 10px !important;
+  border-radius: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-copy > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-copy b {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-copy small {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-copy > div:not(:first-child) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px !important;
+  min-width: 0;
+  font-size: 10px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-notes {
+  min-width: 0;
+  padding: 14px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-client360-notes p {
+  overflow-wrap: anywhere;
+  line-height: 1.8 !important;
+  font-size: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-client360-page :is(.inx-empty, [role="alert"]) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border-radius: 16px;
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-client360-page {
+    padding-inline: 11px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client360-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client360-actions .inx-btn:first-child {
+    grid-column: auto;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client360-operational-kpis .inx-kpi,
+  #root .mobile-shell.view-mode-mobile .inx-client360-financial-kpis .inx-kpi {
+    min-height: 88px;
+    padding: 9px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client360-page .inx-list-item {
+    grid-template-columns: 32px minmax(0, 1fr) 14px;
+    gap: 7px !important;
+    padding: 9px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-client360-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-client360-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-client360-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
