@@ -165,10 +165,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-dashboard-page" dir="rtl">
       <div className="inx-container">
         {/* HEADER */}
         <header
+          className="inx-dashboard-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -231,7 +232,7 @@ export default function DashboardPage() {
         )}
 
         {/* SCOPE ROW */}
-        <div className="inx-scope-row" style={{ marginBottom: 14 }}>
+        <div className="inx-scope-row inx-dashboard-scope-row" style={{ marginBottom: 14 }}>
           <span className="inx-scope-pill">
             <ShieldCheck size={14} />
             {roleLabel}
@@ -256,7 +257,7 @@ export default function DashboardPage() {
         )}
 
         {/* SHORTCUTS */}
-        <div className="inx-shortcut-row inx-shortcut-carousel" style={{ marginBottom: 18 }}>
+        <div className="inx-shortcut-row inx-shortcut-carousel inx-dashboard-shortcuts" style={{ marginBottom: 18 }}>
           <div className="inx-shortcut-track">
             <div className="inx-shortcut-sequence">
               {visibleShortcuts.map(({ to, label, emoji, tone }) => (
@@ -294,7 +295,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="hero-body" style={{ gridTemplateColumns: (settings.features.clients && planFeatures.clients) && (settings.features.policies && planFeatures.policies) ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
+          <div className="hero-body inx-dashboard-hero-body" style={{ gridTemplateColumns: (settings.features.clients && planFeatures.clients) && (settings.features.policies && planFeatures.policies) ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
             {(settings.features.clients && planFeatures.clients) && (
               <div className="hero-column" style={{ textAlign: 'right' }}>
                 <div className="metric">
@@ -359,6 +360,7 @@ export default function DashboardPage() {
         {/* CHARTS ROW */}
         {((settings.features.clients && planFeatures.clients) || (settings.features.renewals && planFeatures.renewals)) && (
           <div
+            className="inx-dashboard-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -373,6 +375,7 @@ export default function DashboardPage() {
                   <span className="value">{data.clients}</span>
                 </div>
                 <div
+                  className="inx-dashboard-donut"
                   style={{
                     display: 'flex',
                     gap: 14,
@@ -388,7 +391,7 @@ export default function DashboardPage() {
                     centerValue={String(data.clients)}
                     centerLabel="إجمالي"
                   />
-                  <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
+                  <div className="inx-donut-legend inx-dashboard-donut-legend" style={{ flex: 1, minWidth: 120 }}>
                     {clientSegments.map((s) => (
                       <div className="legend-row" key={s.label}>
                         <span className="dot" style={{ background: s.color }} />
@@ -449,7 +452,7 @@ export default function DashboardPage() {
             <b>لا توجد مهام قادمة</b>
           </div>
         ) : (
-          <ul className="inx-list" style={{ marginBottom: 18 }}>
+          <ul className="inx-list inx-dashboard-list" style={{ marginBottom: 18 }}>
             {data.tasks.slice(0, 5).map((t) => (
               <li key={t.id}>
                 <Link to="/tasks" className="inx-list-item">
@@ -530,6 +533,7 @@ export default function DashboardPage() {
             <h2>إجراءات سريعة</h2>
           </div>
           <div
+            className="inx-dashboard-quick-actions"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
