@@ -12,6 +12,7 @@ import SubscriptionGate from './features/subscription/SubscriptionGate';
 import './App.css';
 import './theme/identity.css';
 import './theme/landing.css';
+import './theme/mobile-experience.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));

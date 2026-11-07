@@ -1,0 +1,58 @@
+/*
+ * InsurNex mobile ergonomics layer.
+ * Keep this file after the legacy theme layers so touch and safe-area rules win
+ * without changing business components or desktop presentation.
+ */
+
+.mobile-shell.view-mode-mobile > .app-header.s8-header {
+  box-sizing: border-box;
+  height: auto !important;
+  min-height: calc(66px + env(safe-area-inset-top, 0px)) !important;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+}
+
+.mobile-shell.view-mode-mobile .s8-actions > button.view-mode-toggle,
+.mobile-shell.view-mode-mobile .s8-actions > .circle-button {
+  box-sizing: border-box;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  touch-action: manipulation;
+}
+
+.mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+  min-height: 44px !important;
+  touch-action: manipulation;
+}
+
+.mobile-shell.view-mode-mobile
+  > .app-tabbar.s8-tabbar.inx-tabbar-primary
+  > a:focus-visible {
+  outline: 2px solid var(--app-blue, var(--inx-blue)) !important;
+  outline-offset: -3px;
+}
+
+@media (max-width: 360px) {
+  .mobile-shell.view-mode-mobile > .app-header.s8-header {
+    gap: 7px !important;
+    padding-inline: 10px !important;
+  }
+
+  .mobile-shell.view-mode-mobile .s8-actions {
+    gap: 3px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+    transition: none !important;
+  }
+}
