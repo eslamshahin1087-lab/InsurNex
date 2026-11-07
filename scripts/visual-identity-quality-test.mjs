@@ -42,7 +42,7 @@ assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be le
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
 assert.ok(app.indexOf('mobile-experience.css') > app.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
-assert.match(mobileExperience, /env\\(safe-area-inset-top, 0px\\)/,
+assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
 assert.match(mobileExperience, /min-width: 44px !important/,
   'mobile header actions must meet the 44px minimum touch width');
