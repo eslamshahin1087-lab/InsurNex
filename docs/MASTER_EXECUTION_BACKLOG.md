@@ -209,3 +209,11 @@ This backlog is the execution source of truth. A checked source-code task means 
 - The active Supabase `document-storage` v22 bundle was read-only compared with current `main` and does not match. It lacks the current key allowlist, 64 KiB body cap, bounded upstream timeouts, Firebase token length cap and 900-second signed URL TTL. The current source tests passing do not establish deployed parity or Staging acceptance.
 - No dedicated Staging project is designated. The second accessible project remains inactive and its purpose is unverified. A Supabase development branch estimate is `$0.01344/hour`; no branch was created and no paid compute was started. No project was restored, no secrets read or changed, and no function was deployed or invoked.
 - P1-D Staging acceptance remains blocked until the owner designates an environment and approves any associated compute cost, after which the approved function source can be deployed and tested only in that environment.
+
+
+## 2026-11-07 — Copilot free-tier privacy guardrails
+- Business context is disabled by default for consumer/free AI providers. Copilot does not query Firestore for client, policy, claims, renewal, lead or finance context unless the operator explicitly enables `COPILOT_ALLOW_BUSINESS_CONTEXT=true` and confirms `GROQ_ZERO_DATA_RETENTION_CONFIRMED=true`.
+- When business context is explicitly enabled under that dual gate, only Groq is eligible for that request. If Groq fails, the request uses the deterministic local fallback; it does not forward the same business context to Gemini.
+- Removed the implicit `insurnex-8a9df` Firebase project fallback from Copilot. Missing `FIREBASE_PROJECT_ID` now fails closed with a generic configuration-unavailable response.
+- Added visible UI warnings not to send names, identity numbers, contact details, medical information or document contents to Copilot. These warnings are user guidance, not a guarantee that every manually typed sensitive value can be detected.
+- These source changes do not read or mutate provider secrets, enable business context, change provider settings or deploy functions. Runtime configuration must be separately reviewed before any context mode is activated.
