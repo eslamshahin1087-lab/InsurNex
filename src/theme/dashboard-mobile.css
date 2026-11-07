@@ -1,0 +1,425 @@
+/*
+ * InsurNex Dashboard — mobile-first presentation layer.
+ * Isolated to the mobile shell so desktop layout and business logic stay unchanged.
+ */
+
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 14px 14px calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-dashboard-page > .inx-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-header {
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 2px 0 14px !important;
+  flex-wrap: wrap !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-header > div:first-child {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-header .eyebrow {
+  display: inline-block;
+  margin-bottom: 2px;
+  color: var(--inx-brand-gold-ink, var(--inx-brand-gold, #c99a44));
+  font-weight: 800;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-header h2 {
+  font-size: clamp(18px, 5vw, 21px) !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-header-circular {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-header-circular .inx-circle-btn {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--app-line, var(--inx-border));
+  border-radius: 14px;
+  background: var(--app-surface, var(--inx-surface));
+  color: var(--app-text, var(--inx-text));
+  box-shadow: none;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-header-circular .inx-circle-btn.filled {
+  border-color: transparent;
+  background: var(--inx-gradient);
+  color: #fff;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-header-circular .inx-circle-btn .badge {
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-end: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 4px;
+  border: 2px solid var(--app-surface, var(--inx-surface));
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-scope-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-scope-row > * {
+  min-height: 32px;
+  max-width: 100%;
+  font-size: 11px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-sequence {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 82px !important;
+  padding: 9px 4px !important;
+  gap: 7px !important;
+  text-align: center;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-card .label {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-3d-icon {
+  display: grid;
+  flex: 0 0 36px;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero {
+  padding: 15px !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-head {
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-head .title-group {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-head .actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 11px;
+  color: #fff;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-body {
+  display: grid !important;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  margin-block: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-body:has(> .hero-column + .hero-column) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-body:not(:has(> .hero-column + .hero-column)) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-column {
+  min-width: 0;
+  padding: 11px 10px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  background: rgba(255,255,255,.075);
+  text-align: right;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .metric {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: clamp(25px, 7vw, 32px);
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .metric small {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .metric-label,
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .metric-delta {
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-bar {
+  height: 6px;
+  margin-block: 8px 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.2);
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-foot .info {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-hero .hero-foot .hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 7px 11px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.13);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-charts {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 11px !important;
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-charts .inx-chart-card {
+  min-width: 0;
+  padding: 14px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-charts .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-donut {
+  justify-content: center !important;
+  gap: 12px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-donut-legend {
+  min-width: 110px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-list {
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-list .inx-list-item {
+  display: flex;
+  align-items: center;
+  min-height: 62px;
+  min-width: 0;
+  padding: 10px 11px;
+  gap: 10px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-list .inx-list-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-list .inx-list-copy b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-list .inx-list-copy small {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-quick-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 9px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-quick-actions .inx-shortcut-card {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px 11px !important;
+  gap: 9px !important;
+  text-align: right;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-quick-actions .inx-shortcut-card .inx-3d-icon {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-dashboard-quick-actions .inx-shortcut-card .label {
+  min-width: 0;
+  font-size: 11px !important;
+  line-height: 1.35;
+  text-align: start;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-dashboard-page .inx-section-head {
+  align-items: center;
+  gap: 10px;
+  margin: 17px 0 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-dashboard-page .inx-section-head h2 {
+  margin: 0;
+  font-size: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-dashboard-page .inx-section-link {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-dashboard-page {
+    padding-inline: 11px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-dashboard-header {
+    gap: 7px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-header-circular {
+    gap: 4px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-sequence {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-card {
+    min-height: 72px !important;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding-inline: 10px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-dashboard-shortcuts .inx-shortcut-card .label {
+    text-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-dashboard-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-dashboard-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-dashboard-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
