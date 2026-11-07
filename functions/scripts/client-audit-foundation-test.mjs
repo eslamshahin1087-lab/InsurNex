@@ -35,5 +35,11 @@ assert.equal(
   false,
   'Firestore client Rules must not define or trust browser-supplied capability fields',
 );
+const organizationRules = rules.match(/match \/organizations\/\{orgId\}[\s\S]*?match \/members\/\{uid\} \{([\s\S]*?)\n      \}/)?.[1] || '';
+assert.match(
+  organizationRules,
+  /allow update: if request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\s*\.hasOnly\(\['role','status','displayName','updatedAt'\]\)\s*&&\s*\(\s*isAdmin\(\)\s*\|\|/,
+  'membership update field allowlist must apply before the isAdmin client-rule branch',
+);
 
 console.log('P1-E trusted client audit foundation contract tests passed.');
