@@ -12,6 +12,8 @@ const mobileExperience = read('src/theme/mobile-experience.css');
 const dashboard = read('src/pages/DashboardPage.tsx');
 const dashboardStyles = read('src/theme/dashboard-mobile.css');
 const clientsStyles = read('src/theme/clients-mobile.css');
+const client360 = read('src/pages/ClientDetailsPage.tsx');
+const client360Styles = read('src/theme/client360-mobile.css');
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
@@ -65,6 +67,15 @@ assert.match(clientsStyles, /\.mobile-shell\.view-mode-mobile/, 'clients styles 
 assert.match(clientsStyles, /@media \(max-width: 380px\)/, 'clients styles must support narrow phones');
 assert.match(clientsStyles, /min-height: 44px/, 'clients controls must have touch-friendly height');
 assert.doesNotMatch(clientsStyles, /view-mode-desktop/, 'clients mobile styles must not target desktop view');
+assert.ok(app.indexOf('client360-mobile.css') > app.indexOf('clients-mobile.css'), 'Client 360 styles must load after the shared mobile layers');
+assert.match(client360, /insurnex-client360-page/, 'Client 360 must have an isolated responsive style scope');
+for (const hook of ['inx-client360-header', 'inx-client360-actions', 'inx-client360-profile-card', 'inx-client360-profile-row', 'inx-client360-identity', 'inx-client360-contact-actions', 'inx-client360-operational-kpis', 'inx-client360-info-grid', 'inx-client360-info-card', 'inx-client360-financial-kpis', 'inx-client360-policy-list', 'inx-client360-claims-list', 'inx-client360-tasks-list', 'inx-client360-renewals-list', 'inx-client360-notes']) assert.ok(client360.includes(hook), 'Client 360 responsive hook is missing: ' + hook);
+assert.match(client360, /getLegacyClientWorkspace\(profile, id\)/, 'Client 360 must retain the trusted legacy workspace adapter');
+assert.match(client360, /data\.organizationId !== profile\.organizationId/, 'Client 360 must retain its tenant mismatch defense');
+assert.match(client360Styles, /\.mobile-shell\.view-mode-mobile/, 'Client 360 presentation must be mobile-shell scoped');
+assert.match(client360Styles, /@media \(max-width: 380px\)/, 'Client 360 must handle narrow phone screens');
+assert.match(client360Styles, /min-height: 44px/, 'Client 360 key actions must meet minimum touch height');
+assert.doesNotMatch(client360Styles, /view-mode-desktop/, 'Client 360 mobile styles must not target desktop view');
 assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
 assert.match(mobileExperience, /min-width: 44px !important/,
