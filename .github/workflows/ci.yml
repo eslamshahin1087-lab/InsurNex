@@ -114,6 +114,8 @@ jobs:
           npm run build --prefix functions
       - name: P1-E trusted client audit runtime tests
         run: node functions/scripts/client-audit-foundation-runtime-test.mjs
+      - name: P1-E trusted role capability resolver runtime tests
+        run: npm run test:client-capability-resolver
       - name: Verify iNex ingress contract and Spark safety gates
         run: npm run test:inex-ingress-contract
       - name: Verify iNex lead lifecycle integration contract
