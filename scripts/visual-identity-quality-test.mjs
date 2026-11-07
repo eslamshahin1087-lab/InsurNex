@@ -14,6 +14,10 @@ const dashboardStyles = read('src/theme/dashboard-mobile.css');
 const clientsStyles = read('src/theme/clients-mobile.css');
 const client360 = read('src/pages/ClientDetailsPage.tsx');
 const client360Styles = read('src/theme/client360-mobile.css');
+const clientWizardPage = read('src/pages/ClientWizardPage.tsx');
+const clientWizardStyles = read('src/theme/client-wizard.css');
+const clientEditForm = read('src/features/clients/ClientEditForm.tsx');
+const clientEditStyles = read('src/theme/client-edit.css');
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
@@ -76,6 +80,20 @@ assert.match(client360Styles, /\.mobile-shell\.view-mode-mobile/, 'Client 360 pr
 assert.match(client360Styles, /@media \(max-width: 380px\)/, 'Client 360 must handle narrow phone screens');
 assert.match(client360Styles, /min-height: 44px/, 'Client 360 key actions must meet minimum touch height');
 assert.doesNotMatch(client360Styles, /view-mode-desktop/, 'Client 360 mobile styles must not target desktop view');
+assert.match(clientWizardPage, /insurnex-client-wizard-page/, 'client wizard must expose its mobile layout scope');
+assert.match(clientWizardPage, /role="list" aria-label="خطوات إضافة العميل"/, 'wizard progress must expose its step list to assistive technology');
+assert.match(clientWizardPage, /aria-current=\{i === step \? 'step' : undefined\}/, 'wizard must announce the active step');
+assert.match(clientWizardPage, /createExtendedClient\(/, 'wizard must keep its existing client creation service');
+assert.match(clientWizardPage, /uploadClientDocumentsAtomic\(/, 'wizard must keep its existing atomic document upload flow');
+assert.match(clientWizardStyles, /\.mobile-shell\.view-mode-mobile/, 'wizard mobile styling must be scoped to mobile view');
+assert.match(clientWizardStyles, /min-height:\s*48px/, 'wizard fields and actions must remain touch-friendly');
+assert.match(clientWizardStyles, /env\(safe-area-inset-bottom, 0px\)/, 'wizard spacing must respect mobile safe areas');
+assert.match(clientEditForm, /\.\.\/\.\.\/theme\/client-edit\.css/, 'client edit sheet must load its existing stylesheet');
+assert.match(clientEditForm, /updateClientProfile\(/, 'client edit form must keep its existing update service');
+assert.match(clientEditForm, /role="dialog"[\s\S]*aria-modal="true"/, 'client edit sheet must retain modal semantics');
+assert.match(clientEditStyles, /@media\s*\(max-width:\s*600px\)/, 'client edit styling must include its mobile sheet layout');
+assert.match(clientEditStyles, /env\(safe-area-inset-bottom, 0px\)/, 'client edit footer must respect the bottom safe area');
+assert.match(clientEditStyles, /min-height:\s*48px/, 'client edit fields and buttons must remain touch-friendly');
 assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
 assert.match(mobileExperience, /min-width: 44px !important/,
