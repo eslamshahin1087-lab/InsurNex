@@ -200,7 +200,7 @@ export default function ClientWizardPage() {
 
   if (created) {
     return (
-      <main className="mobile-page wizard-page" dir="rtl">
+      <main className="mobile-page wizard-page insurnex-client-wizard-page" dir="rtl">
         <div className="inx-container">
           {uploadWarning && <div className="wizard-error" role="alert">{uploadWarning}</div>}
           <AiAnalysisChatBox
@@ -218,9 +218,9 @@ export default function ClientWizardPage() {
   }
 
   return (
-    <main className="mobile-page wizard-page" dir="rtl">
+    <main className="mobile-page wizard-page insurnex-client-wizard-page" dir="rtl">
       <div className="inx-container">
-        <header className="wizard-head">
+        <header className="wizard-head inx-client-wizard-head">
           <button
             type="button"
             className="inx-icon-btn"
@@ -232,18 +232,20 @@ export default function ClientWizardPage() {
             <span className="eyebrow">عميل جديد</span>
             <h2>{STEP_LABELS[step]}</h2>
           </div>
-          <div className="wizard-progress-text">
+          <div className="wizard-progress-text" aria-live="polite">
             {step + 1} / {STEP_LABELS.length}
           </div>
         </header>
 
-        <div className="wizard-steps">
+        <div className="wizard-steps inx-client-wizard-steps" role="list" aria-label="خطوات إضافة العميل">
           {STEP_LABELS.map((label, i) => (
             <div
               key={label}
               className={`wizard-step-dot ${
                 i < step ? 'done' : i === step ? 'active' : ''
               }`}
+              role="listitem"
+              aria-current={i === step ? 'step' : undefined}
             >
               <span className="dot">
                 {i < step ? <Check size={12} /> : i + 1}
@@ -253,7 +255,7 @@ export default function ClientWizardPage() {
           ))}
         </div>
 
-        <div className="wizard-content">
+        <div className="wizard-content inx-client-wizard-content">
           {step === 0 && (
             <Step1TypeSelector
               value={data.type}
@@ -311,9 +313,9 @@ export default function ClientWizardPage() {
           )}
         </div>
 
-        {error && <div className="wizard-error">{error}</div>}
+        {error && <div className="wizard-error" role="alert">{error}</div>}
 
-        <div className="wizard-footer">
+        <div className="wizard-footer inx-client-wizard-footer">
           {step > 0 && (
             <button
               type="button"
