@@ -23,10 +23,18 @@ assert.match(edge, /const PROVIDER_TIMEOUT_MS = 15_000/,
 assert.equal((edge.match(/signal: AbortSignal\.timeout\(PROVIDER_TIMEOUT_MS\)/g) || []).length, 2,
   'both configured AI providers must use the bounded timeout');
 
-assert.match(edge, /const hasConfiguredProvider = Boolean\(GROQ_API_KEY \|\| GEMINI_API_KEY\)/,
-  'provider-off state must be detected before business context loading');
-assert.match(edge, /const loadedContext = hasConfiguredProvider\s*\? await buildAuthorizedCopilotContext/,
-  'provider-off requests must skip Firestore business context reads');
+assert.match(edge, /resolveCopilotPrivacyPolicy/,
+  'Copilot must resolve its free-tier privacy policy before forwarding business context');
+assert.match(edge, /COPILOT_PRIVACY_POLICY\.allowBusinessContext\s*\? await buildAuthorizedCopilotContext/,
+  'Firestore business context must be disabled unless both privacy gates are approved');
+assert.doesNotMatch(edge, /FIREBASE_PROJECT_ID[^\n]*insurnex-8a9df/,
+  'Copilot must not silently fall back to the production Firebase project');
+assert.match(edge, /FIREBASE_PROJECT_ID_NOT_CONFIGURED/,
+  'missing Firebase project configuration must fail closed');
+assert.match(edge, /providerOrder\.includes\('groq'\)/,
+  'Groq calls must follow the privacy policy provider order');
+assert.match(edge, /providerOrder\.includes\('gemini'\)/,
+  'Gemini calls must follow the privacy policy provider order');
 assert.match(edge, /buildCopilotProviderUnavailableReply\(messages\)/,
   'all provider failures must return the local language-aware fallback');
 assert.match(routing, /provider: "local-fallback"/,
