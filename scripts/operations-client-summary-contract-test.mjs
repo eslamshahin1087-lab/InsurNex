@@ -48,24 +48,22 @@ assert.match(
 );
 
 const policyForm = read('src/features/policies/PolicyForm.tsx');
-assert.match(
-  policyForm,
-  /listClientSummaries\\(profile\\)/,
+assert.ok(
+  policyForm.includes('listClientSummaries(profile)'),
   'PolicyForm must load the allowlisted client summary projection',
 );
-assert.match(
-  policyForm,
-  /useState<ClientBaseSummary\\[\\]>\\(\\[\\]\\)/,
+assert.ok(
+  policyForm.includes('useState<ClientBaseSummary[]>([])'),
   'PolicyForm client state must use ClientBaseSummary',
 );
-assert.doesNotMatch(
-  policyForm,
-  /from ['"]\\.\\.\\/clients\\/client\\.service['"]/,
+assert.equal(
+  policyForm.includes("from '../clients/client.service'"),
+  false,
   'PolicyForm must not import the deprecated client service',
 );
-assert.doesNotMatch(
-  policyForm,
-  /\\blistClients\\s*\\(/,
+assert.equal(
+  policyForm.includes('listClients'),
+  false,
   'PolicyForm must not call the deprecated full-record list reader',
 );
 
