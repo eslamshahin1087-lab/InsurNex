@@ -277,6 +277,13 @@ try {
     },
   );
   const brokerMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-broker', 'broker');
+  await expectDenied(
+    () => updateDoc(
+      doc(ownerA.db, 'organizations', orgA, 'members', brokerMember.actor.user.uid),
+      { clientSensitiveCapabilities: ['client.sensitive.read.medical'] },
+    ),
+    'tenant administrators cannot add trusted capability fields to an existing membership',
+  );
   const salesMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-sales', 'sales');
   const claimsMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-claims', 'claims');
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
