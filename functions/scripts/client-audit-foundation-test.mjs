@@ -25,5 +25,21 @@ assert.doesNotMatch(source, /downloadUrl|storagePath|nationalId|taxId|medication
 const rules = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
 const auditRule = rules.match(/match \/auditLogs\/{[^}]*}/);
 assert.equal(auditRule, null, 'auditLogs must remain inaccessible to client SDKs until a separate Rules review');
+assert.match(
+  rules,
+  /request\.resource\.data\.keys\(\)\.hasOnly\(\[\s*'uid','email','displayName','role','status','createdAt','updatedAt','invitedBy'/,
+  'browser-created memberships must reject unapproved capability/grant fields',
+);
+assert.equal(
+  rules.includes('clientSensitiveCapabilities'),
+  false,
+  'Firestore client Rules must not define or trust browser-supplied capability fields',
+);
+const organizationRules = rules.match(/match \/organizations\/\{orgId\}[\s\S]*?match \/members\/\{uid\} \{([\s\S]*?)\n      \}/)?.[1] || '';
+assert.match(
+  organizationRules,
+  /allow update: if request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\s*\.hasOnly\(\['role','status','displayName','updatedAt'\]\)\s*&&\s*\(\s*isAdmin\(\)\s*\|\|/,
+  'membership update field allowlist must apply before the isAdmin client-rule branch',
+);
 
 console.log('P1-E trusted client audit foundation contract tests passed.');

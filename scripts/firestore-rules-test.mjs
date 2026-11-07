@@ -72,7 +72,7 @@ async function expectDenied(operation, message) {
   console.log('PASS denied: ' + message);
 }
 
-async function createOwnerWorkspace(actor, organizationName) {
+async function createOwnerWorkspace(actor, organizationName, membershipExtras = {}) {
   const uid = actor.user.uid;
   const organizationId = 'org_' + uid;
   const batch = writeBatch(actor.db);
@@ -100,13 +100,14 @@ async function createOwnerWorkspace(actor, organizationName) {
     role: 'owner',
     status: 'active',
     createdAt: serverTimestamp(),
+    ...membershipExtras,
   });
   await batch.commit();
   return organizationId;
 }
 
 
-async function acceptMemberViaInvitation(owner, organizationId, label, role) {
+async function acceptMemberViaInvitation(owner, organizationId, label, role, options = {}) {
   const invitee = await makeActor(label);
   const email = String(invitee.user.email || '').toLowerCase();
   const invitationId = 'invite-' + randomUUID().replace(/-/g, '');
@@ -166,7 +167,15 @@ async function acceptMemberViaInvitation(owner, organizationId, label, role) {
     status: 'active',
     invitedBy: owner.user.uid,
     createdAt: serverTimestamp(),
+    ...(options.membershipExtras || {}),
   });
+  if (options.expectCommitDenied) {
+    await expectDenied(
+      () => batch.commit(),
+      label + ' cannot inject trusted capability fields during invitation acceptance',
+    );
+    return { actor: invitee, invitationId, organizationId };
+  }
   await batch.commit();
 
   const profile = await getDoc(doc(invitee.db, 'users', invitee.user.uid));
@@ -176,6 +185,14 @@ async function acceptMemberViaInvitation(owner, organizationId, label, role) {
 }
 
 try {
+  const forgedOwner = await makeActor('owner-capability-forgery');
+  await expectDenied(
+    () => createOwnerWorkspace(forgedOwner, 'Forged Owner Workspace', {
+      clientSensitiveCapabilities: ['client.sensitive.read.medical'],
+    }),
+    'new owner cannot self-grant sensitive capabilities during workspace creation',
+  );
+
   const ownerA = await makeActor('owner-a');
   const orgA = await createOwnerWorkspace(ownerA, 'InsurNex Rules Test A');
   check((await getDoc(doc(ownerA.db, 'users', ownerA.user.uid))).exists(), 'owner onboarding batch creates its own profile');
@@ -247,7 +264,45 @@ try {
 
   // Verified invite acceptance is an atomic three-document operation: invitation,
   // user profile and organization membership. Test several roles against the real Rules engine.
+  await acceptMemberViaInvitation(
+    ownerA,
+    orgA,
+    'forged-invited-broker',
+    'broker',
+    {
+      membershipExtras: {
+        clientSensitiveCapabilities: ['client.sensitive.read.medical'],
+      },
+      expectCommitDenied: true,
+    },
+  );
   const brokerMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-broker', 'broker');
+  const roleChangeMember = await acceptMemberViaInvitation(ownerA, orgA, 'role-change-member', 'broker');
+  const roleChangeUid = roleChangeMember.actor.user.uid;
+  const memberRoleUpdate = writeBatch(ownerA.db);
+  memberRoleUpdate.update(doc(ownerA.db, 'users', roleChangeUid), {
+    role: 'claims',
+    status: 'active',
+    updatedAt: serverTimestamp(),
+  });
+  memberRoleUpdate.update(doc(ownerA.db, 'organizations', orgA, 'members', roleChangeUid), {
+    role: 'claims',
+    status: 'active',
+    updatedAt: serverTimestamp(),
+  });
+  await memberRoleUpdate.commit();
+  check(
+    (await getDoc(doc(ownerA.db, 'users', roleChangeUid))).data().role === 'claims'
+      && (await getDoc(doc(ownerA.db, 'organizations', orgA, 'members', roleChangeUid))).data().role === 'claims',
+    'owner can update member profile and organization membership role atomically',
+  );
+  await expectDenied(
+    () => updateDoc(
+      doc(ownerA.db, 'organizations', orgA, 'members', brokerMember.actor.user.uid),
+      { clientSensitiveCapabilities: ['client.sensitive.read.medical'] },
+    ),
+    'tenant administrators cannot add trusted capability fields to an existing membership',
+  );
   const salesMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-sales', 'sales');
   const claimsMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-claims', 'claims');
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
