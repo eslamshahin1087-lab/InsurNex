@@ -835,3 +835,336 @@
     height: calc(100vh - 40px);
   }
 }
+
+/* InsurNex mobile client wizard refinements */
+@media (max-width: 760px) {
+  #root .mobile-shell.view-mode-mobile .wizard-page.insurnex-client-wizard-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 0 calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page > .inx-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-head {
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-head > button {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 13px;
+    touch-action: manipulation;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-head .wizard-title {
+    min-width: 0;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-head .wizard-title h2 {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-head .wizard-progress-text {
+    flex: 0 0 auto;
+    padding: 7px 9px;
+    border: 1px solid var(--inx-border);
+    border-radius: 11px;
+    background: var(--inx-surface);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 0 -1px 12px;
+    padding: 11px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps::-webkit-scrollbar {
+    display: none;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps .wizard-step-dot {
+    flex: 0 0 58px;
+    min-width: 58px;
+    scroll-snap-align: center;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps .wizard-step-dot .dot {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps .wizard-step-dot small {
+    max-width: 62px;
+    font-size: 10px;
+    line-height: 1.3;
+    white-space: normal;
+    text-align: center;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-content {
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 13px;
+    border-radius: 17px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .step-content {
+    min-width: 0;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .step-intro {
+    margin: 0 0 13px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid > * {
+    min-width: 0;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid label,
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid .field {
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid :is(input:not([type="checkbox"]), select, textarea) {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 12px;
+    border-radius: 13px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .form-grid textarea {
+    min-height: 112px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .checkbox-row input {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .needs-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .need-card {
+    min-height: 60px;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .risk-section {
+    min-width: 0;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .docs-list {
+    gap: 8px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-row {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 11px;
+    border-width: 1px;
+    border-radius: 14px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-copy b {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-copy small {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-actions {
+    align-items: center;
+    gap: 6px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-actions button,
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-actions a {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .review-item {
+    min-width: 0;
+    padding: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .review-item b {
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .risk-score-block {
+    align-items: center;
+    gap: 12px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-footer {
+    position: sticky;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 -1px;
+    padding: 10px;
+    border: 1px solid var(--inx-border);
+    border-radius: 15px;
+    background: color-mix(in srgb, var(--inx-surface) 94%, transparent);
+    box-shadow: 0 8px 22px rgba(7, 27, 55, .12);
+    backdrop-filter: blur(12px);
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-footer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px;
+    border-radius: 13px;
+    font-size: 13px;
+    touch-action: manipulation;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-footer button:only-child {
+    grid-column: 1 / -1;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .wizard-error {
+    padding: 12px;
+    border-radius: 13px;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .ai-chat-page {
+    height: calc(100dvh - 124px - env(safe-area-inset-bottom, 0px));
+    min-height: 420px;
+    border-radius: 17px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .ai-chat-input {
+    padding: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .ai-chat-input textarea {
+    min-height: 48px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page > .inx-container {
+    padding-inline: 10px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-content {
+    padding: 10px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-client-wizard-steps .wizard-step-dot {
+    flex-basis: 54px;
+    min-width: 54px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .review-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-row {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page .doc-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-client-wizard-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
