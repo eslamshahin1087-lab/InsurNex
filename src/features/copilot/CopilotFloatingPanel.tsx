@@ -19,6 +19,7 @@ import type {  CopilotConversation,
 import { clearCurrentContext, COPILOT_CONTEXT_CHANGE_EVENT, getCurrentContext } from './copilot-context.store';
 import { getCopilotConversationScopeKey, resolveCopilotContextForRoute } from './copilot-context-route';
 import type { CopilotContextSelector } from './copilot-context-selector';
+import '../../theme/copilot.css';
 
 interface Props {
   onClose: () => void;
