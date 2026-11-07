@@ -96,7 +96,9 @@ jobs:
         run: npm run test:client-sensitive-default-deny
       - name: Client data-access static inventory
         run: npm run audit:client-data-access
-      - name: Privacy-safe client data-access review report
+      - name: Generate exact-commit privacy-safe review queue for human reconciliation
+        run: npm run audit:client-data-review
+      - name: Privacy-safe client data-access review report contract tests
         run: npm run test:client-data-review
       - name: Client data-access projection and RBAC regression tests
         run: npm run test:client-data-access-projection

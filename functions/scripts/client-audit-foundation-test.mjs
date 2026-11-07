@@ -4,6 +4,9 @@ import { readFile } from 'node:fs/promises';
 const source = await readFile(new URL('../src/client-data-access/audit.ts', import.meta.url), 'utf8');
 
 assert.match(source, /export async function resolveTrustedClientActor/);
+assert.match(source, /export async function resolveTrustedClientCapability/);
+assert.match(source, /parseTrustedClientCapabilities\(membership\.clientSensitiveCapabilities\)/);
+assert.match(source, /capabilities: parseTrustedClientCapabilities/);
 assert.match(source, /collection\('admin'\)\.doc\(uid\)\.get\(\)/);
 assert.match(source, /collection\('users'\)\.doc\(uid\)\.get\(\)/);
 assert.match(source, /collection\('organizations'\)\.doc\(organizationId\)\.collection\('members'\)\.doc\(uid\)\.get\(\)/);
@@ -25,5 +28,8 @@ assert.doesNotMatch(source, /downloadUrl|storagePath|nationalId|taxId|medication
 const rules = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
 const auditRule = rules.match(/match \/auditLogs\/{[^}]*}/);
 assert.equal(auditRule, null, 'auditLogs must remain inaccessible to client SDKs until a separate Rules review');
+assert.match(rules, /request\.resource\.data\.keys\(\)\.hasOnly\(\[\s*'uid','email','displayName','role','status','createdAt','updatedAt','invitedBy'/, 'membership create must reject browser-added sensitive capability fields');
+assert.match(rules, /affectedKeys\(\)\.hasOnly\(\['role','status','displayName','updatedAt'\]\)/, 'membership updates must not permit capability changes');
+assert.equal(rules.includes('clientSensitiveCapabilities'), false, 'Firestore client Rules must not grant or mutate capability values');
 
 console.log('P1-E trusted client audit foundation contract tests passed.');

@@ -16,11 +16,16 @@ export type ClientDataClass =
   | 'ai_findings';
 
 export type ClientAuditDecision = 'requested' | 'denied' | 'allowed';
+export type ClientSensitiveCapability = `client.sensitive.read.${ClientDataClass}`;
 
 export interface TrustedClientActor {
   uid: string;
   organizationId: string;
   role: 'owner' | 'admin' | 'broker' | 'sales' | 'claims' | 'finance' | 'staff';
+  status: 'active';
+  membershipStatus: 'active';
+  isPlatformAdmin: false;
+  capabilities: ClientSensitiveCapability[];
 }
 
 export interface ClientAuditEventInput {
@@ -76,7 +81,42 @@ export async function resolveTrustedClientActor(
     membership.role !== role
   ) throw new Error('CLIENT_AUDIT_MEMBERSHIP_MISMATCH');
 
-  return { uid, organizationId, role };
+  return {
+    uid,
+    organizationId,
+    role,
+    status: 'active',
+    membershipStatus: 'active',
+    isPlatformAdmin: false,
+    capabilities: parseTrustedClientCapabilities(membership.clientSensitiveCapabilities),
+  };
+}
+
+/**
+ * Resolve one exact sensitive-read capability from the active membership.
+ * Capabilities are provisioned only by a trusted server-side process after
+ * data-owner approval. Missing, malformed and unknown values fail closed.
+ * Organization-member Firestore Rules reject browser create/update attempts.
+ */
+export async function resolveTrustedClientCapability(
+  db: Firestore,
+  authenticatedUid: string,
+  dataClass: ClientDataClass,
+): Promise<boolean> {
+  if (!DATA_CLASSES.has(dataClass)) throw new Error('CLIENT_AUDIT_DATA_CLASS_INVALID');
+  const actor = await resolveTrustedClientActor(db, authenticatedUid);
+  return actor.capabilities.includes(`client.sensitive.read.${dataClass}`);
+}
+
+function parseTrustedClientCapabilities(value: unknown): ClientSensitiveCapability[] {
+  if (!Array.isArray(value)) return [];
+  const allowed = new Set<string>(
+    [...DATA_CLASSES].map((dataClass) => `client.sensitive.read.${dataClass}`),
+  );
+  return [...new Set(value.filter(
+    (candidate): candidate is ClientSensitiveCapability =>
+      typeof candidate === 'string' && allowed.has(candidate),
+  ))].sort();
 }
 
 /**

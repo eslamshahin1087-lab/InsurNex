@@ -199,3 +199,12 @@ This backlog is the execution source of truth. A checked source-code task means 
 - No production data migration or deployment is included in this backlog by default.
 
 **P1-E trusted audit foundation (in progress):** branch `feat/p1e-trusted-audit-foundation-20261106` adds an internal Admin-SDK audit writer and server-derived tenant actor resolver. The resolver requires an active profile plus matching active organization membership and excludes Platform Admin. Audit events are allowlisted, purpose-coded and omit free text, PII, medical values, signed URLs and document contents. The writer only creates `auditLogs` documents; no read/update/delete API or callable endpoint is exposed. This is a foundation module, not yet wired to a sensitive-data reader and not permission to open `auditLogs` or any proposed sensitive collection. Runtime tests and reviewed integration remain required.
+
+
+## P1-E update — trusted capability resolution and membership self-grant guard (2026-11-07)
+
+A new source-only PR candidate adds `resolveTrustedClientCapability` to the Admin-SDK client-data-access module. It resolves only exact `client.sensitive.read.<dataClass>` grants from the active organization membership record after reloading and validating the active profile, organization, membership UID, role and status. Missing, malformed, duplicate and unknown capabilities are normalized to a fail-closed allowlist; user-profile supplied values are ignored. No role-to-capability mapping exists, so Owner/Admin/Broker do not receive automatic sensitive access.
+
+Firestore Rules now constrain browser-created membership fields, preventing owner onboarding and invitation acceptance from injecting capability fields. Membership updates remain restricted to role/status/displayName/updatedAt. Synthetic runtime tests and demo Emulator tests cover the resolver and attempted self-grants.
+
+CI also emits the privacy-safe review queue against the exact checked-out source tree via `npm run audit:client-data-review`. This remains heuristic file-level evidence, not a completed manual call-graph review. Data-owner decisions, a trusted capability provisioning process, reviewed sensitive grant storage and collection-specific Rules/Emulator acceptance remain open. All proposed sensitive collections remain default-denied. This increment does not close Issue #111 or authorize sensitive reads/writes.

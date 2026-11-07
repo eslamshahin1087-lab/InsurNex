@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { recordClientAuditEvent } from '../lib/client-data-access/audit.js';
+import { recordClientAuditEvent, resolveTrustedClientActor, resolveTrustedClientCapability } from '../lib/client-data-access/audit.js';
 
 const uid = 'broker_001';
 const orgId = 'org_alpha';
@@ -30,6 +30,7 @@ function fakeDb({ admin = false, profile = {}, organization = true, membership =
       uid,
       role: 'broker',
       status: 'active',
+      clientSensitiveCapabilities: [],
       ...membership,
     },
   };
@@ -77,6 +78,38 @@ for (const forbidden of [
   'medicalValue', 'diagnosis', 'nationalId', 'downloadUrl',
   'signedUrl', 'storagePath', 'documentBytes', 'freeText',
 ]) assert.equal(Object.hasOwn(event, forbidden), false);
+
+const profileForgedDb = fakeDb({
+  profile: { clientSensitiveCapabilities: ['client.sensitive.read.medical'] },
+});
+const profileActor = await resolveTrustedClientActor(profileForgedDb, uid);
+assert.deepEqual(profileActor.capabilities, [], 'profile-supplied capabilities are ignored');
+assert.equal(profileActor.status, 'active');
+assert.equal(profileActor.membershipStatus, 'active');
+assert.equal(profileActor.isPlatformAdmin, false);
+assert.equal(await resolveTrustedClientCapability(profileForgedDb, uid, 'medical'), false,
+  'missing membership grant denies the sensitive capability');
+
+const membershipGrantDb = fakeDb({
+  membership: {
+    clientSensitiveCapabilities: [
+      'client.sensitive.read.medical',
+      'client.sensitive.read.medical',
+      'client.sensitive.read.not-a-data-class',
+      'client.sensitive.write.medical',
+    ],
+  },
+});
+const membershipActor = await resolveTrustedClientActor(membershipGrantDb, uid);
+assert.deepEqual(membershipActor.capabilities, ['client.sensitive.read.medical'],
+  'only known explicit read capabilities from membership are accepted');
+assert.equal(await resolveTrustedClientCapability(membershipGrantDb, uid, 'medical'), true);
+assert.equal(await resolveTrustedClientCapability(membershipGrantDb, uid, 'family'), false,
+  'one data-class capability cannot grant access to another class');
+
+const ownerRoleOnlyDb = fakeDb({ profile: { role: 'owner' } });
+assert.deepEqual((await resolveTrustedClientActor(ownerRoleOnlyDb, uid)).capabilities, [],
+  'owner role does not imply sensitive-data access');
 
 async function rejectsWithoutWrite(options, input, expectedCode) {
   const testDb = fakeDb(options);
