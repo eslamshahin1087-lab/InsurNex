@@ -34,11 +34,26 @@ for (let index = 0; index < uiSources.length; index += 1) {
 }
 
 const clientWizardChat = uiSources[2];
-assert.doesNotMatch(
-  clientWizardChat,
-  /wizardData\\.individual|wizardData\\.riskData|wizardData\\.preferences|wizardData\\.notes|c\\.(?:companyName|commercialRegister|taxCard|authorizedSignatoryNid|authorizedSignatory|website|street|area)/,
-  'the automatic client-wizard prompt must not serialize direct identity, risk, or document detail fields',
-);
+for (const forbiddenPromptField of [
+  'wizardData.individual',
+  'wizardData.riskData',
+  'wizardData.preferences',
+  'wizardData.notes',
+  'c.companyName',
+  'c.commercialRegister',
+  'c.taxCard',
+  'c.authorizedSignatoryNid',
+  'c.authorizedSignatory',
+  'c.website',
+  'c.street',
+  'c.area',
+]) {
+  assert.equal(
+    clientWizardChat.includes(forbiddenPromptField),
+    false,
+    'the automatic client-wizard prompt must not serialize ' + forbiddenPromptField,
+  );
+}
 assert.match(
   clientWizardChat,
   /التحليل التلقائي يرسل ملخصًا عامًا غير معرّف/,
