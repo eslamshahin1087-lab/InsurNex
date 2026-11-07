@@ -409,7 +409,7 @@ service cloud.firestore {
         allow update: if request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['role','status','displayName','updatedAt']) && (
           isAdmin() || (
-            sameOrg(resource.data.organizationId)
+            sameOrg(orgId)
             && privileged()
             && uid != get(organizationPath(orgId)).data.ownerId
             && request.resource.data.uid == uid
