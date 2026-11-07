@@ -284,7 +284,7 @@ export default function DashboardPage() {
         </div>
 
         {/* HERO PANEL */}
-        <section className="inx-hero-panel" style={{ marginBottom: 18 }}>
+        <section className="inx-hero-panel inx-dashboard-hero" style={{ marginBottom: 18 }}>
           <div className="hero-head">
             <div className="title-group">
               <span className="dot" />
@@ -497,7 +497,7 @@ export default function DashboardPage() {
             <b>لا توجد تجديدات قريبة</b>
           </div>
         ) : (
-          <ul className="inx-list" style={{ marginBottom: 18 }}>
+          <ul className="inx-list inx-dashboard-list" style={{ marginBottom: 18 }}>
             {data.renewals.slice(0, 5).map((r) => (
               <li key={r.id}>
                 <Link to="/renewals" className="inx-list-item">
