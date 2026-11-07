@@ -1,6 +1,6 @@
 # Proposed Client Sensitive-Data RBAC Matrix
 
-**Status:** design proposal for Phase 3 review. This matrix is not proof that the current runtime enforces these permissions. Any behavior change requires a separate code/rules PR, Emulator tests, staging acceptance and explicit release approval.
+**Status:** Product owner approved this matrix as the technical implementation baseline on 2026-11-07. This approval is not legal approval, does not establish lawful basis or retention, and does not authorize sensitive runtime access, migration, deployment or release. Any behavior change still requires a separate code/rules PR, Emulator tests, staging acceptance and explicit release approval.
 
 ## 1. Non-negotiable authorization invariants
 
