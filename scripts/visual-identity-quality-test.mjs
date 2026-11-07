@@ -9,6 +9,8 @@ const layout = read('src/layouts/AppLayout.tsx');
 const clients = read('src/pages/ClientsPage.tsx');
 const styles = read('src/theme/visual-identity-quality.css');
 const mobileExperience = read('src/theme/mobile-experience.css');
+const dashboard = read('src/pages/DashboardPage.tsx');
+const dashboardStyles = read('src/theme/dashboard-mobile.css');
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
@@ -42,6 +44,15 @@ assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be le
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
 assert.ok(app.indexOf('mobile-experience.css') > app.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
+assert.ok(app.indexOf('dashboard-mobile.css') > app.indexOf('mobile-experience.css'), 'dashboard mobile layer must load after shared mobile ergonomics styles');
+assert.match(dashboard, /insurnex-dashboard-page/, 'dashboard must have an isolated responsive styling scope');
+for (const className of ['inx-dashboard-header', 'inx-dashboard-scope-row', 'inx-dashboard-shortcuts', 'inx-dashboard-charts', 'inx-dashboard-donut', 'inx-dashboard-quick-actions']) {
+  assert.ok(dashboard.includes(className), 'dashboard responsive hook is missing: ' + className);
+}
+assert.match(dashboardStyles, /\.mobile-shell\.view-mode-mobile/, 'dashboard styles must be scoped to mobile view');
+assert.match(dashboardStyles, /@media \(max-width: 380px\)/, 'dashboard must handle narrow phone screens');
+assert.match(dashboardStyles, /min-width: 44px/, 'dashboard header actions must retain accessible touch width');
+assert.match(dashboardStyles, /prefers-reduced-motion:\s*reduce/, 'dashboard styles must respect reduced motion');
 assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
 assert.match(mobileExperience, /min-width: 44px !important/,
