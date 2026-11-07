@@ -268,11 +268,12 @@ serve(async (req) => {
     });
     if (!hasValidSupabaseApiKey) throw new Error('INVALID_API_KEY');
 
+    if (!FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID_NOT_CONFIGURED');
+
     const firebaseToken = req.headers.get('x-firebase-token');
     if (!firebaseToken) throw new Error('MISSING_TOKEN');
 
     const caller = await verifyFirebaseToken(firebaseToken);
-    if (!FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID_NOT_CONFIGURED');
 
     const declaredContentLength = Number(req.headers.get('content-length') ?? 0);
     if (Number.isFinite(declaredContentLength) && declaredContentLength > 500_000) throw new Error('REQUEST_TOO_LARGE');
