@@ -48,7 +48,7 @@ assert.match(mobileExperience, /min-width: 44px !important/,
   'mobile header actions must meet the 44px minimum touch width');
 assert.match(mobileExperience, /min-height: 44px !important/,
   'mobile header actions and primary navigation must meet the 44px minimum touch height');
-assert.match(mobileExperience, /prefers-reduced-motion:\\s*reduce/,
+assert.match(mobileExperience, /prefers-reduced-motion:\s*reduce/,
   'mobile navigation must respect reduced-motion preferences');
 
 
