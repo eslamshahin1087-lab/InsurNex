@@ -47,6 +47,28 @@ assert.match(
   'the RFQ operations workspace API must not accept full legacy client records',
 );
 
+const policyForm = read('src/features/policies/PolicyForm.tsx');
+assert.match(
+  policyForm,
+  /listClientSummaries\\(profile\\)/,
+  'PolicyForm must load the allowlisted client summary projection',
+);
+assert.match(
+  policyForm,
+  /useState<ClientBaseSummary\\[\\]>\\(\\[\\]\\)/,
+  'PolicyForm client state must use ClientBaseSummary',
+);
+assert.doesNotMatch(
+  policyForm,
+  /from ['"]\\.\\.\\/clients\\/client\\.service['"]/,
+  'PolicyForm must not import the deprecated client service',
+);
+assert.doesNotMatch(
+  policyForm,
+  /\\blistClients\\s*\\(/,
+  'PolicyForm must not call the deprecated full-record list reader',
+);
+
 const summaryInterface = summaryTypes.match(/export interface ClientBaseSummary \{([\s\S]*?)\n\}/)?.[1] || '';
 assert.ok(summaryInterface, 'ClientBaseSummary type declaration must exist');
 for (const sensitiveField of [
