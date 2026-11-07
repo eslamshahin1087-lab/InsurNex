@@ -53,7 +53,8 @@
     "deploy:hosting": "npm run guard:production-hosting && npm run verify:hosting-config && npm run build && npx --yes firebase-tools deploy --only hosting --project insurnex-8a9df",
     "test:client-audit-foundation": "node functions/scripts/client-audit-foundation-test.mjs",
     "test:client-capability-resolver": "node functions/scripts/client-capability-resolver-test.mjs",
-    "test:copilot-privacy-runtime": "node scripts/copilot-privacy-runtime-test.mjs"
+    "test:copilot-privacy-runtime": "node scripts/copilot-privacy-runtime-test.mjs",
+    "test:medical-ai-privacy": "node scripts/medical-ai-privacy-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
