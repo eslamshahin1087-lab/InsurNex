@@ -2,6 +2,7 @@ import { getAI, getGenerativeModel, GoogleAIBackend } from 'firebase/ai';
 import { getApp } from 'firebase/app';
 import type { Medical42Result } from './medical42.types';
 import { medical54GeminiContext } from './medical54.engine';
+import { isMedicalGeminiAllowed } from './medical-ai-policy.js';
 
 export type GeminiMedicalAnalysis = {
   executiveSummary: string;
@@ -81,6 +82,9 @@ async function generate(modelName: string, prompt: string): Promise<GeminiMedica
 export type GeminiProgress = 'connecting' | 'retrying' | 'fallback' | 'complete';
 
 export async function requestGeminiMedicalAnalysis(r: Medical42Result, language: 'ar' | 'en', onProgress?: (state: GeminiProgress) => void): Promise<GeminiMedicalAnalysis> {
+  if (!isMedicalGeminiAllowed(import.meta.env)) {
+    throw new Error('EXTERNAL_MEDICAL_AI_DISABLED');
+  }
   const prompt = promptFor(r, language);
   onProgress?.('connecting');
   let lastError: unknown;
