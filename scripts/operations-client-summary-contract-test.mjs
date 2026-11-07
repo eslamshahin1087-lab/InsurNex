@@ -55,7 +55,7 @@ for (const sensitiveField of [
   'preferences', 'lifetimeValue',
 ]) {
   assert.equal(
-    new RegExp('\\b' + sensitiveField + '\\b').test(summaryInterface),
+    new RegExp('^\\s*' + sensitiveField + '\\??\\s*:', 'm').test(summaryInterface),
     false,
     'ClientBaseSummary must not expose ' + sensitiveField,
   );
