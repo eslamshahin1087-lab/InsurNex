@@ -1,0 +1,666 @@
+/*
+ * InsurNex Claims Mobile — responsive presentation layer.
+ * Claims workflow, service calls, tenant scoping and Firestore contracts are unchanged.
+ */
+
+/* Claims portfolio framing */
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-claims-page,
+#root .mobile-shell.view-mode-mobile .app-body > .insurnex-claim360-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 14px 14px calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claims-page > .inx-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding: 2px 0 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header > div:first-child {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header h2 {
+  font-size: clamp(19px, 5vw, 22px) !important;
+  line-height: 1.35;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header small {
+  display: block;
+  font-size: 11px !important;
+  line-height: 1.55;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header .inx-header-circular {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-header .inx-circle-btn {
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 14px;
+  touch-action: manipulation;
+}
+
+/* Claims KPI and charts */
+#root .mobile-shell.view-mode-mobile .inx-claims-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-kpis .inx-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 98px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-kpis .inx-kpi-value {
+  max-width: 100%;
+  margin-top: auto;
+  font-size: clamp(21px, 6vw, 27px) !important;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-kpis .inx-kpi-label {
+  margin-top: 5px;
+  font-size: 10px !important;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-charts {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 14px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-chart-card {
+  min-width: 0;
+  padding: 13px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-chart-card .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-chart-card > div:not(.chart-head) {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-chart-card .inx-donut-legend {
+  flex: 1 1 110px !important;
+  min-width: 110px !important;
+}
+
+/* Search and status filter rail */
+#root .mobile-shell.view-mode-mobile .inx-claims-toolbar {
+  min-width: 0;
+  margin-bottom: 14px !important;
+  padding: 10px !important;
+  border-radius: 17px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-search {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  padding: 5px 11px !important;
+  border-color: var(--inx-border) !important;
+  border-radius: 13px !important;
+  background: var(--inx-bg) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-search input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  font-size: 16px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-filters {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 7px !important;
+  max-width: 100%;
+  padding: 9px 1px 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-filters::-webkit-scrollbar {
+  display: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-filters .inx-chip {
+  flex: 0 0 auto;
+  min-width: 62px;
+  min-height: 44px !important;
+  padding: 9px 13px !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-list {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claims-list > li {
+  min-width: 0;
+  margin: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item {
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px !important;
+  min-width: 0;
+  min-height: 82px;
+  padding: 11px !important;
+  border-radius: 16px !important;
+  text-decoration: none;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy b {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy small {
+  display: block;
+  max-width: 100%;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy > div:not(:first-child) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 9px !important;
+  min-width: 0;
+  margin-top: 5px;
+  font-size: 10px !important;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy > div:not(:first-child) > span,
+#root .mobile-shell.view-mode-mobile .inx-claim-list-item .inx-list-copy > div:not(:first-child) > strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Claim 360 */
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 12px 13px calc(42px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-hero {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 19px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-hero > div:nth-child(2) {
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-hero h1 {
+  font-size: 17px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-hero p {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-status {
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-kpis article {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 88px;
+  padding: 11px;
+  border-radius: 15px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-kpis b {
+  max-width: 100%;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-kpis small {
+  font-size: 10px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-section {
+  min-width: 0;
+  margin-top: 17px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-section > header {
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-section h2 {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-section .eyebrow {
+  font-size: 9px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-transitions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-transitions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px 8px;
+  border-radius: 13px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-transitions button svg {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px;
+  border-radius: 12px;
+  font-size: 10px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-task-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 9px !important;
+  min-width: 0;
+  margin-bottom: 10px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-task-form input,
+#root .mobile-shell.view-mode-mobile .inx-claim360-task-form select,
+#root .mobile-shell.view-mode-mobile .inx-claim360-note-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 11px 12px;
+  border: 1px solid var(--app-line);
+  border-radius: 13px;
+  background: var(--app-surface-2);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 16px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-task-form button,
+#root .mobile-shell.view-mode-mobile .inx-claim360-note-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  font-size: 12px;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-note-form {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim360-note-form textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-feed a,
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-timeline article {
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-feed a > span,
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-timeline article > span {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-feed b,
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-timeline b {
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-feed small,
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-timeline small {
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-error {
+  margin-top: 9px;
+  padding: 11px;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-empty,
+#root .mobile-shell.view-mode-mobile .insurnex-claim360-page .empty {
+  min-width: 0;
+  padding: 15px;
+  border-radius: 15px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+/* Create claim modal */
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-backdrop {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center;
+  padding: 8px 8px calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-y: auto !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-modal {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 700px !important;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
+  min-height: 0;
+  margin: 0 !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 23px 23px 15px 15px;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-create-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--app-elevated, var(--inx-surface));
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-create-header h2 {
+  margin: 3px 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+#root .mobile-shell.view-mode-mobile .inx-claim-create-header .icon-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 12px 12px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 11px !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-grid > * {
+  min-width: 0;
+  grid-column: auto !important;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-grid label {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-grid :is(input, select, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 11px;
+  border: 1px solid var(--app-line, var(--inx-border));
+  border-radius: 12px;
+  background: var(--app-surface, var(--inx-surface));
+  color: var(--app-text, var(--inx-text));
+  font-size: 16px;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-grid textarea {
+  min-height: 110px;
+  line-height: 1.7;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form .form-error {
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form > footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px -12px -12px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--app-line, var(--inx-border));
+  background: var(--app-elevated, var(--inx-surface));
+}
+
+#root .mobile-shell.view-mode-mobile .insurnex-claim-create-form > footer button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-claims-page,
+  #root .mobile-shell.view-mode-mobile .app-body > .insurnex-claim360-page {
+    padding-inline: 10px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-claims-kpis .inx-kpi {
+    min-height: 90px;
+    padding: 9px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .inx-claim360-transitions,
+  #root .mobile-shell.view-mode-mobile .insurnex-claim360-page .cl360-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #root .mobile-shell.view-mode-mobile .insurnex-claim-create-form > footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell.view-mode-mobile .insurnex-claims-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-claim360-page *,
+  #root .mobile-shell.view-mode-mobile .insurnex-claim-create-modal *,
+  #root .mobile-shell.view-mode-mobile .insurnex-claims-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-claim360-page *::before,
+  #root .mobile-shell.view-mode-mobile .insurnex-claim-create-modal *::before {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

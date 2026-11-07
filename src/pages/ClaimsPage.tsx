@@ -222,10 +222,11 @@ export default function ClaimsPage() {
   }, [items]);
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-claims-page" dir="rtl">
       <div className="inx-container">
         {/* ============ HEADER ============ */}
         <header
+          className="inx-claims-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -276,7 +277,7 @@ export default function ClaimsPage() {
         </header>
 
         {/* ============ KPI GRID ============ */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-claims-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-cyan">📋</span>
@@ -312,6 +313,7 @@ export default function ClaimsPage() {
         {/* ============ CHARTS ROW ============ */}
         {items.length > 0 && (
           <div
+            className="inx-claims-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -319,7 +321,7 @@ export default function ClaimsPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-claims-chart-card">
               <div className="chart-head">
                 <span className="label">حالات المطالبات</span>
                 <span className="value">{stats.total}</span>
@@ -356,7 +358,7 @@ export default function ClaimsPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-claims-chart-card">
               <div className="chart-head">
                 <span className="label">قيمة المطالبات بالحالة</span>
                 <span className="delta up">↑ بالجنيه</span>
@@ -387,8 +389,9 @@ export default function ClaimsPage() {
         )}
 
         {/* ============ SEARCH + FILTERS ============ */}
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-claims-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-claims-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -403,6 +406,7 @@ export default function ClaimsPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في المطالبات برقم المطالبة أو العميل أو الوثيقة أو شركة التأمين"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث برقم المطالبة، العميل، الوثيقة، الشركة"
@@ -416,12 +420,13 @@ export default function ClaimsPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-claims-filters" role="group" aria-label="تصفية المطالبات حسب الحالة">
             {(Object.keys(FILTER_LABELS) as ClaimFilter[]).map((item) => (
               <button
                 key={item}
                 type="button"
                 className={`inx-chip ${filter === item ? 'active' : ''}`}
+                aria-pressed={filter === item}
                 onClick={() => setFilter(item)}
               >
                 {FILTER_LABELS[item]}
@@ -431,7 +436,7 @@ export default function ClaimsPage() {
         </div>
 
         {/* ============ LIST ============ */}
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-claims-list-heading">
           <h2>قائمة المطالبات</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {visible.length} مطالبة
@@ -481,10 +486,10 @@ export default function ClaimsPage() {
         )}
 
         {!error && !loading && visible.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-claims-list" aria-label="قائمة المطالبات">
             {visible.map((claim) => (
               <li key={claim.id}>
-                <Link to={`/claims/${claim.id}`} className="inx-list-item">
+                <Link to={`/claims/${claim.id}`} className="inx-list-item inx-claim-list-item">
                   <span className={`inx-icon-circle tone-${statusTone(claim.status)}`}>
                     <ClipboardCheck size={18} />
                   </span>
