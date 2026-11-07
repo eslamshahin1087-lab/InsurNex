@@ -277,22 +277,23 @@ try {
     },
   );
   const brokerMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-broker', 'broker');
-  const brokerUid = brokerMember.actor.user.uid;
+  const roleChangeMember = await acceptMemberViaInvitation(ownerA, orgA, 'role-change-member', 'broker');
+  const roleChangeUid = roleChangeMember.actor.user.uid;
   const memberRoleUpdate = writeBatch(ownerA.db);
-  memberRoleUpdate.update(doc(ownerA.db, 'users', brokerUid), {
+  memberRoleUpdate.update(doc(ownerA.db, 'users', roleChangeUid), {
     role: 'claims',
     status: 'active',
     updatedAt: serverTimestamp(),
   });
-  memberRoleUpdate.update(doc(ownerA.db, 'organizations', orgA, 'members', brokerUid), {
+  memberRoleUpdate.update(doc(ownerA.db, 'organizations', orgA, 'members', roleChangeUid), {
     role: 'claims',
     status: 'active',
     updatedAt: serverTimestamp(),
   });
   await memberRoleUpdate.commit();
   check(
-    (await getDoc(doc(ownerA.db, 'users', brokerUid))).data().role === 'claims'
-      && (await getDoc(doc(ownerA.db, 'organizations', orgA, 'members', brokerUid))).data().role === 'claims',
+    (await getDoc(doc(ownerA.db, 'users', roleChangeUid))).data().role === 'claims'
+      && (await getDoc(doc(ownerA.db, 'organizations', orgA, 'members', roleChangeUid))).data().role === 'claims',
     'owner can update member profile and organization membership role atomically',
   );
   await expectDenied(
