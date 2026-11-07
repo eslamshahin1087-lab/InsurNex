@@ -46,7 +46,7 @@ assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-d
 assert.ok(app.indexOf('mobile-experience.css') > app.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
 assert.ok(app.indexOf('dashboard-mobile.css') > app.indexOf('mobile-experience.css'), 'dashboard mobile layer must load after shared mobile ergonomics styles');
 assert.match(dashboard, /insurnex-dashboard-page/, 'dashboard must have an isolated responsive styling scope');
-for (const className of ['inx-dashboard-header', 'inx-dashboard-scope-row', 'inx-dashboard-shortcuts', 'inx-dashboard-charts', 'inx-dashboard-donut', 'inx-dashboard-quick-actions']) {
+for (const className of ['inx-dashboard-header', 'inx-dashboard-scope-row', 'inx-dashboard-shortcuts', 'inx-dashboard-hero', 'inx-dashboard-charts', 'inx-dashboard-donut', 'inx-dashboard-quick-actions', 'inx-dashboard-list']) {
   assert.ok(dashboard.includes(className), 'dashboard responsive hook is missing: ' + className);
 }
 assert.match(dashboardStyles, /\.mobile-shell\.view-mode-mobile/, 'dashboard styles must be scoped to mobile view');
