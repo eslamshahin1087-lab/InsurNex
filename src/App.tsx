@@ -18,6 +18,7 @@ import './theme/clients-mobile.css';
 import './theme/client360-mobile.css';
 import './theme/policies-mobile.css';
 import './theme/claims-mobile.css';
+import './theme/tasks-notifications-mobile.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
