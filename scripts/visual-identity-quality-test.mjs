@@ -11,6 +11,7 @@ const styles = read('src/theme/visual-identity-quality.css');
 const mobileExperience = read('src/theme/mobile-experience.css');
 const dashboard = read('src/pages/DashboardPage.tsx');
 const dashboardStyles = read('src/theme/dashboard-mobile.css');
+const clientsStyles = read('src/theme/clients-mobile.css');
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
@@ -55,6 +56,15 @@ assert.match(dashboardStyles, /min-width: 44px/, 'dashboard header actions must 
 assert.match(dashboardStyles, /min-height: 44px/, 'dashboard header actions must retain accessible touch height');
 assert.doesNotMatch(dashboardStyles, /view-mode-desktop/, 'dashboard mobile styles must not override desktop presentation');
 assert.match(dashboardStyles, /prefers-reduced-motion:\s*reduce/, 'dashboard styles must respect reduced motion');
+assert.ok(app.indexOf('clients-mobile.css') > app.indexOf('dashboard-mobile.css'), 'clients mobile layer must load after dashboard styles');
+assert.match(clients, /insurnex-clients-page/, 'clients page must have an isolated mobile styling scope');
+for (const className of ['inx-clients-header', 'inx-clients-kpis', 'inx-clients-charts', 'inx-clients-donut', 'inx-clients-toolbar', 'inx-clients-search', 'inx-clients-filters', 'inx-clients-list-heading', 'inx-clients-list', 'inx-client-list-item']) { assert.ok(clients.includes(className), 'clients responsive hook is missing: ' + className); }
+assert.match(clients, /aria-label="البحث في العملاء/, 'clients search must have an accessible label');
+assert.match(clients, /aria-pressed=\{filter === item\}/, 'client filters must expose their selected state');
+assert.match(clientsStyles, /\.mobile-shell\.view-mode-mobile/, 'clients styles must be scoped to mobile view');
+assert.match(clientsStyles, /@media \(max-width: 380px\)/, 'clients styles must support narrow phones');
+assert.match(clientsStyles, /min-height: 44px/, 'clients controls must have touch-friendly height');
+assert.doesNotMatch(clientsStyles, /view-mode-desktop/, 'clients mobile styles must not target desktop view');
 assert.match(mobileExperience, /env\(safe-area-inset-top, 0px\)/,
   'mobile header must respect the top safe area on supported devices');
 assert.match(mobileExperience, /min-width: 44px !important/,

@@ -14,6 +14,7 @@ import './theme/identity.css';
 import './theme/landing.css';
 import './theme/mobile-experience.css';
 import './theme/dashboard-mobile.css';
+import './theme/clients-mobile.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));

@@ -148,10 +148,11 @@ export default function ClientsPage() {
   ];
 
   return (
-    <main className="mobile-page" dir="rtl">
+    <main className="mobile-page insurnex-clients-page" dir="rtl">
       <div className="inx-container">
         {/* HEADER */}
         <header
+          className="inx-clients-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -200,7 +201,7 @@ export default function ClientsPage() {
         </header>
 
         {/* KPI GRID */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
+        <div className="inx-kpi-grid inx-clients-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
               <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><Users size={17} strokeWidth={1.9} /></span>
@@ -234,6 +235,7 @@ export default function ClientsPage() {
         {/* CHARTS */}
         {clients.length > 0 && (
           <div
+            className="inx-clients-charts"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -241,12 +243,13 @@ export default function ClientsPage() {
               marginBottom: 16,
             }}
           >
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-clients-chart-card">
               <div className="chart-head">
                 <span className="label">توزيع العملاء</span>
                 <span className="value">{statistics.total}</span>
               </div>
               <div
+                className="inx-clients-donut"
                 style={{
                   display: 'flex',
                   gap: 14,
@@ -266,7 +269,7 @@ export default function ClientsPage() {
                   centerValue={String(statistics.total)}
                   centerLabel="إجمالي"
                 />
-                <div className="inx-donut-legend" style={{ flex: 1, minWidth: 120 }}>
+                <div className="inx-donut-legend inx-clients-donut-legend" style={{ flex: 1, minWidth: 120 }}>
                   {statusSegments.map((s) => (
                     <div className="legend-row" key={s.label}>
                       <span className="dot" style={{ background: s.color }} />
@@ -278,7 +281,7 @@ export default function ClientsPage() {
               </div>
             </article>
 
-            <article className="inx-chart-card">
+            <article className="inx-chart-card inx-clients-chart-card">
               <div className="chart-head">
                 <span className="label">مؤشرات التصنيف</span>
                 <span className="delta up">↗ صاعد</span>
@@ -296,8 +299,9 @@ export default function ClientsPage() {
         )}
 
         {/* SEARCH + FILTERS */}
-        <div className="inx-card" style={{ marginBottom: 16, padding: 12 }}>
+        <div className="inx-card inx-clients-toolbar" style={{ marginBottom: 16, padding: 12 }}>
           <div
+            className="inx-clients-search"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -312,6 +316,7 @@ export default function ClientsPage() {
             <Search size={18} style={{ color: 'var(--inx-muted)' }} />
             <input
               type="search"
+              aria-label="البحث في العملاء بالاسم أو رقم الهاتف أو البريد الإلكتروني"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث بالاسم أو الجوال أو البريد"
@@ -325,12 +330,13 @@ export default function ClientsPage() {
               }}
             />
           </div>
-          <div className="inx-chips">
+          <div className="inx-chips inx-clients-filters" role="group" aria-label="تصفية العملاء حسب الحالة">
             {(Object.keys(filterLabels) as ClientFilter[]).map((item) => (
               <button
                 key={item}
                 type="button"
                 className={`inx-chip ${filter === item ? 'active' : ''}`}
+                aria-pressed={filter === item}
                 onClick={() => setFilter(item)}
               >
                 {filterLabels[item]}
@@ -340,7 +346,7 @@ export default function ClientsPage() {
         </div>
 
         {/* CLIENTS LIST */}
-        <div className="inx-section-head">
+        <div className="inx-section-head inx-clients-list-heading">
           <h2>قائمة العملاء</h2>
           <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
             {filteredClients.length} عميل
@@ -371,10 +377,10 @@ export default function ClientsPage() {
         )}
 
         {!loading && filteredClients.length > 0 && (
-          <ul className="inx-list">
+          <ul className="inx-list inx-clients-list">
             {filteredClients.map((client) => (
               <li key={client.id}>
-                <Link to={`/clients/${client.id}`} className="inx-list-item">
+                <Link to={`/clients/${client.id}`} className="inx-list-item inx-client-list-item">
                   <div className="inx-avatar">{getInitials(client.name)}</div>
                   <div className="inx-list-copy">
                     <div
@@ -396,6 +402,7 @@ export default function ClientsPage() {
                       {getClientTypeLabel(client.type)}
                     </small>
                     <div
+                      className="inx-client-contact"
                       style={{
                         display: 'flex',
                         flexWrap: 'wrap',
