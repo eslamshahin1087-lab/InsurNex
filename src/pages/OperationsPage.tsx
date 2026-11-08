@@ -59,7 +59,6 @@ type View = 'overview' | 'inbox' | 'new-business' | 'accounts' | 'smart' | 'emai
 
 const EMPTY: OperationsSnapshot = {
   tasks: [],
-  claims: [],
   renewals: [],
   workItems: [],
 };
