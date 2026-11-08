@@ -344,9 +344,7 @@ export default function DashboardPage() {
             {showRenewalMetric && (
               <span className="info">
                 <CalendarDays size={13} />
-                {data.activePolicies === null
-                  ? 'غير متاح حسب صلاحية الدور'
-                  : nearestRenewalDays === null
+                {nearestRenewalDays === null
                   ? 'لا تجديدات قريبة'
                   : nearestRenewalDays < 0
                   ? 'يوجد تجديد متأخر'
