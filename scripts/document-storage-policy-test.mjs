@@ -130,8 +130,10 @@ for (const role of ['owner', 'admin', 'broker']) {
   assert.equal(roleCanAccessLegacyClientDocument(role, 'read', 'identity'), true, role + ' can read active-tenant legacy client documents');
   assert.equal(roleCanAccessLegacyClientDocument(role, 'delete', 'identity'), false, role + ' cannot delete legacy documents through the compatibility route');
 }
-assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'claim'), true, 'claims role can only read claim-category legacy documents');
-assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'identity'), false, 'claims role cannot read identity legacy documents');
+assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'claim'), false, 'claims cannot read embedded legacy client documents because Firestore denies the parent client record');
+assert.equal(roleCanAccessLegacyClientDocument('claims', 'read', 'identity'), false, 'claims cannot read identity legacy documents');
+assert.equal(roleCanAccessLegacyClientDocument('sales', 'read', 'claim'), false, 'sales cannot read embedded legacy client documents');
+assert.equal(roleCanAccessLegacyClientDocument('finance', 'read', 'claim'), false, 'finance cannot read embedded legacy client documents');
 assert.equal(roleCanAccessLegacyClientDocument('platform_admin', 'read', 'claim'), false, 'platform admin has no implicit document gateway access');
 assert.equal(roleCanAccessLegacyClientDocument('broker', 'write', 'identity'), false, 'legacy compatibility route is read-only');
 
