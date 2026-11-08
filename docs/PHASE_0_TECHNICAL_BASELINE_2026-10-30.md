@@ -154,3 +154,47 @@ Phase 0 is complete when:
 ## 9. Immediate next step
 
 Proceed to Phase 1 only after this documentation PR is reviewed and merged. Phase 1 begins with runtime compatibility and the client-data access adapter, while keeping all proposed sensitive collections denied until collection-specific authorization has passing Emulator tests.
+
+---
+
+# Phase 0 refresh — 2026-11-08
+
+**Current audited baseline:** `main` at `a8a34e9b4d1493355579e64b5e71309e067a2c24` (also the starting point of `chore/phase0-baseline-stabilization-20261108`).
+
+## Repository and branch state
+
+- Repository default branch: `main`; repository is writable by the connected GitHub account.
+- Recursive tree: 537 entries; tree response was not truncated.
+- Branch inventory: 109 branches across two pages. The list includes older feature, security, mobile, storage and documentation branches; branch existence is not evidence that its changes are merged or current.
+- Open pull requests returned by the repository listing: 9. Important active candidates include #133 (client summary projections), #132 (document gateway runtime semantics), #125 (sensitive capability resolver), #112 (P1-E acceptance gate), #90 (cron security regression gates), #46 (Spark/free-tier architecture audit), #40 (architecture/schema documentation), #36 (notification tenant rules) and #31 (unknown lead stage handling). Review each against current `main` before reuse; do not merge by age or title alone.
+- PR #134 (Client Wizard AI privacy notice) merged at `47aacbe2675f961bdd53ec037a123cd1fba8f476` on 2026-11-08.
+- PR #135 (medical Gemini external-processing default-off gate) merged at the audited baseline SHA `a8a34e9b4d1493355579e64b5e71309e067a2c24` on 2026-11-08.
+
+## Dependency and runtime baseline
+
+- Root lockfile is npm lockfile version 3. Resolved versions include React 19.3.0, TypeScript 6.0.3, Vite 8.3.4, Firebase 12.19.0, Supabase JS 2.117.3 and oxlint 1.87.0.
+- Root CI uses Node.js 22 and README local setup also specifies Node.js 22.
+- `functions/package.json` declares Node.js 20. This runtime difference must remain explicit; do not silently change the engine declaration or deployment target as a Phase 0 cleanup.
+- Supabase Edge Functions are checked with Deno in CI. Firebase Functions are built in CI, but deployment is blocked by the Spark guard.
+- A dependency vulnerability audit (`npm audit`) was not executed as part of this remote GitHub inspection. Do not infer a clean vulnerability status from a successful build.
+
+## Exact CI evidence for this baseline
+
+- CI run [#42498977613](https://github.com/eslamshahin1087-lab/InsurNex/actions/runs/42498977613) completed successfully on the exact baseline SHA. Its build job passed install, Hosting configuration/deploy guard tests, PWA/access/plan checks, documents and AI privacy contracts, storage authorization/runtime checks, Deno type checks, cron/runtime-provenance checks, client-sensitive-data and P1-E regression checks, lint, web build, Firebase Functions build, iNex/Spark guards and Firestore Rules tests against the `demo-insurnex` Emulator.
+- Secrets Scan [#42498977508](https://github.com/eslamshahin1087-lab/InsurNex/actions/runs/42498977508) completed successfully on the exact baseline SHA.
+- These are CI/source-level results. They do not prove production deployment parity, authenticated document-gateway E2E acceptance, real-user workflows, performance, or absence of all runtime defects.
+
+## Phase 0 safety correction
+
+The README previously instructed operators to run generic `firebase deploy` for production. That guidance was inconsistent with the explicit Hosting opt-in guard and risked deploying more Firebase resources than intended. The Phase 0 branch replaces it with a scoped release policy: guarded Hosting only after explicit approval; Rules/indexes, Functions, Supabase, secrets and storage changes remain separate reviewed operations. This is documentation-only and does not alter deployment scripts or cloud resources.
+
+## Phase 0 execution status
+
+- [x] Re-read the current `main` SHA immediately before branch creation.
+- [x] Create an isolated development branch from the exact audited `main` SHA.
+- [x] Record repository, branch, PR, dependency and CI evidence.
+- [x] Correct unsafe generic Firebase deployment guidance in README.
+- [ ] Validate the README/baseline documentation change with a PR CI run before requesting review.
+- [ ] Continue with a separate Phase 1 change only after the baseline is reviewed; do not bundle client-data or document-gateway behavior changes into this baseline.
+
+No application source, visual assets, Firestore Rules, indexes, customer records, secrets, billing settings, Firebase/Supabase configuration or deployed resources were changed during this refresh.
