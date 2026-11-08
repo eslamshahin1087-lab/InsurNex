@@ -4,11 +4,11 @@ import RfqWorkspace from '../rfq/RfqWorkspace';
 import type { RfqRecord } from '../rfq/rfq-types';
 import type { OperationWorkItem } from './operations-workflow.service';
 import type { ClientBaseSummary } from '../clients/client-access.policy.js';
-import type { DocumentRecord } from '../../types/document';
+import type { OperationsDocumentReference } from './operations.service';
 
 type Props = {
   clients: ClientBaseSummary[];
-  documents: DocumentRecord[];
+  documents: OperationsDocumentReference[];
   rfqs: RfqRecord[];
   operations: OperationWorkItem[];
   selectedClientId: string;
