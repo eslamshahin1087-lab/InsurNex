@@ -21,7 +21,6 @@ import {
 import {
   collection,
   doc,
-  getCountFromServer,
   getDoc,
   getDocs,
   limit,
@@ -69,10 +68,11 @@ interface SubDetail {
 }
 
 interface Counts {
-  clients: number;
-  policies: number;
-  claims: number;
-  leads: number;
+  /** Tenant business aggregates are intentionally not readable from Platform Admin. */
+  clients: number | null;
+  policies: number | null;
+  claims: number | null;
+  leads: number | null;
 }
 
 export default function AdminUserDetailsPage() {
@@ -83,11 +83,11 @@ export default function AdminUserDetailsPage() {
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [sub, setSub] = useState<SubDetail | null>(null);
   const [codes, setCodes] = useState<SubscriptionCode[]>([]);
-  const [counts, setCounts] = useState<Counts>({
-    clients: 0,
-    policies: 0,
-    claims: 0,
-    leads: 0,
+  const [counts] = useState<Counts>({
+    clients: null,
+    policies: null,
+    claims: null,
+    leads: null,
   });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -138,38 +138,9 @@ export default function AdminUserDetailsPage() {
           setSub(subSnap.data() as SubDetail);
         }
 
-        const [c, p, cl, l] = await Promise.all([
-          getCountFromServer(
-            query(
-              collection(db, 'clients'),
-              where('organizationId', '==', userData.organizationId),
-            ),
-          ),
-          getCountFromServer(
-            query(
-              collection(db, 'policies'),
-              where('organizationId', '==', userData.organizationId),
-            ),
-          ),
-          getCountFromServer(
-            query(
-              collection(db, 'claims'),
-              where('organizationId', '==', userData.organizationId),
-            ),
-          ),
-          getCountFromServer(
-            query(
-              collection(db, 'leads'),
-              where('organizationId', '==', userData.organizationId),
-            ),
-          ),
-        ]);
-        setCounts({
-          clients: c.data().count,
-          policies: p.data().count,
-          claims: cl.data().count,
-          leads: l.data().count,
-        });
+        // Platform Admin is intentionally isolated from tenant business records.
+        // Do not issue aggregate queries against client/policy/claim/lead collections
+        // from this surface; Firestore Rules do not grant a platform-wide read bypass.
       }
     } catch (e) {
       console.error(e);
@@ -435,6 +406,9 @@ export default function AdminUserDetailsPage() {
       {/* FINANCIAL KPIs */}
       <section className="fin-section">
         <h3 className="fin-section-title">الملخص المالي</h3>
+        <p className="inx-muted" style={{ fontSize: 12, margin: '0 0 12px' }}>
+          إحصاءات النشاط التفصيلية غير متاحة من لوحة Platform Admin؛ تُعرض داخل مساحة المؤسسة للمستخدمين المخولين.
+        </p>
         <div className="admin-kpi-grid">
           <article className="admin-kpi">
             <span className="admin-kpi-icon tone-success">
@@ -676,28 +650,28 @@ export default function AdminUserDetailsPage() {
             <span className="admin-kpi-icon">
               <UserRound size={20} />
             </span>
-            <div className="admin-kpi-value">{counts.clients}</div>
+            <div className="admin-kpi-value">{counts.clients ?? '—'}</div>
             <div className="admin-kpi-label">عملاء</div>
           </article>
           <article className="admin-kpi">
             <span className="admin-kpi-icon tone-success">
               <ShieldCheck size={20} />
             </span>
-            <div className="admin-kpi-value">{counts.policies}</div>
+            <div className="admin-kpi-value">{counts.policies ?? '—'}</div>
             <div className="admin-kpi-label">وثائق</div>
           </article>
           <article className="admin-kpi">
             <span className="admin-kpi-icon tone-warning">
               <Clock size={20} />
             </span>
-            <div className="admin-kpi-value">{counts.claims}</div>
+            <div className="admin-kpi-value">{counts.claims ?? '—'}</div>
             <div className="admin-kpi-label">مطالبات</div>
           </article>
           <article className="admin-kpi">
             <span className="admin-kpi-icon tone-purple">
               <CheckCircle2 size={20} />
             </span>
-            <div className="admin-kpi-value">{counts.leads}</div>
+            <div className="admin-kpi-value">{counts.leads ?? '—'}</div>
             <div className="admin-kpi-label">عملاء محتملون</div>
           </article>
         </div>
