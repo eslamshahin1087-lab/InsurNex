@@ -383,6 +383,66 @@ try {
     organizationId: orgA, name: 'RBAC lead', stage: 'new',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
+
+  const protectedLeadSalesRef = doc(salesMember.actor.db, 'leads', protectedLeadId);
+  await updateDoc(protectedLeadSalesRef, {
+    stage: 'contacted',
+    lastActivityAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedLeadSalesRef)).data().stage === 'contacted',
+    'Sales can move a lead to the next permitted stage');
+
+  await updateDoc(protectedLeadSalesRef, {
+    notes: 'Synthetic follow-up note',
+    lastActivityAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedLeadSalesRef)).data().notes === 'Synthetic follow-up note',
+    'Sales can update lead notes without changing protected lead fields');
+
+  await expectDenied(
+    () => updateDoc(protectedLeadSalesRef, {
+      stage: 'won',
+      wonAt: serverTimestamp(),
+      lastActivityAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }),
+    'lead stage updates cannot skip required sales workflow stages',
+  );
+  await expectDenied(
+    () => updateDoc(protectedLeadSalesRef, {
+      clientId: protectedClientId,
+      clientLinkedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }),
+    'Sales cannot attach a Client 360 record to a lead',
+  );
+
+  const protectedLeadBrokerRef = doc(brokerMember.actor.db, 'leads', protectedLeadId);
+  await updateDoc(protectedLeadBrokerRef, {
+    clientId: protectedClientId,
+    clientLinkedAt: serverTimestamp(),
+    lastActivityAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedLeadBrokerRef)).data().clientId === protectedClientId,
+    'Broker can link a lead to an existing same-tenant Client 360 record');
+
+  const protectedLeadActivityId = 'rbac-lead-activity-' + randomUUID();
+  const protectedLeadActivityRef = doc(salesMember.actor.db, 'leadActivities', protectedLeadActivityId);
+  await setDoc(protectedLeadActivityRef, {
+    organizationId: orgA,
+    leadId: protectedLeadId,
+    type: 'stage_changed',
+    message: 'Synthetic lead history',
+    createdBy: salesMember.actor.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(protectedLeadActivityRef, { message: 'Tampered lead history' }),
+    'lead activity history cannot be updated after creation',
+  );
   await setDoc(doc(ownerA.db, 'tasks', protectedTaskId), {
     organizationId: orgA, title: 'RBAC task', status: 'open',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
