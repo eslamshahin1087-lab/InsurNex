@@ -294,6 +294,16 @@ service cloud.firestore {
           && copilotMessageHasValidShape(data)
           && copilotConversationBelongsToCaller(data));
     }
+    function claimUpdateHasValidShape() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasOnly(['status', 'updatedAt'])
+        && (!changedKeys.hasAny(['status']) || request.resource.data.status in [
+          'new', 'documents', 'submitted', 'additional_documents',
+          'review', 'approved', 'settlement', 'settled', 'rejected', 'closed'
+        ])
+        && (!changedKeys.hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -728,9 +738,11 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
+        && collection != 'claimActivities'
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
+        && (collection != 'claims' || claimUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
         && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
