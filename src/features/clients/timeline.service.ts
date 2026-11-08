@@ -101,7 +101,7 @@ export async function listTimelineEvents(
   const timelineRef = collection(db, 'clients', clientId, 'timeline');
   const projectEvents = (snapshot: Awaited<ReturnType<typeof getDocs>>) =>
     snapshot.docs
-      .map((item) => ({ id: item.id, ...item.data() }) as TimelineEvent)
+      .map((item) => ({ ...(item.data() as Record<string, unknown>), id: item.id }) as unknown as TimelineEvent)
       .filter((event) => event.organizationId === organizationId);
 
   try {
