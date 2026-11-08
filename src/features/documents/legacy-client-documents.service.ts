@@ -2,6 +2,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase/config';
 import type { DocumentCategory } from '../../types/document';
 import { getLegacyClientDocumentTemporaryUrl } from '../storage/supabase-storage.provider';
+import { canReadLegacyClientDocumentReferences } from './legacy-client-documents.policy.js';
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const DOCUMENT_CATEGORIES = new Set<DocumentCategory>([
@@ -85,7 +86,9 @@ export async function listLegacyClientDocuments(
   }
 
   const role = String(profile.role || '');
-  if (!['owner', 'admin', 'broker', 'claims'].includes(role)) return [];
+  // This source is embedded in the mixed-sensitivity clients document.
+  // Claims is intentionally excluded by Firestore Rules and must not attempt this read.
+  if (!canReadLegacyClientDocumentReferences(role)) return [];
 
   const clientSnapshot = await getDoc(doc(db, 'clients', clientId));
   if (!clientSnapshot.exists()) return [];
@@ -100,7 +103,6 @@ export async function listLegacyClientDocuments(
     if (!SAFE_ID.test(id) || !pointsToConfiguredSupabaseStorage(item)) return [];
 
     const category = inferCategory(item);
-    if (role === 'claims' && category !== 'claim') return [];
 
     const fileName = asText(item.originalFileName) || asText(item.fileName) || asText(item.label) || 'مستند قديم';
     const label = asText(item.label) || fileName;
