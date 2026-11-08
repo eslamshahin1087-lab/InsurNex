@@ -24,6 +24,7 @@ The page also displayed client onboarding, client account and RFQ workspaces to 
 - Query organization RFQs only for Owner/Admin/Broker.
 - Keep `listDocuments` for Claims because its existing service adds a Firestore `category == 'claim'` filter for that role.
 - Preserve Claims access to claims, policies/renewals, operation work items, and the operations email directory.
+- Remove the unused claim-record preload from `OperationsSnapshot`; Operations does not render this payload and the dedicated Claims page remains the claim workflow.
 - Hide new client onboarding, client CRM/RFQ workspaces, Accounts, Smart client analysis, and client-centric shortcuts from Claims.
 - Remove the prospect count from the Claims overview chart to avoid presenting an unauthorized zero.
 - Deny Operations page rendering for roles outside the role allowlist; no unsupported query is issued.
