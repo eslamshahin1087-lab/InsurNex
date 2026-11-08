@@ -15,6 +15,7 @@
     "test:copilot-safe-errors": "node scripts/copilot-safe-errors-test.mjs",
     "test:visual-identity": "node scripts/visual-identity-quality-test.mjs",
     "test:access": "node scripts/admin-access-smoke-test.mjs",
+    "test:operations-rbac": "node scripts/operations-role-access-test.mjs",
     "test:plans": "node scripts/plan-feature-entitlements-smoke-test.mjs",
     "preview": "vite preview",
     "test:rules": "node scripts/firestore-rules-test.mjs",
