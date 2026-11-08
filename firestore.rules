@@ -294,6 +294,27 @@ service cloud.firestore {
           && copilotMessageHasValidShape(data)
           && copilotConversationBelongsToCaller(data));
     }
+    function rfqUpdateHasValidShape() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasOnly([
+          'status', 'updatedAt', 'insuranceType', 'coverageSummary',
+          'documentIds', 'insurers', 'insurerIds',
+          'selectedQuoteId', 'selectedInsurerId', 'issuedPolicyId'
+        ])
+        && (!changedKeys.hasAny(['status']) || request.resource.data.status in [
+          'draft', 'ready', 'submitted', 'quotes_received', 'closed'
+        ])
+        && (!changedKeys.hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp)
+        && (!changedKeys.hasAny(['insuranceType']) || request.resource.data.insuranceType is string)
+        && (!changedKeys.hasAny(['coverageSummary']) || request.resource.data.coverageSummary is string)
+        && (!changedKeys.hasAny(['documentIds']) || request.resource.data.documentIds is list)
+        && (!changedKeys.hasAny(['insurers']) || request.resource.data.insurers is list)
+        && (!changedKeys.hasAny(['insurerIds']) || request.resource.data.insurerIds is list)
+        && (!changedKeys.hasAny(['selectedQuoteId']) || request.resource.data.selectedQuoteId is string)
+        && (!changedKeys.hasAny(['selectedInsurerId']) || request.resource.data.selectedInsurerId is string)
+        && (!changedKeys.hasAny(['issuedPolicyId']) || request.resource.data.issuedPolicyId is string);
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -731,6 +752,7 @@ service cloud.firestore {
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
+        && (collection != 'rfqs' || rfqUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
         && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
