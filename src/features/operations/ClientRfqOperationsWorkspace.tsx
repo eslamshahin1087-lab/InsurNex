@@ -3,11 +3,11 @@ import { ArrowRight, FileCheck2, FileText, RefreshCw, Search, ShieldCheck, Users
 import RfqWorkspace from '../rfq/RfqWorkspace';
 import type { RfqRecord } from '../rfq/rfq-types';
 import type { OperationWorkItem } from './operations-workflow.service';
-import type { InsuranceClient } from '../../types/client';
+import type { ClientBaseSummary } from '../clients/client-access.policy.js';
 import type { DocumentRecord } from '../../types/document';
 
 type Props = {
-  clients: InsuranceClient[];
+  clients: ClientBaseSummary[];
   documents: DocumentRecord[];
   rfqs: RfqRecord[];
   operations: OperationWorkItem[];
