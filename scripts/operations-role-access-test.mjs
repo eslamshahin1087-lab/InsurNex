@@ -30,10 +30,16 @@ const [page, rules, documents, operationsService] = await Promise.all([
 ]);
 
 assert.match(page, /getOperationsRoleAccess\(profile\?\.role\)/);
+assert.match(page, /listClientSummaries\(profile\)/);
+assert.doesNotMatch(page, /listClients\(profile\.organizationId\)|InsuranceClient/);
+assert.match(page, /ClientBaseSummary\[\]/);
 assert.match(page, /access\.clientRecords\s*\?\s*listClients/);
 assert.match(page, /access\.rfqWorkspace\s*\?\s*listOrganizationRfqs/);
 assert.match(page, /listDocuments\(profile\.organizationId\)/);
 assert.match(page, /operationsAccess\.clientRecords/);
+const clientWorkspace = await readFile(new URL('../src/features/operations/ClientRfqOperationsWorkspace.tsx', import.meta.url), 'utf8');
+assert.match(clientWorkspace, /ClientBaseSummary\[\]/);
+assert.doesNotMatch(clientWorkspace, /InsuranceClient/);
 assert.match(page, /operationsAccess\.rfqWorkspace && view === 'new-business'/);
 assert.match(page, /operationsAccess\.clientOnboarding && showRequest/);
 assert.match(page, /غير مسموح بفتح مركز العمليات/);
