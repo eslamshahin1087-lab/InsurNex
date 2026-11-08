@@ -24,13 +24,13 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
-import { listClients } from '../features/clients/client.service';
+import { listClientSummaries, type ClientBaseSummary } from '../features/clients/client-data-access.service';
 import { listDocuments } from '../features/documents/document.service';
-import type { InsuranceClient, ClientType } from '../types/client';
-import type { DocumentRecord } from '../types/document';
+import type { ClientType } from '../types/client';
 import {
   loadOperationsSnapshot,
   type OperationsSnapshot,
+  type OperationsDocumentReference,
 } from '../features/operations/operations.service';
 import {
   addOperationsEmail,
@@ -53,12 +53,12 @@ import MiniBarChart from '../components/charts/MiniBarChart';
 import '../theme/operations-v80.css';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
+import { getOperationsRoleAccess } from '../features/operations/operations-access.policy.js';
 
 type View = 'overview' | 'inbox' | 'new-business' | 'accounts' | 'smart' | 'emails';
 
 const EMPTY: OperationsSnapshot = {
   tasks: [],
-  claims: [],
   renewals: [],
   workItems: [],
 };
@@ -100,11 +100,12 @@ function OperationsRobot() {
 export default function OperationsPage() {
   const { profile, user } = useAuth();
   const { settings } = usePlatformSettings();
+  const operationsAccess = getOperationsRoleAccess(profile?.role);
   const [view, setView] = useState<View>('overview');
   const [data, setData] = useState<OperationsSnapshot>(EMPTY);
   const [rfqs, setRfqs] = useState<RfqRecord[]>([]);
-  const [clients, setClients] = useState<InsuranceClient[]>([]);
-  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
+  const [clients, setClients] = useState<ClientBaseSummary[]>([]);
+  const [documents, setDocuments] = useState<OperationsDocumentReference[]>([]);
   const [emails, setEmails] = useState<OperationsEmailContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -114,25 +115,27 @@ export default function OperationsPage() {
   const [workflowGuideOpen, setWorkflowGuideOpen] = useState(false);
 
   const load = useCallback(async () => {
-    if (!profile?.organizationId) {
+    const access = getOperationsRoleAccess(profile?.role);
+    if (!profile?.organizationId || !access.operations) {
       setLoading(false);
       return;
     }
     setLoading(true);
+    setError('');
     try {
       const [snapshot, c, d, e, r] = await Promise.all([
         loadOperationsSnapshot(profile.organizationId),
-        listClients(profile.organizationId),
+        access.clientRecords ? listClientSummaries(profile) : Promise.resolve([] as ClientBaseSummary[]),
         listDocuments(profile.organizationId),
-        listOperationsEmails(profile.organizationId),
-        listOrganizationRfqs(profile.organizationId),
+        access.emails ? listOperationsEmails(profile.organizationId) : Promise.resolve([] as OperationsEmailContact[]),
+        access.rfqWorkspace ? listOrganizationRfqs(profile.organizationId) : Promise.resolve([] as RfqRecord[]),
       ]);
       setData(snapshot);
       setSelectedOperation((current) =>
         current ? snapshot.workItems.find((item) => item.id === current.id) || current : null,
       );
       setClients(c);
-      setDocuments(d);
+      setDocuments(d.map(({ id, relatedType, relatedId }) => ({ id, relatedType, relatedId })));
       setEmails(e);
       setRfqs(r);
     } catch (x) {
@@ -141,7 +144,7 @@ export default function OperationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organizationId]);
+  }, [profile?.organizationId, profile?.role]);
 
   useEffect(() => {
     void load();
@@ -184,20 +187,31 @@ export default function OperationsPage() {
     );
   }
 
+  if (!operationsAccess.operations) {
+    return (
+      <main className="mobile-page" dir="rtl">
+        <div className="inx-container">
+          <div className="inx-card" role="alert">
+            <b>غير مسموح بفتح مركز العمليات</b>
+            <p>مركز العمليات متاح لأدوار Owner وAdmin وBroker وClaims وفق صلاحيات المؤسسة.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const workflowSegments = [
     { label: 'نشطة', value: activeOps.length, color: '#1E4272' },
     { label: 'مكتملة', value: completed.length, color: '#10b981' },
     { label: 'متأخرة', value: overdue.length, color: '#dc2626' },
   ];
 
-  const opsBarData = [
-    activeOps.length,
-    today.length,
-    overdue.length,
-    prospect.length,
-    completed.length,
-  ];
-  const opsBarLabels = ['نشطة', 'اليوم', 'متأخرة', 'محتملون', 'مكتملة'];
+  const opsBarData = operationsAccess.clientRecords
+    ? [activeOps.length, today.length, overdue.length, prospect.length, completed.length]
+    : [activeOps.length, today.length, overdue.length, completed.length];
+  const opsBarLabels = operationsAccess.clientRecords
+    ? ['نشطة', 'اليوم', 'متأخرة', 'محتملون', 'مكتملة']
+    : ['نشطة', 'اليوم', 'متأخرة', 'مكتملة'];
 
   return (
     <main className="mobile-page" dir="rtl">
@@ -222,13 +236,15 @@ export default function OperationsPage() {
               رحلة موحدة من العميل حتى الإصدار وإدارة الحساب.
             </small>
           </div>
-          <button
-            type="button"
-            className="inx-btn inx-btn-primary"
-            onClick={() => setShowRequest(true)}
-          >
-            <Plus size={16} /> طلب جديد
-          </button>
+          {operationsAccess.clientOnboarding && (
+            <button
+              type="button"
+              className="inx-btn inx-btn-primary"
+              onClick={() => setShowRequest(true)}
+            >
+              <Plus size={16} /> طلب جديد
+            </button>
+          )}
         </header>
 
         {settings.advertising.enabled && settings.advertising.operations && (
@@ -256,7 +272,9 @@ export default function OperationsPage() {
               ['smart', 'Smart Operate', ShieldCheck],
               ['emails', 'E-mails', Mail],
             ] as const
-          ).map(([id, label, Icon]) => (
+          ).filter(([id]) =>
+             !['new-business', 'accounts', 'smart'].includes(id) || operationsAccess.clientRecords
+           ).map(([id, label, Icon]) => (
             <button
               key={id}
               type="button"
@@ -295,13 +313,15 @@ export default function OperationsPage() {
                 <div className="inx-kpi-value">{overdue.length}</div>
                 <small className="inx-kpi-label">متأخرة</small>
               </article>
-              <article className="inx-kpi">
-                <div className="inx-kpi-head">
-                  <span className="inx-3d-icon sm tone-warning" data-insurnex-operations-icon="v16"><Target size={18} strokeWidth={1.9} aria-hidden="true" /></span>
-                </div>
-                <div className="inx-kpi-value">{prospect.length}</div>
-                <small className="inx-kpi-label">عملاء محتملون</small>
-              </article>
+              {operationsAccess.clientRecords && (
+                <article className="inx-kpi">
+                  <div className="inx-kpi-head">
+                    <span className="inx-3d-icon sm tone-warning" data-insurnex-operations-icon="v16"><Target size={18} strokeWidth={1.9} aria-hidden="true" /></span>
+                  </div>
+                  <div className="inx-kpi-value">{prospect.length}</div>
+                  <small className="inx-kpi-label">عملاء محتملون</small>
+                </article>
+              )}
             </div>
 
             <div
@@ -391,36 +411,42 @@ export default function OperationsPage() {
                 gap: 10,
               }}
             >
-              <button
-                type="button"
-                className="inx-shortcut-card"
-                onClick={() => setShowRequest(true)}
-                style={{ cursor: 'pointer' }}
-              >
+              {operationsAccess.clientOnboarding && (
+                <button
+                  type="button"
+                  className="inx-shortcut-card"
+                  onClick={() => setShowRequest(true)}
+                  style={{ cursor: 'pointer' }}
+                >
                 <span className="inx-3d-icon tone-cyan">👤</span>
                 <span className="label">طلب جديد</span>
                 <span className="sub">عميل حالي أو جديد</span>
-              </button>
-              <button
-                type="button"
-                className="inx-shortcut-card"
-                onClick={() => setView('new-business')}
+                </button>
+              )}
+              {operationsAccess.clientRecords && (
+                <button
+                  type="button"
+                  className="inx-shortcut-card"
+                  onClick={() => setView('new-business')}
                 style={{ cursor: 'pointer' }}
               >
                 <span className="inx-3d-icon tone-warning">📂</span>
                 <span className="label">أعمال جديدة</span>
                 <span className="sub">متابعة العملاء المحتملين</span>
-              </button>
-              <button
-                type="button"
-                className="inx-shortcut-card"
-                onClick={() => setView('accounts')}
+                </button>
+              )}
+              {operationsAccess.clientRecords && (
+                <button
+                  type="button"
+                  className="inx-shortcut-card"
+                  onClick={() => setView('accounts')}
                 style={{ cursor: 'pointer' }}
               >
                 <span className="inx-3d-icon tone-success">👥</span>
                 <span className="label">العملاء الحاليون</span>
                 <span className="sub">بوابة Account Manager</span>
-              </button>
+                </button>
+              )}
               <button
                 type="button"
                 className="inx-shortcut-card"
@@ -437,7 +463,7 @@ export default function OperationsPage() {
 
         {/* ============ INBOX ============ */}
         {view === 'inbox' && !selectedOperation && (
-          <InboxView items={activeOps} onOpen={setSelectedOperation} />
+          <InboxView items={activeOps} onOpen={setSelectedOperation} allowClientLink={operationsAccess.clientRecords} />
         )}
         {view === 'inbox' && selectedOperation && profile && user && (
           <IssuanceWorkspace
@@ -452,7 +478,7 @@ export default function OperationsPage() {
         )}
 
         {/* ============ NEW BUSINESS ============ */}
-        {view === 'new-business' && (
+        {operationsAccess.rfqWorkspace && view === 'new-business' && (
           <ClientRfqOperationsWorkspace
             clients={clients}
             documents={documents}
@@ -467,10 +493,10 @@ export default function OperationsPage() {
         )}
 
         {/* ============ ACCOUNTS ============ */}
-        {view === 'accounts' && <Accounts clients={clients} />}
+        {operationsAccess.clientRecords && view === 'accounts' && <Accounts clients={clients} />}
 
         {/* ============ SMART ============ */}
-        {view === 'smart' && <Smart clients={clients} docs={documents} />}
+        {operationsAccess.clientRecords && view === 'smart' && <Smart clients={clients} docs={documents} />}
 
         {/* ============ EMAILS ============ */}
         {view === 'emails' && profile && user && (
@@ -484,7 +510,7 @@ export default function OperationsPage() {
       </div>
 
       {/* ============ NEW REQUEST WIZARD ============ */}
-      {showRequest && profile && user && (
+      {operationsAccess.clientOnboarding && showRequest && profile && user && (
         <NewRequestWizard
           clients={clients}
           organizationId={profile.organizationId}
@@ -567,9 +593,11 @@ function Heading({ title, text }: { title: string; text: string }) {
 function InboxView({
   items,
   onOpen,
+  allowClientLink,
 }: {
   items: OperationWorkItem[];
   onOpen: (item: OperationWorkItem) => void;
+  allowClientLink: boolean;
 }) {
   const [q, setQ] = useState('');
   const visible = items.filter((i) =>
@@ -611,7 +639,7 @@ function InboxView({
               >
                 فتح عملية الإصدار <ChevronLeft />
               </button>
-            ) : i.clientId ? (
+            ) : i.clientId && allowClientLink ? (
               <Link to={`/clients/${i.clientId}`}>
                 فتح العميل <ChevronLeft />
               </Link>
@@ -629,7 +657,7 @@ function InboxView({
   );
 }
 
-function Accounts({ clients }: { clients: InsuranceClient[] }) {
+function Accounts({ clients }: { clients: ClientBaseSummary[] }) {
   return (
     <section className="op80-panel">
       <Heading
@@ -664,8 +692,8 @@ function Smart({
   clients,
   docs,
 }: {
-  clients: InsuranceClient[];
-  docs: DocumentRecord[];
+  clients: ClientBaseSummary[];
+  docs: OperationsDocumentReference[];
 }) {
   const missing = clients.filter(
     (c) =>
@@ -702,7 +730,7 @@ function NewRequestWizard({
   onReady,
   onChanged,
 }: {
-  clients: InsuranceClient[];
+  clients: ClientBaseSummary[];
   organizationId: string;
   uid: string;
   onClose: () => void;
