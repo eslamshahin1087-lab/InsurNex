@@ -32,7 +32,7 @@ The unscoped dashboard queries could therefore cause permission-denied failures 
 | Sales | No | No | No | Yes |
 | Finance | No | No | No | Yes |
 | Staff | No | No | No | Yes |
-| Platform Admin / unknown | No tenant metrics | No tenant metrics | No tenant metrics | no tenant role profile |
+| Platform Admin / unknown | Not a tenant role | Not a tenant role | Not a tenant role | Separate Platform Admin surface / unknown roles fail closed |
 
 ## Regression coverage
 
