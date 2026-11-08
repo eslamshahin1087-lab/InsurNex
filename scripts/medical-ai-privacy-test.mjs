@@ -39,6 +39,26 @@ assert.equal(
 const client = await readFile(new URL('../src/features/medical-intelligence/gemini-medical.client.ts', import.meta.url), 'utf8');
 const page = await readFile(new URL('../src/pages/MedicalIntelligencePage.tsx', import.meta.url), 'utf8');
 const css = await readFile(new URL('../src/theme/gemini-medical50.css', import.meta.url), 'utf8');
+const functionsIndex = await readFile(new URL('../functions/src/index.ts', import.meta.url), 'utf8');
+
+assert.match(
+  functionsIndex,
+  /LEGACY_MEDICAL_CLAUDE_ENABLED\s*=\s*defineString\('LEGACY_MEDICAL_CLAUDE_ENABLED',\s*\{\s*default:\s*'false'\s*\}\)/,
+  'the legacy paid Anthropic medical callable must be disabled by default',
+);
+assert.match(
+  functionsIndex,
+  /ANTHROPIC_MEDICAL_TERMS_APPROVED\s*=\s*defineString\('ANTHROPIC_MEDICAL_TERMS_APPROVED',\s*\{\s*default:\s*'false'\s*\}\)/,
+  'provider terms must have a separate explicit approval gate',
+);
+const medicalGate = functionsIndex.indexOf("LEGACY_MEDICAL_CLAUDE_ENABLED.value()!=='true'");
+const providerCall = functionsIndex.indexOf('new Anthropic(');
+assert.ok(medicalGate >= 0 && providerCall > medicalGate, 'the paid provider call must remain behind the default-deny runtime gate');
+assert.match(
+  functionsIndex,
+  /ANTHROPIC_MEDICAL_TERMS_APPROVED\.value\(\)!=='true'/,
+  'the callable must require both explicit approvals before provider processing',
+);
 
 assert.match(
   client,
