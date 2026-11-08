@@ -48,7 +48,8 @@ assert.match(page, /data\.clients !== null && data\.activePolicies !== null/);
 assert.match(page, /data\.clients !== null/);
 assert.match(page, /data\.activePolicies !== null/);
 assert.match(page, /data\.openClaims !== null/);
-assert.match(page, /غير متاح حسب صلاحية الدور/);
+assert.match(page, /showRenewalMetric/);
+assert.match(page, /showClaimsMetric/);
 
 // The application role map must not be implemented by widening Firestore Rules.
 const clientBlock = rules.match(/match \/clients\/\{clientId\} \{([\s\S]*?)\n    \}/)?.[1];
