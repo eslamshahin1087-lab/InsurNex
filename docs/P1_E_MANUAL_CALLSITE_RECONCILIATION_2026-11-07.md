@@ -23,6 +23,30 @@ The CI run on the candidate baseline analyzed 243 source files and identified 94
 | `src/pages/AdminUserDetailsPage.tsx` | Requests `getCountFromServer` for the target organization's client collection; it does not map or return client document fields. The Platform Admin path is not included in the legacy client Rules allowlist. | Aggregate-only candidate; expected to fail closed for Platform Admin. It does not justify granting Platform Admin access to tenant client records. |
 | `src/features/clients/client-data-access.service.ts` | Exposes the two adapter read paths above; it reads from the legacy root collection and applies the base projection only after Firestore returns the document. | Existing compatibility boundary, not a sensitive-data split. |
 
+## 2026-11-08 — Follow-up call-site reconciliation
+
+The following updates were confirmed by direct source inspection. PR references identify unmerged candidates; they are not statements about the current production runtime.
+
+| Path / symbol | Current source consumer evidence | Disposition |
+|---|---|---|
+| `src/features/clients/client.service.ts` → `createClient` | Used by the legacy `src/features/clients/ClientForm.tsx` and by `src/features/operations/operations-v80-foundation.service.ts` when creating an operations client before document upload. | Retain. Both are active creation paths; changing the writer requires compatibility and rollback coverage. |
+| `createExtendedClient` / `saveClientAiAnalysis` | `src/pages/ClientWizardPage.tsx` uses both. | Retain. The wizard remains a confirmed writer of the mixed-sensitivity legacy client root; no field migration is included. |
+| `updateClientProfile` | `src/features/clients/ClientEditForm.tsx` imports and calls it. | Retain. It is a confirmed legacy writer. |
+| `getLegacyClientWorkspace` | `src/pages/ClientDetailsPage.tsx` uses it after the existing Owner/Admin/Broker preflight. | Retain with the current role boundary. This still returns the authorized legacy root object; it is not field-level authorization. |
+| `listClientSummaries` | Used by `src/pages/ClientsPage.tsx`; the current Operations and PolicyForm candidates use it as well. | Prefer this projection for base client selectors and UI state. It remains a post-read allowlist projection over the legacy document. |
+| `listClients` | The previously reviewed PolicyForm and Operations consumers have separate candidate changes: PR #142 switches Operations to `listClientSummaries`; PR #146 switches PolicyForm to `listClientSummaries`. `ClientForm` is a create-only consumer and does not use this list function. | Do not remove yet. Re-run a complete repository call-graph once all candidates are merged; current code search is not reliable enough to prove there are no other indirect imports. |
+| `getClient` / `activateIssuedClientV978` | No direct consumer was identified in the manually inspected client, lead, policy, RFQ, quote, operations and page files in this pass. | Keep the deprecated exports until an exhaustive import/call-graph check proves they are unused. Absence from this manual sample is not proof of no consumer. |
+| `src/pages/OperationsPage.tsx` | PR #142 candidate gates client/RFQ sources by role, removes an unused Claims preload from `OperationsSnapshot`, and passes `ClientBaseSummary` into Operations UI state. | Candidate privacy minimization only. Firestore reads still authorize access to the legacy root and the projection occurs after the read; Claims still must not be granted raw Client 360 access. |
+| `src/pages/AdminUserDetailsPage.tsx` | PR #141 candidate removes aggregate reads against tenant clients/policies/claims/leads from the Platform Admin user-details surface. | Candidate correction to maintain Platform Admin separation; business aggregates show unavailable rather than a false zero. |
+
+### Confirmed limits of this follow-up
+
+- This pass inspected the identified source consumers directly, including current form/page/service paths. It did not establish a whole-repository AST/import graph or prove that every dynamic, aliased, barrel-exported or indirect consumer is absent.
+- Search results from the connected GitHub code-search tool were empty for this repository and were not treated as evidence of absence.
+- The Operations and PolicyForm projections do not change Firestore Rules and do not prevent the permitted reader from receiving the full legacy document at the database boundary.
+- No proposed sensitive collection was enabled, no legacy document migrated, and no customer data or secrets were accessed.
+- PR #141, #142 and #146 were open review candidates at the time of this note; their merge status must be rechecked before treating the candidate behaviors as part of `main`.
+
 ## Findings and false-positive dispositions
 
 - Route strings such as `/clients/:id` in `src/App.tsx` are navigation references, not direct Firestore collection operations.
