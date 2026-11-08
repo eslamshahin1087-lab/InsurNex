@@ -2,7 +2,10 @@ import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { listRenewals, type RenewalItem } from '../renewals/renewal.service';
 import type { AppTask } from '../../types/task';
+import type { DocumentRecord } from '../../types/document';
 import type { OperationWorkItem } from './operations-workflow.service';
+
+export type OperationsDocumentReference = Pick<DocumentRecord, 'id' | 'relatedType' | 'relatedId'>;
 
 export type OperationsSnapshot = { tasks: AppTask[]; renewals: RenewalItem[]; workItems: OperationWorkItem[] };
 
