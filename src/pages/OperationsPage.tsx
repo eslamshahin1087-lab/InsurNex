@@ -27,10 +27,10 @@ import { useAuth } from '../features/auth/auth-context';
 import { listClientSummaries, type ClientBaseSummary } from '../features/clients/client-data-access.service';
 import { listDocuments } from '../features/documents/document.service';
 import type { ClientType } from '../types/client';
-import type { DocumentRecord } from '../types/document';
 import {
   loadOperationsSnapshot,
   type OperationsSnapshot,
+  type OperationsDocumentReference,
 } from '../features/operations/operations.service';
 import {
   addOperationsEmail,
@@ -105,7 +105,7 @@ export default function OperationsPage() {
   const [data, setData] = useState<OperationsSnapshot>(EMPTY);
   const [rfqs, setRfqs] = useState<RfqRecord[]>([]);
   const [clients, setClients] = useState<ClientBaseSummary[]>([]);
-  const [documents, setDocuments] = useState<DocumentRecord[]>([]);
+  const [documents, setDocuments] = useState<OperationsDocumentReference[]>([]);
   const [emails, setEmails] = useState<OperationsEmailContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -135,7 +135,7 @@ export default function OperationsPage() {
         current ? snapshot.workItems.find((item) => item.id === current.id) || current : null,
       );
       setClients(c);
-      setDocuments(d);
+      setDocuments(d.map(({ id, relatedType, relatedId }) => ({ id, relatedType, relatedId })));
       setEmails(e);
       setRfqs(r);
     } catch (x) {
@@ -463,7 +463,7 @@ export default function OperationsPage() {
 
         {/* ============ INBOX ============ */}
         {view === 'inbox' && !selectedOperation && (
-          <InboxView items={activeOps} onOpen={setSelectedOperation} />
+          <InboxView items={activeOps} onOpen={setSelectedOperation} allowClientLink={operationsAccess.clientRecords} />
         )}
         {view === 'inbox' && selectedOperation && profile && user && (
           <IssuanceWorkspace
@@ -593,9 +593,11 @@ function Heading({ title, text }: { title: string; text: string }) {
 function InboxView({
   items,
   onOpen,
+  allowClientLink,
 }: {
   items: OperationWorkItem[];
   onOpen: (item: OperationWorkItem) => void;
+  allowClientLink: boolean;
 }) {
   const [q, setQ] = useState('');
   const visible = items.filter((i) =>
@@ -637,7 +639,7 @@ function InboxView({
               >
                 فتح عملية الإصدار <ChevronLeft />
               </button>
-            ) : i.clientId ? (
+            ) : i.clientId && allowClientLink ? (
               <Link to={`/clients/${i.clientId}`}>
                 فتح العميل <ChevronLeft />
               </Link>
@@ -691,7 +693,7 @@ function Smart({
   docs,
 }: {
   clients: ClientBaseSummary[];
-  docs: DocumentRecord[];
+  docs: OperationsDocumentReference[];
 }) {
   const missing = clients.filter(
     (c) =>
