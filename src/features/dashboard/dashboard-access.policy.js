@@ -1,9 +1,3 @@
-export type DashboardRoleAccess = Readonly<{
-  clients: boolean;
-  policies: boolean;
-  claims: boolean;
-}>;
-
 const CLIENT_READ_ROLES = new Set(['owner', 'admin', 'broker']);
 const POLICY_READ_ROLES = new Set(['owner', 'admin', 'broker', 'claims']);
 const CLAIM_READ_ROLES = new Set(['owner', 'admin', 'broker', 'claims']);
