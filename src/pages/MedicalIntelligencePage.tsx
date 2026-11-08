@@ -6,6 +6,7 @@ import { detectMedical42Mapping } from '../features/medical-intelligence/medical
 import { analyze42, normalize42 } from '../features/medical-intelligence/medical42.engine';
 import type { Medical42Mapping, Medical42Result } from '../features/medical-intelligence/medical42.types';
 import { downloadMedical42Report } from '../features/medical-intelligence/medical42-report.service';
+import { isMedicalGeminiAllowed } from '../features/medical-intelligence/medical-ai-policy.js';
 import Medical54Advanced from '../features/medical-intelligence/Medical54Advanced';
 import {
   requestGeminiMedicalAnalysis,
@@ -22,6 +23,7 @@ const f = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDig
 
 export default function MedicalIntelligencePage() {
   const location = useLocation();
+  const externalMedicalAiEnabled = isMedicalGeminiAllowed(import.meta.env);
   const [p, setP] = useState<ParsedTabularFile | null>(null);
   const [sheet, setSheet] = useState('');
   const [map, setMap] = useState<Medical42Mapping | null>(null);
@@ -97,6 +99,13 @@ export default function MedicalIntelligencePage() {
   }
 
   async function runGemini() {
+    if (!externalMedicalAiEnabled) {
+      setGeminiError(tr(
+        'تم إيقاف التفسير الطبي الخارجي افتراضيًا لحماية بيانات الاستهلاك الطبي. التحليل المحلي متاح دون إرسال البيانات إلى مزوّد خارجي.',
+        'External medical interpretation is disabled by default. Local deterministic analysis remains available without sending medical utilization data to an external provider.',
+      ));
+      return;
+    }
     if (!r || geminiBusy) return;
     setGeminiBusy(true);
     setGeminiError('');
@@ -213,10 +222,18 @@ export default function MedicalIntelligencePage() {
             <h2>{tr('التحليل التنفيذي بالذكاء الاصطناعي', 'AI Executive Intelligence')}</h2>
             <p>{tr('يستخدم Gemini النتائج المحسوبة فقط لتفسير محركات التكلفة والمخاطر وفرص إدارة الحالات والتجديد.', 'Gemini interprets the validated metrics to explain cost drivers, risks, case-management opportunities and renewal considerations.')}</p>
           </div>
-          <button disabled={geminiBusy} onClick={() => void runGemini()}>
-            {geminiBusy ? <LoaderCircle className="gemini53-spin" /> : geminiProgress === 'complete' ? <CheckCircle2 /> : <BrainCircuit />}
-            {geminiBusy ? tr('جارٍ التحليل...', 'Analyzing...') : tr('تحليل بواسطة Gemini AI', 'Analyze with Gemini AI')}
-          </button>
+          {externalMedicalAiEnabled ? (
+            <button disabled={geminiBusy} onClick={() => void runGemini()}>
+              {geminiBusy ? <LoaderCircle className="gemini53-spin" /> : geminiProgress === 'complete' ? <CheckCircle2 /> : <BrainCircuit />}
+              {geminiBusy ? tr('جارٍ التحليل...', 'Analyzing...') : tr('تحليل بواسطة Gemini AI', 'Analyze with Gemini AI')}
+            </button>
+          ) : (
+            <div className="gemini50-privacy-note" role="note" aria-label={tr('حماية البيانات الطبية', 'Medical data protection')}>
+              <strong>{tr('التفسير الخارجي متوقف افتراضيًا', 'External interpretation is disabled by default')}</strong>
+              <p>{tr('قد تكشف التجميعات الطبية مؤشرات صحية حساسة حتى دون أسماء أو أرقام تعريف. لن تُرسل هذه المؤشرات إلى Gemini إلا بعد موافقة تشغيلية صريحة ومراجعة شروط المزوّد.', 'Aggregated medical utilization can still reveal sensitive health patterns even without names or identifiers. These metrics will not be sent to Gemini unless both explicit operational approval and provider-terms review are configured.')}</p>
+              <small>{tr('التحليلات الحتمية المحلية وتصدير PDF متاحان دون اتصال بمزوّد ذكاء اصطناعي خارجي.', 'Local deterministic analytics and PDF export remain available without calling an external AI provider.')}</small>
+            </div>
+          )}
         </div>
 
         {geminiProgress && <div className={`gemini53-progress state-${geminiProgress}`} role="status" aria-live="polite">

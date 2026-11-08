@@ -78,6 +78,8 @@ jobs:
         run: deno test supabase/functions/copilot-chat/privacy-policy.test.ts
       - name: Copilot privacy runtime source guards
         run: npm run test:copilot-privacy-runtime
+      - name: Medical AI external processing privacy gate
+        run: npm run test:medical-ai-privacy
       - name: Copilot provider-off, quota fallback and Firebase disabled-account tests
         run: deno test supabase/functions/copilot-chat/provider-routing.test.ts supabase/functions/copilot-chat/firebase-token-verification.test.ts
       - name: Copilot runtime parity source contract checks
