@@ -38,7 +38,7 @@ assert.match(page, /operationsAccess\.clientOnboarding && showRequest/);
 assert.match(page, /غير مسموح بفتح مركز العمليات/);
 assert.match(documents, /role === 'claims' \? \[where\('category', '==', 'claim'\)\]/);
 
-const clientRoles = rules.match(/function canReadBusinessCollection\(collection, data\) \{([\s\S]*?)\n    \}/)?.[1];
+const clientRoles = rules.match(/function canReadBusinessCollection\(collection, data\)\s*\{([\s\S]*?)\n    \}/)?.[1];
 assert.ok(clientRoles);
 assert.match(clientRoles, /collection == 'clients' && roleIs\(\['owner','admin','broker'\]\)/);
 assert.match(clientRoles, /collection in \['operations','operationEvents','operationAttachments','operationsEmailDirectory'\] && roleIs\(\['owner','admin','broker','claims'\]\)/);
