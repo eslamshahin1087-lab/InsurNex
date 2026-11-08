@@ -22,10 +22,11 @@ for (const role of [undefined, null, '', 'platform_admin', 'unknown']) {
   );
 }
 
-const [page, rules, documents] = await Promise.all([
+const [page, rules, documents, operationsService] = await Promise.all([
   readFile(new URL('../src/pages/OperationsPage.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../firestore.rules', import.meta.url), 'utf8'),
   readFile(new URL('../src/features/documents/document.service.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/features/operations/operations.service.ts', import.meta.url), 'utf8'),
 ]);
 
 assert.match(page, /getOperationsRoleAccess\(profile\?\.role\)/);
@@ -36,6 +37,11 @@ assert.match(page, /operationsAccess\.clientRecords/);
 assert.match(page, /operationsAccess\.rfqWorkspace && view === 'new-business'/);
 assert.match(page, /operationsAccess\.clientOnboarding && showRequest/);
 assert.match(page, /غير مسموح بفتح مركز العمليات/);
+assert.doesNotMatch(
+  operationsService,
+  /q\('claims'|collection\(db,\s*['"]claims['"]\)/,
+  'Operations Center must not preload claim records that its page does not render',
+);
 assert.match(documents, /role === 'claims' \? \[where\('category', '==', 'claim'\)\]/);
 
 const clientRoles = rules.match(/function canReadBusinessCollection\(collection, data\)\s*\{([\s\S]*?)\n    \}/)?.[1];
