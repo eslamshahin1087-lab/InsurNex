@@ -251,11 +251,11 @@ export function legacyObjectMetadataMatches(reference, actual) {
  * Legacy embedded files are read-only via the compatibility gateway.
  * Delete and migration actions must use a separate audited workflow.
  */
-export function roleCanAccessLegacyClientDocument(role, action, category) {
-  if (action !== 'read') return false;
-  if (['owner', 'admin', 'broker'].includes(role)) return true;
-  if (role === 'claims') return String(category || '').toLowerCase() === 'claim';
-  return false;
+export function roleCanAccessLegacyClientDocument(role, action, _category) {
+  // Legacy embedded references require reading clients/{clientId}, whose
+  // Firestore Rules allow only Owner/Admin/Broker. Claims must use the
+  // separately-authorized documents collection for claim evidence.
+  return action === 'read' && ['owner', 'admin', 'broker'].includes(role);
 }
 
 /** Bind an object path to exactly one existing Firestore metadata record. */
