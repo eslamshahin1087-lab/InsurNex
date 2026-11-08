@@ -87,40 +87,45 @@ export async function listTimelineEvents(
   organizationId: string,
   limitCount = 100,
 ): Promise<TimelineEvent[]> {
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(clientId)) {
+    throw new Error('CLIENT_TIMELINE_CLIENT_ID_INVALID');
+  }
+  if (!/^[A-Za-z0-9_-]{1,180}$/.test(organizationId)) {
+    throw new Error('CLIENT_TIMELINE_ORGANIZATION_ID_INVALID');
+  }
+  if (!Number.isInteger(limitCount) || limitCount < 1) {
+    throw new Error('CLIENT_TIMELINE_LIMIT_INVALID');
+  }
+
+  const safeLimit = Math.min(limitCount, 100);
+  const timelineRef = collection(db, 'clients', clientId, 'timeline');
+  const projectEvents = (snapshot: Awaited<ReturnType<typeof getDocs>>) =>
+    snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }) as TimelineEvent)
+      .filter((event) => event.organizationId === organizationId);
+
   try {
-    const q = query(
-      collection(db, 'clients', clientId, 'timeline'),
+    const snapshot = await getDocs(query(
+      timelineRef,
       orderBy('at', 'desc'),
-      limit(limitCount),
-    );
-    const snap = await getDocs(q);
-    const events = snap.docs.map(
-      (d) => ({ id: d.id, ...d.data() } as TimelineEvent),
-    );
-    // Safety filter by organizationId (no index needed)
-    return events.filter(
-      (e) => !e.organizationId || e.organizationId === organizationId,
-    );
-  } catch (e) {
-    // Fallback: if orderBy fails (no index), fetch without orderBy
-    console.warn('Timeline orderBy failed, falling back to unordered:', e);
-    const snap = await getDocs(
-      collection(db, 'clients', clientId, 'timeline'),
-    );
-    const events = snap.docs.map(
-      (d) => ({ id: d.id, ...d.data() } as TimelineEvent),
-    );
-    // Sort client-side
+      limit(safeLimit),
+    ));
+    return projectEvents(snapshot);
+  } catch (error) {
+    // Only an index/precondition failure may use the compatibility fallback.
+    // Authorization and network failures must propagate unchanged.
+    if (!(error && typeof error === 'object' && 'code' in error
+      && error.code === 'failed-precondition')) {
+      throw error;
+    }
+    const snapshot = await getDocs(timelineRef);
+    const events = projectEvents(snapshot);
     events.sort((a, b) => {
-      const ta = (a.at as { seconds?: number })?.seconds ?? 0;
-      const tb = (b.at as { seconds?: number })?.seconds ?? 0;
-      return tb - ta;
+      const left = (a.at as { seconds?: number })?.seconds ?? 0;
+      const right = (b.at as { seconds?: number })?.seconds ?? 0;
+      return right - left;
     });
-    return events
-      .filter(
-        (e) => !e.organizationId || e.organizationId === organizationId,
-      )
-      .slice(0, limitCount);
+    return events.slice(0, safeLimit);
   }
 }
 
