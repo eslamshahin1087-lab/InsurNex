@@ -7,7 +7,7 @@ const CLAIM_READ_ROLES = new Set(['owner', 'admin', 'broker', 'claims']);
  * Unknown roles fail closed. This is a query-planning guard, not authorization;
  * Firestore Rules remain the authoritative boundary.
  */
-export function getDashboardRoleAccess(role: unknown): DashboardRoleAccess {
+export function getDashboardRoleAccess(role) {
   const normalized = typeof role === 'string' ? role : '';
   return Object.freeze({
     clients: CLIENT_READ_ROLES.has(normalized),
