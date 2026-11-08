@@ -28,6 +28,7 @@ import AdsSlideshow from '../features/admin/AdsSlideshow';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
+import { getDashboardRoleAccess } from '../features/dashboard/dashboard-access.policy.js';
 
 const empty: DashboardData = {
   clients: null,
@@ -67,7 +68,14 @@ export default function DashboardPage() {
   const { profile } = useAuth();
   const { settings } = usePlatformSettings();
   const { features: planFeatures } = usePlanFeatures();
-  const visibleShortcuts = shortcuts.filter((item) => !item.feature || (settings.features[item.feature] && planFeatures[item.feature]));
+  const roleAccess = getDashboardRoleAccess(profile?.role);
+  const visibleShortcuts = shortcuts.filter((item) => {
+    if (!item.feature || !settings.features[item.feature] || !planFeatures[item.feature]) return !item.feature;
+    if (item.feature === 'clients') return roleAccess.clients;
+    if (item.feature === 'policies' || item.feature === 'renewals') return roleAccess.policies;
+    if (item.feature === 'claims') return roleAccess.claims;
+    return true;
+  });
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [data, setData] = useState(empty);
@@ -248,7 +256,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ONBOARDING CHECKLIST */}
-        {((settings.features.clients && planFeatures.clients && data.clients !== null) || (settings.features.policies && planFeatures.policies && data.activePolicies !== null)) && (
+        {data.clients !== null && data.activePolicies !== null && ((settings.features.clients && planFeatures.clients) || (settings.features.policies && planFeatures.policies)) && (
           <OnboardingChecklist
             clientsCount={showClientMetric ? (data.clients ?? 0) : 0}
             policiesCount={showPolicyMetric ? (data.activePolicies ?? 0) : 0}
