@@ -730,6 +730,23 @@
   }
 }
 
+.client-wizard-privacy-notice {
+  flex: 0 0 auto;
+  margin: 0 14px 8px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--inx-warning) 24%, transparent);
+  border-radius: 10px;
+  background: var(--inx-warning-bg);
+  color: var(--inx-text-soft);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.client-wizard-privacy-notice strong {
+  color: var(--inx-warning);
+}
+
 .ai-chat-error {
   padding: 10px 14px;
   background: var(--inx-danger-bg);

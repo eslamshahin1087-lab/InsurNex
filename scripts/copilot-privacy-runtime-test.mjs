@@ -3,10 +3,11 @@ import { readFile } from 'node:fs/promises';
 
 const edge = await readFile(new URL('../supabase/functions/copilot-chat/index.ts', import.meta.url), 'utf8');
 const privacyUi = [
-  'src/pages/CopilotPage.tsx',
-  'src/features/copilot/CopilotFloatingPanel.tsx',
+  { path: 'src/pages/CopilotPage.tsx', className: 'copilot-privacy-notice' },
+  { path: 'src/features/copilot/CopilotFloatingPanel.tsx', className: 'copilot-privacy-notice' },
+  { path: 'src/features/clients/components/AiAnalysisChatBox.tsx', className: 'client-wizard-privacy-notice' },
 ];
-const uiSources = await Promise.all(privacyUi.map((path) =>
+const uiSources = await Promise.all(privacyUi.map(({ path }) =>
   readFile(new URL('../' + path, import.meta.url), 'utf8')
 ));
 
@@ -26,11 +27,37 @@ assert.match(edge, /providerOrder\.includes\('groq'\)/, 'Groq routing must honor
 assert.match(edge, /providerOrder\.includes\('gemini'\)/, 'Gemini routing must honor the policy provider order');
 
 for (let index = 0; index < uiSources.length; index += 1) {
-  assert.match(
-    uiSources[index],
-    /copilot-privacy-notice/,
-    privacyUi[index] + ' must display the privacy notice',
+  assert.ok(
+    uiSources[index].includes(privacyUi[index].className),
+    privacyUi[index].path + ' must display its privacy notice',
   );
 }
+
+const clientWizardChat = uiSources[2];
+for (const forbiddenPromptField of [
+  'wizardData.individual',
+  'wizardData.riskData',
+  'wizardData.preferences',
+  'wizardData.notes',
+  'c.companyName',
+  'c.commercialRegister',
+  'c.taxCard',
+  'c.authorizedSignatoryNid',
+  'c.authorizedSignatory',
+  'c.website',
+  'c.street',
+  'c.area',
+]) {
+  assert.equal(
+    clientWizardChat.includes(forbiddenPromptField),
+    false,
+    'the automatic client-wizard prompt must not serialize ' + forbiddenPromptField,
+  );
+}
+assert.match(
+  clientWizardChat,
+  /التحليل التلقائي يرسل ملخصًا عامًا غير معرّف/,
+  'the privacy notice must accurately describe the limited automatic prompt',
+);
 
 console.log('Copilot privacy runtime source guards passed.');
