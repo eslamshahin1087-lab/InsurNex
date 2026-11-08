@@ -21,6 +21,7 @@ The page also displayed client onboarding, client account and RFQ workspaces to 
 - Add a pure Operations role-access policy matching the existing Firestore Rules.
 - Permit Operations Center access only to Owner/Admin/Broker/Claims.
 - Query legacy clients only for Owner/Admin/Broker.
+- Pass only the existing `ClientBaseSummary` projection into Operations UI state/components rather than retaining full `InsuranceClient` records. This remains client-side projection after Firestore reads, not field-level server authorization.
 - Query organization RFQs only for Owner/Admin/Broker.
 - Keep `listDocuments` for Claims because its existing service adds a Firestore `category == 'claim'` filter for that role.
 - Preserve Claims access to claims, policies/renewals, operation work items, and the operations email directory.
