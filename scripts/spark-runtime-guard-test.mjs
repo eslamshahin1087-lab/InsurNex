@@ -29,5 +29,10 @@ assert.match(result.stderr, /No Firebase CLI command was run/);
 
 const packageSource = await readFile(resolve(functionsRoot, 'package.json'), 'utf8');
 assert.doesNotMatch(packageSource, /"deploy"\s*:\s*"firebase deploy/);
+const lock = JSON.parse(await readFile(resolve(functionsRoot, 'package-lock.json'), 'utf8'));
+const ci = await readFile(resolve(root, '.github/workflows/ci.yml'), 'utf8');
+assert.equal(packageJson.engines?.node, '22', 'Functions source engine must match the repository CI runtime');
+assert.equal(lock.packages?.['']?.engines?.node, '22', 'Functions lockfile engine metadata must match package.json');
+assert.match(ci, /node-version:\s*22/, 'CI must test the same supported Node 22 runtime');
 
 console.log('Spark runtime deployment guard tests passed; no Firebase deployment was attempted.');
