@@ -28,6 +28,8 @@ The page also displayed client onboarding, client account and RFQ workspaces to 
 - Remove the unused claim-record preload from `OperationsSnapshot`; Operations does not render this payload and the dedicated Claims page remains the claim workflow.
 - Hide new client onboarding, client CRM/RFQ workspaces, Accounts, Smart client analysis, and client-centric shortcuts from Claims.
 - Remove the prospect count from the Claims overview chart to avoid presenting an unauthorized zero.
+- Pass only minimal document references (`id`, `relatedType`, `relatedId`) into the Operations UI state/components; do not retain signed URLs, storage paths or free-form document metadata in this surface.
+- Hide the Client 360 navigation link from Claims in the Operations inbox; the role can work with the permitted operation flow without a dead-end link to a denied client record.
 - Deny Operations page rendering for roles outside the role allowlist; no unsupported query is issued.
 - Keep Firestore Rules unchanged.
 
