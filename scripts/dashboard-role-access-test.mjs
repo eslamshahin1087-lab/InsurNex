@@ -41,6 +41,10 @@ assert.match(notifications, /access\.policies\s*\?\s*listRenewals/);
 assert.match(notifications, /getDashboardRoleAccess\(role\)/);
 
 assert.match(page, /loadDashboard\(profile\.organizationId, profile\.role\)/);
+assert.match(page, /getDashboardRoleAccess\(profile\?\.role\)/);
+assert.match(page, /item\.feature === 'clients'/);
+assert.match(page, /item\.feature === 'policies' \|\| item\.feature === 'renewals'/);
+assert.match(page, /data\.clients !== null && data\.activePolicies !== null/);
 assert.match(page, /data\.clients !== null/);
 assert.match(page, /data\.activePolicies !== null/);
 assert.match(page, /data\.openClaims !== null/);
