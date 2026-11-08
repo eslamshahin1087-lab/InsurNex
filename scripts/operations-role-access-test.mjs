@@ -33,7 +33,7 @@ assert.match(page, /getOperationsRoleAccess\(profile\?\.role\)/);
 assert.match(page, /listClientSummaries\(profile\)/);
 assert.doesNotMatch(page, /listClients\(profile\.organizationId\)|InsuranceClient/);
 assert.match(page, /ClientBaseSummary\[\]/);
-assert.match(page, /access\.clientRecords\s*\?\s*listClients/);
+assert.match(page, /access\.clientRecords\s*\?\s*listClientSummaries/);
 assert.match(page, /access\.rfqWorkspace\s*\?\s*listOrganizationRfqs/);
 assert.match(page, /listDocuments\(profile\.organizationId\)/);
 assert.match(page, /operationsAccess\.clientRecords/);
