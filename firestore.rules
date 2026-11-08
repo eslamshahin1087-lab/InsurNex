@@ -508,6 +508,8 @@ service cloud.firestore {
         allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);
         allow create: if canAccessClientAfter(clientId)
           && roleIs(['owner','admin','broker'])
+          && request.resource.data.organizationId == getAfter(clientPath(clientId)).data.organizationId
+          && request.resource.data.clientId == clientId
           && request.resource.data.by == request.auth.uid;
         allow update, delete: if false;
       }

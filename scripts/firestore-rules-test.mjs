@@ -451,6 +451,29 @@ try {
     at: serverTimestamp(),
   });
 
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'clients', protectedClientId, 'timeline', 'forged-org-' + randomUUID()), {
+      organizationId: orgB,
+      clientId: protectedClientId,
+      type: 'note',
+      title: 'Synthetic forged tenant event',
+      by: ownerA.user.uid,
+      at: serverTimestamp(),
+    }),
+    'timeline event cannot claim a different organization from its parent client',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'clients', protectedClientId, 'timeline', 'forged-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: 'another-client',
+      type: 'note',
+      title: 'Synthetic forged client event',
+      by: ownerA.user.uid,
+      at: serverTimestamp(),
+    }),
+    'timeline event clientId must match its parent client path',
+  );
+
   // Explicit read matrix: every allowed and denied path is exercised both by
   // known document ID and by a tenant-scoped query against the Firestore Rules Emulator.
   const roleActors = {
