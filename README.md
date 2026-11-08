@@ -53,7 +53,11 @@ Vite embeds `VITE_*` values into the client bundle during build. They must be th
 - [AI Module Contracts](docs/AI_MODULE_CONTRACTS.md)
 - [Phase 3 Acceptance Plan](docs/PHASE_3_ACCEPTANCE_PLAN.md)
 
-## Firebase
-Install the Firebase CLI, authenticate locally, then from the project root run `firebase deploy` when the app is ready for production.
+## Firebase and release safety
+- Do not run the generic `firebase deploy` command. It can target multiple Firebase resources and bypasses the repository's intended release sequence.
+- Production Hosting is opt-in and must use `npm run deploy:hosting` only after a separate explicit release approval. The command checks the pinned project, production configuration and deployment opt-in before building and deploying.
+- Firestore Rules/indexes, Firebase Functions, Supabase Edge Functions, secrets and storage changes require their own reviewed change, environment-specific validation and explicit approval. Do not deploy them as part of a generic release command.
+- Firebase Functions deployment is blocked under the approved Spark-only constraint; keep Functions build/type-check validation separate from deployment.
+- Use the `demo-insurnex` Firebase Emulator workflow in [Local Firebase Emulator Testing](docs/LOCAL_FIREBASE_EMULATOR_TESTING.md) for local security tests. Never point emulator-mode builds at a live project.
 
 The repository does not contain passwords, private keys, service-account JSON, or production secrets.
