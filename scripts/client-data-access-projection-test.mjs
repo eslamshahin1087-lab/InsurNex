@@ -167,6 +167,7 @@ test('Client list and Client 360 routes use the new read adapter', () => {
   const clientsPage = readFileSync(new URL('../src/pages/ClientsPage.tsx', import.meta.url), 'utf8');
   const clientDetailsPage = readFileSync(new URL('../src/pages/ClientDetailsPage.tsx', import.meta.url), 'utf8');
   const legacyService = readFileSync(new URL('../src/features/clients/client.service.ts', import.meta.url), 'utf8');
+  const policyForm = readFileSync(new URL('../src/features/policies/PolicyForm.tsx', import.meta.url), 'utf8');
 
   assert.ok(clientsPage.includes('listClientSummaries(profile)'));
   assert.ok(clientsPage.includes('ClientBaseSummary[]'));
@@ -176,4 +177,8 @@ test('Client list and Client 360 routes use the new read adapter', () => {
   assert.equal(clientDetailsPage.includes("import { getClient } from '../features/clients/client.service'"), false);
 
   assert.ok(legacyService.includes('@deprecated'));
+
+  assert.ok(policyForm.includes('listClientSummaries(profile)'));
+  assert.ok(policyForm.includes('ClientBaseSummary[]'));
+  assert.equal(policyForm.includes("import { listClients } from '../clients/client.service'"), false);
 });
