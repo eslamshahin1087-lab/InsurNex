@@ -290,7 +290,7 @@ export default function DashboardPage() {
               <span>لوحة الأداء</span>
             </div>
             <div className="actions">
-              {(settings.features.policies && planFeatures.policies) && <Link to="/policies">الوثائق</Link>}
+              {showPolicyMetric && <Link to="/policies">الوثائق</Link>}
             </div>
           </div>
 
@@ -311,7 +311,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {(settings.features.policies && planFeatures.policies) && (
+            {showPolicyMetric && (
               <div className="hero-column" style={{ textAlign: 'right' }}>
                 <div className="metric">
                   {data.activePolicies}
@@ -369,7 +369,7 @@ export default function DashboardPage() {
               marginBottom: 18,
             }}
           >
-            {(settings.features.clients && planFeatures.clients) && (
+            {showClientMetric && (
               <article className="inx-chart-card">
                 <div className="chart-head">
                   <span className="label">توزيع العملاء</span>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
               </article>
             )}
 
-            {(settings.features.renewals && planFeatures.renewals) && (
+            {showRenewalMetric && (
               <article className="inx-chart-card">
                 <div className="chart-head">
                   <span className="label">اتجاه التجديدات</span>
@@ -484,7 +484,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {(settings.features.renewals && planFeatures.renewals) && (
+        {showRenewalMetric && (
           <>
         {/* RENEWALS SECTION */}
         <div className="inx-section-head">
@@ -531,7 +531,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {((settings.features.clients && planFeatures.clients) || (settings.features.policies && planFeatures.policies) || (settings.features.claims && planFeatures.claims) || (settings.features.tasks && planFeatures.tasks)) && (
+        {(showClientMetric || showPolicyMetric || showClaimsMetric || (settings.features.tasks && planFeatures.tasks)) && (
           <>
           {/* QUICK ACTIONS */}
           <div className="inx-section-head">
@@ -545,9 +545,9 @@ export default function DashboardPage() {
               gap: 10,
             }}
           >
-            {(settings.features.clients && planFeatures.clients) && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
-            {(settings.features.policies && planFeatures.policies) && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
-            {(settings.features.claims && planFeatures.claims) && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
+            {showClientMetric && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
+            {showPolicyMetric && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
+            {showClaimsMetric && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
             {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
           </div>
           </>
