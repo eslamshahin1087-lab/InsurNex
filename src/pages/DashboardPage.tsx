@@ -30,9 +30,9 @@ import type { PlatformFeatureKey } from '../features/admin/platform-settings.ser
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 
 const empty: DashboardData = {
-  clients: 0,
-  activePolicies: 0,
-  openClaims: 0,
+  clients: null,
+  activePolicies: null,
+  openClaims: null,
   renewals: [],
   tasks: [],
   notificationCount: 0,
@@ -72,10 +72,20 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(empty);
   const [loading, setLoading] = useState(true);
+  const showClientMetric = Boolean(settings.features.clients && planFeatures.clients && data.clients !== null);
+  const showPolicyMetric = Boolean(settings.features.policies && planFeatures.policies && data.activePolicies !== null);
+  const showClaimsMetric = Boolean(settings.features.claims && planFeatures.claims && data.openClaims !== null);
+  const showRenewalMetric = Boolean(settings.features.renewals && planFeatures.renewals && data.activePolicies !== null);
+  const copilotStats = {
+    ...(data.clients !== null ? { totalClients: data.clients } : {}),
+    ...(data.activePolicies !== null ? { activePolicies: data.activePolicies } : {}),
+    ...(data.openClaims !== null ? { openClaims: data.openClaims } : {}),
+    ...(data.activePolicies !== null ? { upcomingRenewals: data.renewals.length } : {}),
+  };
 
   useEffect(() => {
     if (!profile) return;
-    loadDashboard(profile.organizationId)
+    loadDashboard(profile.organizationId, profile.role)
       .then(setData)
       .finally(() => setLoading(false));
   }, [profile]);
@@ -85,12 +95,7 @@ export default function DashboardPage() {
     if (!profile) return;
     setCurrentContext({
       page: 'dashboard',
-      stats: {
-        totalClients: data.clients,
-        activePolicies: data.activePolicies,
-        openClaims: data.openClaims,
-        upcomingRenewals: data.renewals.length,
-      },
+      stats: copilotStats,
       tasks: data.tasks.slice(0, 15).map((t) => ({
         title: t.title,
         status: t.status,
@@ -119,11 +124,11 @@ export default function DashboardPage() {
       ? 'أدمن'
       : profile?.role || 'مستخدم';
 
-  const clientsPct = Math.min(
+  const clientsPct = data.clients === null ? 0 : Math.min(
     100,
     Math.max(15, (data.clients / Math.max(data.clients, 10)) * 100),
   );
-  const policiesPct = Math.min(
+  const policiesPct = data.activePolicies === null ? 0 : Math.min(
     100,
     Math.max(15, (data.activePolicies / Math.max(data.activePolicies, 10)) * 100),
   );
@@ -133,7 +138,7 @@ export default function DashboardPage() {
       ? Math.min(...data.renewals.map((r) => r.daysLeft))
       : null;
 
-  const clientSegments = [
+  const clientSegments = data.clients === null ? [] : [
     { label: 'عملاء نشطون', value: Math.max(data.clients - 1, 0), color: '#10b981' },
     { label: 'عملاء جدد', value: 1, color: '#1E4272' },
   ];
@@ -142,22 +147,16 @@ export default function DashboardPage() {
     clientSegments[1].value = 0;
   }
 
-  const renewalTrend =
-    data.renewals.length > 0
-      ? data.renewals.slice(0, 8).map((r) => Math.max(r.daysLeft, 0))
-      : [4, 6, 5, 8, 7, 9, 11, 10];
+  const renewalTrend = data.renewals
+    .slice(0, 8)
+    .map((renewal) => Math.max(renewal.daysLeft, 0));
 
   const askCopilot = () => {
     navigate('/copilot', {
       state: {
         context: {
           page: 'dashboard',
-          stats: {
-            totalClients: data.clients,
-            activePolicies: data.activePolicies,
-            openClaims: data.openClaims,
-            upcomingRenewals: data.renewals.length,
-          },
+          stats: copilotStats,
           notes: 'The broker is on the main dashboard.',
         },
       },
@@ -198,7 +197,7 @@ export default function DashboardPage() {
             >
               {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            {(settings.features.policies && planFeatures.policies) && (
+            {showPolicyMetric && (
               <Link to="/policies" className="inx-circle-btn" title="بحث سريع">
                 <Search size={17} />
               </Link>
@@ -249,10 +248,10 @@ export default function DashboardPage() {
         </div>
 
         {/* ONBOARDING CHECKLIST */}
-        {((settings.features.clients && planFeatures.clients) || (settings.features.policies && planFeatures.policies)) && (
+        {((settings.features.clients && planFeatures.clients && data.clients !== null) || (settings.features.policies && planFeatures.policies && data.activePolicies !== null)) && (
           <OnboardingChecklist
-            clientsCount={(settings.features.clients && planFeatures.clients) ? data.clients : 0}
-            policiesCount={(settings.features.policies && planFeatures.policies) ? data.activePolicies : 0}
+            clientsCount={showClientMetric ? (data.clients ?? 0) : 0}
+            policiesCount={showPolicyMetric ? (data.activePolicies ?? 0) : 0}
           />
         )}
 
@@ -295,8 +294,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="hero-body inx-dashboard-hero-body" style={{ gridTemplateColumns: (settings.features.clients && planFeatures.clients) && (settings.features.policies && planFeatures.policies) ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
-            {(settings.features.clients && planFeatures.clients) && (
+          <div className="hero-body inx-dashboard-hero-body" style={{ gridTemplateColumns: showClientMetric && showPolicyMetric ? "repeat(2, minmax(0, 1fr))" : "1fr" }}>
+            {showClientMetric && (
               <div className="hero-column" style={{ textAlign: 'right' }}>
                 <div className="metric">
                   {data.clients}
@@ -334,10 +333,12 @@ export default function DashboardPage() {
               <CheckCircle2 size={13} />
               آخر تحديث: {loading ? 'جاري...' : 'الآن'}
             </span>
-            {(settings.features.renewals && planFeatures.renewals) && (
+            {showRenewalMetric && (
               <span className="info">
                 <CalendarDays size={13} />
-                {nearestRenewalDays === null
+                {data.activePolicies === null
+                  ? 'غير متاح حسب صلاحية الدور'
+                  : nearestRenewalDays === null
                   ? 'لا تجديدات قريبة'
                   : nearestRenewalDays < 0
                   ? 'يوجد تجديد متأخر'
@@ -347,7 +348,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="hero-foot" style={{ borderTop: 'none', paddingTop: 0 }}>
-            {(settings.features.claims && planFeatures.claims) && (
+            {showClaimsMetric && (
               <span className="info">
                 <TrendingUp size={13} />
                 {data.openClaims} مطالبات مفتوحة
@@ -358,7 +359,7 @@ export default function DashboardPage() {
         </section>
 
         {/* CHARTS ROW */}
-        {((settings.features.clients && planFeatures.clients) || (settings.features.renewals && planFeatures.renewals)) && (
+        {(showClientMetric || showRenewalMetric) && (
           <div
             className="inx-dashboard-charts"
             style={{
@@ -410,14 +411,18 @@ export default function DashboardPage() {
                   <span className="label">اتجاه التجديدات</span>
                   <span className="delta up">↗ صاعد</span>
                 </div>
-                <div style={{ color: 'var(--inx-blue)' }}>
-                  <MiniLineChart
-                    data={renewalTrend}
-                    height={80}
-                    color="var(--inx-blue)"
-                    fillColor="rgba(30, 66, 114, 0.12)"
-                  />
-                </div>
+                {renewalTrend.length > 0 ? (
+                  <div style={{ color: 'var(--inx-blue)' }}>
+                    <MiniLineChart
+                      data={renewalTrend}
+                      height={80}
+                      color="var(--inx-blue)"
+                      fillColor="rgba(30, 66, 114, 0.12)"
+                    />
+                  </div>
+                ) : (
+                  <div className="metric-delta">لا توجد تجديدات قريبة للعرض</div>
+                )}
                 <div
                   style={{
                     display: 'flex',
