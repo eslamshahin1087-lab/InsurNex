@@ -766,12 +766,12 @@ service cloud.firestore {
         && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
         && collection != 'operationEvents'
-        && collection != 'claimActivities'
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
-        && (collection != 'operations' || operationUpdateHasValidShape())
+        && collection != 'claimActivities'
         && (collection != 'claims' || claimUpdateHasValidShape())
+        && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
         && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
