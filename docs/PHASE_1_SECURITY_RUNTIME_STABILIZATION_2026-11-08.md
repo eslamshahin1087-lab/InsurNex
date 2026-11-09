@@ -45,6 +45,10 @@ Client, task and lead assignment are also validated when present: create and cha
 
 RFQ creation and changes to its client/lead links now require the client to exist in the RFQ organization; an optional lead must exist in the same organization and already link to that client. Emulator tests cover missing, nonexistent and cross-organization parents, mismatched leads, and unrelated RFQ updates. Other collection relationships remain subject to the broader reconciliation.
 
+Lead and policy creation and changes to `clientId` now require an existing client in the same organization when a client link is supplied. The field remains optional for unconverted leads and legacy records. Synthetic Emulator coverage checks cross-organization and nonexistent clients, denied relinking, preservation during unrelated updates, and lead conversion that creates the client and links the lead in one batch.
+
+`claimActivities.claimId`, `leadActivities.leadId`, and operation child records' `operationId` are now checked against an existing parent in the same organization on create; activity links are also checked when changed. Emulator tests cover valid links, missing and cross-organization parents, denied activity relinking, and operation event/attachment parent validation.
+
 ### 2026-11-09 — Phase 1 source verification and remaining gates
 
 - After explicit staging-only authorization, a read-only Supabase CLI query confirmed the designated test project's `document-storage` is ACTIVE v5, `verify_jwt=false`, bundle SHA `f51a8d90a9e246a356a12542840dd71bee7725f336d606f4479352c5be104d50`. Its public liveness ping returned HTTP 200. One synthetic request with an invalid API key returned HTTP 401 `API_KEY_INVALID` before authentication or storage operations. No object, secret, setting, or function version was changed. Authenticated positive/negative E2E remains blocked pending an approved synthetic Firebase test project and caller identity; no runtime secrets were read.

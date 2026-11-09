@@ -35,6 +35,35 @@ service cloud.firestore {
           && getAfter(userDocumentPath(data.assignedTo)).data.status == 'active'
           && getAfter(userDocumentPath(data.assignedTo)).data.organizationId == data.organizationId);
     }
+    function hasValidClientRelation(data){
+      return !data.keys().hasAny(['clientId'])
+        || data.clientId == ''
+        || (data.clientId is string
+          && data.clientId.size() > 0
+          && existsAfter(clientPath(data.clientId))
+          && getAfter(clientPath(data.clientId)).data.organizationId == data.organizationId);
+    }
+    function claimActivityHasValidClaim(data){
+      return data.keys().hasAll(['claimId'])
+        && data.claimId is string
+        && data.claimId.size() > 0
+        && existsAfter(/databases/$(database)/documents/claims/$(data.claimId))
+        && getAfter(/databases/$(database)/documents/claims/$(data.claimId)).data.organizationId == data.organizationId;
+    }
+    function leadActivityHasValidLead(data){
+      return data.keys().hasAll(['leadId'])
+        && data.leadId is string
+        && data.leadId.size() > 0
+        && existsAfter(/databases/$(database)/documents/leads/$(data.leadId))
+        && getAfter(/databases/$(database)/documents/leads/$(data.leadId)).data.organizationId == data.organizationId;
+    }
+    function operationChildHasValidOperation(data){
+      return data.keys().hasAll(['operationId'])
+        && data.operationId is string
+        && data.operationId.size() > 0
+        && existsAfter(/databases/$(database)/documents/operations/$(data.operationId))
+        && getAfter(/databases/$(database)/documents/operations/$(data.operationId)).data.organizationId == data.organizationId;
+    }
     function taskHasValidEntityRelation(data){
       return taskHasValidClientRelation(data)
         && (!data.keys().hasAny(['relatedType'])
@@ -828,6 +857,10 @@ service cloud.firestore {
             && request.resource.data.downloadUrl == ''
             && request.resource.data.uploadState == 'pending'))
         && (!(collection in ['tasks','leads']) || hasValidAssignee(request.resource.data))
+        && (!(collection in ['leads','policies']) || hasValidClientRelation(request.resource.data))
+        && (collection != 'claimActivities' || claimActivityHasValidClaim(request.resource.data))
+        && (collection != 'leadActivities' || leadActivityHasValidLead(request.resource.data))
+        && (!(collection in ['operationEvents','operationAttachments']) || operationChildHasValidOperation(request.resource.data))
         && (collection != 'tasks' || taskHasValidEntityRelation(request.resource.data))
         && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
         && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
@@ -847,6 +880,15 @@ service cloud.firestore {
         && (!(collection in ['tasks','leads'])
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo'])
           || hasValidAssignee(request.resource.data))
+        && (!(collection in ['leads','policies'])
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId'])
+          || hasValidClientRelation(request.resource.data))
+        && (collection != 'claimActivities'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['claimId'])
+          || claimActivityHasValidClaim(request.resource.data))
+        && (collection != 'leadActivities'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leadId'])
+          || leadActivityHasValidLead(request.resource.data))
         && (collection != 'tasks'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
           || taskHasValidEntityRelation(request.resource.data))
