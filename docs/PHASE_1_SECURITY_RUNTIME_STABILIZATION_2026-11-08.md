@@ -49,6 +49,8 @@ Lead and policy creation and changes to `clientId` now require an existing clien
 
 `claimActivities.claimId`, `leadActivities.leadId`, and operation child records' `operationId` are now checked against an existing parent in the same organization on create; activity links are also checked when changed. Emulator tests cover valid links, missing and cross-organization parents, denied activity relinking, and operation event/attachment parent validation.
 
+New document metadata with a typed `relatedType` now requires a same-organization client, policy, or claim parent; general documents remain unlinked. Changes to document relationship fields are validated while unrelated metadata edits preserve legacy links. Synthetic Emulator tests cover cross-organization, missing and unlinked typed parents.
+
 ### 2026-11-09 — Phase 1 source verification and remaining gates
 
 - After explicit staging-only authorization, a read-only Supabase CLI query confirmed the designated test project's `document-storage` is ACTIVE v5, `verify_jwt=false`, bundle SHA `f51a8d90a9e246a356a12542840dd71bee7725f336d606f4479352c5be104d50`. Its public liveness ping returned HTTP 200. One synthetic request with an invalid API key returned HTTP 401 `API_KEY_INVALID` before authentication or storage operations. No object, secret, setting, or function version was changed. Authenticated positive/negative E2E remains blocked pending an approved synthetic Firebase test project and caller identity; no runtime secrets were read.
