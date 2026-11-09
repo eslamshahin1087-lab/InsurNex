@@ -11,6 +11,8 @@ const policy = read('supabase/functions/document-storage/access-policy.mjs');
 const sharedApiKey = read('supabase/functions/_shared/api-key-authorization.ts');
 const config = read('supabase/config.toml');
 const provider = read('src/features/storage/supabase-storage.provider.ts');
+assert.match(edge, /async function handleOperationAttachmentCleanup[\s\S]*?roleCanAccessOperationAttachment\(role, 'write'\)/,
+  'pending attachment cleanup must enforce the current operation attachment role policy');
 
 assert.match(config, /\[functions\.document-storage\][\s\S]*?verify_jwt = false/,
   'document-storage gateway JWT bypass must be explicit because the function authenticates the publishable key and Firebase token itself');

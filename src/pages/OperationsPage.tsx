@@ -24,9 +24,12 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
-import { listClients } from '../features/clients/client.service';
+import {
+  listClientSummaries,
+  type ClientBaseSummary,
+} from '../features/clients/client-data-access.service';
 import { listDocuments } from '../features/documents/document.service';
-import type { InsuranceClient, ClientType } from '../types/client';
+import type { ClientType } from '../types/client';
 import type { DocumentRecord } from '../types/document';
 import {
   loadOperationsSnapshot,
@@ -103,7 +106,7 @@ export default function OperationsPage() {
   const [view, setView] = useState<View>('overview');
   const [data, setData] = useState<OperationsSnapshot>(EMPTY);
   const [rfqs, setRfqs] = useState<RfqRecord[]>([]);
-  const [clients, setClients] = useState<InsuranceClient[]>([]);
+  const [clients, setClients] = useState<ClientBaseSummary[]>([]);
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [emails, setEmails] = useState<OperationsEmailContact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +125,7 @@ export default function OperationsPage() {
     try {
       const [snapshot, c, d, e, r] = await Promise.all([
         loadOperationsSnapshot(profile.organizationId),
-        listClients(profile.organizationId),
+        listClientSummaries(profile),
         listDocuments(profile.organizationId),
         listOperationsEmails(profile.organizationId),
         listOrganizationRfqs(profile.organizationId),
@@ -141,7 +144,7 @@ export default function OperationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organizationId]);
+  }, [profile]);
 
   useEffect(() => {
     void load();
@@ -629,7 +632,7 @@ function InboxView({
   );
 }
 
-function Accounts({ clients }: { clients: InsuranceClient[] }) {
+function Accounts({ clients }: { clients: ClientBaseSummary[] }) {
   return (
     <section className="op80-panel">
       <Heading
@@ -664,7 +667,7 @@ function Smart({
   clients,
   docs,
 }: {
-  clients: InsuranceClient[];
+  clients: ClientBaseSummary[];
   docs: DocumentRecord[];
 }) {
   const missing = clients.filter(
@@ -702,7 +705,7 @@ function NewRequestWizard({
   onReady,
   onChanged,
 }: {
-  clients: InsuranceClient[];
+  clients: ClientBaseSummary[];
   organizationId: string;
   uid: string;
   onClose: () => void;

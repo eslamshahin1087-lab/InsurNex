@@ -17,6 +17,84 @@ service cloud.firestore {
         && getAfter(clientPath(clientId)).data.organizationId is string
         && sameOrg(getAfter(clientPath(clientId)).data.organizationId);
     }
+    function taskHasValidClientRelation(data){
+      return !data.keys().hasAny(['relatedType'])
+        || data.relatedType != 'client'
+        || (data.keys().hasAll(['relatedId'])
+          && data.relatedId is string
+          && data.relatedId.size() > 0
+          && existsAfter(clientPath(data.relatedId))
+          && getAfter(clientPath(data.relatedId)).data.organizationId == data.organizationId);
+    }
+    function hasValidAssignee(data){
+      return !data.keys().hasAny(['assignedTo'])
+        || data.assignedTo == ''
+        || (data.assignedTo is string
+          && data.assignedTo.size() > 0
+          && existsAfter(userDocumentPath(data.assignedTo))
+          && getAfter(userDocumentPath(data.assignedTo)).data.status == 'active'
+          && getAfter(userDocumentPath(data.assignedTo)).data.organizationId == data.organizationId);
+    }
+    function taskHasValidEntityRelation(data){
+      return taskHasValidClientRelation(data)
+        && (!data.keys().hasAny(['relatedType'])
+          || data.relatedType == 'general'
+          || data.relatedType == 'client'
+          || (data.relatedType == 'claim'
+            && data.keys().hasAll(['relatedId'])
+            && data.relatedId is string
+            && data.relatedId.size() > 0
+            && existsAfter(/databases/$(database)/documents/claims/$(data.relatedId))
+            && getAfter(/databases/$(database)/documents/claims/$(data.relatedId)).data.organizationId == data.organizationId)
+          || (data.relatedType == 'policy'
+            && data.keys().hasAll(['relatedId'])
+            && data.relatedId is string
+            && data.relatedId.size() > 0
+            && existsAfter(/databases/$(database)/documents/policies/$(data.relatedId))
+            && getAfter(/databases/$(database)/documents/policies/$(data.relatedId)).data.organizationId == data.organizationId)
+          || (data.relatedType == 'renewal'
+            && data.keys().hasAll(['relatedId'])
+            && data.relatedId is string
+            && data.relatedId.size() > 0
+            && existsAfter(/databases/$(database)/documents/policies/$(data.relatedId))
+            && getAfter(/databases/$(database)/documents/policies/$(data.relatedId)).data.organizationId == data.organizationId)
+          || (data.relatedType == 'lead'
+            && data.keys().hasAll(['relatedId'])
+            && data.relatedId is string
+            && data.relatedId.size() > 0
+            && existsAfter(/databases/$(database)/documents/leads/$(data.relatedId))
+            && getAfter(/databases/$(database)/documents/leads/$(data.relatedId)).data.organizationId == data.organizationId)
+          || (data.relatedType == 'rfq'
+            && data.keys().hasAll(['relatedId'])
+            && data.relatedId is string
+            && data.relatedId.size() > 0
+            && existsAfter(/databases/$(database)/documents/rfqs/$(data.relatedId))
+            && getAfter(/databases/$(database)/documents/rfqs/$(data.relatedId)).data.organizationId == data.organizationId));
+    }
+    function claimHasValidClientPolicyRelation(data){
+      return data.keys().hasAll(['clientId','policyId'])
+        && data.clientId is string && data.clientId.size() > 0
+        && data.policyId is string && data.policyId.size() > 0
+        && existsAfter(clientPath(data.clientId))
+        && getAfter(clientPath(data.clientId)).data.organizationId == data.organizationId
+        && existsAfter(/databases/$(database)/documents/policies/$(data.policyId))
+        && getAfter(/databases/$(database)/documents/policies/$(data.policyId)).data.organizationId == data.organizationId
+        && getAfter(/databases/$(database)/documents/policies/$(data.policyId)).data.clientId == data.clientId;
+    }
+    function rfqHasValidClientLeadRelation(data){
+      return data.keys().hasAll(['clientId'])
+        && data.clientId is string
+        && data.clientId.size() > 0
+        && existsAfter(clientPath(data.clientId))
+        && getAfter(clientPath(data.clientId)).data.organizationId == data.organizationId
+        && (!data.keys().hasAny(['leadId'])
+          || data.leadId == ''
+          || (data.leadId is string
+            && data.leadId.size() > 0
+            && existsAfter(/databases/$(database)/documents/leads/$(data.leadId))
+            && getAfter(/databases/$(database)/documents/leads/$(data.leadId)).data.organizationId == data.organizationId
+            && getAfter(/databases/$(database)/documents/leads/$(data.leadId)).data.clientId == data.clientId));
+    }
     function adminPath(uid){ return /databases/$(database)/documents/admin/$(uid); }
     function userDocumentPath(uid){ return /databases/$(database)/documents/users/$(uid); }
     function memberPath(orgId, uid){ return /databases/$(database)/documents/organizations/$(orgId)/members/$(uid); }
@@ -521,11 +599,14 @@ service cloud.firestore {
       allow create: if request.resource.data.organizationId is string
         && sameOrg(request.resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
+        && hasValidAssignee(request.resource.data)
         && request.resource.data.createdBy == request.auth.uid;
       allow update: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
         && roleIs(['owner','admin','broker'])
         && request.resource.data.organizationId == resource.data.organizationId
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo'])
+          || hasValidAssignee(request.resource.data))
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy);
       allow delete: if resource.data.organizationId is string
         && sameOrg(resource.data.organizationId)
@@ -746,6 +827,10 @@ service cloud.firestore {
           || (request.resource.data.storageKeyVersion == 2
             && request.resource.data.downloadUrl == ''
             && request.resource.data.uploadState == 'pending'))
+        && (!(collection in ['tasks','leads']) || hasValidAssignee(request.resource.data))
+        && (collection != 'tasks' || taskHasValidEntityRelation(request.resource.data))
+        && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
+        && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
         && canCreateBusinessCollection(collection, request.resource.data, docId);
       allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
@@ -759,6 +844,18 @@ service cloud.firestore {
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
+        && (!(collection in ['tasks','leads'])
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo'])
+          || hasValidAssignee(request.resource.data))
+        && (collection != 'tasks'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
+          || taskHasValidEntityRelation(request.resource.data))
+        && (collection != 'claims'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId','policyId'])
+          || claimHasValidClientPolicyRelation(request.resource.data))
+        && (collection != 'rfqs'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId','leadId'])
+          || rfqHasValidClientLeadRelation(request.resource.data))
         && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)

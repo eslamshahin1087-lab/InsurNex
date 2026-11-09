@@ -85,7 +85,9 @@ export async function listLegacyClientDocuments(
   }
 
   const role = String(profile.role || '');
-  if (!['owner', 'admin', 'broker', 'claims'].includes(role)) return [];
+  // The legacy client root mixes sensitive fields and is denied to Claims by
+  // Firestore Rules, so do not attempt to read it for that role.
+  if (!['owner', 'admin', 'broker'].includes(role)) return [];
 
   const clientSnapshot = await getDoc(doc(db, 'clients', clientId));
   if (!clientSnapshot.exists()) return [];
@@ -98,9 +100,7 @@ export async function listLegacyClientDocuments(
     const item = value as Record<string, unknown>;
     const id = asText(item.id);
     if (!SAFE_ID.test(id) || !pointsToConfiguredSupabaseStorage(item)) return [];
-
     const category = inferCategory(item);
-    if (role === 'claims' && category !== 'claim') return [];
 
     const fileName = asText(item.originalFileName) || asText(item.fileName) || asText(item.label) || 'مستند قديم';
     const label = asText(item.label) || fileName;

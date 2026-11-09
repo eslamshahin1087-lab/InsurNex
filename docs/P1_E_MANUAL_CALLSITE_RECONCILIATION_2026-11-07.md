@@ -42,3 +42,38 @@ The CI run on the candidate baseline analyzed 243 source files and identified 94
 ## Safety
 
 No live customer data inventory, customer document read, Firestore Rules change, migration, secret/configuration change, storage operation, deployment or billing operation was performed.
+
+## 2026-11-09 — Additional list-reader reconciliation
+
+A source search after the initial review found two production UI consumers of the deprecated full-record `listClients` export that were not listed in the first-pass table:
+
+| Path | Change | Disposition |
+|---|---|---|
+| `src/pages/OperationsPage.tsx` | Replaced the deprecated list call and `InsuranceClient[]` in-memory state with `listClientSummaries(profile)` and `ClientBaseSummary[]`. The page and its client chooser only use base-summary fields. | Migrated to the compatibility adapter; no role or Rules grant was added. |
+| `src/features/policies/PolicyForm.tsx` | Replaced the deprecated list call and full-record state with `listClientSummaries(profile)` and `ClientBaseSummary[]`. The form only uses client ID and name to select and create a policy. | Migrated to the compatibility adapter; no role or Rules grant was added. |
+
+`npm run test:client-data-access-projection` now asserts that both paths use the adapter and do not import the deprecated list export. This reduces the data retained by these UI paths and runs the adapter's role/active-user/tenant preflight. It does **not** prevent the authorized Firestore read from returning the legacy root document before projection, and it does not complete the sensitive-data split.
+
+A repository-wide textual search found no remaining production imports/calls of `listClients`; its deprecated export remains for compatibility. The legacy `createExtendedClient` mixed-sensitivity writer, `saveClientAiAnalysis`, `updateClientProfile`, and full-record Client 360 path remain unresolved. This is targeted call-site evidence, not proof against dynamic imports or all indirect data flows.
+
+### Direct-reference classification
+
+The latest heuristic report flags 13 source files with direct `clients` collection/subcollection references. The following source review classifies those signals:
+
+| Path | Verified operation | Disposition |
+|---|---|---|
+| `functions/src/copilot/context-builder.ts` | Same-organization Client Details query selects only `organizationId`, `type` and `status`; the callable handler supplies verified membership/role scope. | Retain the field projection; no client profile fields enter Copilot context. |
+| `src/features/clients/client-data-access.service.ts` | Reads the legacy root, preflights active Owner/Admin/Broker scope, and projects summaries/workspace afterward. | Compatibility boundary only; root document still reaches authorized browser memory. |
+| `src/features/clients/client-edit.service.ts` | Writes base fields and free-form notes to the legacy root; it does not independently authorize the caller. | Rules remain the authority (same-tenant Owner/Admin/Broker, immutable organization); notes classification and field split remain open. |
+| `src/features/clients/client.service.ts` | `createExtendedClient` writes mixed identity/contact/risk/document/notes data; `saveClientAiAnalysis` writes derived AI data; `getClient` and `listClients` are deprecated; `activateIssuedClientV978` only verifies tenant after reading. | Preserve compatibility pending protected destinations and call-site proof. No production `listClients` callers remain; no `activateIssuedClientV978` caller was found. AI findings inherit source sensitivity and remain on the legacy root. |
+| `src/features/clients/timeline.service.ts` | Appends events and reads the client timeline subcollection; Rules enforce parent tenant and Owner/Admin/Broker and deny update/delete. | Retain current append-only behavior; arbitrary event metadata still needs data-classification review. |
+| `src/features/dashboard/dashboard.service.ts` | Uses `getCountFromServer` on the tenant-filtered client query; no client fields are projected. | Aggregate only; Rules restrict client access to Owner/Admin/Broker, so unsupported roles fail closed. |
+| `src/features/documents/legacy-client-documents.service.ts` | Reads the entire legacy root to project embedded document metadata, then requests a fresh gateway URL. Claims previously passed a local preflight even though root Client Rules deny that role. | Fixed: Claims now receive no embedded legacy references before any restricted client read; their existing independently authorized claim/document paths remain unchanged. Other roles were not broadened. |
+| `src/features/leads/lead.service.ts` | The lead conversion transaction verifies the lead and linked client's organization, creates a contact/prospect client and appends a timeline event. The UI gates conversion to Client 360 roles. | Same-tenant workflow retained; it writes into the legacy client record, and field separation remains open. |
+| `src/features/operations/operations-v80-foundation.service.ts` | Creates a mixed-sensitivity client through `createClient`; on subsequent document-upload failure it attempts compensating client deletion. | Existing workflow retained; no authorization change. Legacy write and rollback recovery remain part of the future migration plan. |
+| `src/features/policies/policy-lifecycle.service.ts` | Appends a policy-renewal event to the client timeline. | Parent-path Rules enforce same tenant and role; event metadata requires continued classification. |
+| `src/features/quotes/quote.service.ts` | Quote issuance transaction reads the client, checks organization and RFQ/client relationships, activates the client and appends a timeline event. | Tenant and relation checks remain; browser Rules are still the authorization boundary and the root read is mixed-sensitivity. |
+| `src/features/rfq/rfq.service.ts` | RFQ creation reads the client and optional lead in a transaction, checks tenant and client relationship, then appends timeline/follow-up data. | Tenant and relation checks remain; source transaction does not provide field-level projection or independent authorization. |
+| `src/pages/AdminUserDetailsPage.tsx` | Platform Admin requests an organization-filtered client count only. | No client fields are returned; generic Rules explicitly exclude `clients`, so no blanket Platform Admin client access is granted. |
+
+This closes classification of the current scanner's 13 direct-reference file signals, not every indirect/dynamic call path or the owner/legal decisions. Assignment-specific grants are not represented by these file-level checks and remain subject to the approved RBAC matrix.

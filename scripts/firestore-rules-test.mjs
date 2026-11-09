@@ -202,16 +202,27 @@ try {
   await setDoc(doc(ownerA.db, 'clients', clientA), {
     organizationId: orgA,
     name: 'Isolated test client',
+    assignedTo: ownerA.user.uid,
     createdBy: ownerA.user.uid,
     createdAt: serverTimestamp(),
   });
   check((await getDoc(doc(ownerA.db, 'clients', clientA))).exists(), 'owner can create and read a business record in own organization');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'clients', 'rules-client-cross-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Nonexistent client assignee',
+      assignedTo: 'foreign-user-placeholder',
+      createdBy: ownerA.user.uid,
+    }),
+    'a client cannot be assigned to a nonexistent user',
+  );
 
   const tenantTask = 'rules-task-' + randomUUID();
   await setDoc(doc(ownerA.db, 'tasks', tenantTask), {
     organizationId: orgA,
     title: 'Allowlisted tenant task',
     status: 'open',
+    assignedTo: '',
     createdBy: ownerA.user.uid,
   });
   check((await getDoc(doc(ownerA.db, 'tasks', tenantTask))).exists(),
@@ -220,6 +231,513 @@ try {
   const ownerB = await makeActor('owner-b');
   const orgB = await createOwnerWorkspace(ownerB, 'InsurNex Rules Test B');
   check((await getDoc(doc(ownerB.db, 'organizations', orgB))).exists(), 'a second owner can complete normal onboarding');
+  const clientB = 'rules-test-' + randomUUID();
+  await setDoc(doc(ownerB.db, 'clients', clientB), {
+    organizationId: orgB,
+    name: 'Isolated test client B',
+    assignedTo: ownerB.user.uid,
+    createdBy: ownerB.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'clients', 'rules-client-foreign-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Foreign organization assignee',
+      assignedTo: ownerB.user.uid,
+      createdBy: ownerA.user.uid,
+    }),
+    'a client cannot be assigned to a user from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'clients', clientA), {
+      assignedTo: ownerB.user.uid,
+      updatedAt: serverTimestamp(),
+    }),
+    'a client cannot be updated to an assignee from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'clients', clientA), {
+      assignedTo: 'missing-client-assignee-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'a client cannot be updated to a nonexistent assignee',
+  );
+  await updateDoc(doc(ownerA.db, 'clients', clientA), {
+    name: 'Updated synthetic client',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(ownerA.db, 'clients', clientA))).data().assignedTo === ownerA.user.uid,
+    'a client can update other fields while preserving its valid assignee');
+  const foreignRelations = {
+    claim: 'rules-claim-' + randomUUID(),
+    policy: 'rules-policy-' + randomUUID(),
+    lead: 'rules-lead-' + randomUUID(),
+    rfq: 'rules-rfq-' + randomUUID(),
+  };
+  const ownRelations = {
+    claim: 'rules-claim-' + randomUUID(),
+    policy: 'rules-policy-' + randomUUID(),
+    otherClientPolicy: 'rules-policy-' + randomUUID(),
+    lead: 'rules-lead-' + randomUUID(),
+    otherClientLead: 'rules-lead-' + randomUUID(),
+    rfq: 'rules-rfq-' + randomUUID(),
+  };
+  const ownAlternateClient = 'rules-client-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'clients', ownAlternateClient), {
+    organizationId: orgA,
+    name: 'Isolated alternate synthetic client',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await Promise.all([
+    setDoc(doc(ownerB.db, 'policies', foreignRelations.policy), {
+      organizationId: orgB, clientId: clientB, policyNumber: 'SYNTHETIC-CROSS-ORG', createdBy: ownerB.user.uid,
+    }),
+    setDoc(doc(ownerB.db, 'leads', foreignRelations.lead), {
+      organizationId: orgB, name: 'Synthetic cross-org lead',
+      assignedTo: ownerB.user.uid, clientId: clientB, createdBy: ownerB.user.uid,
+    }),
+    setDoc(doc(ownerB.db, 'rfqs', foreignRelations.rfq), {
+      organizationId: orgB, clientId: clientB, leadId: foreignRelations.lead,
+      insurerIds: [], createdBy: ownerB.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'policies', ownRelations.policy), {
+      organizationId: orgA, clientId: clientA, policyNumber: 'SYNTHETIC-SAME-ORG', createdBy: ownerA.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'policies', ownRelations.otherClientPolicy), {
+      organizationId: orgA, clientId: ownAlternateClient,
+      policyNumber: 'SYNTHETIC-OTHER-CLIENT', createdBy: ownerA.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      organizationId: orgA, name: 'Synthetic same-org lead',
+      assignedTo: ownerA.user.uid, clientId: clientA, createdBy: ownerA.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'leads', ownRelations.otherClientLead), {
+      organizationId: orgA, name: 'Synthetic lead for another client',
+      assignedTo: ownerA.user.uid, clientId: ownAlternateClient, createdBy: ownerA.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      organizationId: orgA, clientId: clientA, leadId: ownRelations.lead,
+      insurerIds: [], createdBy: ownerA.user.uid,
+    }),
+  ]);
+  await Promise.all([
+    setDoc(doc(ownerB.db, 'claims', foreignRelations.claim), {
+      organizationId: orgB, clientId: clientB, policyId: foreignRelations.policy,
+      claimNumber: 'SYNTHETIC-CROSS-ORG', createdBy: ownerB.user.uid,
+    }),
+    setDoc(doc(ownerA.db, 'claims', ownRelations.claim), {
+      organizationId: orgA, clientId: clientA, policyId: ownRelations.policy,
+      claimNumber: 'SYNTHETIC-SAME-ORG', createdBy: ownerA.user.uid,
+    }),
+  ]);
+  check((await getDoc(doc(ownerA.db, 'claims', ownRelations.claim))).exists(),
+    'a claim can link to its own organization client and policy');
+
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientB,
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-missing-client-' + randomUUID()), {
+      organizationId: orgA,
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ must include its client parent ID',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-nonexistent-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: 'missing-rfq-client-' + randomUUID(),
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ cannot reference a nonexistent client',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-cross-lead-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      leadId: foreignRelations.lead,
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ cannot reference a lead from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-mismatched-lead-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      leadId: ownRelations.otherClientLead,
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ cannot reference a same-organization lead linked to another client',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-nonexistent-lead-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      leadId: 'missing-rfq-lead-' + randomUUID(),
+      insurerIds: [],
+      createdBy: ownerA.user.uid,
+    }),
+    'an RFQ cannot reference a nonexistent lead',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      clientId: ownAlternateClient,
+      updatedAt: serverTimestamp(),
+    }),
+    'an RFQ cannot be updated to a client that does not match its linked lead',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      clientId: 'missing-rfq-client-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'an RFQ cannot be updated to a nonexistent client',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      leadId: foreignRelations.lead,
+      updatedAt: serverTimestamp(),
+    }),
+    'an RFQ cannot be updated to a lead from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      leadId: 'missing-rfq-lead-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'an RFQ cannot be updated to a nonexistent lead',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+      leadId: ownRelations.otherClientLead,
+      updatedAt: serverTimestamp(),
+    }),
+    'an RFQ cannot be updated to a lead linked to another client',
+  );
+  await updateDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq), {
+    status: 'ready',
+    updatedAt: serverTimestamp(),
+  });
+  const preservedRfq = (await getDoc(doc(ownerA.db, 'rfqs', ownRelations.rfq))).data();
+  check(
+    preservedRfq.status === 'ready'
+      && preservedRfq.clientId === clientA
+      && preservedRfq.leadId === ownRelations.lead,
+    'an RFQ can update workflow fields while preserving its valid client and lead relationships',
+  );
+
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leads', 'rules-lead-cross-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Cross-organization lead assignee',
+      assignedTo: ownerB.user.uid,
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead cannot be assigned to a user from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      assignedTo: ownerB.user.uid,
+      updatedAt: serverTimestamp(),
+    }),
+    'a lead cannot be updated to an assignee from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leads', 'rules-lead-missing-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Nonexistent lead assignee',
+      assignedTo: 'missing-lead-assignee-' + randomUUID(),
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead cannot be assigned to a nonexistent user',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      assignedTo: 'missing-user-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'a lead cannot be updated to a nonexistent assignee',
+  );
+  await updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+    name: 'Updated synthetic lead',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(ownerA.db, 'leads', ownRelations.lead))).data().assignedTo === ownerA.user.uid,
+    'a lead can update other fields while preserving its valid assignee');
+
+  const linkedTask = 'rules-task-client-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'tasks', linkedTask), {
+    organizationId: orgA,
+    title: 'Same-organization client task',
+    status: 'open',
+    relatedType: 'client',
+    relatedId: clientA,
+    assignedTo: '',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'tasks', linkedTask))).exists(),
+    'a task can reference a client in its own organization');
+  await updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+    assignedTo: ownerA.user.uid,
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(ownerA.db, 'tasks', linkedTask))).data().assignedTo === ownerA.user.uid,
+    'a task can be assigned to an active user in its own organization');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-cross-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      title: 'Cross-organization assignee task',
+      status: 'open',
+      assignedTo: ownerB.user.uid,
+      createdBy: ownerA.user.uid,
+    }),
+    'a task cannot be assigned to a user from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-missing-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      title: 'Nonexistent assignee task',
+      status: 'open',
+      assignedTo: 'missing-user-' + randomUUID(),
+      createdBy: ownerA.user.uid,
+    }),
+    'a task cannot be assigned to a nonexistent user',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+      assignedTo: ownerB.user.uid,
+      updatedAt: serverTimestamp(),
+    }),
+    'a task cannot be updated to an assignee from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+      assignedTo: 'missing-user-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'a task cannot be updated to a nonexistent assignee',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      title: 'Cross-organization client task',
+      status: 'open',
+      relatedType: 'client',
+      relatedId: clientB,
+      createdBy: ownerA.user.uid,
+    }),
+    'a task cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+      relatedId: clientB,
+      updatedAt: serverTimestamp(),
+    }),
+    'a task cannot be updated to reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-invalid-relation-' + randomUUID()), {
+      organizationId: orgA,
+      title: 'Unsupported relation task',
+      status: 'open',
+      relatedType: 'unsupported',
+      relatedId: clientA,
+      createdBy: ownerA.user.uid,
+    }),
+    'a task cannot use an unsupported related record type',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+      relatedType: 'unsupported',
+      updatedAt: serverTimestamp(),
+    }),
+    'a task cannot be updated to use an unsupported related record type',
+  );
+  await updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+    status: 'in_progress',
+    description: 'Unrelated task fields can change without rewriting its relationship',
+    updatedAt: serverTimestamp(),
+  });
+  const preservedTask = (await getDoc(doc(ownerA.db, 'tasks', linkedTask))).data();
+  check(
+    preservedTask.status === 'in_progress'
+      && preservedTask.relatedType === 'client'
+      && preservedTask.relatedId === clientA
+      && preservedTask.assignedTo === ownerA.user.uid,
+    'a task can update workflow fields while preserving its valid parent relationship and assignee',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientB,
+      policyId: ownRelations.policy,
+      claimNumber: 'SYNTHETIC-CROSS-CLIENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-cross-policy-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      policyId: foreignRelations.policy,
+      claimNumber: 'SYNTHETIC-CROSS-POLICY',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim cannot reference a policy from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-missing-client-' + randomUUID()), {
+      organizationId: orgA,
+      policyId: ownRelations.policy,
+      claimNumber: 'SYNTHETIC-MISSING-CLIENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim must include its client parent ID',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-missing-policy-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      claimNumber: 'SYNTHETIC-MISSING-POLICY',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim must include its policy parent ID',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-nonexistent-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: 'missing-client-' + randomUUID(),
+      policyId: ownRelations.policy,
+      claimNumber: 'SYNTHETIC-NONEXISTENT-CLIENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim cannot reference a nonexistent client',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-nonexistent-policy-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      policyId: 'missing-policy-' + randomUUID(),
+      claimNumber: 'SYNTHETIC-NONEXISTENT-POLICY',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim cannot reference a nonexistent policy',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claims', 'rules-claim-mismatched-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientA,
+      policyId: ownRelations.otherClientPolicy,
+      claimNumber: 'SYNTHETIC-MISMATCHED-PARENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim cannot reference a policy linked to a different client',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'claims', ownRelations.claim), {
+      clientId: clientB,
+      updatedAt: serverTimestamp(),
+    }),
+    'a claim cannot be updated to a client from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'claims', ownRelations.claim), {
+      policyId: foreignRelations.policy,
+      updatedAt: serverTimestamp(),
+    }),
+    'a claim cannot be updated to a policy from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'claims', ownRelations.claim), {
+      policyId: ownRelations.otherClientPolicy,
+      updatedAt: serverTimestamp(),
+    }),
+    'a claim cannot be updated to a same-organization policy linked to another client',
+  );
+  await updateDoc(doc(ownerA.db, 'claims', ownRelations.claim), {
+    status: 'review',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(doc(ownerA.db, 'claims', ownRelations.claim))).data().status === 'review',
+    'a claim can update its workflow state without changing parent relationships');
+  const taskRelations = [
+    { type: 'claim', ownId: ownRelations.claim, foreignId: foreignRelations.claim },
+    { type: 'policy', ownId: ownRelations.policy, foreignId: foreignRelations.policy },
+    { type: 'renewal', ownId: ownRelations.policy, foreignId: foreignRelations.policy },
+    { type: 'lead', ownId: ownRelations.lead, foreignId: foreignRelations.lead },
+    { type: 'rfq', ownId: ownRelations.rfq, foreignId: foreignRelations.rfq },
+  ];
+  for (const relation of taskRelations) {
+    const taskRef = doc(ownerA.db, 'tasks', 'rules-task-' + relation.type + '-' + randomUUID());
+    await setDoc(taskRef, {
+      organizationId: orgA,
+      title: 'Same-organization ' + relation.type + ' task',
+      status: 'open',
+      relatedType: relation.type,
+      relatedId: relation.ownId,
+      createdBy: ownerA.user.uid,
+    });
+    check((await getDoc(taskRef)).exists(),
+      'a task can reference its own organization ' + relation.type);
+    await expectDenied(
+      () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-cross-' + relation.type + '-' + randomUUID()), {
+        organizationId: orgA,
+        title: 'Cross-organization ' + relation.type + ' task',
+        status: 'open',
+        relatedType: relation.type,
+        relatedId: relation.foreignId,
+        createdBy: ownerA.user.uid,
+      }),
+      'a task cannot reference a ' + relation.type + ' from another organization',
+    );
+    await expectDenied(
+      () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-unlinked-' + relation.type + '-' + randomUUID()), {
+        organizationId: orgA,
+        title: 'Unlinked ' + relation.type + ' task',
+        status: 'open',
+        relatedType: relation.type,
+        createdBy: ownerA.user.uid,
+      }),
+      'a ' + relation.type + ' task must include its related record ID',
+    );
+    await expectDenied(
+      () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-nonexistent-' + relation.type + '-' + randomUUID()), {
+        organizationId: orgA,
+        title: 'Nonexistent-parent ' + relation.type + ' task',
+        status: 'open',
+        relatedType: relation.type,
+        relatedId: 'missing-' + relation.type + '-' + randomUUID(),
+        createdBy: ownerA.user.uid,
+      }),
+      'a ' + relation.type + ' task cannot reference a nonexistent parent',
+    );
+    await expectDenied(
+      () => updateDoc(taskRef, {
+        relatedId: relation.foreignId,
+        updatedAt: serverTimestamp(),
+      }),
+      'a task cannot be updated to reference a ' + relation.type + ' from another organization',
+    );
+    await expectDenied(
+      () => updateDoc(taskRef, {
+        relatedId: 'missing-' + relation.type + '-' + randomUUID(),
+        updatedAt: serverTimestamp(),
+      }),
+      'a task cannot be updated to reference a nonexistent ' + relation.type + ' parent',
+    );
+  }
 
   // Finance collections must remain tenant-isolated by the generic rules.
   for (const collectionName of ['revenue', 'expenses', 'commissions']) {
@@ -308,6 +826,34 @@ try {
   const financeMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-finance', 'finance');
   const staffMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-staff', 'staff');
   const adminMember = await acceptMemberViaInvitation(ownerA, orgA, 'invited-admin', 'admin');
+  const inactiveAssignee = await acceptMemberViaInvitation(ownerA, orgA, 'inactive-assignee', 'staff');
+  const disableAssignee = writeBatch(ownerA.db);
+  disableAssignee.update(doc(ownerA.db, 'users', inactiveAssignee.actor.user.uid), {
+    status: 'disabled',
+    updatedAt: serverTimestamp(),
+  });
+  disableAssignee.update(doc(ownerA.db, 'organizations', orgA, 'members', inactiveAssignee.actor.user.uid), {
+    status: 'disabled',
+    updatedAt: serverTimestamp(),
+  });
+  await disableAssignee.commit();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'tasks', 'rules-task-inactive-assignee-' + randomUUID()), {
+      organizationId: orgA,
+      title: 'Inactive assignee task',
+      status: 'open',
+      assignedTo: inactiveAssignee.actor.user.uid,
+      createdBy: ownerA.user.uid,
+    }),
+    'a task cannot be assigned to an inactive user',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'tasks', linkedTask), {
+      assignedTo: inactiveAssignee.actor.user.uid,
+      updatedAt: serverTimestamp(),
+    }),
+    'a task cannot be reassigned to an inactive user',
+  );
 
   // Phase 3 proposed sensitive collections remain closed until a dedicated,
   // collection-specific rules PR explicitly enables the approved role matrix.
