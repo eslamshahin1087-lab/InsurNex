@@ -24,6 +24,8 @@ jobs:
         run: npm run test:firebase-emulator-bootstrap
       - name: Admin and user access boundary smoke checks
         run: npm run test:access
+      - name: Platform Admin tenant business-data boundary tests
+        run: npm run test:admin-tenant-boundary
       - name: Plan feature entitlement smoke checks
         run: npm run test:plans
       - name: PWA installability and privacy smoke checks
