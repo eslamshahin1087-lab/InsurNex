@@ -30,6 +30,8 @@ jobs:
         run: npm run test:pwa
       - name: Documents route regression checks
         run: npm run test:documents-route
+      - name: Operations client summary data-access regression checks
+        run: npm run test:operations-client-summary
       - name: Copilot client-data minimization regression checks
         run: npm run test:copilot-minimization
       - name: Copilot session-context minimization regression checks
