@@ -418,6 +418,72 @@ try {
     'a lead activity can update its message while preserving its valid lead relationship',
   );
 
+  const ownClientDocumentId = 'rules-document-client-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'documents', ownClientDocumentId), {
+    organizationId: orgA,
+    category: 'client',
+    relatedType: 'client',
+    relatedId: clientA,
+    name: 'Synthetic client document',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'documents', ownClientDocumentId))).exists(),
+    'a document can reference a client in its own organization');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'documents', 'rules-document-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      category: 'client',
+      relatedType: 'client',
+      relatedId: clientB,
+      name: 'Invalid cross-organization client document',
+      createdBy: ownerA.user.uid,
+    }),
+    'a document cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'documents', 'rules-document-missing-claim-' + randomUUID()), {
+      organizationId: orgA,
+      category: 'claim',
+      relatedType: 'claim',
+      relatedId: 'missing-document-claim-' + randomUUID(),
+      name: 'Invalid missing-claim document',
+      createdBy: ownerA.user.uid,
+    }),
+    'a document cannot reference a nonexistent claim',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'documents', 'rules-document-unlinked-policy-' + randomUUID()), {
+      organizationId: orgA,
+      category: 'policy',
+      relatedType: 'policy',
+      name: 'Invalid unlinked policy document',
+      createdBy: ownerA.user.uid,
+    }),
+    'a typed document relationship must include its parent ID',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'documents', ownClientDocumentId), {
+      relatedId: clientB,
+    }),
+    'a document cannot be relinked to a client from another organization',
+  );
+  await updateDoc(doc(ownerA.db, 'documents', ownClientDocumentId), { name: 'Updated synthetic document' });
+  check(
+    (await getDoc(doc(ownerA.db, 'documents', ownClientDocumentId))).data().relatedId === clientA,
+    'a document can update its name while preserving its valid parent relationship',
+  );
+  const generalDocumentId = 'rules-document-general-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'documents', generalDocumentId), {
+    organizationId: orgA,
+    category: 'other',
+    relatedType: 'general',
+    relatedId: '',
+    name: 'Synthetic general document',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'documents', generalDocumentId))).exists(),
+    'a general document can remain unlinked');
+
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-cross-client-' + randomUUID()), {
       organizationId: orgA,

@@ -64,6 +64,23 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/operations/$(data.operationId))
         && getAfter(/databases/$(database)/documents/operations/$(data.operationId)).data.organizationId == data.organizationId;
     }
+    function documentHasValidRelation(data){
+      return (!data.keys().hasAny(['relatedType']) && !data.keys().hasAny(['relatedId']))
+        || (data.keys().hasAll(['relatedType','relatedId'])
+          && ((data.relatedType == 'general' && data.relatedId == '')
+            || (data.relatedType == 'client'
+              && data.relatedId is string && data.relatedId.size() > 0
+              && existsAfter(clientPath(data.relatedId))
+              && getAfter(clientPath(data.relatedId)).data.organizationId == data.organizationId)
+            || (data.relatedType == 'policy'
+              && data.relatedId is string && data.relatedId.size() > 0
+              && existsAfter(/databases/$(database)/documents/policies/$(data.relatedId))
+              && getAfter(/databases/$(database)/documents/policies/$(data.relatedId)).data.organizationId == data.organizationId)
+            || (data.relatedType == 'claim'
+              && data.relatedId is string && data.relatedId.size() > 0
+              && existsAfter(/databases/$(database)/documents/claims/$(data.relatedId))
+              && getAfter(/databases/$(database)/documents/claims/$(data.relatedId)).data.organizationId == data.organizationId)));
+    }
     function taskHasValidEntityRelation(data){
       return taskHasValidClientRelation(data)
         && (!data.keys().hasAny(['relatedType'])
@@ -861,6 +878,7 @@ service cloud.firestore {
         && (collection != 'claimActivities' || claimActivityHasValidClaim(request.resource.data))
         && (collection != 'leadActivities' || leadActivityHasValidLead(request.resource.data))
         && (!(collection in ['operationEvents','operationAttachments']) || operationChildHasValidOperation(request.resource.data))
+        && (collection != 'documents' || documentHasValidRelation(request.resource.data))
         && (collection != 'tasks' || taskHasValidEntityRelation(request.resource.data))
         && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
         && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
@@ -889,6 +907,9 @@ service cloud.firestore {
         && (collection != 'leadActivities'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leadId'])
           || leadActivityHasValidLead(request.resource.data))
+        && (collection != 'documents'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
+          || documentHasValidRelation(request.resource.data))
         && (collection != 'tasks'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
           || taskHasValidEntityRelation(request.resource.data))
