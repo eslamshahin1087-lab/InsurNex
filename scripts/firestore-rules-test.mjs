@@ -334,6 +334,90 @@ try {
   check((await getDoc(doc(ownerA.db, 'claims', ownRelations.claim))).exists(),
     'a claim can link to its own organization client and policy');
 
+  const ownClaimActivity = 'rules-claim-activity-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'claimActivities', ownClaimActivity), {
+    organizationId: orgA,
+    claimId: ownRelations.claim,
+    type: 'note',
+    title: 'Synthetic claim activity',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'claimActivities', ownClaimActivity))).exists(),
+    'a claim activity can reference a claim in its own organization');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claimActivities', 'rules-claim-activity-cross-org-' + randomUUID()), {
+      organizationId: orgA,
+      claimId: foreignRelations.claim,
+      type: 'note',
+      title: 'Invalid cross-organization claim activity',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim activity cannot reference a claim from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'claimActivities', 'rules-claim-activity-missing-' + randomUUID()), {
+      organizationId: orgA,
+      claimId: 'missing-claim-' + randomUUID(),
+      type: 'note',
+      title: 'Invalid missing-claim activity',
+      createdBy: ownerA.user.uid,
+    }),
+    'a claim activity cannot reference a nonexistent claim',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'claimActivities', ownClaimActivity), {
+      claimId: foreignRelations.claim,
+    }),
+    'a claim activity cannot be relinked to a claim from another organization',
+  );
+  await updateDoc(doc(ownerA.db, 'claimActivities', ownClaimActivity), { title: 'Updated synthetic activity' });
+  check(
+    (await getDoc(doc(ownerA.db, 'claimActivities', ownClaimActivity))).data().claimId === ownRelations.claim,
+    'a claim activity can update its title while preserving its valid claim relationship',
+  );
+
+  const ownLeadActivity = 'rules-lead-activity-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'leadActivities', ownLeadActivity), {
+    organizationId: orgA,
+    leadId: ownRelations.lead,
+    type: 'note',
+    message: 'Synthetic lead activity',
+    createdBy: ownerA.user.uid,
+  });
+  check((await getDoc(doc(ownerA.db, 'leadActivities', ownLeadActivity))).exists(),
+    'a lead activity can reference a lead in its own organization');
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leadActivities', 'rules-lead-activity-cross-org-' + randomUUID()), {
+      organizationId: orgA,
+      leadId: foreignRelations.lead,
+      type: 'note',
+      message: 'Invalid cross-organization lead activity',
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead activity cannot reference a lead from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leadActivities', 'rules-lead-activity-missing-' + randomUUID()), {
+      organizationId: orgA,
+      leadId: 'missing-lead-' + randomUUID(),
+      type: 'note',
+      message: 'Invalid missing-lead activity',
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead activity cannot reference a nonexistent lead',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leadActivities', ownLeadActivity), {
+      leadId: foreignRelations.lead,
+    }),
+    'a lead activity cannot be relinked to a lead from another organization',
+  );
+  await updateDoc(doc(ownerA.db, 'leadActivities', ownLeadActivity), { message: 'Updated synthetic activity' });
+  check(
+    (await getDoc(doc(ownerA.db, 'leadActivities', ownLeadActivity))).data().leadId === ownRelations.lead,
+    'a lead activity can update its message while preserving its valid lead relationship',
+  );
+
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-cross-client-' + randomUUID()), {
       organizationId: orgA,
@@ -342,6 +426,105 @@ try {
       createdBy: ownerA.user.uid,
     }),
     'an RFQ cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leads', 'rules-lead-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Cross-organization lead client',
+      assignedTo: ownerA.user.uid,
+      clientId: clientB,
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'policies', 'rules-policy-cross-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: clientB,
+      policyNumber: 'SYNTHETIC-CROSS-ORG-CLIENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a policy cannot reference a client from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'policies', 'rules-policy-nonexistent-client-' + randomUUID()), {
+      organizationId: orgA,
+      clientId: 'missing-policy-client-' + randomUUID(),
+      policyNumber: 'SYNTHETIC-MISSING-CLIENT',
+      createdBy: ownerA.user.uid,
+    }),
+    'a policy cannot reference a nonexistent client',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'policies', ownRelations.policy), {
+      clientId: clientB,
+      updatedAt: serverTimestamp(),
+    }),
+    'a policy cannot be updated to a client from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'policies', ownRelations.policy), {
+      clientId: 'missing-policy-client-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'a policy cannot be updated to a nonexistent client',
+  );
+  await updateDoc(doc(ownerA.db, 'policies', ownRelations.policy), {
+    status: 'active',
+    updatedAt: serverTimestamp(),
+  });
+  check(
+    (await getDoc(doc(ownerA.db, 'policies', ownRelations.policy))).data().clientId === clientA,
+    'a policy can update unrelated fields while preserving its valid client relationship',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'leads', 'rules-lead-nonexistent-client-' + randomUUID()), {
+      organizationId: orgA,
+      name: 'Nonexistent lead client',
+      assignedTo: ownerA.user.uid,
+      clientId: 'missing-lead-client-' + randomUUID(),
+      createdBy: ownerA.user.uid,
+    }),
+    'a lead cannot reference a nonexistent client',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      clientId: clientB,
+      updatedAt: serverTimestamp(),
+    }),
+    'a lead cannot be updated to a client from another organization',
+  );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      clientId: 'missing-lead-client-' + randomUUID(),
+      updatedAt: serverTimestamp(),
+    }),
+    'a lead cannot be updated to a nonexistent client',
+  );
+  const convertingLead = 'rules-lead-transactional-client-' + randomUUID();
+  await setDoc(doc(ownerA.db, 'leads', convertingLead), {
+    organizationId: orgA,
+    name: 'Synthetic converting lead',
+    assignedTo: ownerA.user.uid,
+    createdBy: ownerA.user.uid,
+  });
+  const convertedClient = 'rules-client-from-lead-' + randomUUID();
+  const conversionBatch = writeBatch(ownerA.db);
+  conversionBatch.set(doc(ownerA.db, 'clients', convertedClient), {
+    organizationId: orgA,
+    name: 'Synthetic converted client',
+    assignedTo: ownerA.user.uid,
+    sourceLeadId: convertingLead,
+    createdBy: ownerA.user.uid,
+  });
+  conversionBatch.update(doc(ownerA.db, 'leads', convertingLead), {
+    clientId: convertedClient,
+    updatedAt: serverTimestamp(),
+  });
+  await conversionBatch.commit();
+  check(
+    (await getDoc(doc(ownerA.db, 'leads', convertingLead))).data().clientId === convertedClient,
+    'a lead can link to a same-organization client created in the same batch',
   );
   await expectDenied(
     () => setDoc(doc(ownerA.db, 'rfqs', 'rules-rfq-missing-client-' + randomUUID()), {
@@ -473,8 +656,11 @@ try {
     name: 'Updated synthetic lead',
     updatedAt: serverTimestamp(),
   });
-  check((await getDoc(doc(ownerA.db, 'leads', ownRelations.lead))).data().assignedTo === ownerA.user.uid,
-    'a lead can update other fields while preserving its valid assignee');
+  const preservedLead = (await getDoc(doc(ownerA.db, 'leads', ownRelations.lead))).data();
+  check(
+    preservedLead.assignedTo === ownerA.user.uid && preservedLead.clientId === clientA,
+    'a lead can update other fields while preserving its valid client relationship and assignee',
+  );
 
   const linkedTask = 'rules-task-client-' + randomUUID();
   await setDoc(doc(ownerA.db, 'tasks', linkedTask), {
@@ -951,6 +1137,7 @@ try {
   const protectedQuoteId = 'rbac-quote-' + randomUUID();
   const protectedInsurerId = 'rbac-insurer-' + randomUUID();
   const protectedMatrixOperationId = 'rbac-operation-' + randomUUID();
+  const foreignOperationId = 'rbac-foreign-operation-' + randomUUID();
   const protectedNotificationId = 'rbac-notification-' + randomUUID();
   const protectedExpenseId = 'rbac-expense-' + randomUUID();
   const protectedCommissionId = 'rbac-commission-' + randomUUID();
@@ -972,6 +1159,10 @@ try {
   await setDoc(doc(ownerA.db, 'operations', protectedMatrixOperationId), {
     organizationId: orgA, kind: 'policy_issuance', status: 'request',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
+  });
+  await setDoc(doc(ownerB.db, 'operations', foreignOperationId), {
+    organizationId: orgB, kind: 'policy_issuance', status: 'request',
+    createdBy: ownerB.user.uid, createdAt: serverTimestamp(),
   });
 
   const protectedOperationRef = doc(brokerMember.actor.db, 'operations', protectedMatrixOperationId);
@@ -1030,6 +1221,26 @@ try {
     createdBy: ownerA.user.uid,
     createdAt: serverTimestamp(),
   });
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'operationEvents', 'rbac-operation-event-cross-org-' + randomUUID()), {
+      organizationId: orgA,
+      operationId: foreignOperationId,
+      action: 'forged',
+      createdBy: ownerA.user.uid,
+      createdAt: serverTimestamp(),
+    }),
+    'an operation event cannot reference an operation from another organization',
+  );
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'operationEvents', 'rbac-operation-event-missing-' + randomUUID()), {
+      organizationId: orgA,
+      operationId: 'missing-operation-' + randomUUID(),
+      action: 'orphaned',
+      createdBy: ownerA.user.uid,
+      createdAt: serverTimestamp(),
+    }),
+    'an operation event cannot reference a nonexistent operation',
+  );
   await expectDenied(
     () => updateDoc(doc(brokerMember.actor.db, 'operationEvents', protectedOperationEventId), {
       note: 'Tampered event history',
@@ -1330,6 +1541,28 @@ try {
       downloadUrl: '', uploadState: 'pending',
     }),
     'new Supabase operation attachment metadata requires storageKeyVersion 2',
+  );
+  const crossOrganizationAttachmentId = 'rbac-cross-org-attachment-' + randomUUID();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'operationAttachments', crossOrganizationAttachmentId), {
+      organizationId: orgA, operationId: foreignOperationId, name: 'invoice.pdf',
+      uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+      storageProvider: 'supabase', storageKeyVersion: 2, storageBucket: 'insurnex-documents',
+      storagePath: `organizations/${orgA}/operations/${foreignOperationId}/${crossOrganizationAttachmentId}-invoice.pdf`,
+      downloadUrl: '', uploadState: 'pending',
+    }),
+    'an operation attachment cannot reference an operation from another organization',
+  );
+  const missingOperationAttachmentId = 'rbac-missing-operation-attachment-' + randomUUID();
+  await expectDenied(
+    () => setDoc(doc(ownerA.db, 'operationAttachments', missingOperationAttachmentId), {
+      organizationId: orgA, operationId: 'missing-operation-' + randomUUID(), name: 'invoice.pdf',
+      uploadedBy: ownerA.user.uid, createdBy: ownerA.user.uid,
+      storageProvider: 'supabase', storageKeyVersion: 2, storageBucket: 'insurnex-documents',
+      storagePath: `organizations/${orgA}/operations/missing/${missingOperationAttachmentId}-invoice.pdf`,
+      downloadUrl: '', uploadState: 'pending',
+    }),
+    'an operation attachment cannot reference a nonexistent operation',
   );
   const operationAttachmentId = 'rbac-attachment-' + randomUUID();
   const operationAttachmentRef = doc(ownerA.db, 'operationAttachments', operationAttachmentId);
