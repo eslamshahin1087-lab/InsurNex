@@ -36,7 +36,7 @@ function errorResponse(error: string, status = 400): Response {
 }
 
 function authorizationFailure(error: unknown): Response {
-  if (error instanceof Error && error.message === 'FIRESTORE_LOOKUP_UNAVAILABLE') {
+  if (error instanceof Error && ['FIRESTORE_LOOKUP_UNAVAILABLE', 'FIREBASE_PROJECT_ID_NOT_CONFIGURED'].includes(error.message)) {
     return errorResponse('AUTHORIZATION_TEMPORARILY_UNAVAILABLE', 503);
   }
   return errorResponse('AUTHORIZATION_CHECK_FAILED', 403);
@@ -757,7 +757,7 @@ serve(async (req: Request) => {
 
   // Public liveness endpoint; do not disclose secret/configuration status.
   try {
-    if (new URL(req.url).searchParams.get('ping') === '1') {
+    if (req.method === 'GET' && new URL(req.url).searchParams.get('ping') === '1') {
       return jsonResponse({
         ok: true,
         service: 'document-storage',
