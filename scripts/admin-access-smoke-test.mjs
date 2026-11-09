@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
-const [app, guard, adminLogin, rules, settings, subscriptionGate, authContext, protectedRoute, appLayout, morePage, claimPage] = await Promise.all([
+const [app, guard, adminLogin, rules, settings, subscriptionGate, authContext, protectedRoute, appLayout, morePage, claimPage, legacyClientDocuments] = await Promise.all([
   read('../src/App.tsx'),
   read('../src/features/admin/AdminGuard.tsx'),
   read('../src/pages/AdminLoginPage.tsx'),
@@ -14,6 +14,7 @@ const [app, guard, adminLogin, rules, settings, subscriptionGate, authContext, p
   read('../src/layouts/AppLayout.tsx'),
   read('../src/pages/MorePage.tsx'),
   read('../src/pages/ClaimDetailsPage.tsx'),
+  read('../src/features/documents/legacy-client-documents.service.ts'),
 ]);
 
 function check(condition, message) {
@@ -84,6 +85,10 @@ check(clientRules.includes("roleIs(['owner','admin','broker'])"),
   'Firestore Client 360 Rules allow only Owner/Admin/Broker');
 check(!clientRules.includes("'claims'"),
   'Claims cannot read or browse the legacy mixed-sensitivity client document');
+const legacyClaimsCheck = legacyClientDocuments.indexOf("if (!['owner', 'admin', 'broker'].includes(role)) return [];");
+const legacyClientRead = legacyClientDocuments.indexOf("getDoc(doc(db, 'clients', clientId))");
+check(legacyClaimsCheck >= 0 && legacyClaimsCheck < legacyClientRead,
+  'legacy document resolver returns no embedded client records for Claims before reading the restricted client');
 check(rules.includes("allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);"),
   'Client timeline reads follow the same least-privilege boundary');
 

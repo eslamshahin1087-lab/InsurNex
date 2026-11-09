@@ -503,6 +503,10 @@ async function handleOperationAttachmentCleanup(body: Record<string, unknown>, u
         || stringField(profile, 'organizationId') !== organizationId) {
       return errorResponse('ORGANIZATION_ACCESS_DENIED', 403);
     }
+    const role = stringField(profile, 'role') ?? '';
+    if (!roleCanAccessOperationAttachment(role, 'write')) {
+      return errorResponse('OPERATION_ATTACHMENT_ACCESS_DENIED', 403);
+    }
     const metadata = await readCallerVisibleDocument(`operationAttachments/${attachmentId}`, token);
     if (!metadata) return errorResponse('OPERATION_ATTACHMENT_NOT_FOUND', 404);
     const metadataView = {
