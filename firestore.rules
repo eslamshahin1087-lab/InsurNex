@@ -294,6 +294,33 @@ service cloud.firestore {
           && copilotMessageHasValidShape(data)
           && copilotConversationBelongsToCaller(data));
     }
+    function operationUpdateHasValidShape() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasOnly([
+          'status', 'updatedAt',
+          'quoteDocumentId', 'quoteDocumentName', 'insurerId',
+          'premium', 'currency', 'approvalReason',
+          'policyId', 'policyNumber', 'policyDocumentId', 'completedAt'
+        ])
+        && (!changedKeys.hasAny(['status'])
+          || request.resource.data.status in [
+            'request', 'data_collection', 'market_submission', 'quotation',
+            'client_approval', 'binding', 'policy_issuance', 'policy_checking',
+            'review', 'in_progress', 'waiting', 'completed', 'cancelled'
+          ])
+        && (!changedKeys.hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp)
+        && (!changedKeys.hasAny(['quoteDocumentId']) || request.resource.data.quoteDocumentId is string)
+        && (!changedKeys.hasAny(['quoteDocumentName']) || request.resource.data.quoteDocumentName is string)
+        && (!changedKeys.hasAny(['insurerId']) || request.resource.data.insurerId is string)
+        && (!changedKeys.hasAny(['premium']) || (request.resource.data.premium is number && request.resource.data.premium >= 0))
+        && (!changedKeys.hasAny(['currency']) || (request.resource.data.currency is string && request.resource.data.currency.size() <= 8))
+        && (!changedKeys.hasAny(['approvalReason']) || request.resource.data.approvalReason is string)
+        && (!changedKeys.hasAny(['policyId']) || request.resource.data.policyId is string)
+        && (!changedKeys.hasAny(['policyNumber']) || request.resource.data.policyNumber is string)
+        && (!changedKeys.hasAny(['policyDocumentId']) || request.resource.data.policyDocumentId is string)
+        && (!changedKeys.hasAny(['completedAt']) || request.resource.data.completedAt is string);
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -728,9 +755,11 @@ service cloud.firestore {
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients' && collection != 'platformSettings'
         && isTenantBusinessCollection(collection)
+        && collection != 'operationEvents'
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
+        && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
         && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)

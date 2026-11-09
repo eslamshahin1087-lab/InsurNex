@@ -427,6 +427,69 @@ try {
     organizationId: orgA, kind: 'policy_issuance', status: 'request',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
+
+  const protectedOperationRef = doc(brokerMember.actor.db, 'operations', protectedMatrixOperationId);
+  await updateDoc(protectedOperationRef, {
+    status: 'data_collection',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedOperationRef)).data().status === 'data_collection',
+    'an authorized operations role can update a workflow status');
+
+  await updateDoc(protectedOperationRef, {
+    quoteDocumentId: 'synthetic-quote-doc-1',
+    quoteDocumentName: 'synthetic-quote.pdf',
+    insurerId: protectedInsurerId,
+    premium: 1200,
+    currency: 'EGP',
+    approvalReason: 'Synthetic approval reason',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedOperationRef)).data().quoteDocumentId === 'synthetic-quote-doc-1',
+    'the quote handoff can update only its approved operation reference fields');
+
+  await updateDoc(protectedOperationRef, {
+    status: 'completed',
+    policyId: 'synthetic-policy-1',
+    policyNumber: 'SYN-POL-001',
+    policyDocumentId: 'synthetic-policy-document-1',
+    completedAt: new Date().toISOString(),
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedOperationRef)).data().policyId === 'synthetic-policy-1',
+    'policy completion can attach only its approved policy reference fields');
+
+  await expectDenied(
+    () => updateDoc(protectedOperationRef, {
+      clientId: 'forged-client-id',
+      updatedAt: serverTimestamp(),
+    }),
+    'operations cannot change the original client relationship',
+  );
+  await expectDenied(
+    () => updateDoc(protectedOperationRef, {
+      notes: 'Injected operation note',
+      updatedAt: serverTimestamp(),
+    }),
+    'operations updates cannot change unrestricted notes or unapproved fields',
+  );
+
+  const protectedOperationEventId = 'rbac-operation-event-' + randomUUID();
+  const protectedOperationEventRef = doc(ownerA.db, 'operationEvents', protectedOperationEventId);
+  await setDoc(protectedOperationEventRef, {
+    organizationId: orgA,
+    operationId: protectedMatrixOperationId,
+    action: 'created',
+    note: 'Synthetic immutable event',
+    createdBy: ownerA.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(doc(brokerMember.actor.db, 'operationEvents', protectedOperationEventId), {
+      note: 'Tampered event history',
+    }),
+    'operation events cannot be updated after creation',
+  );
   await setDoc(doc(ownerA.db, 'notifications', protectedNotificationId), {
     organizationId: orgA, title: 'Synthetic role test notification',
     message: 'No customer data', type: 'task', read: false,
