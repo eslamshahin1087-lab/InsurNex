@@ -505,6 +505,34 @@ service cloud.firestore {
             && request.resource.data.clientId is string));
     }
 
+    // Keep Lead writes on a narrow evaluation path. The generic tenant update
+    // expression validates several unrelated collections and can exceed Firestore's
+    // per-request expression budget when combined with Lead relationship checks.
+    function canUpdateLead() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return isTenantBusinessCollection('leads')
+        && resource.data.organizationId is string
+        && request.resource.data.organizationId == resource.data.organizationId
+        && sameOrg(resource.data.organizationId)
+        && (!changedKeys.hasAny(['assignedTo']) || hasValidAssignee(request.resource.data))
+        && (!changedKeys.hasAny(['clientId']) || hasValidClientRelation(request.resource.data))
+        && leadUpdateHasValidShape()
+        && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
+        && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && canUpdateBusinessCollection('leads', resource.data);
+    }
+
+    function canUpdateLeadActivity() {
+      return isTenantBusinessCollection('leadActivities')
+        && resource.data.organizationId is string
+        && request.resource.data.organizationId == resource.data.organizationId
+        && sameOrg(resource.data.organizationId)
+        && leadActivityUpdateHasValidShape()
+        && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
+        && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && canUpdateBusinessCollection('leadActivities', resource.data);
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -943,10 +971,13 @@ service cloud.firestore {
         && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
         && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
         && canCreateBusinessCollection(collection, request.resource.data, docId);
+      allow update: if collection == 'leads' && canUpdateLead();
+      allow update: if collection == 'leadActivities' && canUpdateLeadActivity();
       allow update: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
         && collection != 'copilotMessages'
+        && collection != 'leads' && collection != 'leadActivities'
         && collection != 'onboardingProgress' && collection != 'archives'
         && collection != 'pricingPlans' && collection != 'clientCounters'
         && collection != 'clients' && collection != 'platformSettings'
@@ -955,18 +986,15 @@ service cloud.firestore {
         && resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
         && sameOrg(resource.data.organizationId)
-        && (!(collection in ['tasks','leads'])
+        && (!(collection in ['tasks'])
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo'])
           || hasValidAssignee(request.resource.data))
-        && (!(collection in ['leads','policies'])
+        && (!(collection in ['policies'])
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId'])
           || hasValidClientRelation(request.resource.data))
         && (collection != 'claimActivities'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['claimId'])
           || claimActivityHasValidClaim(request.resource.data))
-        && (collection != 'leadActivities'
-          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['leadId'])
-          || leadActivityHasValidLead(request.resource.data))
         && (collection != 'documents'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
           || documentHasValidRelation(request.resource.data))
@@ -981,8 +1009,6 @@ service cloud.firestore {
           || rfqHasValidClientLeadRelation(request.resource.data))
         && (collection != 'claimActivities' || claimActivityUpdateHasValidShape())
         && (collection != 'claims' || claimUpdateHasValidShape())
-        && (collection != 'leadActivities' || leadActivityUpdateHasValidShape())
-        && (collection != 'leads' || leadUpdateHasValidShape())
         && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
