@@ -1219,7 +1219,7 @@ try {
     createdAt: serverTimestamp(),
   });
   await expectDenied(
-    () => updateDoc(protectedClaimActivityRef, { title: 'Tampered claim event' }),
+    () => updateDoc(protectedClaimActivityRef, { message: 'Tampered claim event' }),
     'claim activity history cannot be updated after creation',
   );
   await setDoc(doc(ownerA.db, 'leads', protectedLeadId), {
