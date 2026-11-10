@@ -1177,6 +1177,51 @@ try {
     clientName: 'RBAC fixture client', policyNumber: 'RBAC-POLICY',
     claimNumber: 'RBAC-CLAIM', status: 'review', createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
+  const protectedClaimRef = doc(claimsMember.actor.db, 'claims', protectedClaimId);
+  await updateDoc(protectedClaimRef, {
+    status: 'approved',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedClaimRef)).data().status === 'approved',
+    'an authorized Claims role can transition claim status');
+
+  await expectDenied(
+    () => updateDoc(protectedClaimRef, {
+      approvedAmount: 999999,
+      updatedAt: serverTimestamp(),
+    }),
+    'claim updates cannot change approved financial amounts',
+  );
+  await expectDenied(
+    () => updateDoc(protectedClaimRef, {
+      clientId: 'forged-client-id',
+      updatedAt: serverTimestamp(),
+    }),
+    'claim updates cannot change their original client relationship',
+  );
+  await expectDenied(
+    () => updateDoc(protectedClaimRef, {
+      description: 'Injected claim description',
+      updatedAt: serverTimestamp(),
+    }),
+    'claim updates cannot change descriptive or unapproved fields',
+  );
+
+  const protectedClaimActivityId = 'rbac-claim-activity-' + randomUUID();
+  const protectedClaimActivityRef = doc(claimsMember.actor.db, 'claimActivities', protectedClaimActivityId);
+  await setDoc(protectedClaimActivityRef, {
+    organizationId: orgA,
+    claimId: protectedClaimId,
+    type: 'status_change',
+    title: 'Synthetic claim event',
+    toStatus: 'approved',
+    createdBy: claimsMember.actor.user.uid,
+    createdAt: serverTimestamp(),
+  });
+  await expectDenied(
+    () => updateDoc(protectedClaimActivityRef, { message: 'Tampered claim event' }),
+    'claim activity history cannot be updated after creation',
+  );
   await setDoc(doc(ownerA.db, 'leads', protectedLeadId), {
     organizationId: orgA, name: 'RBAC lead', stage: 'new',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
