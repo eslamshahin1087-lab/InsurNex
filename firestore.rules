@@ -956,6 +956,8 @@ service cloud.firestore {
         && (collection != 'rfqs'
           || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId','leadId'])
           || rfqHasValidClientLeadRelation(request.resource.data))
+        && collection != 'leadActivities'
+        && (collection != 'leads' || leadUpdateHasValidShape())
         && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
