@@ -993,6 +993,20 @@ service cloud.firestore {
       ];
     }
 
+    // Lead updates use narrow, collection-specific rules so the broad wildcard
+    // update policy is never evaluated for Lead documents.
+    match /leads/{leadId} {
+      allow update: if signedIn()
+        && exists(userPath())
+        && canUpdateLead(get(userPath()).data);
+    }
+
+    match /leadActivities/{activityId} {
+      allow update: if signedIn()
+        && exists(userPath())
+        && canUpdateLeadActivity(get(userPath()).data);
+    }
+
     // ============ Generic business records ============
     // Platform Admin does not receive blanket access to organization business records.
     match /{collection}/{docId} {
@@ -1038,11 +1052,9 @@ service cloud.firestore {
         && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
         && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
         && canCreateBusinessCollection(collection, request.resource.data, docId);
-      allow update: if collection == 'leads'
-        ? (signedIn() && exists(userPath()) && canUpdateLead(get(userPath()).data))
-        : collection == 'leadActivities'
-          ? (signedIn() && exists(userPath()) && canUpdateLeadActivity(get(userPath()).data))
-          : canUpdateOtherBusinessCollection(collection, docId);
+      allow update: if collection != 'leads'
+        && collection != 'leadActivities'
+        && canUpdateOtherBusinessCollection(collection, docId);
       allow delete: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
         && collection != 'subscriptionCodes' && collection != 'ads'
