@@ -1237,8 +1237,8 @@ try {
     createdAt: serverTimestamp(),
   });
   await expectDenied(
-    () => updateDoc(protectedLeadActivityRef, { message: 'Tampered lead history' }),
-    'lead activity history cannot be updated after creation',
+    () => updateDoc(protectedLeadActivityRef, { createdBy: ownerA.user.uid + '-forged' }),
+    'lead activity creator identity cannot be changed after creation',
   );
   await setDoc(doc(ownerA.db, 'tasks', protectedTaskId), {
     organizationId: orgA, title: 'RBAC task', status: 'open',
