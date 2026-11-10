@@ -503,25 +503,27 @@ service cloud.firestore {
           || request.resource.data.clientId is string);
     }
 
-    function canUpdateLead() {
+    function canUpdateLead(member) {
       let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
       return resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
-        && sameOrg(resource.data.organizationId)
-        && me().role in ['owner','admin','broker','sales']
+        && member.status == 'active'
+        && member.organizationId == resource.data.organizationId
+        && member.role in ['owner','admin','broker','sales']
         && (!changedKeys.hasAny(['assignedTo']) || hasValidAssignee(request.resource.data))
         && (!changedKeys.hasAny(['clientId'])
-          || (me().role in ['owner','admin','broker'] && hasValidClientRelation(request.resource.data)))
+          || (member.role in ['owner','admin','broker'] && hasValidClientRelation(request.resource.data)))
         && leadUpdateHasValidShape(changedKeys)
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId);
     }
 
-    function canUpdateLeadActivity() {
+    function canUpdateLeadActivity(member) {
       return resource.data.organizationId is string
         && request.resource.data.organizationId == resource.data.organizationId
-        && sameOrg(resource.data.organizationId)
-        && me().role in ['owner','admin','broker','sales']
+        && member.status == 'active'
+        && member.organizationId == resource.data.organizationId
+        && member.role in ['owner','admin','broker','sales']
         && leadActivityUpdateHasValidShape()
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId);
@@ -1037,9 +1039,9 @@ service cloud.firestore {
         && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
         && canCreateBusinessCollection(collection, request.resource.data, docId);
       allow update: if collection == 'leads'
-        ? canUpdateLead()
+        ? (signedIn() && exists(userPath()) && canUpdateLead(get(userPath()).data))
         : collection == 'leadActivities'
-          ? canUpdateLeadActivity()
+          ? (signedIn() && exists(userPath()) && canUpdateLeadActivity(get(userPath()).data))
           : canUpdateOtherBusinessCollection(collection, docId);
       allow delete: if collection != 'users' && collection != 'organizations'
         && collection != 'admin' && collection != 'organizationSubscriptions'
