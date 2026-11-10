@@ -462,6 +462,49 @@ service cloud.firestore {
         && (!changedKeys.hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
     }
 
+    function leadStageTransitionIsValid() {
+      return (resource.data.keys().hasAny(['stage'])
+          && request.resource.data.stage == resource.data.stage)
+        || (!resource.data.keys().hasAny(['stage'])
+          && request.resource.data.stage in ['new', 'contacted', 'lost'])
+        || (resource.data.stage == 'new' && request.resource.data.stage in ['contacted', 'lost'])
+        || (resource.data.stage == 'contacted' && request.resource.data.stage in ['qualified', 'lost'])
+        || (resource.data.stage == 'qualified' && request.resource.data.stage in ['quotation', 'lost'])
+        || (resource.data.stage == 'quotation' && request.resource.data.stage in ['negotiation', 'won', 'lost'])
+        || (resource.data.stage == 'negotiation' && request.resource.data.stage in ['won', 'lost']);
+    }
+
+    // Existing lead activity messages may be corrected, but identity and event metadata stay immutable.
+    function leadActivityUpdateHasValidShape() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasOnly(['message'])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 1000;
+    }
+
+    function leadUpdateHasValidShape() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasOnly([
+          'stage', 'updatedAt', 'lastActivityAt', 'wonAt', 'lostAt',
+          'lostReason', 'notes', 'clientId', 'clientLinkedAt', 'convertedAt'
+        ])
+        && (!changedKeys.hasAny(['stage'])
+          || (request.resource.data.stage in [
+            'new', 'contacted', 'qualified', 'quotation', 'negotiation', 'won', 'lost'
+          ] && leadStageTransitionIsValid()))
+        && (!changedKeys.hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp)
+        && (!changedKeys.hasAny(['lastActivityAt']) || request.resource.data.lastActivityAt is timestamp)
+        && (!changedKeys.hasAny(['wonAt']) || request.resource.data.wonAt is timestamp)
+        && (!changedKeys.hasAny(['lostAt']) || request.resource.data.lostAt is timestamp)
+        && (!changedKeys.hasAny(['clientLinkedAt']) || request.resource.data.clientLinkedAt is timestamp)
+        && (!changedKeys.hasAny(['convertedAt']) || request.resource.data.convertedAt is timestamp)
+        && (!changedKeys.hasAny(['lostReason']) || (request.resource.data.lostReason is string && request.resource.data.lostReason.size() <= 1000))
+        && (!changedKeys.hasAny(['notes']) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 4000))
+        && (!changedKeys.hasAny(['clientId'])
+          || (roleIs(['owner','admin','broker'])
+            && request.resource.data.clientId is string));
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -938,6 +981,8 @@ service cloud.firestore {
           || rfqHasValidClientLeadRelation(request.resource.data))
         && (collection != 'claimActivities' || claimActivityUpdateHasValidShape())
         && (collection != 'claims' || claimUpdateHasValidShape())
+        && (collection != 'leadActivities' || leadActivityUpdateHasValidShape())
+        && (collection != 'leads' || leadUpdateHasValidShape())
         && (collection != 'operations' || operationUpdateHasValidShape())
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
