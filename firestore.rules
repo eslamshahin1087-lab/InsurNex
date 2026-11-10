@@ -484,9 +484,7 @@ service cloud.firestore {
         && (!changedKeys.hasAny(['notes']) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 4000))
         && (!changedKeys.hasAny(['clientId'])
           || (roleIs(['owner','admin','broker'])
-            && request.resource.data.clientId is string
-            && existsAfter(clientPath(request.resource.data.clientId))
-            && getAfter(clientPath(request.resource.data.clientId)).data.organizationId == resource.data.organizationId));
+            && request.resource.data.clientId is string));
     }
 
     function canUpdateBusinessCollection(collection, data){
