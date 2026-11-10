@@ -533,6 +533,76 @@ service cloud.firestore {
         && canUpdateBusinessCollection('leadActivities', resource.data);
     }
 
+    // Evaluate only the selected collection-specific update path. Multiple
+    // allow-update statements are ORed by Firestore and all can be evaluated,
+    // which needlessly evaluates the broad generic policy for Lead writes.
+    function canUpdateOtherBusinessCollection(collection, docId) {
+      return collection != 'users' && collection != 'organizations'
+        && collection != 'admin' && collection != 'organizationSubscriptions'
+        && collection != 'subscriptionCodes' && collection != 'ads'
+        && collection != 'copilotMessages'
+        && collection != 'leads' && collection != 'leadActivities'
+        && collection != 'onboardingProgress' && collection != 'archives'
+        && collection != 'pricingPlans' && collection != 'clientCounters'
+        && collection != 'clients' && collection != 'platformSettings'
+        && isTenantBusinessCollection(collection)
+        && collection != 'operationEvents'
+        && resource.data.organizationId is string
+        && request.resource.data.organizationId == resource.data.organizationId
+        && sameOrg(resource.data.organizationId)
+        && (!(collection in ['tasks'])
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo'])
+          || hasValidAssignee(request.resource.data))
+        && (!(collection in ['policies'])
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId'])
+          || hasValidClientRelation(request.resource.data))
+        && (collection != 'claimActivities'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['claimId'])
+          || claimActivityHasValidClaim(request.resource.data))
+        && (collection != 'documents'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
+          || documentHasValidRelation(request.resource.data))
+        && (collection != 'tasks'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['relatedType','relatedId'])
+          || taskHasValidEntityRelation(request.resource.data))
+        && (collection != 'claims'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId','policyId'])
+          || claimHasValidClientPolicyRelation(request.resource.data))
+        && (collection != 'rfqs'
+          || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['clientId','leadId'])
+          || rfqHasValidClientLeadRelation(request.resource.data))
+        && (collection != 'claimActivities' || claimActivityUpdateHasValidShape())
+        && (collection != 'claims' || claimUpdateHasValidShape())
+        && (collection != 'operations' || operationUpdateHasValidShape())
+        && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
+        && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
+        && (collection != 'copilotMessages' || request.resource.data.conversationId == resource.data.conversationId)
+        && (collection != 'quotes' || quoteUpdateIsValid(docId))
+        && (collection != 'documents' || (
+          request.resource.data.category == resource.data.category
+          && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)
+          && (!resource.data.keys().hasAny(['storageProvider']) || request.resource.data.storageProvider == resource.data.storageProvider)
+          && (!resource.data.keys().hasAny(['storageBucket']) || request.resource.data.storageBucket == resource.data.storageBucket)
+          && (!resource.data.keys().hasAny(['storageKeyVersion']) || request.resource.data.storageKeyVersion == resource.data.storageKeyVersion)
+          && (!resource.data.keys().hasAny(['downloadUrl']) || request.resource.data.downloadUrl == resource.data.downloadUrl)
+        ))
+        && (collection != 'operationAttachments' || (
+          request.resource.data.operationId == resource.data.operationId
+          && (!resource.data.keys().hasAny(['storagePath']) || request.resource.data.storagePath == resource.data.storagePath)
+          && (!resource.data.keys().hasAny(['storageProvider']) || request.resource.data.storageProvider == resource.data.storageProvider)
+          && (!resource.data.keys().hasAny(['storageBucket']) || request.resource.data.storageBucket == resource.data.storageBucket)
+          && (!resource.data.keys().hasAny(['storageKeyVersion']) || request.resource.data.storageKeyVersion == resource.data.storageKeyVersion)
+          && (!resource.data.keys().hasAny(['downloadUrl']) || request.resource.data.downloadUrl == resource.data.downloadUrl)
+          && (request.resource.data.storageProvider != 'supabase' || resource.data.storageProvider == 'supabase')
+          && (resource.data.storageProvider != 'supabase'
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uploadState'])
+              && resource.data.uploadState == 'pending'
+              && request.resource.data.uploadState == 'ready'
+              && resource.data.uploadedBy == request.auth.uid))
+        ))
+        && canUpdateBusinessCollection(collection, resource.data);
+    }
+
     function canUpdateBusinessCollection(collection, data){
       return (collection == 'clients' && roleIs(['owner','admin','broker']))
         || (collection == 'policies' && roleIs(['owner','admin','broker']))
@@ -878,98 +948,12 @@ service cloud.firestore {
         && request.resource.data.count is int
         && request.resource.data.count >= 1;
       allow update: if resource.data.organizationId is string
-        && sameOrg(resource.data.organizationId)
-        && request.resource.data.organizationId == resource.data.organizationId
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count','updatedAt'])
-        && request.resource.data.count is int
-        && request.resource.data.count >= resource.data.count;
-      allow delete: if false;
-    }
-
-    // ============ Ads ============
-    // Ads are visible to any signed-in user (they're marketing content).
-    // Only admins can create/edit/delete.
-    match /ads/{adId} {
-      allow read: if signedIn();
-      allow write: if isAdmin();
-    }
-
-    // ============ Onboarding Progress ============
-    match /onboardingProgress/{uid} {
-      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow create: if isAdmin() || (
-        signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.uid == request.auth.uid
-      );
-      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow delete: if isAdmin();
-    }
-
-    // ============ Archives ============
-    match /archives/{archiveId} {
-      allow read: if isAdmin();
-      allow create: if isAdmin()
-        && request.resource.data.deletedBy == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
-    }
-
-    // Only known tenant-scoped business collections are eligible for the generic rule.
-    // Unknown top-level collections default to deny for non-admin users.
-    function isTenantBusinessCollection(collection) {
-      return collection in [
-        'claims', 'claimActivities', 'policies', 'tasks', 'leads', 'leadActivities',
-        'rfqs', 'quotes', 'insurers', 'documents', 'operations', 'operationEvents',
-        'operationsEmailDirectory', 'operationAttachments', 'revenue', 'expenses',
-        'commissions', 'copilotConversations', 'copilotMessages', 'notifications'
-      ];
-    }
-
-    // ============ Generic business records ============
-    // Platform Admin does not receive blanket access to organization business records.
-    match /{collection}/{docId} {
-      allow read: if collection != 'users' && collection != 'organizations'
-        && collection != 'admin' && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes' && collection != 'ads'
-        && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients' && collection != 'platformSettings'
-        && isTenantBusinessCollection(collection)
-        && resource.data.organizationId is string
-        && sameOrg(resource.data.organizationId)
-        && canReadBusinessCollection(collection, resource.data);
-      allow create: if collection != 'users' && collection != 'organizations'
-        && collection != 'admin' && collection != 'organizationSubscriptions'
-        && collection != 'subscriptionCodes' && collection != 'ads'
-        && collection != 'onboardingProgress' && collection != 'archives'
-        && collection != 'pricingPlans' && collection != 'clientCounters'
-        && collection != 'clients' && collection != 'platformSettings'
-        && isTenantBusinessCollection(collection)
-        && request.resource.data.organizationId is string
-        && sameOrg(request.resource.data.organizationId)
-        && (!request.resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == request.auth.uid)
-        // New Supabase document records must use the bound-path format. Legacy
-        // records remain readable, but cannot be re-created without an explicit key version.
-        && (collection != 'documents'
-          || !request.resource.data.keys().hasAny(['storageProvider'])
-          || request.resource.data.storageProvider != 'supabase'
-          || (request.resource.data.storageKeyVersion == 2 && request.resource.data.downloadUrl == ''))
-        && (collection != 'operationAttachments'
-          || !request.resource.data.keys().hasAny(['storageProvider'])
-          || request.resource.data.storageProvider != 'supabase'
-          || (request.resource.data.storageKeyVersion == 2
-            && request.resource.data.downloadUrl == ''
-            && request.resource.data.uploadState == 'pending'))
-        && (!(collection in ['tasks','leads']) || hasValidAssignee(request.resource.data))
-        && (!(collection in ['leads','policies']) || hasValidClientRelation(request.resource.data))
-        && (collection != 'claimActivities' || claimActivityHasValidClaim(request.resource.data))
-        && (collection != 'leadActivities' || leadActivityHasValidLead(request.resource.data))
-        && (!(collection in ['operationEvents','operationAttachments']) || operationChildHasValidOperation(request.resource.data))
-        && (collection != 'documents' || documentHasValidRelation(request.resource.data))
-        && (collection != 'tasks' || taskHasValidEntityRelation(request.resource.data))
-        && (collection != 'claims' || claimHasValidClientPolicyRelation(request.resource.data))
-        && (collection != 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
+           allow update: if collection == 'leads'
+        ? canUpdateLead()
+        : collection == 'leadActivities'
+          ? canUpdateLeadActivity()
+          : canUpdateOtherBusinessCollection(collection, docId);
+= 'rfqs' || rfqHasValidClientLeadRelation(request.resource.data))
         && canCreateBusinessCollection(collection, request.resource.data, docId);
       allow update: if collection == 'leads' && canUpdateLead();
       allow update: if collection == 'leadActivities' && canUpdateLeadActivity();
