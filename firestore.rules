@@ -459,9 +459,9 @@ service cloud.firestore {
 
     function leadActivityUpdateHasValidShape() {
       let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
-      return changedKeys.hasOnly(['title'])
-        && request.resource.data.title is string
-        && request.resource.data.title.size() <= 160;
+      return changedKeys.hasOnly(['message'])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 1000;
     }
 
     function leadUpdateHasValidShape() {
