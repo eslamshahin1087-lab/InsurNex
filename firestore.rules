@@ -482,8 +482,7 @@ service cloud.firestore {
         && request.resource.data.message.size() <= 1000;
     }
 
-    function leadUpdateHasValidShape() {
-      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+    function leadUpdateHasValidShape(changedKeys) {
       return changedKeys.hasOnly([
           'stage', 'updatedAt', 'lastActivityAt', 'wonAt', 'lostAt',
           'lostReason', 'notes', 'clientId', 'clientLinkedAt', 'convertedAt'
@@ -513,7 +512,7 @@ service cloud.firestore {
         && (!changedKeys.hasAny(['assignedTo']) || hasValidAssignee(request.resource.data))
         && (!changedKeys.hasAny(['clientId'])
           || (me().role in ['owner','admin','broker'] && hasValidClientRelation(request.resource.data)))
-        && leadUpdateHasValidShape()
+        && leadUpdateHasValidShape(changedKeys)
         && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
         && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId);
     }
