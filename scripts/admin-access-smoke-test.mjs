@@ -61,8 +61,8 @@ check(subscriptionGate.includes('to="/subscription"'), 'expired subscriptions ar
 // all use the same Owner/Admin/Broker boundary.
 check(authContext.includes("CLIENT_360_ALLOWED_ROLES = ['owner', 'admin', 'broker']"),
   'Client 360 allowed roles are explicit and least-privileged');
-check(authContext.includes('OPERATIONS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES'),
-  'Operations role policy matches the data boundary used by its combined loader');
+check(authContext.includes("OPERATIONS_ALLOWED_ROLES = ['owner', 'admin', 'broker', 'claims']"),
+  'Operations role policy includes Claims while its page skips client and RFQ reads for that role');
 check(authContext.includes('ANALYTICS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES'),
   'portfolio analytics role policy matches the intersection of its collection reads');
 check(authContext.includes('export function canAccessOperations(role: unknown)')
