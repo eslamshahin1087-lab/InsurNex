@@ -12,6 +12,8 @@ export const OPERATIONS_ALLOWED_ROLES = ['owner', 'admin', 'broker', 'claims'] a
 export type OperationsAllowedRole = (typeof OPERATIONS_ALLOWED_ROLES)[number];
 export const ANALYTICS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES;
 export type AnalyticsAllowedRole = (typeof ANALYTICS_ALLOWED_ROLES)[number];
+export const FINANCE_ALLOWED_ROLES = ['owner', 'admin', 'finance'] as const;
+export type FinanceAllowedRole = (typeof FINANCE_ALLOWED_ROLES)[number];
 
 /**
  * The legacy clients record contains mixed-sensitivity data. Only roles
@@ -38,5 +40,11 @@ export function canAccessOperations(role: unknown): role is OperationsAllowedRol
 export function canAccessAnalytics(role: unknown): role is AnalyticsAllowedRole {
   return typeof role === 'string'
     && (ANALYTICS_ALLOWED_ROLES as readonly string[]).includes(role);
+}
+
+/** Finance reads are limited by Firestore Rules to Owner, Admin and Finance. */
+export function canAccessFinance(role: unknown): role is FinanceAllowedRole {
+  return typeof role === 'string'
+    && (FINANCE_ALLOWED_ROLES as readonly string[]).includes(role);
 }
 
