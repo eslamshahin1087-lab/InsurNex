@@ -22,11 +22,13 @@ for (const role of [undefined, null, '', 'platform_admin', 'unknown']) {
   );
 }
 
-const [page, rules, documents, operationsService] = await Promise.all([
+const [page, rules, documents, operationsService, app, authContext] = await Promise.all([
   readFile(new URL('../src/pages/OperationsPage.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../firestore.rules', import.meta.url), 'utf8'),
   readFile(new URL('../src/features/documents/document.service.ts', import.meta.url), 'utf8'),
   readFile(new URL('../src/features/operations/operations.service.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/features/auth/auth-context.ts', import.meta.url), 'utf8'),
 ]);
 
 assert.match(page, /getOperationsRoleAccess\(profile\?\.role\)/);
@@ -63,5 +65,8 @@ assert.match(clientRoles, /collection == 'clients' && roleIs\(\['owner','admin',
 assert.match(clientRoles, /collection in \['operations','operationEvents','operationAttachments','operationsEmailDirectory'\] && roleIs\(\['owner','admin','broker','claims'\]\)/);
 assert.match(clientRoles, /collection in \['leads','leadActivities','rfqs','quotes'\] && roleIs\(\['owner','admin','broker','sales'\]\)/);
 assert.match(clientRoles, /collection == 'documents' && \(roleIs\(\['owner','admin','broker'\]\) \|\| \(roleIs\(\['claims'\]\) && data\.category == 'claim'\)\)/);
+assert.match(authContext, /OPERATIONS_ALLOWED_ROLES = \['owner', 'admin', 'broker', 'claims'\]/);
+assert.match(app, /OrganizationRoleRoute allowedRoles=\{OPERATIONS_ALLOWED_ROLES\}/);
 
 console.log('Operations role-scoped data and UI regression tests passed.');
+
