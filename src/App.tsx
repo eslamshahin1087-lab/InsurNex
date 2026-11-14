@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider';
 import ProtectedRoute, { OrganizationRoleRoute } from './features/auth/ProtectedRoute';
-import { ANALYTICS_ALLOWED_ROLES, CLIENT_360_ALLOWED_ROLES, OPERATIONS_ALLOWED_ROLES } from './features/auth/auth-context';
+import { ANALYTICS_ALLOWED_ROLES, CLIENT_360_ALLOWED_ROLES, FINANCE_ALLOWED_ROLES, OPERATIONS_ALLOWED_ROLES } from './features/auth/auth-context';
 import AppLayout from './layouts/AppLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminGuard from './features/admin/AdminGuard';
@@ -216,8 +216,10 @@ export default function App() {
                   <Route element={<PlatformFeatureGate feature="copilot" />}>
                     <Route path="copilot" element={<CopilotPage />} />
                   </Route>
-                  <Route element={<PlatformFeatureGate feature="finance" />}>
-                    <Route path="finance" element={<FinancePage />} />
+                  <Route element={<OrganizationRoleRoute allowedRoles={FINANCE_ALLOWED_ROLES} />}>
+                    <Route element={<PlatformFeatureGate feature="finance" />}>
+                      <Route path="finance" element={<FinancePage />} />
+                    </Route>
                   </Route>
                   <Route path="more" element={<MorePage />} />
                   <Route path="settings" element={<SettingsPage />} />

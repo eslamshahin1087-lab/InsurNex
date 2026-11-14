@@ -115,5 +115,17 @@ check(legacyClaimsCheck >= 0 && legacyClaimsCheck < legacyClientRead,
 check(rules.includes("allow read: if canAccessClient(clientId) && roleIs(['owner','admin','broker']);"),
   'Client timeline reads follow the same least-privilege boundary');
 
+const financeRoute = app.indexOf('<Route path="finance"');
+const financeFeatureGate = app.indexOf('feature="finance"');
+const financeRoleGate = app.lastIndexOf('OrganizationRoleRoute allowedRoles={FINANCE_ALLOWED_ROLES}', financeFeatureGate);
+check(authContext.includes("FINANCE_ALLOWED_ROLES = ['owner', 'admin', 'finance']"),
+  'finance route policy matches the existing Firestore read roles');
+check(financeRoute > financeRoleGate && financeRoleGate >= 0,
+  'finance route checks roles before loading revenue, expenses and commissions');
+check(morePage.includes("to !== '/finance' || canAccessFinance(profile?.role)"),
+  'More menu hides finance from roles denied by the finance collection rules');
+check(rules.includes("collection in ['revenue','expenses','commissions'] && roleIs(['owner','admin','finance'])"),
+  'Firestore remains the finance collection authorization boundary');
+
 console.log('Admin/user access smoke tests passed.');
 
