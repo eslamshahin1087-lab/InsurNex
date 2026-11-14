@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const layout = read('src/layouts/AppLayout.tsx');
 const clients = read('src/pages/ClientsPage.tsx');
 const styles = read('src/theme/visual-identity-quality.css');
+const showcaseStyles = read('src/theme/showcase-identity.css');
 const mobileExperience = read('src/theme/mobile-experience.css');
 const dashboard = read('src/pages/DashboardPage.tsx');
 const dashboardStyles = read('src/theme/dashboard-mobile.css');
@@ -68,6 +69,10 @@ assert.match(styles, /grid-template-columns: 240px minmax\(0, 1fr\)/, 'desktop s
 assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be legible');
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
+assert.ok(main.indexOf('showcase-identity.css') > main.indexOf('visual-identity-quality.css'), 'showcase identity overrides must apply after existing feature styles');
+assert.match(showcaseStyles, /--inx-brand-blue: #126cf3/);
+assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #08234c/);
+assert.match(showcaseStyles, /--inx-brand-gold: var\(--inx-brand-blue\)/, 'legacy gold accent hooks resolve to the new blue palette');
 assert.ok(app.indexOf('mobile-experience.css') > app.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
 assert.ok(app.indexOf('dashboard-mobile.css') > app.indexOf('mobile-experience.css'), 'dashboard mobile layer must load after shared mobile ergonomics styles');
 assert.match(dashboard, /insurnex-dashboard-page/, 'dashboard must have an isolated responsive styling scope');
