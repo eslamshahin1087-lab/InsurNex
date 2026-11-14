@@ -40,12 +40,12 @@ const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
+assert.ok(layout.includes('resolveViewMode(location.search, viewModeOverride)'), 'phone layout is the default unless explicitly changed');
+assert.ok(layout.includes('buildViewModeHref('), 'desktop mode is exposed as a shareable link');
+assert.ok(layout.includes('to={viewModeHref}'), 'view selection updates the current route link');
+assert.ok(layout.includes('writeViewModePreference(nextMode)'), 'chosen presentation persists across navigation');
 const { statSync } = await import('node:fs');
 
-assert.match(layout, /window\.innerWidth >= 1024/, 'desktop layout must be selected using the real wide viewport');
-assert.match(layout, /window\.addEventListener\('resize', syncViewportMode/, 'layout must respond when the browser viewport changes');
-assert.match(layout, /window\.removeEventListener\('resize', syncViewportMode/, 'viewport listeners must be cleaned up');
-assert.match(layout, /viewModeOverride \?\? \(isWideViewport \? 'desktop' : 'mobile'\)/, 'manual phone preview must override responsive mode without forcing it by default');
 assert.match(layout, /INTERNAL_DISPLAY_NAMES/, 'internal route/role slugs must not be used as a personal greeting');
 assert.match(layout, /return 'بك'/, 'invalid display names must fall back to a natural Arabic greeting');
 for (const role of ['وسيط تأمين', 'فريق المبيعات', 'فريق المطالبات', 'الإدارة المالية']) {

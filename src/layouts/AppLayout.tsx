@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Bell,
   Bot,
@@ -24,7 +24,12 @@ import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider'
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
-import { readViewModePreference, writeViewModePreference } from './view-mode-preference';
+import {
+  buildViewModeHref,
+  readViewModePreference,
+  resolveViewMode,
+  writeViewModePreference,
+} from './view-mode-preference';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
   { to: '/', label: 'الرئيسية', Icon: Home },
@@ -87,31 +92,16 @@ export default function AppLayout() {
   const roleLabel = profile?.role ? roleLabels[profile.role] ?? 'مستخدم' : 'مستخدم';
   const location = useLocation();
   const [floatingOpen, setFloatingOpen] = useState(false);
-  const [isWideViewport, setIsWideViewport] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth >= 1024 && window.matchMedia('(min-width: 1024px)').matches;
-  });
   const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(readViewModePreference);
-  const viewMode = viewModeOverride ?? (isWideViewport ? 'desktop' : 'mobile');
-
-  useEffect(() => {
-    const breakpoint = window.matchMedia('(min-width: 1024px)');
-    const syncViewportMode = () => {
-      setIsWideViewport(window.innerWidth >= 1024 && breakpoint.matches);
-    };
-
-    syncViewportMode();
-    window.addEventListener('resize', syncViewportMode, { passive: true });
-    breakpoint.addEventListener('change', syncViewportMode);
-
-    return () => {
-      window.removeEventListener('resize', syncViewportMode);
-      breakpoint.removeEventListener('change', syncViewportMode);
-    };
-  }, []);
-
-  const toggleViewMode = () => {
-    const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
+  const viewMode = resolveViewMode(location.search, viewModeOverride);
+  const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
+  const viewModeHref = buildViewModeHref(
+    location.pathname,
+    location.search,
+    location.hash,
+    nextMode,
+  );
+  const selectViewMode = () => {
     writeViewModePreference(nextMode);
     setViewModeOverride(nextMode);
   };
@@ -135,16 +125,16 @@ export default function AppLayout() {
         </div>
 
         <div className="s8-actions">
-          <button
-            type="button"
+          <Link
             className="view-mode-toggle"
-            onClick={toggleViewMode}
+            to={viewModeHref}
+            onClick={selectViewMode}
             aria-label={
               viewMode === 'mobile'
-                ? 'التبديل إلى عرض سطح المكتب'
-                : 'التبديل إلى عرض الهاتف'
+                ? 'فتح واجهة سطح المكتب'
+                : 'العودة إلى واجهة الهاتف'
             }
-            title={viewMode === 'mobile' ? 'عرض سطح المكتب' : 'عرض الهاتف'}
+            title={viewMode === 'mobile' ? 'واجهة سطح المكتب' : 'واجهة الهاتف'}
           >
             {viewMode === 'mobile' ? (
               <Monitor size={16} aria-hidden="true" />
@@ -152,7 +142,7 @@ export default function AppLayout() {
               <Smartphone size={16} aria-hidden="true" />
             )}
             <span>{viewMode === 'mobile' ? 'سطح المكتب' : 'عرض الهاتف'}</span>
-          </button>
+          </Link>
 
           <button
             type="button"

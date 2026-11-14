@@ -10,6 +10,19 @@ export function readViewModePreference() {
   }
 }
 
+export function resolveViewMode(search, preference) {
+  const requested = new URLSearchParams(search).get('view');
+  if (requested === 'desktop' || requested === 'mobile') return requested;
+  return preference === 'desktop' || preference === 'mobile' ? preference : 'mobile';
+}
+
+export function buildViewModeHref(pathname, search, hash, mode) {
+  const params = new URLSearchParams(search);
+  params.set('view', mode);
+  const query = params.toString();
+  return `${pathname}${query ? `?${query}` : ''}${hash || ''}`;
+}
+
 export function writeViewModePreference(mode) {
   if (mode !== 'desktop' && mode !== 'mobile') return false;
 

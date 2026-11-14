@@ -11,7 +11,7 @@
   padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
 }
 
-.mobile-shell.view-mode-mobile .s8-actions > button.view-mode-toggle,
+.mobile-shell.view-mode-mobile .s8-actions > .view-mode-toggle,
 .mobile-shell.view-mode-mobile .s8-actions > .circle-button {
   box-sizing: border-box;
   display: inline-grid !important;
@@ -26,6 +26,18 @@
   padding: 0 !important;
   border-radius: 50% !important;
   touch-action: manipulation;
+  text-decoration: none;
+}
+
+.mobile-shell.view-mode-mobile .s8-actions > .view-mode-toggle > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
