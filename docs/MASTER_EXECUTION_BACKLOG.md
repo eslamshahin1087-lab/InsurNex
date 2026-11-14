@@ -82,6 +82,8 @@ This backlog is the execution source of truth. A checked source-code task means 
 **Priority:** P0 · **Dependencies:** P1.3 data contracts  
 **Implemented interim boundary (PR #86, with RBAC regression coverage in PR #88):** Claims is denied direct get/query/timeline access to the legacy mixed-sensitivity `clients/{clientId}` record. Claim snapshots, linked policy metadata and claim-category document metadata remain available. Client 360 UI routes/navigation and both legacy Copilot client-context policy are restricted to Owner/Admin/Broker. This is an interim deny-until-projection control, not completion of data separation.
 
+**2026-11-14 role/data-loading compatibility update:** PR #159 restricts the combined database-backed portfolio Analytics dashboard to Owner/Admin/Broker. PR #160 makes the main dashboard queries, notifications and visible metrics follow each role's existing Firestore access; unauthorized aggregates are represented as unavailable, not zero. PR #161 keeps the Operations Center available to Owner/Admin/Broker/Claims and skips client/RFQ reads and actions for Claims. Exact-head CI and Secrets Scan passed for all three PRs (CI runs 987, 989 and 991; Secrets Scan runs 522, 524 and 526). These are source and CI results; staging runtime acceptance remains separate.
+
 - Convert the proposed matrix into exact collection/action grants.
 - Rules and trusted endpoint checks validate Firebase identity, active membership, role, immutable organization ID, parent relationship and assignment.
 - Keep `clientSensitiveProfiles`, `clientMedicalProfiles`, `claimSensitiveDetails`, `aiFindings` and `auditLogs` deny-by-default until their own rules are approved.
