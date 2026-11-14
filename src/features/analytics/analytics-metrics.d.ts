@@ -21,6 +21,9 @@ export interface AnalyticsSnapshot {
   lost: number;
   winRate: number;
   openTasks: number;
+  tasks: number;
+  completedTasks: number;
+  taskCompletionRate: number;
   stages: Record<string, number>;
   sources: Record<string, number>;
   insurers: Record<string, number>;
