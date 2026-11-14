@@ -61,14 +61,26 @@ check(subscriptionGate.includes('to="/subscription"'), 'expired subscriptions ar
 // all use the same Owner/Admin/Broker boundary.
 check(authContext.includes("CLIENT_360_ALLOWED_ROLES = ['owner', 'admin', 'broker']"),
   'Client 360 allowed roles are explicit and least-privileged');
+check(authContext.includes('OPERATIONS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES'),
+  'Operations role policy matches the data boundary used by its combined loader');
+check(authContext.includes('export function canAccessOperations(role: unknown)')
+  && authContext.includes('(OPERATIONS_ALLOWED_ROLES as readonly string[]).includes(role)'),
+  'Operations access check rejects unknown and out-of-scope roles');
 check(authContext.includes('CLIENT_360_ALLOWED_ROLES as readonly string[]).includes(role)'),
   'Client 360 role check fails closed for unknown roles');
 check(protectedRoute.includes('allowedRoles.includes(profile.role)'),
   'direct Client 360 routes enforce the tenant role capability');
 check(app.includes('OrganizationRoleRoute allowedRoles={CLIENT_360_ALLOWED_ROLES}'),
   'all Client 360 routes are wrapped in the role gate');
+const operationsRoute = app.indexOf('<Route path="operations"');
+const operationsFeatureGate = app.indexOf('feature="operations"');
+const operationsRoleGate = app.lastIndexOf('OrganizationRoleRoute allowedRoles={OPERATIONS_ALLOWED_ROLES}', operationsFeatureGate);
+check(operationsRoute > operationsFeatureGate && operationsRoleGate >= 0 && operationsRoleGate < operationsFeatureGate,
+  'operations route enforces the roles needed by its Client 360 and RFQ data calls');
 check(appLayout.includes("item.to !== '/clients' || canAccessClient360(profile?.role)"),
   'primary CRM navigation is hidden for roles without Client 360 access');
+check(appLayout.includes("item.to !== '/operations' || canAccessOperations(profile?.role)"),
+  'operations navigation is hidden for roles that cannot load its tenant data');
 check(morePage.includes("to !== '/clients' || canAccessClient360(profile?.role)"),
   'More menu CRM entry is hidden for roles without Client 360 access');
 check(claimPage.includes("claim.clientId&&canAccessClient360(profile?.role)"),
@@ -93,3 +105,4 @@ check(rules.includes("allow read: if canAccessClient(clientId) && roleIs(['owner
   'Client timeline reads follow the same least-privilege boundary');
 
 console.log('Admin/user access smoke tests passed.');
+

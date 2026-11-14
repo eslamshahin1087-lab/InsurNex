@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider';
 import ProtectedRoute, { OrganizationRoleRoute } from './features/auth/ProtectedRoute';
-import { CLIENT_360_ALLOWED_ROLES } from './features/auth/auth-context';
+import { CLIENT_360_ALLOWED_ROLES, OPERATIONS_ALLOWED_ROLES } from './features/auth/auth-context';
 import AppLayout from './layouts/AppLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminGuard from './features/admin/AdminGuard';
@@ -186,8 +186,10 @@ export default function App() {
                     <Route path="claims" element={<ClaimsPage />} />
                     <Route path="claims/:id" element={<ClaimDetailsPage />} />
                   </Route>
-                  <Route element={<PlatformFeatureGate feature="operations" />}>
-                    <Route path="operations" element={<OperationsPage />} />
+                  <Route element={<OrganizationRoleRoute allowedRoles={OPERATIONS_ALLOWED_ROLES} />}>
+                    <Route element={<PlatformFeatureGate feature="operations" />}>
+                      <Route path="operations" element={<OperationsPage />} />
+                    </Route>
                   </Route>
                   <Route element={<PlatformFeatureGate feature="tasks" />}>
                     <Route path="tasks" element={<TasksPage />} />
@@ -230,3 +232,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
