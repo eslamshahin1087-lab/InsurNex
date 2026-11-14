@@ -19,10 +19,26 @@ import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniBarChart from '../components/charts/MiniBarChart';
-import MiniLineChart from '../components/charts/MiniLineChart';
 
 const money = (n: number) =>
   new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n || 0);
+
+function formatCurrencyTotals(totals: Record<string, number>) {
+  const entries = Object.entries(totals);
+  if (!entries.length) return 'لا توجد مبالغ مسجلة';
+  return entries.map(([currency, value]) => {
+    if (currency === 'UNKNOWN') return `${money(value)} (عملة غير محددة)`;
+    try {
+      return new Intl.NumberFormat('ar-EG', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+      }).format(value);
+    } catch {
+      return `${money(value)} ${currency}`;
+    }
+  }).join(' · ');
+}
 
 const STAGE_LABELS: Record<string, string> = {
   new: 'جديد',
@@ -165,15 +181,12 @@ export default function AnalyticsPage() {
   const stageBarData = Object.values(d.stages);
   const stageBarLabels = Object.keys(d.stages).map((k) => STAGE_LABELS[k] || k);
 
-  const sourceBarData = Object.entries(d.sources)
-    .slice(0, 6)
-    .map(([, v]) => v);
-  const sourceBarLabels = Object.keys(d.sources)
-    .slice(0, 6)
-    .map((k) => SOURCE_LABELS[k] || k);
-
-  // Simple trend from pipeline (fake progression for visualization)
-  const trend = [3, 5, 4, 6, 8, 7, 9, 11];
+  const sourceEntries = Object.entries(d.sources).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const sourceBarData = sourceEntries.map(([, count]) => count);
+  const sourceBarLabels = sourceEntries.map(([source]) => SOURCE_LABELS[source] || source);
+  const insurerValueEntries = Object.entries(d.insurers).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const insurerValueData = insurerValueEntries.map(([, value]) => value);
+  const insurerValueLabels = insurerValueEntries.map(([insurer]) => insurer);
 
   return (
     <main className="mobile-page" dir="rtl">
@@ -195,7 +208,10 @@ export default function AnalyticsPage() {
               التحليلات والتقارير
             </h2>
             <small style={{ color: 'var(--inx-muted)', fontSize: 12 }}>
-              نظرة شاملة على أداء المحفظة وخط المبيعات.
+              كل السجلات المتاحة للمؤسسة، مع فصل مبالغ الوثائق والمطالبات حسب العملة.
+            </small>
+            <small style={{ display: 'block', marginTop: 4, color: 'var(--inx-muted)', fontSize: 11 }}>
+              آخر تحديث: {new Date(d.generatedAt).toLocaleString('ar-EG')}
             </small>
           </div>
           <div className="inx-header-circular">
@@ -246,7 +262,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
-              {money(d.premium)} ج.م
+              {formatCurrencyTotals(d.premiumByCurrency)}
             </div>
             <small className="inx-kpi-label">
               {d.activePolicies} وثيقة نشطة
@@ -350,7 +366,7 @@ export default function AnalyticsPage() {
           </article>
         </div>
 
-        {/* CHARTS ROW 2: Stages bar + Line */}
+        {/* CHARTS ROW 2: Stages + insurer pipeline */}
         <div
           style={{
             display: 'grid',
@@ -362,7 +378,7 @@ export default function AnalyticsPage() {
           <article className="inx-chart-card">
             <div className="chart-head">
               <span className="label">توزيع المراحل</span>
-              <span className="delta up">↑ مباشر</span>
+              <span className="value">{d.leads}</span>
             </div>
             <div style={{ color: 'var(--inx-blue)' }}>
               <MiniBarChart
@@ -380,36 +396,28 @@ export default function AnalyticsPage() {
                 color: 'var(--inx-muted)',
               }}
             >
-              {stageBarLabels.slice(0, 4).map((l) => (
-                <span key={l}>{l}</span>
+              {stageBarLabels.slice(0, 4).map((label) => (
+                <span key={label}>{label}</span>
               ))}
             </div>
           </article>
 
           <article className="inx-chart-card">
             <div className="chart-head">
-              <span className="label">اتجاه الأداء</span>
-              <span className="delta up">↑ نمو</span>
+              <span className="label">قيمة الفرص المفتوحة حسب شركة التأمين</span>
+              <span className="value">ج.م</span>
             </div>
             <div style={{ color: 'var(--inx-blue)' }}>
-              <MiniLineChart
-                data={trend}
+              <MiniBarChart
+                data={insurerValueData}
+                labels={insurerValueLabels}
                 height={80}
                 color="var(--inx-blue)"
-                fillColor="rgba(30, 66, 114, 0.12)"
               />
             </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 11,
-                color: 'var(--inx-muted)',
-              }}
-            >
-              <span>آخر 8 أشهر</span>
-              <span>مؤشر النمو</span>
-            </div>
+            <small style={{ color: 'var(--inx-muted)', fontSize: 10 }}>
+              أعلى ست شركات حسب قيمة الفرص المفتوحة، وليست اتجاهًا زمنيًا.
+            </small>
           </article>
         </div>
 
