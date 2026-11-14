@@ -8,7 +8,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const CLIENT_360_ALLOWED_ROLES = ['owner', 'admin', 'broker'] as const;
 export type Client360AllowedRole = (typeof CLIENT_360_ALLOWED_ROLES)[number];
-export const OPERATIONS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES;
+export const OPERATIONS_ALLOWED_ROLES = ['owner', 'admin', 'broker', 'claims'] as const;
 export type OperationsAllowedRole = (typeof OPERATIONS_ALLOWED_ROLES)[number];
 export const ANALYTICS_ALLOWED_ROLES = CLIENT_360_ALLOWED_ROLES;
 export type AnalyticsAllowedRole = (typeof ANALYTICS_ALLOWED_ROLES)[number];
@@ -23,8 +23,8 @@ export function canAccessClient360(role: unknown): role is Client360AllowedRole 
 }
 
 /**
- * The current Operations workspace loads the same Client 360 and RFQ data
- * boundary, so only Owner/Admin/Broker can complete its combined data load.
+ * Operations supports Claims while its loader skips Client 360 and RFQ
+ * queries that Claims is not authorized to read.
  */
 export function canAccessOperations(role: unknown): role is OperationsAllowedRole {
   return typeof role === 'string'
