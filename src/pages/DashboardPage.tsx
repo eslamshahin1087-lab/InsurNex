@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Bell,
-  Bot,
+  ArrowLeft,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -32,6 +32,7 @@ import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
+import InsurNexRobot from '../components/InsurNexRobot';
 import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
@@ -226,7 +227,7 @@ export default function DashboardPage() {
                 onClick={askCopilot}
                 title="اسأل InsurNex"
               >
-                <Bot size={17} />
+                <InsurNexRobot size={25} className="inx-robot-icon" />
               </button>
             )}
             {(settings.features.notifications && planFeatures.notifications) && (
@@ -270,6 +271,26 @@ export default function DashboardPage() {
             clientsCount={showClientMetric ? (data.clients ?? 0) : 0}
             policiesCount={showPolicyMetric ? (data.activePolicies ?? 0) : 0}
           />
+        )}
+
+        {settings.features.copilot && planFeatures.copilot && (
+          <Link to="/copilot" className="inx-insurtech-ai-promo">
+            <span className="inx-robot-stage" aria-hidden="true">
+              <InsurNexRobot size={104} />
+            </span>
+            <span className="inx-insurtech-ai-copy">
+              <span className="inx-insurtech-ai-eyebrow">
+                <Sparkles size={13} aria-hidden="true" /> INSURNEX AI
+                <span className="inx-insurtech-live"><i /> مباشر</span>
+              </span>
+              <strong>مساعدك الذكي لإدارة التأمين</strong>
+              <small>افهم محفظتك بسرعة، واكتشف الخطوة التالية لفريقك.</small>
+              <span className="inx-insurtech-secure">
+                <ShieldCheck size={13} aria-hidden="true" /> يعمل ضمن بيانات مؤسستك
+              </span>
+            </span>
+            <span className="inx-insurtech-ai-arrow" aria-hidden="true"><ArrowLeft size={18} /></span>
+          </Link>
         )}
 
         {/* SHORTCUTS */}
