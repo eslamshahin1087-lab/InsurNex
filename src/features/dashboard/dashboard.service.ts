@@ -1,8 +1,6 @@
 import {
   collection,
   getCountFromServer,
-  getDocs,
-  limit,
   query,
   where,
 } from 'firebase/firestore';
@@ -12,6 +10,7 @@ import { listTasks } from '../tasks/task.service';
 import { buildNotifications } from '../notifications/notification.service';
 import { getDashboardRoleAccess } from './dashboard-access.policy.js';
 import type { AppTask } from '../../types/task';
+import { calculateOpenClaimsCount } from './dashboard-metrics.js';
 
 export type DashboardData = {
   /** null means the current role is not allowed to read this aggregate. */
@@ -41,7 +40,6 @@ export async function loadDashboard(
   const claimsQuery = query(
     collection(db, 'claims'),
     where('organizationId', '==', organizationId),
-    limit(100),
   );
 
   // Do not issue a Firestore query when the current role is not permitted
@@ -56,10 +54,13 @@ export async function loadDashboard(
     : Promise.resolve(null);
 
   const openClaimsPromise: Promise<number | null> = access.claims
-    ? getDocs(claimsQuery).then((snapshot) => snapshot.docs.filter((item) => {
-        const status = item.get('status');
-        return status !== 'closed' && status !== 'rejected';
-      }).length)
+    ? Promise.all([
+        getCountFromServer(claimsQuery).then((snapshot) => snapshot.data().count),
+        getCountFromServer(query(claimsQuery, where('status', '==', 'closed')))
+          .then((snapshot) => snapshot.data().count),
+        getCountFromServer(query(claimsQuery, where('status', '==', 'rejected')))
+          .then((snapshot) => snapshot.data().count),
+      ]).then(([total, closed, rejected]) => calculateOpenClaimsCount(total, closed, rejected))
     : Promise.resolve(null);
 
   const renewalsPromise = access.policies

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { getDashboardRoleAccess } from '../src/features/dashboard/dashboard-access.policy.js';
+import { calculateOpenClaimsCount } from '../src/features/dashboard/dashboard-metrics.js';
 
 const expected = {
   owner: { clients: true, policies: true, claims: true },
@@ -14,6 +15,10 @@ const expected = {
 for (const [role, permissions] of Object.entries(expected)) {
   assert.deepEqual(getDashboardRoleAccess(role), permissions, role + ' dashboard collection access matches Firestore RBAC');
 }
+assert.equal(calculateOpenClaimsCount(250, 110, 9), 131, 'open claims include every status except closed and rejected');
+assert.equal(calculateOpenClaimsCount(10, 20, 1), 0, 'inconsistent aggregate responses fail safely at zero');
+assert.equal(calculateOpenClaimsCount(Number.NaN, -1, 0), 0, 'invalid aggregate values normalize to zero');
+
 for (const role of [undefined, null, '', 'platform_admin', 'unknown']) {
   assert.deepEqual(
     getDashboardRoleAccess(role),
@@ -32,7 +37,12 @@ const [dashboard, notifications, page, rules] = await Promise.all([
 assert.match(dashboard, /getDashboardRoleAccess\(role\)/);
 assert.match(dashboard, /access\.clients\s*\?\s*getCountFromServer/);
 assert.match(dashboard, /access\.policies\s*\?\s*getCountFromServer/);
-assert.match(dashboard, /access\.claims\s*\?\s*getDocs/);
+assert.match(dashboard, /access\.claims\s*\?\s*Promise\.all/);
+assert.match(dashboard, /getCountFromServer\(claimsQuery\)/);
+assert.match(dashboard, /where\('status', '==', 'closed'\)/);
+assert.match(dashboard, /where\('status', '==', 'rejected'\)/);
+assert.match(dashboard, /calculateOpenClaimsCount\(total, closed, rejected\)/);
+assert.doesNotMatch(dashboard, /claimsQuery[\s\S]*?limit\(100\)/);
 assert.match(dashboard, /access\.policies\s*\?\s*listRenewals/);
 assert.match(dashboard, /buildNotifications\(organizationId, role\)/);
 
