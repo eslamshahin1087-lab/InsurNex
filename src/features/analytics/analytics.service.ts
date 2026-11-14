@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { buildAnalyticsSnapshot, type AnalyticsInput, type AnalyticsRow, type AnalyticsSnapshot } from './analytics-metrics.js';
+export type { AnalyticsSnapshot };
 
 const ANALYTICS_PAGE_SIZE = 500;
 type AnalyticsCollection = keyof AnalyticsInput;
