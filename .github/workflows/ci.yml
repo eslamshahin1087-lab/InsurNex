@@ -28,6 +28,8 @@ jobs:
         run: npm run test:dashboard-rbac
       - name: Operations role-scoped data access regression tests
         run: npm run test:operations-rbac
+      - name: Complete and currency-safe analytics snapshot tests
+        run: npm run test:analytics-snapshot
       - name: Platform Admin tenant business-data boundary tests
         run: npm run test:admin-tenant-boundary
       - name: Plan feature entitlement smoke checks
