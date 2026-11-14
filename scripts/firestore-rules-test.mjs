@@ -718,13 +718,22 @@ try {
     }),
     'a lead cannot be updated to a nonexistent assignee',
   );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      name: 'Unexpected lead name change',
+      updatedAt: serverTimestamp(),
+    }),
+    'lead updates cannot change fields outside the approved workflow allowlist',
+  );
   await updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
-    name: 'Updated synthetic lead',
+    notes: 'Updated synthetic lead',
     updatedAt: serverTimestamp(),
   });
   const preservedLead = (await getDoc(doc(ownerA.db, 'leads', ownRelations.lead))).data();
   check(
-    preservedLead.assignedTo === ownerA.user.uid && preservedLead.clientId === clientA,
+    preservedLead.assignedTo === ownerA.user.uid
+      && preservedLead.clientId === clientA
+      && preservedLead.notes === 'Updated synthetic lead',
     'a lead can update other fields while preserving its valid client relationship and assignee',
   );
 
@@ -1316,6 +1325,70 @@ try {
     organizationId: orgA, clientId: protectedClientId, insurerIds: [protectedInsurerId], status: 'draft',
     createdBy: ownerA.user.uid, createdAt: serverTimestamp(),
   });
+  const protectedRfqRef = doc(salesMember.actor.db, 'rfqs', protectedRfqId);
+  await updateDoc(protectedRfqRef, {
+    status: 'ready',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedRfqRef)).data().status === 'ready',
+    'Sales can update an RFQ workflow status');
+
+  await updateDoc(protectedRfqRef, {
+    insuranceType: 'medical',
+    coverageSummary: 'Synthetic coverage summary',
+    documentIds: ['synthetic-doc-1'],
+    insurers: [{ insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', status: 'draft' }],
+    insurerIds: [protectedInsurerId],
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedRfqRef)).data().coverageSummary === 'Synthetic coverage summary',
+    'RFQ details and insurer submission metadata can be updated through approved fields');
+
+  await updateDoc(protectedRfqRef, {
+    status: 'quotes_received',
+    selectedQuoteId: protectedQuoteId,
+    selectedInsurerId: protectedInsurerId,
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedRfqRef)).data().selectedQuoteId === protectedQuoteId,
+    'the quote-selection workflow can attach its selected quote and insurer');
+
+  await updateDoc(protectedRfqRef, {
+    status: 'closed',
+    issuedPolicyId: 'synthetic-policy-1',
+    updatedAt: serverTimestamp(),
+  });
+  check((await getDoc(protectedRfqRef)).data().issuedPolicyId === 'synthetic-policy-1',
+    'the issuance workflow can close an RFQ with its resulting policy reference');
+
+  await expectDenied(
+    () => updateDoc(protectedRfqRef, {
+      clientId: 'forged-client-id',
+      updatedAt: serverTimestamp(),
+    }),
+    'RFQ updates cannot change the original client relationship',
+  );
+  await expectDenied(
+    () => updateDoc(protectedRfqRef, {
+      leadId: 'forged-lead-id',
+      updatedAt: serverTimestamp(),
+    }),
+    'RFQ updates cannot change the original lead relationship',
+  );
+  await expectDenied(
+    () => updateDoc(protectedRfqRef, {
+      clientName: 'Forged client name',
+      updatedAt: serverTimestamp(),
+    }),
+    'RFQ updates cannot modify immutable client identity fields',
+  );
+  await expectDenied(
+    () => updateDoc(protectedRfqRef, {
+      status: 'unknown_status',
+      updatedAt: serverTimestamp(),
+    }),
+    'RFQ updates reject unknown workflow states',
+  );
   await setDoc(doc(ownerA.db, 'quotes', protectedQuoteId), {
     organizationId: orgA, rfqId: protectedRfqId, clientId: protectedClientId,
     insurerId: protectedInsurerId, insurerName: 'Synthetic Insurer', premium: 1200,
@@ -2226,3 +2299,4 @@ try {
 } finally {
   await Promise.allSettled(apps.map((app) => deleteApp(app)));
 }
+
