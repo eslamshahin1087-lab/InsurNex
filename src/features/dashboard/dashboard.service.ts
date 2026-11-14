@@ -1,8 +1,6 @@
 import {
   collection,
   getCountFromServer,
-  getDocs,
-  limit,
   query,
   where,
 } from 'firebase/firestore';
