@@ -40,10 +40,10 @@ const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
-assert.match(layout, /resolveViewMode\\(location\\.search, viewModeOverride\\)/, 'phone layout is the default unless explicitly changed');
-assert.match(layout, /buildViewModeHref\\(/, 'desktop mode is exposed as a shareable link');
-assert.match(layout, /to=\\{viewModeHref\\}/, 'view selection updates the current route link');
-assert.match(layout, /writeViewModePreference\\(nextMode\\)/, 'chosen presentation persists across navigation');
+assert.ok(layout.includes('resolveViewMode(location.search, viewModeOverride)'), 'phone layout is the default unless explicitly changed');
+assert.ok(layout.includes('buildViewModeHref('), 'desktop mode is exposed as a shareable link');
+assert.ok(layout.includes('to={viewModeHref}'), 'view selection updates the current route link');
+assert.ok(layout.includes('writeViewModePreference(nextMode)'), 'chosen presentation persists across navigation');
 const { statSync } = await import('node:fs');
 
 assert.match(layout, /INTERNAL_DISPLAY_NAMES/, 'internal route/role slugs must not be used as a personal greeting');
