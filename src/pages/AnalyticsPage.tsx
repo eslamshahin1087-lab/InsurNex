@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
-  Bot,
   ClipboardCheck,
   FileSearch,
   Moon,
   RefreshCw,
+  Sparkles,
   Sun,
   Target,
   TrendingUp,
@@ -23,6 +23,7 @@ import { setCurrentContext } from '../features/copilot/copilot-context.store';
 import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniBarChart from '../components/charts/MiniBarChart';
+import InsurNexRobot from '../components/InsurNexRobot';
 
 const money = (n: number) =>
   new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n || 0);
@@ -296,7 +297,7 @@ export default function AnalyticsPage() {
               onClick={askCopilot}
               title="مساعد InsurNex"
             >
-              <Bot size={17} />
+              <InsurNexRobot size={25} className="inx-robot-icon" />
             </button>
             <button
               type="button"
@@ -477,14 +478,11 @@ export default function AnalyticsPage() {
               alignItems: 'flex-start',
             }}
           >
-            <span
-              className="inx-icon-circle inx-icon-circle-lg"
-              style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
-            >
-              <Bot className="inx-animated-icon" size={22} />
+            <span className="inx-robot-stage inx-robot-stage-insight" aria-hidden="true">
+              <InsurNexRobot size={94} />
             </span>
-            <div style={{ flex: 1 }}>
-              <small style={{ opacity: 0.85, fontSize: 11 }}>تحليل ذكي</small>
+            <div className="inx-insurtech-insight-copy" style={{ flex: 1 }}>
+              <small className="inx-insurtech-ai-eyebrow"><Sparkles size={13} aria-hidden="true" /> INSURNEX AI · تحليل ذكي</small>
               <p
                 style={{
                   margin: '6px 0 0',
