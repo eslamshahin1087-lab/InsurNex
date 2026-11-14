@@ -1,0 +1,383 @@
+/* InsurNex showcase-inspired identity: bright insurance blue, deep navy,
+   cool white surfaces, and consistent presentation across every workspace. */
+:root {
+  --inx-font-family: 'IBM Plex Sans Arabic', Inter, 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-brand-navy: #08234c;
+  --inx-brand-blue: #126cf3;
+  --inx-brand-accent: #18a9f8;
+  /* Compatibility aliases for earlier components that used gold token names. */
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #eaf3ff;
+  --inx-brand-gold-ink: #124b9a;
+
+  --inx-navy: #0b2146;
+  --inx-blue: #126cf3;
+  --inx-cyan: #18a9f8;
+  --inx-bg: #f2f7fd;
+  --inx-surface: #ffffff;
+  --inx-surface-2: #f7faff;
+  --inx-elevated: #ffffff;
+  --inx-border: #dce8f6;
+  --inx-muted: #6b7f9b;
+  --inx-app-muted: #5d7391;
+  --inx-text: #10264a;
+  --inx-text-soft: #526b8f;
+  --inx-info: #126cf3;
+  --inx-info-bg: #eaf3ff;
+  --inx-cyan-bg: #e9f8ff;
+  --inx-navy-bg: #e9f0fd;
+  --inx-neutral-bg: #f0f4fa;
+  --inx-neutral-text: #536781;
+  --inx-gradient: linear-gradient(125deg, #092958 0%, #126cf3 72%, #18a9f8 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #fafdff 0%, #edf5ff 100%);
+  --inx-3d-blue: linear-gradient(145deg, #e8f2ff 0%, #a7caff 52%, #126cf3 100%);
+  --inx-3d-cyan: linear-gradient(145deg, #e9f8ff 0%, #a5e4ff 52%, #18a9f8 100%);
+  --inx-3d-warning: linear-gradient(145deg, #fff8e9 0%, #ffd985 52%, #e9a827 100%);
+  --inx-shadow-sm: 0 2px 8px rgba(13, 53, 112, .045);
+  --inx-shadow: 0 8px 24px rgba(13, 53, 112, .065);
+  --inx-shadow-lg: 0 18px 44px rgba(13, 53, 112, .105);
+  --inx-shadow-app: 0 12px 34px rgba(13, 53, 112, .065);
+  --inx-shadow-app-strong: 0 18px 46px rgba(13, 53, 112, .11);
+  --inx-radius: 16px;
+  --inx-radius-lg: 20px;
+  --inx-radius-app-sm: 14px;
+  --inx-radius-app-md: 20px;
+  --inx-radius-app-lg: 26px;
+
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-info-bg);
+  --app-nav: rgba(255, 255, 255, .97);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --inx-brand-navy: #06162c;
+  --inx-brand-blue: #6aa7ff;
+  --inx-brand-accent: #42c6ff;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #142c4b;
+  --inx-brand-gold-ink: #c8e2ff;
+
+  --inx-navy: #edf5ff;
+  --inx-blue: #78adff;
+  --inx-cyan: #55c8fa;
+  --inx-bg: #07182c;
+  --inx-surface: #0e2541;
+  --inx-surface-2: #122d4d;
+  --inx-elevated: #173656;
+  --inx-border: #244365;
+  --inx-muted: #a9bfd9;
+  --inx-app-muted: #b7cce3;
+  --inx-text: #f0f6ff;
+  --inx-text-soft: #ceddf0;
+  --inx-info: #9bc3ff;
+  --inx-info-bg: #153658;
+  --inx-cyan-bg: #12384f;
+  --inx-navy-bg: #183554;
+  --inx-neutral-bg: #1a3048;
+  --inx-neutral-text: #d2dfed;
+  --inx-gradient: linear-gradient(125deg, #09234a 0%, #1455ad 72%, #087eae 100%);
+  --inx-gradient-soft: linear-gradient(145deg, #102a47 0%, #173958 100%);
+  --inx-3d-blue: linear-gradient(145deg, #173958 0%, #20528c 52%, #347dd5 100%);
+  --inx-3d-cyan: linear-gradient(145deg, #153c52 0%, #1d7498 52%, #29a9d7 100%);
+  --inx-3d-warning: linear-gradient(145deg, #47381d 0%, #8b692a 52%, #bd8e2c 100%);
+  --inx-shadow-sm: 0 2px 8px rgba(0, 0, 0, .25);
+  --inx-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+  --inx-shadow-lg: 0 18px 44px rgba(0, 0, 0, .38);
+  --inx-shadow-app: 0 12px 34px rgba(0, 0, 0, .28);
+  --inx-shadow-app-strong: 0 18px 46px rgba(0, 0, 0, .38);
+  --app-bg: var(--inx-bg);
+  --app-surface: var(--inx-surface);
+  --app-surface-2: var(--inx-surface-2);
+  --app-elevated: var(--inx-elevated);
+  --app-text: var(--inx-text);
+  --app-muted: var(--inx-app-muted);
+  --app-line: var(--inx-border);
+  --app-blue: var(--inx-blue);
+  --app-cyan: var(--inx-cyan);
+  --app-blue-soft: var(--inx-info-bg);
+  --app-nav: rgba(14, 37, 65, .98);
+  --app-shadow: var(--inx-shadow-app);
+  --app-shadow-strong: var(--inx-shadow-app-strong);
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--app-bg) !important;
+  color: var(--app-text);
+}
+
+#root .mobile-shell {
+  color: var(--app-text) !important;
+  background: var(--app-bg) !important;
+  font-family: var(--inx-font-family) !important;
+}
+
+#root .mobile-shell .app-header {
+  border-color: var(--app-line) !important;
+  background: var(--app-nav) !important;
+  box-shadow: 0 4px 18px rgba(12, 58, 130, .06) !important;
+}
+
+#root .mobile-shell .inx-logo-wordmark {
+  color: var(--inx-brand-navy) !important;
+}
+#root .mobile-shell .inx-logo-wordmark > span {
+  color: var(--inx-brand-blue) !important;
+}
+
+#root .mobile-shell .s8-hello strong {
+  color: var(--app-text) !important;
+}
+#root .mobile-shell .s8-hello small {
+  color: var(--app-muted) !important;
+}
+
+#root .mobile-shell .view-mode-toggle:focus-visible,
+#root .mobile-shell :is(button, a, input, select, textarea):focus-visible {
+  outline-color: var(--app-blue) !important;
+}
+
+#root .mobile-shell .s8-actions > :is(button, a) {
+  border-color: var(--app-line) !important;
+  color: var(--app-text) !important;
+}
+#root .mobile-shell .s8-actions > :is(button, a):hover {
+  border-color: var(--app-blue) !important;
+  background: var(--app-blue-soft) !important;
+  color: var(--app-blue) !important;
+}
+
+#root .mobile-shell > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  border-color: var(--app-line) !important;
+  background: var(--app-nav) !important;
+}
+#root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current='page'] {
+  color: var(--app-blue) !important;
+  border-color: transparent !important;
+  background: linear-gradient(145deg, #ffffff, var(--app-blue-soft)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-blue) 16%, transparent) !important;
+}
+
+#root .mobile-shell .app-body :is(
+  .inx-card,
+  .inx-kpi:not(.inx-kpi-featured),
+  .inx-chart-card,
+  .panel,
+  .task-card,
+  .notification-card,
+  .home-kpis > a,
+  .home-feed > a,
+  .insurer-mobile-card,
+  .claim-card,
+  .action-list > a
+) {
+  border: 1px solid var(--app-line) !important;
+  border-radius: 19px !important;
+  background: var(--app-surface) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+
+#root .mobile-shell .app-body :is(h1, h2, h3) {
+  color: var(--app-text);
+  font-family: var(--inx-font-family);
+  font-weight: 750;
+}
+
+#root .mobile-shell .app-body :is(p, small, .muted, .description) {
+  color: var(--app-muted);
+}
+
+#root .mobile-shell .app-body :is(.inx-kpi-value, .metric, .amount, .currency-value) {
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+}
+
+#root .mobile-shell .app-body .inx-kpi .inx-kpi-value {
+  color: var(--app-text) !important;
+}
+
+#root .mobile-shell .app-body .inx-card-head,
+#root .mobile-shell .app-body .chart-head {
+  color: var(--app-text);
+}
+
+#root .mobile-shell .app-body .inx-list-item,
+#root .mobile-shell .app-body .inx-shortcut-card {
+  border-color: var(--app-line) !important;
+  background: var(--app-surface) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+#root .mobile-shell .app-body .inx-list-item:hover,
+#root .mobile-shell .app-body .inx-shortcut-card:hover,
+#root .mobile-shell .app-body .inx-shortcut-card:focus-visible {
+  border-color: var(--app-blue) !important;
+  background: color-mix(in srgb, var(--app-blue-soft) 48%, var(--app-surface)) !important;
+  box-shadow: 0 8px 22px rgba(18, 108, 243, .12) !important;
+}
+
+#root .mobile-shell .app-body .inx-shortcut-card .inx-3d-icon {
+  color: var(--app-blue) !important;
+  background: linear-gradient(145deg, #ffffff, var(--app-blue-soft)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 3px 10px rgba(18, 108, 243, .1) !important;
+}
+
+#root .mobile-shell .app-body .inx-chart-card .chart-head .label {
+  color: var(--app-text) !important;
+}
+
+#root .mobile-shell .app-body :is(.primary-button, .app-cta, .inx-btn-primary) {
+  border-color: transparent !important;
+  background: var(--inx-gradient) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(18, 108, 243, .2) !important;
+}
+#root .mobile-shell .app-body :is(.primary-button, .app-cta, .inx-btn-primary):hover {
+  filter: brightness(1.04);
+  box-shadow: 0 10px 24px rgba(18, 108, 243, .24) !important;
+}
+
+#root .mobile-shell .app-body :is(.secondary-button, .inx-btn-secondary) {
+  border-color: var(--app-line) !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+}
+#root .mobile-shell .app-body :is(.ghost-button, .inx-btn-ghost, .inx-section-link, .inx-section-head .inx-link) {
+  color: var(--app-blue) !important;
+}
+
+#root .mobile-shell .app-body :is(input, select, textarea, .input-wrap) {
+  border-color: var(--app-line) !important;
+  background-color: var(--app-surface-2) !important;
+  color: var(--app-text) !important;
+  border-radius: 13px;
+}
+#root .mobile-shell .app-body :is(input, select, textarea):focus {
+  border-color: var(--app-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-blue) 17%, transparent) !important;
+}
+
+#root .mobile-shell .app-body table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--app-line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--app-surface);
+}
+#root .mobile-shell .app-body thead th {
+  background: var(--app-blue-soft);
+  color: var(--app-text);
+  border-color: var(--app-line);
+}
+#root .mobile-shell .app-body tbody tr:hover {
+  background: color-mix(in srgb, var(--app-blue-soft) 45%, var(--app-surface));
+}
+#root .mobile-shell .app-body td,
+#root .mobile-shell .app-body th {
+  border-color: var(--app-line);
+}
+
+#root .mobile-shell .inx-hero-panel,
+#root .mobile-shell .home-hero,
+#root .mobile-shell .client-hero {
+  border-color: color-mix(in srgb, var(--app-blue) 20%, transparent) !important;
+  background: var(--inx-gradient-soft) !important;
+  box-shadow: 0 12px 28px rgba(18, 108, 243, .1) !important;
+}
+#root .mobile-shell .inx-hero-panel .hero-cta {
+  background: var(--app-blue) !important;
+  color: #fff !important;
+}
+
+#root .mobile-shell .inx-3d-icon {
+  box-shadow: 0 6px 16px rgba(18, 108, 243, .14) !important;
+}
+
+#root .mobile-shell .inx-badge-primary,
+#root .mobile-shell .inx-badge-cyan,
+#root .mobile-shell .inx-badge-navy {
+  background: var(--app-blue-soft) !important;
+  color: var(--app-blue) !important;
+}
+#root .mobile-shell .inx-badge-success { background: #e6f8f0 !important; color: #078452 !important; }
+#root .mobile-shell .inx-badge-warning { background: #fff5dc !important; color: #956600 !important; }
+#root .mobile-shell .inx-badge-danger { background: #fff0f0 !important; color: #b42336 !important; }
+
+#root .mobile-shell .app-body :is(.status-badge, .status-pill, .stage-pill)[data-tone='info'],
+#root .mobile-shell .app-body :is(.status-badge, .status-pill, .stage-pill).tone-info {
+  background: var(--app-blue-soft);
+  color: var(--app-blue);
+}
+
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  background: linear-gradient(180deg, #08234c 0%, #0c3269 100%) !important;
+  border-inline-end: 1px solid #123d77 !important;
+  box-shadow: 6px 0 28px rgba(4, 22, 52, .12) !important;
+}
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a {
+  color: #c8ddf7 !important;
+}
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a:hover {
+  background: rgba(255, 255, 255, .08) !important;
+  color: #fff !important;
+}
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current='page'] {
+  border: 0 !important;
+  background: linear-gradient(100deg, #1477ff, #1a95ff) !important;
+  box-shadow: 0 5px 16px rgba(0, 86, 200, .24) !important;
+  color: #fff !important;
+}
+#root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary > a[aria-current='page']::before {
+  display: none !important;
+}
+
+#root .mobile-shell.view-mode-desktop > .app-header {
+  background: rgba(255, 255, 255, .97) !important;
+  border-bottom-color: var(--app-line) !important;
+}
+#root .mobile-shell.view-mode-desktop .view-mode-toggle {
+  border-color: var(--app-line) !important;
+  color: var(--app-blue) !important;
+}
+
+:root[data-theme='dark'] #root .mobile-shell .app-body :is(
+  .inx-card, .inx-kpi:not(.inx-kpi-featured), .inx-chart-card, .panel,
+  .task-card, .notification-card, .home-kpis > a, .home-feed > a,
+  .insurer-mobile-card, .claim-card, .action-list > a
+) {
+  background: var(--app-surface) !important;
+  border-color: var(--app-line) !important;
+  box-shadow: var(--inx-shadow-sm) !important;
+}
+:root[data-theme='dark'] #root .mobile-shell .app-body :is(input, select, textarea, .input-wrap) {
+  background: var(--app-surface-2) !important;
+  border-color: var(--app-line) !important;
+  color: var(--app-text) !important;
+}
+:root[data-theme='dark'] #root .mobile-shell .inx-logo-wordmark {
+  color: #f0f6ff !important;
+}
+:root[data-theme='dark'] #root .mobile-shell .inx-logo-wordmark > span {
+  color: #78adff !important;
+}
+:root[data-theme='dark'] #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  background: linear-gradient(180deg, #06162c 0%, #09234a 100%) !important;
+  border-inline-end-color: #16375d !important;
+}
+@media (min-width: 700px) {
+  body:has(#root .mobile-shell.view-mode-mobile) {
+    background: radial-gradient(circle at 14% 8%, #e7f2ff, transparent 28%), #eaf1fa !important;
+  }
+}
