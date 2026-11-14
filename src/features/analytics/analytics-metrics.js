@@ -51,6 +51,7 @@ export function buildAnalyticsSnapshot({ clients, policies, claims, leads, tasks
   const lost = stages.lost || 0;
   const openLeads = leads.filter((lead) => !['won', 'lost'].includes(lead.stage));
   const openTasks = tasks.filter((task) => task.status !== 'completed').length;
+  const completedTasks = tasks.length - openTasks;
 
   return {
     clients: clients.length,
@@ -66,6 +67,9 @@ export function buildAnalyticsSnapshot({ clients, policies, claims, leads, tasks
     lost,
     winRate: won + lost ? Math.round((won / (won + lost)) * 100) : 0,
     openTasks,
+    tasks: tasks.length,
+    completedTasks,
+    taskCompletionRate: tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0,
     stages,
     sources,
     insurers,
