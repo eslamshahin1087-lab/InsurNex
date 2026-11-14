@@ -2,13 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
   Bot,
+  ClipboardCheck,
+  FileSearch,
   Moon,
   RefreshCw,
   Sun,
   Target,
   TrendingUp,
   Users,
+  ShieldCheck,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import {
@@ -22,6 +26,9 @@ import MiniBarChart from '../components/charts/MiniBarChart';
 
 const money = (n: number) =>
   new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 0 }).format(n || 0);
+
+const percentage = (value: number, total: number) =>
+  total > 0 ? Math.min(100, Math.max(0, Math.round((value / total) * 100))) : 0;
 
 function formatCurrencyTotals(totals: Record<string, number>) {
   const entries = Object.entries(totals);
@@ -162,6 +169,66 @@ export default function AnalyticsPage() {
     );
   }
 
+  const openLeadCount = Math.max(d.leads - d.won - d.lost, 0);
+  const performanceMetrics: {
+    label: string;
+    value: string | number;
+    detail: string;
+    progressLabel: string;
+    progress: number;
+    Icon: LucideIcon;
+    tone: string;
+    compact?: boolean;
+  }[] = [
+    {
+      label: 'العملاء النشطون',
+      value: d.clients,
+      detail: `${d.activeClients} نشط من ${d.clients}`,
+      progressLabel: 'نسبة النشاط',
+      progress: percentage(d.activeClients, d.clients),
+      Icon: Users,
+      tone: 'tone-cyan',
+    },
+    {
+      label: 'إجمالي الأقساط',
+      value: formatCurrencyTotals(d.premiumByCurrency),
+      detail: `${d.activePolicies} نشطة من ${d.policies} وثيقة`,
+      progressLabel: 'الوثائق النشطة',
+      progress: percentage(d.activePolicies, d.policies),
+      Icon: ShieldCheck,
+      tone: 'tone-success',
+      compact: true,
+    },
+    {
+      label: 'خط المبيعات المفتوح',
+      value: `${money(d.pipeline)} ج.م`,
+      detail: `${openLeadCount} مفتوحة من ${d.leads} فرصة`,
+      progressLabel: 'الفرص المفتوحة',
+      progress: percentage(openLeadCount, d.leads),
+      Icon: Target,
+      tone: 'tone-primary',
+      compact: true,
+    },
+    {
+      label: 'معدل الفوز',
+      value: `${d.winRate}%`,
+      detail: `${d.won} فوز · ${d.lost} خسارة`,
+      progressLabel: 'الفرص المحسومة',
+      progress: d.winRate,
+      Icon: TrendingUp,
+      tone: 'tone-purple',
+    },
+    {
+      label: 'إنجاز المهام',
+      value: `${d.taskCompletionRate}%`,
+      detail: d.tasks ? `${d.completedTasks} مكتملة من ${d.tasks}` : 'لا توجد مهام مسجلة',
+      progressLabel: 'معدل الإكمال',
+      progress: d.taskCompletionRate,
+      Icon: ClipboardCheck,
+      tone: 'tone-warning',
+    },
+  ];
+
   // Charts
   const stageSegments = Object.entries(d.stages)
     .map(([k, v]) => ({
@@ -243,53 +310,23 @@ export default function AnalyticsPage() {
         </header>
 
         {/* KPIs */}
-        <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">
-                <Users size={18} />
-              </span>
-            </div>
-            <div className="inx-kpi-value">{d.clients}</div>
-            <small className="inx-kpi-label">
-              {d.activeClients} نشط من {d.clients}
-            </small>
-          </article>
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">
-                <TrendingUp size={18} />
-              </span>
-            </div>
-            <div className="inx-kpi-value" style={{ fontSize: 15 }}>
-              {formatCurrencyTotals(d.premiumByCurrency)}
-            </div>
-            <small className="inx-kpi-label">
-              {d.activePolicies} وثيقة نشطة
-            </small>
-          </article>
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">
-                <Target size={18} />
-              </span>
-            </div>
-            <div className="inx-kpi-value" style={{ fontSize: 15 }}>
-              {money(d.pipeline)} ج.م
-            </div>
-            <small className="inx-kpi-label">{d.leads} فرصة</small>
-          </article>
-          <article className="inx-kpi">
-            <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-purple">
-                <BarChart3 size={18} />
-              </span>
-            </div>
-            <div className="inx-kpi-value">{d.winRate}%</div>
-            <small className="inx-kpi-label">
-              {d.won} فوز · {d.lost} خسارة
-            </small>
-          </article>
+        <div className="inx-kpi-grid inx-analytics-performance-grid" style={{ marginBottom: 16 }}>
+          {performanceMetrics.map(({ label, value, detail, progressLabel, progress, Icon, tone, compact }) => (
+            <article className="inx-kpi inx-analytics-metric-card" key={label}>
+              <div className="inx-kpi-head">
+                <span className={`inx-3d-icon sm ${tone} inx-animated-icon`} aria-hidden="true">
+                  <Icon size={18} strokeWidth={1.9} />
+                </span>
+                <span className="inx-analytics-rate">{progress}%</span>
+              </div>
+              <div className={`inx-kpi-value${compact ? ' is-compact' : ''}`}>{value}</div>
+              <small className="inx-kpi-label">{detail}</small>
+              <div className="inx-analytics-progress" role="img" aria-label={`${progressLabel}: ${progress}%`}>
+                <span style={{ width: `${progress}%` }} />
+              </div>
+              <small className="inx-analytics-progress-label">{progressLabel}</small>
+            </article>
+          ))}
         </div>
 
         {/* CHARTS ROW 1: Donut + Bars */}
@@ -444,7 +481,7 @@ export default function AnalyticsPage() {
               className="inx-icon-circle inx-icon-circle-lg"
               style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
             >
-              <Bot size={22} />
+              <Bot className="inx-animated-icon" size={22} />
             </span>
             <div style={{ flex: 1 }}>
               <small style={{ opacity: 0.85, fontSize: 11 }}>تحليل ذكي</small>
@@ -497,19 +534,19 @@ export default function AnalyticsPage() {
           }}
         >
           <Link to="/leads" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-primary">📊</span>
+            <span className="inx-3d-icon sm tone-primary inx-animated-icon"><BarChart3 size={18} aria-hidden="true" /></span>
             <span className="label">خط المبيعات</span>
           </Link>
           <Link to="/policies" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-cyan">🛡️</span>
+            <span className="inx-3d-icon sm tone-cyan inx-animated-icon"><ShieldCheck size={18} aria-hidden="true" /></span>
             <span className="label">الوثائق</span>
           </Link>
           <Link to="/claims" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-success">📋</span>
+            <span className="inx-3d-icon sm tone-success inx-animated-icon"><ClipboardCheck size={18} aria-hidden="true" /></span>
             <span className="label">المطالبات</span>
           </Link>
           <Link to="/ai/file-analysis" className="inx-shortcut-card">
-            <span className="inx-3d-icon sm tone-purple">🤖</span>
+            <span className="inx-3d-icon sm tone-purple inx-animated-icon"><FileSearch size={18} aria-hidden="true" /></span>
             <span className="label">تحليل الملفات</span>
           </Link>
         </div>
