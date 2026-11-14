@@ -718,13 +718,22 @@ try {
     }),
     'a lead cannot be updated to a nonexistent assignee',
   );
+  await expectDenied(
+    () => updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
+      name: 'Unexpected lead name change',
+      updatedAt: serverTimestamp(),
+    }),
+    'lead updates cannot change fields outside the approved workflow allowlist',
+  );
   await updateDoc(doc(ownerA.db, 'leads', ownRelations.lead), {
-    name: 'Updated synthetic lead',
+    notes: 'Updated synthetic lead',
     updatedAt: serverTimestamp(),
   });
   const preservedLead = (await getDoc(doc(ownerA.db, 'leads', ownRelations.lead))).data();
   check(
-    preservedLead.assignedTo === ownerA.user.uid && preservedLead.clientId === clientA,
+    preservedLead.assignedTo === ownerA.user.uid
+      && preservedLead.clientId === clientA
+      && preservedLead.notes === 'Updated synthetic lead',
     'a lead can update other fields while preserving its valid client relationship and assignee',
   );
 
