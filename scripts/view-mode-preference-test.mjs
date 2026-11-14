@@ -1,8 +1,21 @@
 import assert from 'node:assert/strict';
 import {
+  buildViewModeHref,
   readViewModePreference,
+  resolveViewMode,
   writeViewModePreference,
 } from '../src/layouts/view-mode-preference.js';
+
+assert.equal(resolveViewMode('', null), 'mobile');
+assert.equal(resolveViewMode('', 'desktop'), 'desktop', 'saved user choice is honored');
+assert.equal(resolveViewMode('?view=desktop', 'mobile'), 'desktop', 'desktop URL mode is explicit');
+assert.equal(resolveViewMode('?view=mobile', 'desktop'), 'mobile', 'phone URL mode is explicit');
+assert.equal(resolveViewMode('?view=invalid', null), 'mobile', 'invalid URL mode falls back to phone');
+assert.equal(
+  buildViewModeHref('/claims', '?filter=open&view=mobile', '#list', 'desktop'),
+  '/claims?filter=open&view=desktop#list',
+  'view links preserve route filters and anchors',
+);
 
 function withStorage(storage, run) {
   const previous = globalThis.window;
