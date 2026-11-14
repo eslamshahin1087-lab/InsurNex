@@ -72,6 +72,8 @@ The merged Rules currently enforce the following same-organization top-level rea
 | `revenue`, `expenses`, `commissions` | Owner, Admin, Finance |
 | Copilot conversations/messages | Owning user only, with parent-conversation checks |
 
+The current `/operations` screen is a combined workspace: its initial load requests Client 360 summaries, documents, RFQs, claims, policies, tasks and operations records together. Until the screen separates role-specific data loads, its route and navigation are limited to Owner, Admin and Broker, the intersection that can read all required records. Claims retains access to its claims workspace and its permitted operations collections; Firestore Rules remain the security boundary.
+
 Sales and Claims do not have direct access to the legacy mixed-sensitivity `clients` record. Claims access to linked policy metadata and claim-category documents is currently organization-scoped; per-claim assignment checks are a future gate. Finance can read finance collections, not full client profiles or claim narratives. The new P1-E compatibility adapter keeps this same role boundary, preflights active profile/role/tenant before client reads, and returns an allowlisted base summary to the Clients index. The Client 360 compatibility read remains Owner/Admin/Broker only. This is application-level data minimization, not Firestore field-level redaction; the entire legacy document is still returned by Firestore to an authorized Client 360 reader until sensitive fields are physically separated or served through a trusted projection.
 
 A current Emulator read matrix is being expanded to test each allowed/denied direct get and tenant-scoped query, as well as role-appropriate create paths. A green test means these exact Rules passed against the demo emulator; it does not certify staging/production configuration.
@@ -98,6 +100,7 @@ The current rule changes enforce organization membership plus action/collection 
 
 Important residual risks before production:
 - The current `clients/{clientId}` document still contains mixed-sensitivity fields. Firestore Rules cannot hide selected fields in a readable document. Claims is now denied direct reads, queries and client-timeline reads on this legacy record; its claim workspace uses the client/policy snapshot and claim-category document metadata instead. Owner/Admin/Broker remain the only roles with full Client 360 access until a safe base-client projection and per-class records are implemented. Sales/Finance/Staff remain denied.
+- The portfolio Analytics dashboard reads clients, policies, claims, leads and tasks together. Because no other organization role can read every source collection under the current Firestore Rules, the dashboard route is limited to Owner/Admin/Broker and hidden from other roles. Local medical-file analysis routes remain separate from this database-backed portfolio dashboard.
 - Current policies/claims/documents remain organization-scoped rather than fully assignment-scoped. A later phase must validate every foreign-key relationship (claim→policy/client, document→client/claim) server/rules-side and add assigned-record restrictions.
 - Platform Admin still has deliberate access to platform-management collections such as users, organization metadata, plans and subscription records. It must not be used as a general tenant-record access role.
 - auditLogs, data export/deletion, retention enforcement, and client-consent flows are not implemented by the current code changes.
@@ -105,3 +108,4 @@ Important residual risks before production:
 - Firebase Functions/Anthropic AI deployment is not made free-tier compatible by this PR. Sensitive AI calls stay out of scope until a suitable runtime and data-handling posture are approved.
 
 No production rules, hosting, function, or storage deployment was performed as part of PR #48.
+
