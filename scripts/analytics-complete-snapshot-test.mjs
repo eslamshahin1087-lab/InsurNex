@@ -43,7 +43,13 @@ assert.equal(result.won, 1);
 assert.equal(result.lost, 1);
 assert.equal(result.winRate, 50);
 assert.equal(result.openTasks, 1);
+assert.equal(result.tasks, 2);
+assert.equal(result.completedTasks, 1);
+assert.equal(result.taskCompletionRate, 50);
 assert.equal(result.generatedAt, '2026-11-14T00:00:00.000Z');
+
+const emptyTasks = buildAnalyticsSnapshot({ clients: [], policies: [], claims: [], leads: [], tasks: [] });
+assert.equal(emptyTasks.taskCompletionRate, 0, 'task completion rate is zero when there are no tasks');
 
 const service = await readFile(new URL('../src/features/analytics/analytics.service.ts', import.meta.url), 'utf8');
 assert.match(service, /startAfter\(cursor\)/, 'analytics service paginates with a document cursor');
@@ -53,4 +59,7 @@ assert.match(service, /ANALYTICS_PAGE_SIZE = 500/, 'page size is an implementati
 const page = await readFile(new URL('../src/pages/AnalyticsPage.tsx', import.meta.url), 'utf8');
 assert.doesNotMatch(page, /const trend = \[/, 'analytics must not show a fabricated trend');
 assert.match(page, /premiumByCurrency/, 'policy premium totals remain separated by currency');
+assert.match(page, /inx-analytics-performance-grid/, 'analytics exposes a responsive performance indicator grid');
+assert.match(page, /taskCompletionRate/, 'task completion indicator comes from complete task data');
+assert.match(page, /progressLabel/, 'performance indicators explain what each percentage measures');
 console.log('Complete analytics snapshot tests passed.');
