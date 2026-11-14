@@ -2,17 +2,26 @@ import { useEffect, useState } from 'react';
 import {
   Bell,
   Bot,
+  Building2,
   CalendarDays,
   CheckCircle2,
+  FilePlus,
+  FileText,
   ListTodo,
   Moon,
   RefreshCcw,
   Search,
+  Sparkles,
   ShieldCheck,
   Sun,
+  ShieldAlert,
   TrendingUp,
+  UserPlus,
+  Users,
   Wallet,
+  MoreHorizontal,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import {
@@ -53,15 +62,15 @@ const priorityTone: Record<string, string> = {
   urgent: 'tone-danger',
 };
 
-const shortcuts: { to: string; label: string; emoji: string; tone: string; feature: PlatformFeatureKey | null }[] = [
-  { to: '/clients', label: 'العملاء', emoji: '👥', tone: '', feature: 'clients' },
-  { to: '/policies', label: 'الوثائق', emoji: '📄', tone: 'tone-cyan', feature: 'policies' },
-  { to: '/claims', label: 'المطالبات', emoji: '⚠️', tone: 'tone-success', feature: 'claims' },
-  { to: '/renewals', label: 'التجديدات', emoji: '🔄', tone: 'tone-warning', feature: 'renewals' },
-  { to: '/tasks', label: 'المهام', emoji: '✅', tone: '', feature: 'tasks' },
-  { to: '/insurers', label: 'الشركات', emoji: '🏢', tone: 'tone-cyan', feature: 'insurers' },
-  { to: '/finance', label: 'المالية', emoji: '💰', tone: 'tone-success', feature: 'finance' },
-  { to: '/more', label: 'المزيد', emoji: '⋯', tone: 'tone-purple', feature: null },
+const shortcuts: { to: string; label: string; Icon: LucideIcon; tone: string; feature: PlatformFeatureKey | null }[] = [
+  { to: '/clients', label: 'العملاء', Icon: Users, tone: '', feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', Icon: FileText, tone: 'tone-cyan', feature: 'policies' },
+  { to: '/claims', label: 'المطالبات', Icon: ShieldAlert, tone: 'tone-success', feature: 'claims' },
+  { to: '/renewals', label: 'التجديدات', Icon: RefreshCcw, tone: 'tone-warning', feature: 'renewals' },
+  { to: '/tasks', label: 'المهام', Icon: ListTodo, tone: '', feature: 'tasks' },
+  { to: '/insurers', label: 'الشركات', Icon: Building2, tone: 'tone-cyan', feature: 'insurers' },
+  { to: '/finance', label: 'المالية', Icon: Wallet, tone: 'tone-success', feature: 'finance' },
+  { to: '/more', label: 'المزيد', Icon: MoreHorizontal, tone: 'tone-purple', feature: null },
 ];
 
 export default function DashboardPage() {
@@ -267,22 +276,22 @@ export default function DashboardPage() {
         <div className="inx-shortcut-row inx-shortcut-carousel inx-dashboard-shortcuts" style={{ marginBottom: 18 }}>
           <div className="inx-shortcut-track">
             <div className="inx-shortcut-sequence">
-              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
+              {visibleShortcuts.map(({ to, label, Icon, tone }) => (
                 <Link key={to} to={to} className="inx-shortcut-card">
-                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
+                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
                   <span className="label">{label}</span>
                 </Link>
               ))}
             </div>
             <div className="inx-shortcut-sequence" aria-hidden="true">
-              {visibleShortcuts.map(({ to, label, emoji, tone }) => (
+              {visibleShortcuts.map(({ to, label, Icon, tone }) => (
                 <Link
                   key={`inx-carousel-copy-${to}`}
                   to={to}
                   className="inx-shortcut-card"
                   tabIndex={-1}
                 >
-                  <span className={`inx-3d-icon ${tone}`}>{emoji}</span>
+                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
                   <span className="label">{label}</span>
                 </Link>
               ))}
@@ -295,6 +304,7 @@ export default function DashboardPage() {
           <div className="hero-head">
             <div className="title-group">
               <span className="dot" />
+              <Sparkles className="inx-animated-icon" size={16} aria-hidden="true" />
               <span>لوحة الأداء</span>
             </div>
             <div className="actions">
@@ -414,8 +424,8 @@ export default function DashboardPage() {
             {showRenewalMetric && (
               <article className="inx-chart-card">
                 <div className="chart-head">
-                  <span className="label">اتجاه التجديدات</span>
-                  <span className="delta up">↗ صاعد</span>
+                  <span className="label">مواعيد التجديد القادمة</span>
+                  <span className="delta up">الأقرب أولاً</span>
                 </div>
                 {renewalTrend.length > 0 ? (
                   <div style={{ color: 'var(--inx-blue)' }}>
@@ -437,7 +447,7 @@ export default function DashboardPage() {
                     color: 'var(--inx-muted)',
                   }}
                 >
-                  <span>آخر 8 وثائق</span>
+                  <span>أقرب 8 وثائق</span>
                   <span>{data.renewals.length} عميل</span>
                 </div>
               </article>
@@ -551,10 +561,10 @@ export default function DashboardPage() {
               gap: 10,
             }}
           >
-            {showClientMetric && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm">👤</span><span className="label">إضافة عميل</span></Link>}
-            {showPolicyMetric && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan">📄</span><span className="label">إضافة وثيقة</span></Link>}
-            {showClaimsMetric && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success">⚠️</span><span className="label">إضافة مطالبة</span></Link>}
-            {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning">✅</span><span className="label">إضافة مهمة</span></Link>}
+            {showClientMetric && <Link to="/clients" className="inx-shortcut-card"><span className="inx-3d-icon sm inx-animated-icon"><UserPlus size={18} aria-hidden="true" /></span><span className="label">إضافة عميل</span></Link>}
+            {showPolicyMetric && <Link to="/policies" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-cyan inx-animated-icon"><FilePlus size={18} aria-hidden="true" /></span><span className="label">إضافة وثيقة</span></Link>}
+            {showClaimsMetric && <Link to="/claims" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-success inx-animated-icon"><ShieldAlert size={18} aria-hidden="true" /></span><span className="label">إضافة مطالبة</span></Link>}
+            {(settings.features.tasks && planFeatures.tasks) && <Link to="/tasks" className="inx-shortcut-card"><span className="inx-3d-icon sm tone-warning inx-animated-icon"><CheckCircle2 size={18} aria-hidden="true" /></span><span className="label">إضافة مهمة</span></Link>}
           </div>
           </>
         )}
