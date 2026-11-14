@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bot, Maximize2, MessageSquare, Minimize2, Send, X } from 'lucide-react';
+import { Maximize2, MessageSquare, Minimize2, Send, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/auth-context';
 import ChatMessage from './ChatMessage';
+import InsurNexRobot from '../../components/InsurNexRobot';
 import SuggestedPrompts from './SuggestedPrompts';
 import {
   createConversation,
@@ -321,7 +322,7 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
         onClick={() => setMinimized(false)}
         aria-label="فتح المساعد الذكي"
       >
-        <Bot size={20} />
+        <InsurNexRobot size={30} className="inx-robot-icon" />
         <span>المساعد الذكي</span>
         <Maximize2 size={14} />
       </button>,
@@ -334,8 +335,8 @@ export default function CopilotFloatingPanel({ onClose }: Props) {
     <div className="copilot-floating" dir="rtl">
       <header className="copilot-floating-head">
         <div className="title">
-          <span className="inx-icon-circle tone-cyan" style={{ width: 32, height: 32 }}>
-            <Bot size={16} />
+          <span className="inx-icon-circle tone-cyan inx-copilot-robot-avatar" style={{ width: 38, height: 38 }}>
+            <InsurNexRobot size={38} />
           </span>
           <div>
             <strong>InsurNex AI</strong>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Bell,
-  Bot,
   Home,
   LogOut,
   Moon,
@@ -20,6 +19,7 @@ import { useAuth, canAccessClient360, canAccessOperations } from '../features/au
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
+import InsurNexRobot from '../components/InsurNexRobot';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
@@ -189,7 +189,7 @@ export default function AppLayout() {
           aria-label="مساعد InsurNex الذكي"
           title="مساعد InsurNex الذكي"
         >
-          <Bot size={22} />
+          <InsurNexRobot size={34} className="inx-robot-icon" />
         </button>
       )}
 
@@ -220,4 +220,3 @@ export default function AppLayout() {
     </div>
   );
 }
-
