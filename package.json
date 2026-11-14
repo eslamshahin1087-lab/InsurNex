@@ -57,7 +57,8 @@
     "test:client-audit-foundation": "node functions/scripts/client-audit-foundation-test.mjs",
     "test:client-capability-resolver": "node functions/scripts/client-capability-resolver-test.mjs",
     "test:copilot-privacy-runtime": "node scripts/copilot-privacy-runtime-test.mjs",
-    "test:medical-ai-privacy": "node scripts/medical-ai-privacy-test.mjs"
+    "test:medical-ai-privacy": "node scripts/medical-ai-privacy-test.mjs",
+    "test:analytics-snapshot": "node scripts/analytics-complete-snapshot-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
