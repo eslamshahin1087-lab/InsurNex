@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
-import { useAuth, canAccessClient360 } from '../features/auth/auth-context';
+import { useAuth, canAccessClient360, canAccessOperations } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
@@ -78,6 +78,7 @@ export default function AppLayout() {
   const visibleNavigation = navigation.filter(
     (item) =>
       (item.to !== '/clients' || canAccessClient360(profile?.role)) &&
+      (item.to !== '/operations' || canAccessOperations(profile?.role)) &&
       (!item.feature ||
         (settings.features[item.feature] && planFeatures[item.feature])),
   );
@@ -229,3 +230,4 @@ export default function AppLayout() {
     </div>
   );
 }
+
