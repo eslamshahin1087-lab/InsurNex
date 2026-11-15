@@ -1,10 +1,37 @@
 /* Final app-wide spacing and brand pass for the phone and desktop workspaces. */
 
 :root {
+  --inx-font-family: 'Inter', 'Alexandria', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
   --inx-brand-navy: #08234c;
   --inx-brand-blue: #126cf3;
   --inx-brand-accent: #18a9f8;
-  --inx-focus-ring: 0 0 0 3px rgba(18, 108, 243, .2);
+  --inx-hero-surface: linear-gradient(125deg, #08234c 0%, #104888 58%, #155a9b 100%);
+  --inx-focus-ring: 0 0 0 3px color-mix(in srgb, var(--inx-brand-blue) 24%, transparent);
+}
+
+:root[data-theme='dark'] {
+  --inx-brand-navy: #f0f6ff;
+  --inx-brand-blue: #78adff;
+  --inx-brand-accent: #55c8fa;
+  --inx-hero-surface: linear-gradient(125deg, #06162c 0%, #0b2545 58%, #123c64 100%);
+  --inx-focus-ring: 0 0 0 3px color-mix(in srgb, var(--inx-brand-blue) 34%, transparent);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--inx-font-family) !important;
+}
+
+#root .mobile-shell,
+#root .mobile-shell :not(code):not(pre):not(kbd):not(samp),
+#root .admin-shell,
+#root .admin-shell :not(code):not(pre):not(kbd):not(samp) {
+  font-family: var(--inx-font-family) !important;
+  font-synthesis: none;
 }
 
 #root .inx-logo-lockup {
@@ -38,8 +65,8 @@
 }
 
 #root .inx-logo-wordmark {
-  color: #10264a !important;
-  font-family: Inter, 'Segoe UI', Arial, sans-serif !important;
+  color: var(--inx-brand-navy) !important;
+  font-family: var(--inx-font-family) !important;
   font-size: 23px !important;
   font-weight: 800 !important;
   letter-spacing: -.055em !important;
@@ -48,7 +75,7 @@
 }
 
 #root .inx-logo-wordmark > span {
-  color: #126cf3 !important;
+  color: var(--inx-brand-blue) !important;
 }
 
 #root .inx-logo-stacked {
@@ -141,7 +168,7 @@
 }
 
 #root .mobile-shell .app-body .inx-dashboard-header .eyebrow {
-  color: #126cf3 !important;
+  color: var(--inx-brand-blue) !important;
 }
 
 #root .mobile-shell .app-body .inx-dashboard-header h2 {
@@ -356,6 +383,12 @@
   border-color: rgba(106, 167, 255, .2) !important;
   background: #153658 !important;
   color: #9bc3ff !important;
+}
+
+:root[data-theme='dark'] #root .mobile-shell .app-body .inx-hero-panel .hero-cta {
+  border: 1px solid rgba(155, 195, 255, .28) !important;
+  background: #17477a !important;
+  color: #f4faff !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
