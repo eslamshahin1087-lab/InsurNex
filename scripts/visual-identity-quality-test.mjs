@@ -50,9 +50,11 @@ const markArtwork = read('public/branding/insurnex-mark.svg');
 const appPolish = read('src/theme/app-visual-polish.css');
 const adminPage = read('src/pages/AdminPage.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
-assert.ok(layout.includes('resolveViewMode(location.search, null)'), 'the URL controls presentation and the default is phone');
-assert.doesNotMatch(layout, /view-mode-links|view-mode-link|viewModeHref|selectViewMode|readViewModePreference|writeViewModePreference|buildViewModeHref/,
-  'presentation is opened from its own URL instead of an in-app switch');
+assert.ok(layout.includes('useState(() => resolveViewMode(location.search, null))'), 'the URL sets the initial presentation and defaults to phone');
+assert.match(layout, /useLayoutEffect\(\(\) => \{[\s\S]*?buildViewModeHref\(location\.pathname, location\.search, location\.hash, 'desktop'\)/,
+  'desktop presentation must remain in the URL after navigation to every app page');
+assert.doesNotMatch(layout, /view-mode-links|view-mode-link|selectViewMode/,
+  'presentation remains URL-controlled without an in-app mode switch');
 assert.ok(layout.includes("const isDashboardPage = location.pathname === '/';"), 'dashboard chrome has one greeting and one action row');
 assert.ok(layout.includes('{!isDashboardPage && ('), 'shared greeting and theme/notification actions are hidden on dashboard');
 const { statSync } = await import('node:fs');
