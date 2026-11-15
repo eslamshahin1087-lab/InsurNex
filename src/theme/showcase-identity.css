@@ -296,6 +296,12 @@ body {
   background: var(--inx-gradient-soft) !important;
   box-shadow: 0 12px 28px rgba(18, 108, 243, .1) !important;
 }
+#root .mobile-shell .inx-hero-panel {
+  border-color: color-mix(in srgb, var(--app-blue) 32%, var(--app-line)) !important;
+  background: var(--inx-hero-surface) !important;
+  color: #f4faff !important;
+  box-shadow: var(--app-shadow-strong) !important;
+}
 #root .mobile-shell .inx-hero-panel .hero-cta {
   background: var(--app-blue) !important;
   color: #fff !important;
