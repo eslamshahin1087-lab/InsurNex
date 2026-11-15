@@ -63,6 +63,22 @@ const priorityTone: Record<string, string> = {
   urgent: 'tone-danger',
 };
 
+const INTERNAL_DISPLAY_NAMES = new Set([
+  'admin', 'broker', 'claims', 'client', 'clients', 'default', 'finance', 'lead',
+  'leads', 'owner', 'platform-admin', 'platform_admin', 'sales', 'staff', 'unknown',
+  'user', 'users',
+]);
+
+const roleLabels: Record<string, string> = {
+  owner: 'مالك المؤسسة',
+  admin: 'مسؤول المؤسسة',
+  broker: 'وسيط تأمين',
+  sales: 'فريق المبيعات',
+  claims: 'فريق المطالبات',
+  finance: 'الإدارة المالية',
+  staff: 'عضو الفريق',
+};
+
 const shortcuts: { to: string; label: string; Icon: LucideIcon; tone: string; feature: PlatformFeatureKey | null }[] = [
   { to: '/clients', label: 'العملاء', Icon: Users, tone: '', feature: 'clients' },
   { to: '/policies', label: 'الوثائق', Icon: FileText, tone: 'tone-cyan', feature: 'policies' },
@@ -134,13 +150,12 @@ export default function DashboardPage() {
     });
   }, [data, profile]);
 
-  const firstName = profile?.displayName?.split(' ')[0] || 'أهلاً';
-  const roleLabel =
-    profile?.role === 'owner'
-      ? 'مالك المؤسسة'
-      : profile?.role === 'admin'
-      ? 'أدمن'
-      : profile?.role || 'مستخدم';
+  const nameCandidate = profile?.displayName?.trim().split(/\s+/)[0];
+  const normalizedName = nameCandidate?.toLowerCase().replace(/\s+/g, '-');
+  const firstName = nameCandidate && normalizedName && !INTERNAL_DISPLAY_NAMES.has(normalizedName)
+    ? nameCandidate
+    : 'بك';
+  const roleLabel = profile?.role ? roleLabels[profile.role] ?? 'مستخدم' : 'مستخدم';
 
   const clientsPct = data.clients === null ? 0 : Math.min(
     100,
@@ -296,22 +311,9 @@ export default function DashboardPage() {
         {/* SHORTCUTS */}
         <div className="inx-shortcut-row inx-shortcut-carousel inx-dashboard-shortcuts" style={{ marginBottom: 18 }}>
           <div className="inx-shortcut-track">
-            <div className="inx-shortcut-sequence">
+            <div className="inx-shortcut-sequence" role="group" aria-label="اختصارات InsurNex">
               {visibleShortcuts.map(({ to, label, Icon, tone }) => (
                 <Link key={to} to={to} className="inx-shortcut-card">
-                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
-                  <span className="label">{label}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="inx-shortcut-sequence" aria-hidden="true">
-              {visibleShortcuts.map(({ to, label, Icon, tone }) => (
-                <Link
-                  key={`inx-carousel-copy-${to}`}
-                  to={to}
-                  className="inx-shortcut-card"
-                  tabIndex={-1}
-                >
                   <span className={`inx-3d-icon ${tone} inx-animated-icon`}><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
                   <span className="label">{label}</span>
                 </Link>
@@ -593,3 +595,4 @@ export default function DashboardPage() {
     </main>
   );
 }
+

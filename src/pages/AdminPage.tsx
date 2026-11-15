@@ -18,6 +18,7 @@ import {
   listCodes,
 } from '../features/subscription/subscription.service';
 import type { OrganizationSubscription } from '../features/subscription/subscription.types';
+import Logo from '../components/Logo';
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -115,11 +116,7 @@ export default function AdminPage() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/branding/logo-light.png"
-              alt="InsurNex"
-              style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 12 }}
-            />
+            <Logo alt="InsurNex" variant="mark" className="admin-page-logo" />
             <div>
               <span className="eyebrow">Admin Panel</span>
               <h2 style={{ margin: '2px 0 0', fontSize: 20, color: 'var(--inx-text)' }}>
@@ -249,3 +246,4 @@ export default function AdminPage() {
     </main>
   );
 }
+

@@ -43,11 +43,15 @@ const claimWorkflowService = read('src/features/claims/claim-workflow.service.ts
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
+const appPolish = read('src/theme/app-visual-polish.css');
+const adminPage = read('src/pages/AdminPage.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
 assert.ok(layout.includes('resolveViewMode(location.search, viewModeOverride)'), 'phone layout is the default unless explicitly changed');
-assert.ok(layout.includes('buildViewModeHref('), 'desktop mode is exposed as a shareable link');
-assert.ok(layout.includes('to={viewModeHref}'), 'view selection updates the current route link');
-assert.ok(layout.includes('writeViewModePreference(nextMode)'), 'chosen presentation persists across navigation');
+assert.ok(layout.includes("to={viewModeHref('mobile')}"), 'phone mode has a dedicated shareable link');
+assert.ok(layout.includes("to={viewModeHref('desktop')}"), 'desktop mode has a dedicated shareable link');
+assert.ok(layout.includes("selectViewMode('mobile')"), 'phone selection persists across navigation');
+assert.ok(layout.includes("selectViewMode('desktop')"), 'desktop selection persists across navigation');
+assert.ok(layout.includes('view-mode-links'), 'both presentation links are shown together');
 const { statSync } = await import('node:fs');
 
 assert.match(layout, /INTERNAL_DISPLAY_NAMES/, 'internal route/role slugs must not be used as a personal greeting');
@@ -81,6 +85,11 @@ assert.doesNotMatch(dashboard, /\p{Extended_Pictographic}/u, 'dashboard shortcut
 assert.match(analytics, /inx-analytics-performance-grid/, 'analytics must show actual performance indicators');
 assert.match(showcaseStyles, /@media \(prefers-reduced-motion: reduce\)/, 'animated identity icons respect reduced-motion settings');
 assert.match(showcaseStyles, /@keyframes inx-icon-drift/, 'the identity provides a subtle animated icon treatment');
+assert.match(appPolish, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'dashboard shortcuts use a balanced phone grid');
+assert.match(appPolish, /grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)/, 'dashboard shortcuts expand for desktop');
+assert.match(appPolish, /white-space: nowrap/, 'mode links remain readable without wrapping');
+assert.equal((dashboard.match(/className="inx-shortcut-sequence"/g) || []).length, 1,
+  'dashboard shortcuts must not render a duplicate carousel row');
 assert.match(robot, /viewBox="0 0 120 120"/, 'the digital assistant mascot is a scalable vector asset');
 assert.match(robot, /useId\(\)/, 'robot instances keep their SVG gradients isolated');
 assert.match(dashboard, /inx-insurtech-ai-promo/, 'the mobile dashboard introduces InsurNex AI with its robot mascot');
@@ -88,6 +97,7 @@ assert.match(copilotPanel, /InsurNexRobot/, 'the assistant uses the shared Insur
 assert.match(showcaseStyles, /@keyframes inx-robot-hover/, 'the robot uses restrained idle motion');
 assert.match(showcaseStyles, /inx-insurtech-ai-promo::before/, 'the AI card uses a subtle digital network field');
 assert.ok(app.indexOf('mobile-experience.css') > app.indexOf('landing.css'), 'mobile ergonomics layer must load after legacy page themes');
+assert.ok(main.indexOf('app-visual-polish.css') > main.indexOf('showcase-identity.css'), 'final spacing and brand styles must load last');
 assert.ok(app.indexOf('dashboard-mobile.css') > app.indexOf('mobile-experience.css'), 'dashboard mobile layer must load after shared mobile ergonomics styles');
 assert.match(dashboard, /insurnex-dashboard-page/, 'dashboard must have an isolated responsive styling scope');
 for (const className of ['inx-dashboard-header', 'inx-dashboard-scope-row', 'inx-dashboard-shortcuts', 'inx-dashboard-hero', 'inx-dashboard-charts', 'inx-dashboard-donut', 'inx-dashboard-quick-actions', 'inx-dashboard-list']) {
@@ -218,10 +228,14 @@ assert.match(refreshedStyles, /position:\s*sticky !important/, 'desktop navigati
 assert.match(refreshedStyles, /@media \(max-width: 1023px\)/, 'mobile and tablet navigation must retain a responsive bottom bar');
 assert.match(refreshedStyles, /prefers-reduced-motion:\s*reduce/, 'motion preferences must be respected');
 
-assert.match(logo, /BRAND_ARTWORK = '\/branding\/logo-light\.png'/,
-  'the exact supplied transparent brand artwork must be the shared logo source');
-assert.match(logo, /inx-logo-mark-artwork/,
-  'compact header and sidebar marks must use the supplied shield artwork');
+assert.doesNotMatch(logo, /branding\/logo-light\.png|BRAND_ARTWORK/,
+  'the old gold artwork must not be used by the application logo');
+assert.match(logo, /Insur<span>Nex/,
+  'the InsurNex wordmark must remain visible in every logo variant');
+assert.match(logo, /linearGradient/,
+  'the product mark must use the new blue digital identity');
+assert.doesNotMatch(adminPage, /branding\/logo-light\.png/,
+  'the admin dashboard must also use the new InsurNex mark');
 assert.equal(manifest.icons.length, 2, 'PWA manifest must expose both required icon sizes');
 for (const [size, assetPath, pixels] of [
   ['192x192', '/pwa-icon-192.png', 192],
@@ -239,7 +253,5 @@ for (const [size, assetPath, pixels] of [
   assert.equal(png.readUInt32BE(16), pixels, `PWA icon width must be ${pixels}px`);
   assert.equal(png.readUInt32BE(20), pixels, `PWA icon height must be ${pixels}px`);
 }
-assert.ok(statSync(resolve(root, 'public/branding/logo-light.png')).size > 100_000,
-  'the supplied transparent logo asset must remain available for in-app branding');
+console.log('Visual identity, InsurNex wordmark, PWA branding and responsive layout regression checks passed.');
 
-console.log('Visual identity, supplied logo, PWA branding and responsive layout regression checks passed.');
