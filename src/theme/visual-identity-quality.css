@@ -635,7 +635,7 @@
    ===================================================================== */
 
 :root {
-  --inx-brand-navy: #071b37;
+  --inx-brand-navy: #14275e;
   --inx-brand-blue: #2a7be4;
   --inx-brand-gold: var(--inx-brand-blue);
   --inx-brand-gold-soft: #eaf3ff;
@@ -644,19 +644,19 @@
   --inx-navy: #14275e;
   --inx-blue: #2a7be4;
   --inx-cyan: #3d8ef5;
-  --inx-bg: #f4f7fb;
+  --inx-bg: #f2f7fd;
   --inx-surface: #ffffff;
   --inx-surface-2: #f7f9fc;
   --inx-elevated: #ffffff;
-  --inx-border: #dce5ef;
-  --inx-muted: #71839a;
-  --inx-app-muted: #687d95;
-  --inx-text: #10253f;
-  --inx-text-soft: #526982;
+  --inx-border: #dce8f6;
+  --inx-muted: #6b7f9b;
+  --inx-app-muted: #5d7391;
+  --inx-text: #14275e;
+  --inx-text-soft: #526b8f;
   --inx-info: #2a7be4;
-  --inx-info-bg: #edf3f9;
-  --inx-cyan-bg: #eef4f8;
-  --inx-navy-bg: #e9eff5;
+  --inx-info-bg: #eaf3ff;
+  --inx-cyan-bg: #e9f8ff;
+  --inx-navy-bg: #e9f0fd;
   --inx-neutral-bg: #f0f3f7;
   --inx-neutral-text: #526273;
   --inx-gradient: linear-gradient(128deg, #14275e 0%, #1b58c9 58%, #2a7be4 100%);
