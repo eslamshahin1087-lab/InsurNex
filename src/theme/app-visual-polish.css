@@ -2,17 +2,23 @@
 
 :root {
   --inx-font-family: 'Inter', 'Alexandria', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
-  --inx-brand-navy: #08234c;
-  --inx-brand-blue: #126cf3;
-  --inx-brand-accent: #18a9f8;
-  --inx-hero-surface: linear-gradient(125deg, #08234c 0%, #104888 58%, #155a9b 100%);
+  --inx-brand-navy: #14275e;
+  --inx-brand-blue: #2a7be4;
+  --inx-brand-accent: #3d8ef5;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #eaf3ff;
+  --inx-brand-gold-ink: #174b95;
+  --inx-hero-surface: linear-gradient(125deg, #14275e 0%, #1b58c9 58%, #2a7be4 100%);
   --inx-focus-ring: 0 0 0 3px color-mix(in srgb, var(--inx-brand-blue) 24%, transparent);
 }
 
 :root[data-theme='dark'] {
   --inx-brand-navy: #f0f6ff;
   --inx-brand-blue: #78adff;
-  --inx-brand-accent: #55c8fa;
+  --inx-brand-accent: #62c7f4;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #142c4b;
+  --inx-brand-gold-ink: #c8e2ff;
   --inx-hero-surface: linear-gradient(125deg, #06162c 0%, #0b2545 58%, #123c64 100%);
   --inx-focus-ring: 0 0 0 3px color-mix(in srgb, var(--inx-brand-blue) 34%, transparent);
 }
@@ -39,11 +45,36 @@ textarea {
   align-items: center;
   justify-content: flex-start;
   flex: 0 0 auto;
-  gap: 9px;
   width: auto !important;
   min-width: 0;
   direction: rtl;
   text-decoration: none;
+}
+
+#root .inx-logo-image {
+  display: block;
+  flex: 0 0 auto;
+  width: 164px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  filter: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .inx-logo-image-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] #root .inx-logo-image-light {
+  display: none;
+}
+
+:root[data-theme='dark'] #root .inx-logo-image-dark {
+  display: block;
 }
 
 #root .inx-logo-mark {
@@ -52,53 +83,32 @@ textarea {
   flex: 0 0 auto;
   place-items: center;
   width: 42px;
-  height: 42px;
+  height: 52px;
   overflow: visible;
-  border-radius: 12px;
   background: transparent !important;
 }
 
-#root .inx-logo-mark > svg {
+#root .inx-logo-mark-image {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-#root .inx-logo-wordmark {
-  color: var(--inx-brand-navy) !important;
-  font-family: var(--inx-font-family) !important;
-  font-size: 23px !important;
-  font-weight: 800 !important;
-  letter-spacing: -.055em !important;
-  line-height: 1 !important;
-  white-space: nowrap;
-}
-
-#root .inx-logo-wordmark > span {
-  color: var(--inx-brand-blue) !important;
+  object-fit: contain;
 }
 
 #root .inx-logo-stacked {
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  gap: 9px;
-  width: 180px !important;
+  width: min(280px, 82vw) !important;
   margin: 0 auto 28px;
 }
 
-#root .inx-logo-stacked .inx-logo-symbol {
-  width: 54px;
-  height: 54px;
-}
-
-#root .inx-logo-stacked .inx-logo-wordmark {
-  font-size: 29px !important;
+#root .inx-logo-stacked .inx-logo-image {
+  width: 100%;
 }
 
 #root .admin-page-logo {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 56px;
 }
 
 #root .mobile-shell .s8-brand {
@@ -243,7 +253,7 @@ textarea {
   border: 1px solid rgba(18, 108, 243, .14) !important;
   border-radius: 12px;
   background: #eaf3ff !important;
-  color: #126cf3 !important;
+  color: #2a7be4 !important;
   box-shadow: none !important;
 }
 
@@ -283,13 +293,10 @@ textarea {
     gap: 8px !important;
   }
 
-  #root .mobile-shell .s8-brand .inx-logo-mark {
-    width: 34px;
-    height: 34px;
-  }
-
-  #root .mobile-shell .s8-brand .inx-logo-wordmark {
-    font-size: 19px !important;
+  #root .mobile-shell .s8-brand .inx-logo-image {
+    width: 128px;
+    max-width: 128px;
+    max-height: 36px;
   }
 
   #root .mobile-shell .s8-hello strong {
@@ -338,13 +345,10 @@ textarea {
     gap: 5px;
   }
 
-  #root .mobile-shell .s8-brand .inx-logo-mark {
-    width: 31px;
-    height: 31px;
-  }
-
-  #root .mobile-shell .s8-brand .inx-logo-wordmark {
-    font-size: 17px !important;
+  #root .mobile-shell .s8-brand .inx-logo-image {
+    width: 108px;
+    max-width: 108px;
+    max-height: 32px;
   }
 
   #root .mobile-shell .s8-hello {
@@ -373,10 +377,6 @@ textarea {
     min-height: 76px !important;
     padding: 8px 4px !important;
   }
-}
-
-:root[data-theme='dark'] #root .mobile-shell .inx-logo-wordmark {
-  color: #f0f6ff !important;
 }
 
 :root[data-theme='dark'] #root .mobile-shell .app-body .inx-dashboard-shortcuts .inx-3d-icon {

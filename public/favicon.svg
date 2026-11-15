@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="shield-blue" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#18a9f8"/>
-      <stop offset="1" stop-color="#126cf3"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="14" fill="#08234c"/>
-  <path d="M32 5 55 14v17c0 15-9 25-23 31C18 56 9 46 9 31V14L32 5Z" fill="url(#shield-blue)"/>
-  <path d="M21 20h7l15 19V20h5v24h-6L26 27v17h-5V20Z" fill="#fff"/>
+  <rect width="64" height="64" rx="15" fill="#14275E"/>
+  <g transform="translate(9.5 6) scale(.45)">
+    <defs><linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D8EF5"/><stop offset="1" stop-color="#1B58C9"/></linearGradient></defs>
+    <path d="M50 2 L92 17 V54 C92 81 72 100 50 109 C28 100 8 81 8 54 V17 Z" fill="url(#sh)"/>
+    <path d="M50 11 L83 23 V54 C83 75 67 90 50 98 C33 90 17 75 17 54 V23 Z" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.5"/>
+    <g stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none" stroke-linecap="round"><path d="M66 36 H76 V28"/><path d="M34 74 H24 V82"/></g>
+    <circle cx="76" cy="26" r="2.6" fill="#fff"/><circle cx="24" cy="84" r="2.6" fill="#fff"/>
+    <path d="M34 76 V36 L66 76 V36" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#fff" stroke="#1F63D2" stroke-width="3"><circle cx="34" cy="36" r="5"/><circle cx="34" cy="76" r="5"/><circle cx="66" cy="36" r="5"/><circle cx="66" cy="76" r="5"/></g>
+  </g>
 </svg>
-

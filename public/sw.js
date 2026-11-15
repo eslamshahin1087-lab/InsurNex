@@ -1,4 +1,4 @@
-const CACHE_NAME = 'insurnex-static-v2';
+const CACHE_NAME = 'insurnex-static-v3';
 const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = new Set([
   '/offline.html',
@@ -8,6 +8,11 @@ const STATIC_ASSETS = new Set([
   '/pwa-icon-192.png',
   '/pwa-icon-512.png',
   '/favicon.svg',
+  '/branding/insurnex-logo.svg',
+  '/branding/insurnex-logo-dark.svg',
+  '/branding/insurnex-logo-compact.svg',
+  '/branding/insurnex-logo-compact-dark.svg',
+  '/branding/insurnex-mark.svg',
 ]);
 
 self.addEventListener('install', (event) => {

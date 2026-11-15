@@ -99,12 +99,12 @@
 }
 
 
-/* Brand refresh: navy structure, InsurNex gold accents, and calmer surfaces. */
+/* Brand refresh: navy structure, InsurNex blue accents, and calm surfaces. */
 :root {
-  --inx-brand-navy: #071b37;
+  --inx-brand-navy: #14275e;
   --inx-brand-blue: #1e4272;
-  --inx-brand-gold: #d6a447;
-  --inx-brand-gold-soft: #fbf5e8;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #eaf3ff;
 }
 
 #root .mobile-shell {
@@ -629,37 +629,37 @@
 
 /* =====================================================================
    INSURNEX BRAND REFRESH V3
-   Premium brokerage workspace: midnight navy, restrained gold, calm
+   Premium brokerage workspace: InsurNex navy and blue, calm
    surfaces, consistent RTL navigation, and a true wide-screen layout.
    No routes, permissions, data contracts, or business workflows change.
    ===================================================================== */
 
 :root {
-  --inx-brand-navy: #071b37;
-  --inx-brand-blue: #244e78;
-  --inx-brand-gold: #c99a44;
-  --inx-brand-gold-soft: #fbf5e8;
-  --inx-brand-gold-ink: #805b20;
+  --inx-brand-navy: #14275e;
+  --inx-brand-blue: #2a7be4;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #eaf3ff;
+  --inx-brand-gold-ink: #174b95;
 
-  --inx-navy: #0b2038;
-  --inx-blue: #244e78;
-  --inx-cyan: #5b7fa1;
-  --inx-bg: #f4f7fb;
+  --inx-navy: #14275e;
+  --inx-blue: #2a7be4;
+  --inx-cyan: #3d8ef5;
+  --inx-bg: #f2f7fd;
   --inx-surface: #ffffff;
   --inx-surface-2: #f7f9fc;
   --inx-elevated: #ffffff;
-  --inx-border: #dce5ef;
-  --inx-muted: #71839a;
-  --inx-app-muted: #687d95;
-  --inx-text: #10253f;
-  --inx-text-soft: #526982;
-  --inx-info: #244e78;
-  --inx-info-bg: #edf3f9;
-  --inx-cyan-bg: #eef4f8;
-  --inx-navy-bg: #e9eff5;
+  --inx-border: #dce8f6;
+  --inx-muted: #6b7f9b;
+  --inx-app-muted: #5d7391;
+  --inx-text: #14275e;
+  --inx-text-soft: #526b8f;
+  --inx-info: #2a7be4;
+  --inx-info-bg: #eaf3ff;
+  --inx-cyan-bg: #e9f8ff;
+  --inx-navy-bg: #e9f0fd;
   --inx-neutral-bg: #f0f3f7;
   --inx-neutral-text: #526273;
-  --inx-gradient: linear-gradient(128deg, #071b37 0%, #153b62 58%, #28577f 100%);
+  --inx-gradient: linear-gradient(128deg, #14275e 0%, #1b58c9 58%, #2a7be4 100%);
   --inx-gradient-soft: linear-gradient(145deg, #f9fbfd 0%, #edf3f8 100%);
   --inx-shadow-sm: 0 2px 8px rgba(7, 27, 55, 0.045);
   --inx-shadow: 0 8px 24px rgba(7, 27, 55, 0.065);
@@ -690,15 +690,15 @@
 }
 
 :root[data-theme="dark"] {
-  --inx-brand-navy: #071729;
-  --inx-brand-blue: #6f9cc8;
-  --inx-brand-gold: #e0b96f;
-  --inx-brand-gold-soft: #302a20;
-  --inx-brand-gold-ink: #f1d7a4;
+  --inx-brand-navy: #f2f7fd;
+  --inx-brand-blue: #86b9ff;
+  --inx-brand-gold: var(--inx-brand-blue);
+  --inx-brand-gold-soft: #142c4b;
+  --inx-brand-gold-ink: #c8e2ff;
 
-  --inx-navy: #d9e7f5;
-  --inx-blue: #86b2dc;
-  --inx-cyan: #9bc0df;
+  --inx-navy: #edf5ff;
+  --inx-blue: #86b9ff;
+  --inx-cyan: #62c7f4;
   --inx-bg: #081727;
   --inx-surface: #10243a;
   --inx-surface-2: #142b44;
@@ -708,7 +708,7 @@
   --inx-app-muted: #aec0d3;
   --inx-text: #edf4fb;
   --inx-text-soft: #c3d2e1;
-  --inx-info: #9bc1e4;
+  --inx-info: #9bc3ff;
   --inx-info-bg: #193650;
   --inx-cyan-bg: #18344d;
   --inx-navy-bg: #1b3854;

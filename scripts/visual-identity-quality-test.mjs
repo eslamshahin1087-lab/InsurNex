@@ -43,6 +43,10 @@ const claimWorkflowService = read('src/features/claims/claim-workflow.service.ts
 const main = read('src/main.tsx');
 const app = read('src/App.tsx');
 const logo = read('src/components/Logo.tsx');
+const logoArtwork = read('public/branding/insurnex-logo.svg');
+const logoDarkArtwork = read('public/branding/insurnex-logo-dark.svg');
+const compactLogoArtwork = read('public/branding/insurnex-logo-compact.svg');
+const markArtwork = read('public/branding/insurnex-mark.svg');
 const appPolish = read('src/theme/app-visual-polish.css');
 const adminPage = read('src/pages/AdminPage.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
@@ -76,8 +80,8 @@ assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be le
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
 assert.ok(main.indexOf('showcase-identity.css') > main.indexOf('visual-identity-quality.css'), 'showcase identity overrides must apply after existing feature styles');
-assert.match(showcaseStyles, /--inx-brand-blue: #126cf3/);
-assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #08234c/);
+assert.match(showcaseStyles, /--inx-brand-blue: #2a7be4/);
+assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #14275e/);
 assert.match(showcaseStyles, /--inx-brand-gold: var\(--inx-brand-blue\)/, 'legacy gold accent hooks resolve to the new blue palette');
 const dashboardHeroStart = showcaseStyles.indexOf('#root .mobile-shell .inx-hero-panel {');
 const dashboardHeroEnd = showcaseStyles.indexOf('}', dashboardHeroStart);
@@ -235,8 +239,9 @@ const refreshSectionStart = styles.indexOf('INSURNEX BRAND REFRESH V3');
 assert.ok(refreshSectionStart >= 0, 'the premium brand refresh section must be present');
 const refreshedStyles = styles.slice(refreshSectionStart);
 assert.ok(refreshedStyles.length > 0, 'the premium brand refresh layer must be present');
-assert.match(refreshedStyles, /--inx-brand-navy:\s*#071b37/i, 'brand navy token must remain explicit');
-assert.match(refreshedStyles, /--inx-brand-gold:\s*#c99a44/i, 'restrained gold accent token must remain explicit');
+assert.match(refreshedStyles, /--inx-brand-navy:\s*#14275e/i, 'brand navy token must match the InsurNex logo');
+assert.match(refreshedStyles, /--inx-brand-blue:\s*#2a7be4/i, 'brand blue token must match the InsurNex logo');
+assert.match(refreshedStyles, /--inx-brand-gold:\s*var\(--inx-brand-blue\)/i, 'legacy gold hooks must resolve to brand blue');
 assert.match(refreshedStyles, /:root\[data-theme="dark"\]/, 'the refreshed palette must define dark-mode tokens');
 assert.match(refreshedStyles, /grid-template-columns:\s*264px minmax\(0, 1fr\)/, 'desktop must use a dedicated RTL navigation rail and flexible workspace');
 assert.match(refreshedStyles, /display:\s*grid !important/, 'desktop view must override the legacy flex-only shell');
@@ -244,12 +249,20 @@ assert.match(refreshedStyles, /position:\s*sticky !important/, 'desktop navigati
 assert.match(refreshedStyles, /@media \(max-width: 1023px\)/, 'mobile and tablet navigation must retain a responsive bottom bar');
 assert.match(refreshedStyles, /prefers-reduced-motion:\s*reduce/, 'motion preferences must be respected');
 
-assert.doesNotMatch(logo, /branding\/logo-light\.png|BRAND_ARTWORK/,
-  'the old gold artwork must not be used by the application logo');
-assert.match(logo, /Insur<span>Nex/,
-  'the InsurNex wordmark must remain visible in every logo variant');
-assert.match(logo, /linearGradient/,
-  'the product mark must use the new blue digital identity');
+assert.match(logo, /insurnex-logo-compact\.svg/,
+  'the app header must use the supplied InsurNex wordmark artwork');
+assert.match(logo, /insurnex-logo-dark\.svg/,
+  'the logo must remain legible on dark surfaces');
+assert.match(logo, /insurnex-mark\.svg/,
+  'mark-only surfaces must use the supplied digital shield');
+assert.match(logoArtwork, /#14275E[\s\S]*#2A7BE4/,
+  'the supplied logo name must use its navy and bright-blue wordmark colors');
+assert.match(compactLogoArtwork, /#3D8EF5[\s\S]*#1B58C9/,
+  'the compact lockup must retain the shield gradient from the attached artwork');
+assert.match(logoDarkArtwork, /#F2F7FD/,
+  'the dark-theme logo must use a readable light wordmark');
+assert.doesNotMatch(logoArtwork + markArtwork, /#(?:d6a447|c99a44|e0b96f)/i,
+  'active InsurNex logo assets must not contain the retired gold palette');
 assert.doesNotMatch(adminPage, /branding\/logo-light\.png/,
   'the admin dashboard must also use the new InsurNex mark');
 assert.equal(manifest.icons.length, 2, 'PWA manifest must expose both required icon sizes');
