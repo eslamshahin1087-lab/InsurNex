@@ -79,6 +79,21 @@ assert.ok(main.indexOf('showcase-identity.css') > main.indexOf('visual-identity-
 assert.match(showcaseStyles, /--inx-brand-blue: #126cf3/);
 assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #08234c/);
 assert.match(showcaseStyles, /--inx-brand-gold: var\(--inx-brand-blue\)/, 'legacy gold accent hooks resolve to the new blue palette');
+const dashboardHeroStart = showcaseStyles.indexOf('#root .mobile-shell .inx-hero-panel {');
+const dashboardHeroEnd = showcaseStyles.indexOf('}', dashboardHeroStart);
+const dashboardHeroTheme = showcaseStyles.slice(dashboardHeroStart, dashboardHeroEnd + 1);
+assert.match(dashboardHeroTheme, /background: var\(--inx-hero-surface\) !important/,
+  'dashboard performance panel must keep its dark brand surface in light mode');
+assert.match(dashboardHeroTheme, /color: #f4faff !important/,
+  'dashboard performance panel text must retain contrast on the brand surface');
+assert.match(appPolish, /--inx-font-family: 'Inter', 'Alexandria'/,
+  'the application uses one Latin and Arabic type stack');
+assert.match(appPolish, /:root\[data-theme='dark'\][\s\S]*--inx-brand-blue: #78adff/,
+  'dark mode uses its own high-contrast blue accent');
+assert.match(appPolish, /:root\[data-theme='dark'\][\s\S]*--inx-hero-surface: linear-gradient\(125deg, #06162c/,
+  'dark mode defines a separate deep-blue performance panel');
+assert.match(appPolish, /#root \.mobile-shell :not\(code\):not\(pre\)[\s\S]*font-family: var\(--inx-font-family\) !important/,
+  'phone and desktop workspaces share the same interface typeface');
 assert.match(dashboard, /LucideIcon/, 'dashboard shortcuts use consistent product icons');
 assert.doesNotMatch(dashboard, /\p{Extended_Pictographic}/u, 'dashboard shortcuts must not use emoji as UI icons');
 assert.match(analytics, /inx-analytics-performance-grid/, 'analytics must show actual performance indicators');
