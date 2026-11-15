@@ -1,7 +1,7 @@
 /* Final app-wide spacing and brand pass for the phone and desktop workspaces. */
 
 :root {
-  --inx-font-family: 'Inter', 'Alexandria', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --inx-font-family: 'Alexandria', 'Inter', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif;
   --inx-brand-navy: #14275e;
   --inx-brand-blue: #2a7be4;
   --inx-brand-accent: #3d8ef5;
@@ -395,5 +395,129 @@ textarea {
   #root .mobile-shell .app-body .inx-dashboard-shortcuts .inx-shortcut-card {
     transition: none !important;
     transform: none !important;
+  }
+}
+
+/* Shared visual rhythm for every authenticated page. */
+:root {
+  --inx-space-1: 4px;
+  --inx-space-2: 8px;
+  --inx-space-3: 12px;
+  --inx-space-4: 16px;
+  --inx-space-5: 20px;
+  --inx-space-6: 24px;
+  --inx-space-8: 32px;
+  --inx-page-title-size: 28px;
+  --inx-control-radius: 12px;
+}
+
+#root .mobile-shell .app-body .mobile-page {
+  width: 100%;
+  max-width: none;
+  margin-inline: auto;
+  padding: 0 0 var(--inx-space-8);
+}
+
+#root .mobile-shell .app-body .mobile-page > .inx-container {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+#root .mobile-shell.view-mode-desktop .app-body .mobile-page :is(h1, .page-heading h1, .mobile-page-heading h1) {
+  font-size: clamp(25px, 1.85vw, var(--inx-page-title-size)) !important;
+  line-height: 1.3 !important;
+  letter-spacing: -.03em;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.page-heading, .mobile-page-heading) {
+  gap: var(--inx-space-4);
+  margin-bottom: var(--inx-space-6);
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.page-heading p, .mobile-page-heading p) {
+  max-width: 70ch;
+  line-height: 1.65;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.inx-section-head, .inx-card-head, .chart-head) {
+  min-width: 0;
+  gap: var(--inx-space-3);
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.kpi-grid, .dashboard-grid, .profile-grid, .insurer-grid) {
+  gap: var(--inx-space-4);
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.toolbar, .inx-toolbar) {
+  gap: var(--inx-space-3);
+  margin-bottom: var(--inx-space-4);
+}
+
+#root .mobile-shell .app-body :is(.inx-btn, .primary-button, .secondary-button, .icon-button) {
+  border-radius: var(--inx-control-radius);
+}
+
+#root .mobile-shell .app-body :is(input, select, textarea) {
+  min-height: 42px;
+  border-radius: var(--inx-control-radius);
+}
+
+/* Lucide outlines stay crisp and still at rest, with motion on deliberate interaction. */
+#root .mobile-shell svg.lucide {
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: none;
+  animation: none;
+  will-change: auto;
+  transition: color .16s ease, transform .16s ease;
+}
+
+#root .mobile-shell .app-body :is(.inx-3d-icon, .inx-icon-circle) {
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+#root .mobile-shell .app-body :is(.inx-3d-icon, .inx-icon-circle) svg.lucide {
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  #root .mobile-shell :is(.app-tabbar, .s8-actions) a:hover svg.lucide,
+  #root .mobile-shell :is(.app-tabbar, .s8-actions) button:hover svg.lucide,
+  #root .mobile-shell .app-body :is(a, button, [role='button']):hover > svg.lucide {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@media (max-width: 760px) {
+  #root .mobile-shell .app-body .mobile-page {
+    padding: 16px 14px calc(108px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #root .mobile-shell .app-body .mobile-page :is(h1, .page-heading h1, .mobile-page-heading h1) {
+    font-size: 23px !important;
+    line-height: 1.35 !important;
+  }
+
+  #root .mobile-shell .app-body .mobile-page :is(h2, .inx-section-head h2) {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+  }
+
+  #root .mobile-shell .app-body .mobile-page :is(.kpi-grid, .dashboard-grid, .profile-grid, .insurer-grid) {
+    gap: 12px;
+  }
+
+  #root .mobile-shell.view-mode-desktop .app-body .mobile-page {
+    padding-inline: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell svg.lucide {
+    transition: none !important;
   }
 }
