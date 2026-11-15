@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <defs>
-    <linearGradient id="shield-blue" x1="38" y1="17" x2="154" y2="169" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#18a9f8"/>
-      <stop offset="1" stop-color="#126cf3"/>
-    </linearGradient>
-  </defs>
-  <rect width="192" height="192" fill="#08234c"/>
-  <path d="M96 17 154 39v43c0 37-24 66-58 87-34-21-58-50-58-87V39l58-22Z" fill="url(#shield-blue)"/>
-  <path d="M60 60h18l37 47V60h16v72h-16l-39-49v49H60V60Z" fill="#fff"/>
+  <rect width="192" height="192" rx="30" fill="#F2F7FD"/>
+  <g transform="translate(43.5 39) scale(1.05)">
+    <defs><linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D8EF5"/><stop offset="1" stop-color="#1B58C9"/></linearGradient><linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <path d="M50 2 L92 17 V54 C92 81 72 100 50 109 C28 100 8 81 8 54 V17 Z" fill="url(#sh)"/>
+    <path d="M50 2 L92 17 V54 C92 60 91 66 89 71 C70 58 40 52 8 58 C8 57 8 55 8 54 V17 Z" fill="url(#hl)"/>
+    <path d="M50 11 L83 23 V54 C83 75 67 90 50 98 C33 90 17 75 17 54 V23 Z" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+    <g stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none" stroke-linecap="round"><path d="M66 36 H76 V28"/><path d="M34 74 H24 V82"/></g>
+    <circle cx="76" cy="26" r="2.6" fill="#fff"/><circle cx="24" cy="84" r="2.6" fill="#fff"/>
+    <path d="M34 76 V36 L66 76 V36" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#fff" stroke="#1F63D2" stroke-width="3"><circle cx="34" cy="36" r="5"/><circle cx="34" cy="76" r="5"/><circle cx="66" cy="36" r="5"/><circle cx="66" cy="76" r="5"/></g>
+  </g>
 </svg>
-
