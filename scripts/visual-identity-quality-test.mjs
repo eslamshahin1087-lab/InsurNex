@@ -80,8 +80,8 @@ assert.match(styles, /width: 124px !important/, 'desktop brand lockup must be le
 assert.match(styles, /box-shadow: none !important/, 'logo itself must not receive a decorative frame shadow');
 assert.ok(main.indexOf('visual-identity-quality.css') > main.indexOf('insurnex-design-system.css'), 'identity refinements must load after shared design-system overrides');
 assert.ok(main.indexOf('showcase-identity.css') > main.indexOf('visual-identity-quality.css'), 'showcase identity overrides must apply after existing feature styles');
-assert.match(showcaseStyles, /--inx-brand-blue: #126cf3/);
-assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #08234c/);
+assert.match(showcaseStyles, /--inx-brand-blue: #2a7be4/);
+assert.match(showcaseStyles, /view-mode-desktop > \.app-tabbar[\s\S]*background: linear-gradient\(180deg, #14275e/);
 assert.match(showcaseStyles, /--inx-brand-gold: var\(--inx-brand-blue\)/, 'legacy gold accent hooks resolve to the new blue palette');
 const dashboardHeroStart = showcaseStyles.indexOf('#root .mobile-shell .inx-hero-panel {');
 const dashboardHeroEnd = showcaseStyles.indexOf('}', dashboardHeroStart);
