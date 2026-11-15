@@ -94,16 +94,11 @@ export default function AppLayout() {
   const [floatingOpen, setFloatingOpen] = useState(false);
   const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(readViewModePreference);
   const viewMode = resolveViewMode(location.search, viewModeOverride);
-  const nextMode = viewMode === 'mobile' ? 'desktop' : 'mobile';
-  const viewModeHref = buildViewModeHref(
-    location.pathname,
-    location.search,
-    location.hash,
-    nextMode,
-  );
-  const selectViewMode = () => {
-    writeViewModePreference(nextMode);
-    setViewModeOverride(nextMode);
+  const viewModeHref = (mode: 'desktop' | 'mobile') =>
+    buildViewModeHref(location.pathname, location.search, location.hash, mode);
+  const selectViewMode = (mode: 'desktop' | 'mobile') => {
+    writeViewModePreference(mode);
+    setViewModeOverride(mode);
   };
 
   const isCopilotPage = location.pathname === '/copilot';
@@ -125,24 +120,30 @@ export default function AppLayout() {
         </div>
 
         <div className="s8-actions">
-          <Link
-            className="view-mode-toggle"
-            to={viewModeHref}
-            onClick={selectViewMode}
-            aria-label={
-              viewMode === 'mobile'
-                ? 'فتح واجهة سطح المكتب'
-                : 'العودة إلى واجهة الهاتف'
-            }
-            title={viewMode === 'mobile' ? 'واجهة سطح المكتب' : 'واجهة الهاتف'}
-          >
-            {viewMode === 'mobile' ? (
-              <Monitor size={16} aria-hidden="true" />
-            ) : (
+          <div className="view-mode-links" role="group" aria-label="اختر واجهة التطبيق">
+            <Link
+              className="view-mode-link"
+              to={viewModeHref('mobile')}
+              onClick={() => selectViewMode('mobile')}
+              aria-current={viewMode === 'mobile' ? 'page' : undefined}
+              aria-label="فتح InsurNex بواجهة الهاتف"
+              title="واجهة الهاتف"
+            >
               <Smartphone size={16} aria-hidden="true" />
-            )}
-            <span>{viewMode === 'mobile' ? 'سطح المكتب' : 'عرض الهاتف'}</span>
-          </Link>
+              <span>الهاتف</span>
+            </Link>
+            <Link
+              className="view-mode-link"
+              to={viewModeHref('desktop')}
+              onClick={() => selectViewMode('desktop')}
+              aria-current={viewMode === 'desktop' ? 'page' : undefined}
+              aria-label="فتح InsurNex بواجهة سطح المكتب"
+              title="واجهة سطح المكتب"
+            >
+              <Monitor size={16} aria-hidden="true" />
+              <span>سطح المكتب</span>
+            </Link>
+          </div>
 
           <button
             type="button"
@@ -220,3 +221,4 @@ export default function AppLayout() {
     </div>
   );
 }
+
