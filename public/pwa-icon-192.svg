@@ -1,7 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <defs><linearGradient id="gold" x1="25" y1="14" x2="167" y2="178" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE6A0"/><stop offset=".5" stop-color="#F0C35C"/><stop offset="1" stop-color="#B9801D"/></linearGradient><linearGradient id="bg" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse"><stop stop-color="#071B37"/><stop offset="1" stop-color="#102F57"/></linearGradient></defs>
-  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
-  <path d="M96 17 154 39V82C154 119 130 148 96 169 62 148 38 119 38 82V39L96 17Z" stroke="url(#gold)" stroke-width="8" stroke-linejoin="miter" fill="none"/>
-  <path d="M67 126V62L125 126V62" stroke="url(#gold)" stroke-width="11" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
-  <path d="M143 51 151 58M41 58 49 51" stroke="#F8D985" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  <defs>
+    <linearGradient id="shield-blue" x1="38" y1="17" x2="154" y2="169" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18a9f8"/>
+      <stop offset="1" stop-color="#126cf3"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" fill="#08234c"/>
+  <path d="M96 17 154 39v43c0 37-24 66-58 87-34-21-58-50-58-87V39l58-22Z" fill="url(#shield-blue)"/>
+  <path d="M60 60h18l37 47V60h16v72h-16l-39-49v49H60V60Z" fill="#fff"/>
 </svg>
+
