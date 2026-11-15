@@ -38,7 +38,8 @@ assert.doesNotMatch(html, /branding\/logo-light\.png/,
   'page metadata must not expose the retired gold logo');
 assert.match(html, /og:image[\s\S]*pwa-icon-512\.png/,
   'social previews must use the refreshed InsurNex brand icon');
-assert.match(favicon, /#126cf3/i, 'favicon must use the new InsurNex blue');
+assert.match(favicon, /#3d8ef5/i, 'favicon must use the supplied shield gradient');
+assert.match(favicon, /#14275e/i, 'favicon tile must use the supplied InsurNex navy');
 assert.doesNotMatch(favicon, /#ffe6a0|#f0c35c|#b9801d/i,
   'favicon must not contain the retired gold palette');
 assert.match(html, /rel="apple-touch-icon"\s+href="\/pwa-icon-192\.png"/,
@@ -48,7 +49,7 @@ assert.match(html, /name="apple-mobile-web-app-title"\s+content="InsurNex"/,
 assert.match(entry, /navigator\.serviceWorker\.register\(['"]\/sw\.js['"]/,
   'App entry must register the service worker');
 assert.match(worker, /request\.mode === 'navigate'/, 'Worker must handle offline navigation');
-assert.match(worker, /const CACHE_NAME = 'insurnex-static-v2'/,
+assert.match(worker, /const CACHE_NAME = 'insurnex-static-v3'/,
   'updated PWA icons must be loaded into a fresh static asset cache');
 assert.match(worker, /url\.pathname\.startsWith\('\/assets\/'\)/,
   'Worker must restrict runtime caching to static Vite assets');
@@ -62,5 +63,5 @@ for (const iconPath of ['/pwa-icon-192.png', '/pwa-icon-512.png']) {
     `Service worker must precache ${iconPath}`);
 }
 
-console.log('PWA installability, privacy and blue InsurNex identity checks passed.');
+console.log('PWA installability, privacy and supplied InsurNex branding checks passed.');
 
