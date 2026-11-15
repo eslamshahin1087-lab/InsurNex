@@ -2414,26 +2414,11 @@ html { text-rendering: optimizeLegibility; }
   }
 }
 
-/* Subtle application-wide Lucide motion: 1.5px lift and 1deg tilt, staggered gently. */
-@keyframes insurnex-lucide-drift-v29 {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  50% { transform: translate3d(0, -1.5px, 0) rotate(-1deg); }
-}
+/* Utility icons remain still at rest; interactive states add their own motion. */
 #root svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
   transform-origin: center center;
-  animation: insurnex-lucide-drift-v29 3.4s ease-in-out infinite;
-  will-change: transform;
-}
-#root a:nth-of-type(3n) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin),
-#root button:nth-of-type(3n) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
-  animation-delay: -1.1s;
-}
-#root a:nth-of-type(3n + 1) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin),
-#root button:nth-of-type(3n + 1) > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
-  animation-delay: -2.2s;
-}
-#root .app-tabbar.s8-tabbar > a > svg.lucide:not([class*="loader"]):not([class*="spin"]):not(.operations-spin) {
-  animation-duration: 3.8s;
+  animation: none;
+  will-change: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
