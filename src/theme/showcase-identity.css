@@ -326,7 +326,7 @@ body {
 }
 
 #root .mobile-shell.view-mode-desktop > .app-tabbar.s8-tabbar.inx-tabbar-primary {
-  background: linear-gradient(180deg, #08234c 0%, #0c3269 100%) !important;
+  background: linear-gradient(180deg, #14275e 0%, #1b58c9 100%) !important;
   border-inline-end: 1px solid #123d77 !important;
   box-shadow: 6px 0 28px rgba(4, 22, 52, .12) !important;
 }
