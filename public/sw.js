@@ -1,4 +1,4 @@
-const CACHE_NAME = 'insurnex-static-v1';
+const CACHE_NAME = 'insurnex-static-v2';
 const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = new Set([
   '/offline.html',
@@ -65,3 +65,4 @@ self.addEventListener('fetch', (event) => {
     }),
   );
 });
+
