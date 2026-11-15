@@ -92,7 +92,7 @@ assert.match(dashboardHeroTheme, /background: var\(--inx-hero-surface\) !importa
   'dashboard performance panel must keep its dark brand surface in light mode');
 assert.match(dashboardHeroTheme, /color: #f4faff !important/,
   'dashboard performance panel text must retain contrast on the brand surface');
-assert.match(appPolish, /--inx-font-family: 'Inter', 'Alexandria'/,
+assert.match(appPolish, /--inx-font-family: 'Alexandria', 'Inter'/,
   'the application uses one Latin and Arabic type stack');
 assert.match(appPolish, /:root\[data-theme='dark'\][\s\S]*--inx-brand-blue: #78adff/,
   'dark mode uses its own high-contrast blue accent');
