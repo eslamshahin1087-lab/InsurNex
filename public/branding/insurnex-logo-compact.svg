@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 140" width="560" height="140" role="img" aria-label="InsurNex">
+  <defs>
+    <linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D8EF5"/><stop offset="1" stop-color="#1B58C9"/></linearGradient>
+    <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  </defs>
+  <text x="14" y="98" font-family="Poppins, Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="68" textLength="340" lengthAdjust="spacingAndGlyphs"><tspan fill="#14275E">Insur</tspan><tspan fill="#2A7BE4">Nex</tspan></text>
+  <path d="M16 122 H120 L132 108 L146 134 L158 122 H354" fill="none" stroke="#2A7BE4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <circle cx="354" cy="122" r="5" fill="#14275E"/>
+  <g transform="translate(398 14) scale(1.25)">
+    <path d="M50 2 L92 17 V54 C92 81 72 100 50 109 C28 100 8 81 8 54 V17 Z" fill="url(#sh)"/>
+    <path d="M50 2 L92 17 V54 C92 60 91 66 89 71 C70 58 40 52 8 58 C8 57 8 55 8 54 V17 Z" fill="url(#hl)"/>
+    <path d="M50 11 L83 23 V54 C83 75 67 90 50 98 C33 90 17 75 17 54 V23 Z" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+    <g stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none" stroke-linecap="round"><path d="M66 36 H76 V28"/><path d="M34 74 H24 V82"/></g>
+    <circle cx="76" cy="26" r="2.6" fill="#fff"/><circle cx="24" cy="84" r="2.6" fill="#fff"/>
+    <path d="M34 76 V36 L66 76 V36" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#fff" stroke="#1F63D2" stroke-width="3"><circle cx="34" cy="36" r="5"/><circle cx="34" cy="76" r="5"/><circle cx="66" cy="36" r="5"/><circle cx="66" cy="76" r="5"/></g>
+  </g>
+</svg>
