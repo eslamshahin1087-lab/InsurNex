@@ -5,11 +5,9 @@ import {
   LogOut,
   Moon,
   MoreHorizontal,
-  Monitor,
   Settings2,
   ShieldCheck,
   Sparkles,
-  Smartphone,
   Sun,
   Users,
 } from 'lucide-react';
@@ -25,10 +23,7 @@ import type { PlatformFeatureKey } from '../features/admin/platform-settings.ser
 import type { LucideIcon } from 'lucide-react';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 import {
-  buildViewModeHref,
-  readViewModePreference,
   resolveViewMode,
-  writeViewModePreference,
 } from './view-mode-preference';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
@@ -92,15 +87,9 @@ export default function AppLayout() {
   const roleLabel = profile?.role ? roleLabels[profile.role] ?? 'مستخدم' : 'مستخدم';
   const location = useLocation();
   const [floatingOpen, setFloatingOpen] = useState(false);
-  const [viewModeOverride, setViewModeOverride] = useState<'desktop' | 'mobile' | null>(readViewModePreference);
-  const viewMode = resolveViewMode(location.search, viewModeOverride);
-  const viewModeHref = (mode: 'desktop' | 'mobile') =>
-    buildViewModeHref(location.pathname, location.search, location.hash, mode);
-  const selectViewMode = (mode: 'desktop' | 'mobile') => {
-    writeViewModePreference(mode);
-    setViewModeOverride(mode);
-  };
+  const viewMode = resolveViewMode(location.search, null);
 
+  const isDashboardPage = location.pathname === '/';
   const isCopilotPage = location.pathname === '/copilot';
   const isAuthPage =
     location.pathname.startsWith('/login') ||
@@ -113,57 +102,38 @@ export default function AppLayout() {
       <header className="app-header s8-header">
         <div className="s8-brand">
           <Logo alt="InsurNex" />
-          <div className="s8-hello">
-            <strong>أهلاً {firstName}</strong>
-            <small>{roleLabel}</small>
-          </div>
+          {!isDashboardPage && (
+            <div className="s8-hello">
+              <strong>أهلاً {firstName}</strong>
+              <small>{roleLabel}</small>
+            </div>
+          )}
         </div>
 
         <div className="s8-actions">
-          <div className="view-mode-links" role="group" aria-label="اختر واجهة التطبيق">
-            <Link
-              className="view-mode-link"
-              to={viewModeHref('mobile')}
-              onClick={() => selectViewMode('mobile')}
-              aria-current={viewMode === 'mobile' ? 'page' : undefined}
-              aria-label="فتح InsurNex بواجهة الهاتف"
-              title="واجهة الهاتف"
-            >
-              <Smartphone size={16} aria-hidden="true" />
-              <span>الهاتف</span>
-            </Link>
-            <Link
-              className="view-mode-link"
-              to={viewModeHref('desktop')}
-              onClick={() => selectViewMode('desktop')}
-              aria-current={viewMode === 'desktop' ? 'page' : undefined}
-              aria-label="فتح InsurNex بواجهة سطح المكتب"
-              title="واجهة سطح المكتب"
-            >
-              <Monitor size={16} aria-hidden="true" />
-              <span>سطح المكتب</span>
-            </Link>
-          </div>
+          {!isDashboardPage && (
+            <>
+              <button
+                type="button"
+                className="circle-button"
+                onClick={toggleTheme}
+                aria-label="تبديل السمة"
+                title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+              >
+                {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
 
-          <button
-            type="button"
-            className="circle-button"
-            onClick={toggleTheme}
-            aria-label="تبديل السمة"
-            title={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
-          >
-            {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
-          {settings.features.notifications && planFeatures.notifications && (
-            <Link
-              className="circle-button notification-button"
-              to="/notifications"
-              aria-label="الإشعارات"
-              title="الإشعارات"
-            >
-              <Bell size={18} />
-            </Link>
+              {settings.features.notifications && planFeatures.notifications && (
+                <Link
+                  className="circle-button notification-button"
+                  to="/notifications"
+                  aria-label="الإشعارات"
+                  title="الإشعارات"
+                >
+                  <Bell size={18} />
+                </Link>
+              )}
+            </>
           )}
 
           <button
@@ -221,4 +191,3 @@ export default function AppLayout() {
     </div>
   );
 }
-

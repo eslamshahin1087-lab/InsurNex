@@ -46,12 +46,11 @@ const logo = read('src/components/Logo.tsx');
 const appPolish = read('src/theme/app-visual-polish.css');
 const adminPage = read('src/pages/AdminPage.tsx');
 const manifest = JSON.parse(read('public/manifest.webmanifest'));
-assert.ok(layout.includes('resolveViewMode(location.search, viewModeOverride)'), 'phone layout is the default unless explicitly changed');
-assert.ok(layout.includes("to={viewModeHref('mobile')}"), 'phone mode has a dedicated shareable link');
-assert.ok(layout.includes("to={viewModeHref('desktop')}"), 'desktop mode has a dedicated shareable link');
-assert.ok(layout.includes("selectViewMode('mobile')"), 'phone selection persists across navigation');
-assert.ok(layout.includes("selectViewMode('desktop')"), 'desktop selection persists across navigation');
-assert.ok(layout.includes('view-mode-links'), 'both presentation links are shown together');
+assert.ok(layout.includes('resolveViewMode(location.search, null)'), 'the URL controls presentation and the default is phone');
+assert.doesNotMatch(layout, /view-mode-links|view-mode-link|viewModeHref|selectViewMode|readViewModePreference|writeViewModePreference|buildViewModeHref/,
+  'presentation is opened from its own URL instead of an in-app switch');
+assert.ok(layout.includes("const isDashboardPage = location.pathname === '/';"), 'dashboard chrome has one greeting and one action row');
+assert.ok(layout.includes('{!isDashboardPage && ('), 'shared greeting and theme/notification actions are hidden on dashboard');
 const { statSync } = await import('node:fs');
 
 assert.match(layout, /INTERNAL_DISPLAY_NAMES/, 'internal route/role slugs must not be used as a personal greeting');
@@ -87,7 +86,9 @@ assert.match(showcaseStyles, /@media \(prefers-reduced-motion: reduce\)/, 'anima
 assert.match(showcaseStyles, /@keyframes inx-icon-drift/, 'the identity provides a subtle animated icon treatment');
 assert.match(appPolish, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'dashboard shortcuts use a balanced phone grid');
 assert.match(appPolish, /grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)/, 'dashboard shortcuts expand for desktop');
-assert.match(appPolish, /white-space: nowrap/, 'mode links remain readable without wrapping');
+assert.match(appPolish, /@media \(max-width: 640px\)[\s\S]*?#root \.mobile-shell \.s8-header \{[\s\S]*?flex-direction: row !important/,
+  'mobile global header stays in one compact, balanced row');
+assert.doesNotMatch(appPolish, /view-mode-links|view-mode-link/, 'mobile styling contains no presentation switch controls');
 assert.equal((dashboard.match(/className="inx-shortcut-sequence"/g) || []).length, 1,
   'dashboard shortcuts must not render a duplicate carousel row');
 assert.match(robot, /viewBox="0 0 120 120"/, 'the digital assistant mascot is a scalable vector asset');
@@ -254,4 +255,3 @@ for (const [size, assetPath, pixels] of [
   assert.equal(png.readUInt32BE(20), pixels, `PWA icon height must be ${pixels}px`);
 }
 console.log('Visual identity, InsurNex wordmark, PWA branding and responsive layout regression checks passed.');
-
