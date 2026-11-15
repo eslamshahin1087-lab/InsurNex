@@ -48,6 +48,8 @@ assert.match(html, /name="apple-mobile-web-app-title"\s+content="InsurNex"/,
 assert.match(entry, /navigator\.serviceWorker\.register\(['"]\/sw\.js['"]/,
   'App entry must register the service worker');
 assert.match(worker, /request\.mode === 'navigate'/, 'Worker must handle offline navigation');
+assert.match(worker, /const CACHE_NAME = 'insurnex-static-v2'/,
+  'updated PWA icons must be loaded into a fresh static asset cache');
 assert.match(worker, /url\.pathname\.startsWith\('\/assets\/'\)/,
   'Worker must restrict runtime caching to static Vite assets');
 assert.match(worker, /fetch\(request\)\.catch/,
