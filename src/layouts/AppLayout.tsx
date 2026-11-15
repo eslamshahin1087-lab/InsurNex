@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import {
   Bell,
   Home,
@@ -11,7 +11,7 @@ import {
   Sun,
   Users,
 } from 'lucide-react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from '../features/auth/auth.service';
 import { useAuth, canAccessClient360, canAccessOperations } from '../features/auth/auth-context';
 import { useTheme } from '../theme/ThemeProvider';
@@ -22,9 +22,7 @@ import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider'
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
-import {
-  resolveViewMode,
-} from './view-mode-preference';
+import { buildViewModeHref, resolveViewMode } from './view-mode-preference';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
   { to: '/', label: 'الرئيسية', Icon: Home },
@@ -86,8 +84,25 @@ export default function AppLayout() {
   const firstName = getGreetingName(profile?.displayName);
   const roleLabel = profile?.role ? roleLabels[profile.role] ?? 'مستخدم' : 'مستخدم';
   const location = useLocation();
+  const navigate = useNavigate();
   const [floatingOpen, setFloatingOpen] = useState(false);
-  const viewMode = resolveViewMode(location.search, null);
+  const [viewMode, setViewMode] = useState(() => resolveViewMode(location.search, null));
+
+  useLayoutEffect(() => {
+    const requestedViewMode = new URLSearchParams(location.search).get('view');
+
+    if (requestedViewMode === 'desktop' || requestedViewMode === 'mobile') {
+      setViewMode(requestedViewMode);
+      return;
+    }
+
+    if (viewMode === 'desktop') {
+      navigate(
+        buildViewModeHref(location.pathname, location.search, location.hash, 'desktop'),
+        { replace: true },
+      );
+    }
+  }, [location.hash, location.pathname, location.search, navigate, viewMode]);
 
   const isDashboardPage = location.pathname === '/';
   const isCopilotPage = location.pathname === '/copilot';
