@@ -7,6 +7,7 @@ const manifest = JSON.parse(read('public/manifest.webmanifest'));
 const html = read('index.html');
 const entry = read('src/main.tsx');
 const worker = read('public/sw.js');
+const favicon = read('public/favicon.svg');
 
 assert.equal(manifest.display, 'standalone', 'PWA must support standalone display');
 assert.equal(manifest.start_url, '/', 'PWA start URL must remain at app root');
@@ -31,6 +32,15 @@ assert.match(html, /name="viewport"[^>]*viewport-fit=cover/,
   'Viewport must extend into safe areas on supported mobile devices');
 assert.match(html, /rel="manifest"\s+href="\/manifest\.webmanifest"/,
   'HTML must link the web app manifest');
+assert.match(html, /rel="icon"\s+type="image\/svg\+xml"\s+href="\/favicon\.svg"/,
+  'browser tabs must use the new blue InsurNex favicon');
+assert.doesNotMatch(html, /branding\/logo-light\.png/,
+  'page metadata must not expose the retired gold logo');
+assert.match(html, /og:image[\s\S]*pwa-icon-512\.png/,
+  'social previews must use the refreshed InsurNex brand icon');
+assert.match(favicon, /#126cf3/i, 'favicon must use the new InsurNex blue');
+assert.doesNotMatch(favicon, /#ffe6a0|#f0c35c|#b9801d/i,
+  'favicon must not contain the retired gold palette');
 assert.match(html, /rel="apple-touch-icon"\s+href="\/pwa-icon-192\.png"/,
   'HTML must provide an Apple home-screen icon');
 assert.match(html, /name="apple-mobile-web-app-title"\s+content="InsurNex"/,
@@ -50,4 +60,5 @@ for (const iconPath of ['/pwa-icon-192.png', '/pwa-icon-512.png']) {
     `Service worker must precache ${iconPath}`);
 }
 
-console.log('PWA installability and privacy smoke checks passed.');
+console.log('PWA installability, privacy and blue InsurNex identity checks passed.');
+
