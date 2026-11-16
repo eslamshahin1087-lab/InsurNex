@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Bot,
+  CircleDollarSign,
   ClipboardCheck,
+  Clock3,
   FileText,
   Moon,
   Plus,
@@ -280,28 +282,28 @@ export default function ClaimsPage() {
         <div className="inx-kpi-grid inx-claims-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">📋</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><ClipboardCheck size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي المطالبات</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">⏳</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Clock3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.open}</div>
             <small className="inx-kpi-label">قيد المتابعة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">✅</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><ShieldCheck size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.approved}</div>
             <small className="inx-kpi-label">مقبولة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-danger">💰</span>
+              <span className="inx-3d-icon sm tone-danger" aria-hidden="true"><CircleDollarSign size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
               {money(stats.totalAmount, currency)}
