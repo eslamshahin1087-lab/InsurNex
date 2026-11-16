@@ -570,7 +570,7 @@ service cloud.firestore {
           && (collection != 'claimActivities' || claimActivityUpdateHasValidShape())
           && (collection != 'claims' || claimUpdateHasValidShape())
           && (collection != 'leadActivities' || leadActivityUpdateHasValidShape())
-          && (collection != 'leads' || leadUpdateHasValidShape())
+          && (collection != 'leads' || leadUpdateHasValidShape(request.resource.data.diff(resource.data).affectedKeys()))
           && (collection != 'operations' || operationUpdateHasValidShape())
           && (!resource.data.keys().hasAny(['createdBy']) || request.resource.data.createdBy == resource.data.createdBy)
           && (!resource.data.keys().hasAny(['userId']) || request.resource.data.userId == resource.data.userId)
