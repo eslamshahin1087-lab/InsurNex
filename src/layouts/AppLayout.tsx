@@ -19,6 +19,7 @@ import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
 import InsurNexRobot from '../components/InsurNexRobot';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
+import AdsSlideshow from '../features/admin/AdsSlideshow';
 import type { PlatformFeatureKey } from '../features/admin/platform-settings.service';
 import type { LucideIcon } from 'lucide-react';
 import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
@@ -105,6 +106,7 @@ export default function AppLayout() {
   }, [location.hash, location.pathname, location.search, navigate, viewMode]);
 
   const isDashboardPage = location.pathname === '/';
+  const isOperationsPage = location.pathname === '/operations';
   const isCopilotPage = location.pathname === '/copilot';
   const isAuthPage =
     location.pathname.startsWith('/login') ||
@@ -166,6 +168,18 @@ export default function AppLayout() {
       <main className="app-body">
         <Outlet />
       </main>
+
+      {settings.advertising.enabled &&
+        settings.advertising.dashboard &&
+        !isDashboardPage &&
+        !isOperationsPage &&
+        !isAuthPage && (
+          <aside className="inx-global-ad-slot" aria-label="مساحة إعلانية">
+            <div className="inx-global-ad-slot-inner">
+              <AdsSlideshow compact />
+            </div>
+          </aside>
+        )}
 
       {showFab && !floatingOpen && (
         <button
