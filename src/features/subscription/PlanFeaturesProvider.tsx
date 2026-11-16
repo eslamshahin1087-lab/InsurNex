@@ -9,11 +9,12 @@ interface PlanFeaturesContextValue {
 
 const PlanFeaturesContext = createContext<PlanFeaturesContextValue | null>(null);
 
-export function PlanFeaturesProvider({ planId, children }: { planId: string; children: ReactNode }) {
+export function PlanFeaturesProvider({ planId, children, unrestricted = false }: { planId: string; children: ReactNode; unrestricted?: boolean }) {
   const [features, setFeatures] = useState<FeatureEntitlements>(DEFAULT_FEATURE_ENTITLEMENTS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (unrestricted) return;
     let cancelled = false;
     setLoading(true);
     void getPlanById(planId)
@@ -30,9 +31,15 @@ export function PlanFeaturesProvider({ planId, children }: { planId: string; chi
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [planId]);
+  }, [planId, unrestricted]);
 
-  const value = useMemo(() => ({ features, loading }), [features, loading]);
+  const value = useMemo(
+    () => ({
+      features: unrestricted ? DEFAULT_FEATURE_ENTITLEMENTS : features,
+      loading: unrestricted ? false : loading,
+    }),
+    [features, loading, unrestricted],
+  );
   return <PlanFeaturesContext.Provider value={value}>{children}</PlanFeaturesContext.Provider>;
 }
 
