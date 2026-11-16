@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bot, Building2, HeartPulse, Moon, Plus, Scale, Search, ShieldCheck, Sun } from 'lucide-react';
+import { Bot, Building2, HeartPulse, Moon, Plus, Scale, Search, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { createInsurer, listInsurers } from '../features/insurers/insurer.service';
