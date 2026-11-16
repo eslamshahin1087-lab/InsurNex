@@ -1,0 +1,311 @@
+/* InsurNex internal workspace refinement: consistent hierarchy, spacing and contrast. */
+:root {
+  --inx-workspace-radius: 18px;
+  --inx-workspace-card-shadow: 0 7px 20px rgba(19, 53, 91, .065);
+  --inx-workspace-card-shadow-hover: 0 12px 28px rgba(19, 53, 91, .11);
+}
+
+#root .mobile-shell .app-body .mobile-page > .inx-container {
+  width: 100%;
+  max-width: 1440px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.inx-card, .inx-chart-card, .panel, .task-card, .notification-card) {
+  border-radius: var(--inx-workspace-radius) !important;
+  border-color: var(--app-line, var(--inx-border)) !important;
+  box-shadow: var(--inx-workspace-card-shadow) !important;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.inx-card, .inx-chart-card, .panel, .task-card, .notification-card):focus-within {
+  border-color: color-mix(in srgb, var(--app-blue, #1e72d8) 38%, var(--app-line, #d7e2ef)) !important;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.inx-circle-btn, .icon-button) {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--app-line, var(--inx-border)) !important;
+  border-radius: 13px !important;
+  background: var(--app-surface, var(--inx-surface)) !important;
+  color: var(--app-text, var(--inx-text)) !important;
+  box-shadow: 0 2px 7px rgba(18, 54, 93, .06) !important;
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+#root .mobile-shell .app-body .mobile-page .inx-circle-btn.filled {
+  border-color: transparent !important;
+  background: linear-gradient(145deg, #1768c5, #2488f4) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(31, 116, 213, .2) !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid {
+  gap: 14px !important;
+  margin-block-end: 20px !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 13px;
+  row-gap: 3px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 15px !important;
+  border: 1px solid #dce7f3 !important;
+  border-radius: var(--inx-workspace-radius) !important;
+  background: #fff !important;
+  color: #142b49 !important;
+  box-shadow: var(--inx-workspace-card-shadow) !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-head {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  min-width: 0;
+  margin: 0 !important;
+  color: #142b49 !important;
+  font-size: 23px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value[style*="font-size"] {
+  font-size: 15.5px !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-label {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  min-width: 0;
+  margin: 0 !important;
+  color: #63788e !important;
+  font-size: 11.5px !important;
+  font-weight: 600;
+  line-height: 1.4 !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon {
+  display: inline-grid !important;
+  place-items: center;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px;
+  border: 1px solid rgba(35, 101, 170, .14) !important;
+  border-radius: 13px !important;
+  background: #edf5ff !important;
+  color: #1768bd !important;
+  box-shadow: none !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon::after {
+  display: none !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon svg {
+  display: block;
+  width: 18px !important;
+  height: 18px !important;
+  stroke-width: 1.9;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-cyan {
+  background: #e8f7fb !important;
+  color: #117891 !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-success {
+  background: #e9f8f0 !important;
+  color: #12835f !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-warning {
+  background: #fff5e5 !important;
+  color: #a76808 !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-danger {
+  background: #fff0f1 !important;
+  color: #bb4855 !important;
+}
+
+#root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-purple {
+  background: #f2edff !important;
+  color: #704cc1 !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .mobile-page :is(.inx-card, .inx-chart-card, .panel, .task-card, .notification-card) {
+  border-color: rgba(130, 170, 210, .2) !important;
+  box-shadow: 0 10px 24px rgba(0, 8, 20, .19) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) {
+  border-color: rgba(130, 170, 210, .22) !important;
+  background: linear-gradient(155deg, #102a45 0%, #0d223a 100%) !important;
+  color: #f4f8fd !important;
+  box-shadow: 0 10px 24px rgba(0, 8, 20, .2) !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value {
+  color: #f4f8fd !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-label {
+  color: #b9cadd !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon {
+  border-color: rgba(130, 190, 240, .2) !important;
+  background: rgba(39, 108, 172, .2) !important;
+  color: #8fc7ff !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-cyan {
+  background: rgba(31, 144, 170, .19) !important;
+  color: #7de0f2 !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-success {
+  background: rgba(18, 148, 104, .18) !important;
+  color: #73e0b7 !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-warning {
+  background: rgba(197, 135, 29, .18) !important;
+  color: #ffd47c !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-danger {
+  background: rgba(203, 73, 91, .18) !important;
+  color: #ff9ca8 !important;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon.tone-purple {
+  background: rgba(131, 95, 206, .2) !important;
+  color: #d0baff !important;
+}
+
+#root .mobile-shell .app-body .mobile-page :is(.inx-section-head, .inx-card-head, .chart-head) {
+  gap: 12px;
+}
+
+#root .mobile-shell .app-body .mobile-page .inx-chart-card .chart-head {
+  min-height: 34px;
+  margin-block-end: 10px;
+}
+
+:root[data-theme="dark"] #root .mobile-shell .app-body .mobile-page .inx-chart-card :is(.label, .value, .legend-label, .legend-value, small, figcaption) {
+  color: #c3d3e4 !important;
+}
+
+@media (max-width: 760px) {
+  #root .mobile-shell.view-mode-mobile .app-body > main.mobile-page {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-block-end: 18px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) {
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 9px;
+    row-gap: 2px;
+    min-height: 84px;
+    padding: 11px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px;
+    border-radius: 11px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value {
+    font-size: 21px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value[style*="font-size"] {
+    font-size: 15px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-label {
+    font-size: 10.5px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-circle-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 13px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) {
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 7px;
+    min-height: 80px;
+    padding: 9px !important;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid .inx-kpi .inx-3d-icon {
+    width: 31px !important;
+    height: 31px !important;
+    min-width: 31px;
+  }
+
+  #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid > .inx-kpi:has(> .inx-kpi-head) > .inx-kpi-value {
+    font-size: 19px !important;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  #root .mobile-shell .app-body .mobile-page :is(.inx-card, .inx-chart-card, .inx-kpi-grid > .inx-kpi):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--inx-workspace-card-shadow-hover) !important;
+  }
+
+  #root .mobile-shell .app-body .mobile-page :is(.inx-circle-btn, .icon-button):hover {
+    transform: translateY(-1px);
+    border-color: #80baff !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .mobile-shell .app-body .mobile-page *,
+  #root .mobile-shell .app-body .mobile-page *::before,
+  #root .mobile-shell .app-body .mobile-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
