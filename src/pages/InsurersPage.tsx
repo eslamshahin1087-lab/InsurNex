@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bot, Building2, Moon, Plus, Search, Sun } from 'lucide-react';
+import { Bot, Building2, HeartPulse, Moon, Plus, Scale, Search, ShieldCheck, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
 import { createInsurer, listInsurers } from '../features/insurers/insurer.service';
@@ -176,14 +176,14 @@ export default function InsurersPage() {
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">🏢</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><Building2 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{all.length}</div>
             <small className="inx-kpi-label">إجمالي الشركات</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-primary">⚖️</span>
+              <span className="inx-3d-icon sm tone-primary" aria-hidden="true"><Scale size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">
               {all.filter((i) => i.category === 'general').length}
@@ -192,7 +192,7 @@ export default function InsurersPage() {
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">💚</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><HeartPulse size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">
               {all.filter((i) => i.category === 'life' || i.category === 'general_life').length}
@@ -201,7 +201,7 @@ export default function InsurersPage() {
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">➕</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Plus size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{custom.length}</div>
             <small className="inx-kpi-label">شركات مخصصة</small>
