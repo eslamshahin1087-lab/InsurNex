@@ -91,7 +91,13 @@ export default function SubscriptionGate() {
   }
 
   // Admins always have access
-  if (adminState === 'admin') return <Outlet />;
+  if (adminState === 'admin') {
+    return (
+      <PlanFeaturesProvider planId="platform-admin" unrestricted>
+        <Outlet />
+      </PlanFeaturesProvider>
+    );
+  }
 
   if (!subscription) {
     return (
