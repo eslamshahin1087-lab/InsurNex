@@ -1,6 +1,9 @@
 import {
   ArrowRight,
+  BarChart3,
+  Bookmark,
   Bot,
+  CircleDollarSign,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -8,6 +11,7 @@ import {
   Moon,
   Phone,
   Save,
+  ShieldCheck,
   Sun,
   Target,
   XCircle,
@@ -340,7 +344,7 @@ export default function LeadDetailsPage() {
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">🛡️</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><ShieldCheck size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
               {lead.insuranceType || '—'}
@@ -349,7 +353,7 @@ export default function LeadDetailsPage() {
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">💰</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CircleDollarSign size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
               {Number(lead.estimatedValue || 0).toLocaleString('ar-EG')} ج.م
@@ -358,14 +362,14 @@ export default function LeadDetailsPage() {
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">📊</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><BarChart3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{acts.length}</div>
             <small className="inx-kpi-label">نشاطات مسجلة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-purple">📌</span>
+              <span className="inx-3d-icon sm tone-purple" aria-hidden="true"><Bookmark size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
               {LEAD_SOURCE_LABELS[lead.source]}
