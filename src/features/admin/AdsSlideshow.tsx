@@ -48,8 +48,6 @@ export default function AdsSlideshow({ autoPlayMs = 5000, compact = false }: Ads
     setIndex((i) => (i - 1 + ads.length) % ads.length);
   }
 
-  const current = ads[index];
-
   function handleClick(ad: Ad) {
     if (ad.linkUrl) {
       window.open(ad.linkUrl, '_blank', 'noopener,noreferrer');
