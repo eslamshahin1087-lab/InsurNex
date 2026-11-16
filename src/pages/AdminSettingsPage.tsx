@@ -134,10 +134,10 @@ export default function AdminSettingsPage() {
         <span className="inx-badge inx-badge-neutral">توزيع العرض</span>
       </div>
       <p style={{ marginTop: 0, color: 'var(--inx-muted)', fontSize: 12, lineHeight: 1.8 }}>
-        إدارة محتوى الإعلانات تبقى في صفحة «الإعلانات». تتحكم هذه الإعدادات في تفعيل المساحة ومكان العرض.
+        إدارة المحتوى في صفحة «الإعلانات». تظهر إعلانات الرئيسية أيضًا كمساحة مختصرة في الصفحات الداخلية، بينما يظل مركز العمليات بإعداد مستقل.
       </p>
       <label style={toggleRowStyle}><input type="checkbox" checked={form.advertising.enabled} onChange={(e) => updateAdvertising('enabled', e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--inx-blue)' }} /><span><b style={{ display: 'block', fontSize: 13 }}>تفعيل الإعلانات في التطبيق</b><small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>إيقاف الخيار يخفي المساحات دون حذف إعلانات الإدارة.</small></span></label>
-      <label style={toggleRowStyle}><input type="checkbox" checked={form.advertising.dashboard} disabled={!form.advertising.enabled} onChange={(e) => updateAdvertising('dashboard', e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--inx-blue)' }} /><span><b style={{ display: 'block', fontSize: 13 }}>الصفحة الرئيسية</b><small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>عرض الشرائح الإعلانية في أعلى الصفحة الرئيسية.</small></span></label>
+      <label style={toggleRowStyle}><input type="checkbox" checked={form.advertising.dashboard} disabled={!form.advertising.enabled} onChange={(e) => updateAdvertising('dashboard', e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--inx-blue)' }} /><span><b style={{ display: 'block', fontSize: 13 }}>الرئيسية والصفحات الداخلية</b><small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>عرض الشرائح في الرئيسية ومساحة إعلان مختصرة داخل CRM والوثائق والمهام وباقي صفحات التطبيق.</small></span></label>
       <label style={{ ...toggleRowStyle, borderBottom: 0 }}><input type="checkbox" checked={form.advertising.operations} disabled={!form.advertising.enabled} onChange={(e) => updateAdvertising('operations', e.target.checked)} style={{ marginTop: 3, accentColor: 'var(--inx-blue)' }} /><span><b style={{ display: 'block', fontSize: 13 }}>مركز العمليات</b><small style={{ color: 'var(--inx-muted)', fontSize: 11 }}>عرض الشرائح الإعلانية أسفل عنوان مركز العمليات.</small></span></label>
     </section>
 
