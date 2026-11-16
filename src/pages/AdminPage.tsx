@@ -7,6 +7,7 @@ import {
   KeyRound,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   TrendingUp,
   Users,
 } from 'lucide-react';
@@ -217,11 +218,11 @@ export default function AdminPage() {
             <span className="label">الاشتراكات</span>
             <span className="sub">عرض وإدارة</span>
           </Link>
-          <div className="inx-shortcut-card" style={{ opacity: 0.6 }}>
-            <span className="inx-3d-icon tone-warning">📢</span>
+          <Link to="/admin-panel/ads" className="inx-shortcut-card">
+            <span className="inx-3d-icon tone-warning"><Megaphone size={20} /></span>
             <span className="label">الإعلانات</span>
-            <span className="sub">قريباً</span>
-          </div>
+            <span className="sub">عرض وإدارة الإعلانات</span>
+          </Link>
           <div className="inx-shortcut-card" style={{ opacity: 0.6 }}>
             <span className="inx-3d-icon tone-success">
               <Users size={20} />

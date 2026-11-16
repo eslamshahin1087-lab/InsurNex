@@ -6,9 +6,10 @@ import '../../theme/admin-ads.css';
 
 interface AdsSlideshowProps {
   autoPlayMs?: number;
+  compact?: boolean;
 }
 
-export default function AdsSlideshow({ autoPlayMs = 5000 }: AdsSlideshowProps) {
+export default function AdsSlideshow({ autoPlayMs = 5000, compact = false }: AdsSlideshowProps) {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -47,16 +48,14 @@ export default function AdsSlideshow({ autoPlayMs = 5000 }: AdsSlideshowProps) {
     setIndex((i) => (i - 1 + ads.length) % ads.length);
   }
 
-  const current = ads[index];
-
-  function handleClick() {
-    if (current.linkUrl) {
-      window.open(current.linkUrl, '_blank', 'noopener,noreferrer');
+  function handleClick(ad: Ad) {
+    if (ad.linkUrl) {
+      window.open(ad.linkUrl, '_blank', 'noopener,noreferrer');
     }
   }
 
   return (
-    <section className="ads-slideshow" dir="rtl">
+    <section className={`ads-slideshow${compact ? ' ads-slideshow-compact' : ''}`} dir="rtl">
       <div
         className="ads-slideshow-track"
         style={{ transform: `translateX(${index * 100}%)` }}
@@ -65,7 +64,7 @@ export default function AdsSlideshow({ autoPlayMs = 5000 }: AdsSlideshowProps) {
           <div
             key={ad.id}
             className="ads-slide"
-            onClick={ad.linkUrl ? handleClick : undefined}
+            onClick={ad.linkUrl ? () => handleClick(ad) : undefined}
             style={{ cursor: ad.linkUrl ? 'pointer' : 'default' }}
           >
             <img src={ad.imageUrl} alt={ad.title} />
