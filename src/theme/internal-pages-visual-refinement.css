@@ -216,11 +216,48 @@
   color: #c3d3e4 !important;
 }
 
-@media (max-width: 760px) {
-  #root .mobile-shell.view-mode-mobile .app-body > main.mobile-page {
-    padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
-  }
+/* Keep the phone app inside the viewport and reserve a real row for its tab bar.
+   The page scrolls above navigation, so filters and final list items stay reachable. */
+#root .mobile-shell.view-mode-mobile {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+}
 
+#root .mobile-shell.view-mode-mobile > .app-body {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding-bottom: 20px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+}
+
+#root .mobile-shell.view-mode-mobile > .app-tabbar.s8-tabbar.inx-tabbar-primary {
+  position: relative !important;
+  inset: auto !important;
+  align-self: center !important;
+  flex: 0 0 68px !important;
+  margin: 0 auto calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  transform: none !important;
+}
+
+#root .mobile-shell.view-mode-mobile .app-body > main.mobile-page {
+  padding-bottom: 24px !important;
+}
+
+@media (max-width: 760px) {
   #root .mobile-shell.view-mode-mobile .app-body .inx-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
