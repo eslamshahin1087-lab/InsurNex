@@ -1,6 +1,9 @@
 import {
   ArrowLeft,
+  Award,
+  BarChart3,
   Bot,
+  CircleDollarSign,
   Building2,
   Mail,
   Moon,
@@ -339,21 +342,21 @@ export default function LeadsPage() {
         <div className="inx-kpi-grid" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">📊</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><BarChart3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي العملاء</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">🎯</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Target size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.active}</div>
             <small className="inx-kpi-label">فرص نشطة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">💰</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CircleDollarSign size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 16 }}>
               {money(stats.pipeline)} ج.م
@@ -362,7 +365,7 @@ export default function LeadsPage() {
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-purple">🏆</span>
+              <span className="inx-3d-icon sm tone-purple" aria-hidden="true"><Award size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.won}</div>
             <small className="inx-kpi-label">صفقات مغلقة</small>

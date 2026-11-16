@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Bot,
   CalendarDays,
+  AlertTriangle,
   CircleDollarSign,
+  Clock3,
+  FileText,
   Moon,
   Plus,
   Search,
@@ -267,28 +270,28 @@ export default function PoliciesPage() {
         <div className="inx-kpi-grid inx-policies-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">📋</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><FileText size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي الوثائق</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">✅</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><ShieldCheck size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.active}</div>
             <small className="inx-kpi-label">سارية</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">⏳</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Clock3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.pending}</div>
             <small className="inx-kpi-label">قيد الانتظار</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-danger">⚠️</span>
+              <span className="inx-3d-icon sm tone-danger" aria-hidden="true"><AlertTriangle size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.expired}</div>
             <small className="inx-kpi-label">منتهية</small>

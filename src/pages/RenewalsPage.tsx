@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ChevronLeft,
   CircleAlert,
+  CircleDollarSign,
   Clock3,
   FileText,
   ListTodo,
@@ -286,28 +287,28 @@ export default function RenewalsPage() {
         <div className="inx-kpi-grid inx-renewals-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-danger">🚨</span>
+              <span className="inx-3d-icon sm tone-danger" aria-hidden="true"><AlertTriangle size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{summary.overdue}</div>
             <small className="inx-kpi-label">متأخرة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">⏰</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Clock3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{summary.urgent}</div>
             <small className="inx-kpi-label">خلال 7 أيام</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">📅</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><CalendarDays size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{summary.due90}</div>
             <small className="inx-kpi-label">خلال 90 يوم</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">💰</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CircleDollarSign size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value" style={{ fontSize: 15 }}>
               {formatMoney(summary.premiumAtRisk, currency)}

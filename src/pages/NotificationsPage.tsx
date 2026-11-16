@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  BarChart3,
   Bell,
   BellRing,
+  CheckCircle2,
+  MailOpen,
   Moon,
   Search,
   Sun,
@@ -178,28 +181,28 @@ export default function NotificationsPage() {
         <div className="inx-kpi-grid inx-notifications-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">🔔</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><Bell size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{items.length}</div>
             <small className="inx-kpi-label">إجمالي الإشعارات</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-danger">📬</span>
+              <span className="inx-3d-icon sm tone-danger" aria-hidden="true"><MailOpen size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{unread}</div>
             <small className="inx-kpi-label">غير مقروءة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">✅</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CheckCircle2 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{items.length - unread}</div>
             <small className="inx-kpi-label">مقروءة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">📊</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><BarChart3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">
               {items.length > 0 ? Math.round((unread / items.length) * 100) : 0}%

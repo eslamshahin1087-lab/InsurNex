@@ -18,6 +18,7 @@ import './theme/insurnex-design-system.css';
 import './theme/visual-identity-quality.css';
 import './theme/showcase-identity.css';
 import './theme/app-visual-polish.css';
+import './theme/internal-pages-visual-refinement.css';
 import { ThemeProvider } from './theme/ThemeProvider';
 
 // Register the privacy-safe PWA worker only for production builds.

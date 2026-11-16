@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Bot,
   CalendarDays,
+  CheckCircle2,
+  Clock3,
   ListTodo,
   Moon,
   Search,
@@ -285,28 +287,28 @@ export default function TasksPage() {
         <div className="inx-kpi-grid inx-tasks-kpis" style={{ marginBottom: 16 }}>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-cyan">📝</span>
+              <span className="inx-3d-icon sm tone-cyan" aria-hidden="true"><ListTodo size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.total}</div>
             <small className="inx-kpi-label">إجمالي المهام</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-warning">⏳</span>
+              <span className="inx-3d-icon sm tone-warning" aria-hidden="true"><Clock3 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.open}</div>
             <small className="inx-kpi-label">قيد التنفيذ</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-danger">🚨</span>
+              <span className="inx-3d-icon sm tone-danger" aria-hidden="true"><TriangleAlert size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.urgent}</div>
             <small className="inx-kpi-label">عاجلة</small>
           </article>
           <article className="inx-kpi">
             <div className="inx-kpi-head">
-              <span className="inx-3d-icon sm tone-success">✅</span>
+              <span className="inx-3d-icon sm tone-success" aria-hidden="true"><CheckCircle2 size={18} strokeWidth={1.9} /></span>
             </div>
             <div className="inx-kpi-value">{stats.completed}</div>
             <small className="inx-kpi-label">مكتملة</small>

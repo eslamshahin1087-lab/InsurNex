@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
+  Clock3,
   CheckCircle,
   Download,
   Edit2,
@@ -289,7 +290,7 @@ export default function PolicyDetailsPage() {
               </h2>
               <StatusBadge status={policy.status} />
               {isExpiringSoon && (
-                <span className="inx-badge inx-badge-warning">⏰ تنتهي خلال {daysLeft} يوم</span>
+                <span className="inx-badge inx-badge-warning"><Clock3 size={14} aria-hidden="true" /> تنتهي خلال {daysLeft} يوم</span>
               )}
               {isExpired && (
                 <span className="inx-badge inx-badge-danger">⚠️ منتهية منذ {Math.abs(daysLeft)} يوم</span>
