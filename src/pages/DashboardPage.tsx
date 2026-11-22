@@ -33,6 +33,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import MiniDonutChart from '../components/charts/MiniDonutChart';
 import MiniLineChart from '../components/charts/MiniLineChart';
 import InsurNexRobot from '../components/InsurNexRobot';
+import CopperIcon from '../components/CopperIcon';
 import OnboardingChecklist from '../features/onboarding/OnboardingChecklist';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
@@ -314,7 +315,7 @@ export default function DashboardPage() {
             <div className="inx-shortcut-sequence" role="group" aria-label="اختصارات InsurNex">
               {visibleShortcuts.map(({ to, label, Icon, tone }) => (
                 <Link key={to} to={to} className="inx-shortcut-card">
-                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><Icon size={19} strokeWidth={1.9} aria-hidden="true" /></span>
+                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><CopperIcon Icon={Icon} size={20} /></span>
                   <span className="label">{label}</span>
                 </Link>
               ))}
