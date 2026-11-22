@@ -17,6 +17,7 @@ import { useAuth, canAccessClient360, canAccessOperations } from '../features/au
 import { useTheme } from '../theme/ThemeProvider';
 import CopilotFloatingPanel from '../features/copilot/CopilotFloatingPanel';
 import Logo from '../components/Logo';
+import CopperIcon from '../components/CopperIcon';
 import InsurNexRobot from '../components/InsurNexRobot';
 import { usePlatformSettings } from '../features/admin/PlatformSettingsProvider';
 import AdsSlideshow from '../features/admin/AdsSlideshow';
@@ -208,12 +209,12 @@ export default function AppLayout() {
     end={to === '/'}
     className={to === '/copilot' ? 'nav-copilot' : undefined}
   >
-    <Icon size={21} />
+    <CopperIcon Icon={Icon} size={21} />
     <span>{label}</span>
   </NavLink>
 ))}
         <NavLink to="/more">
-          <MoreHorizontal size={22} />
+          <CopperIcon Icon={MoreHorizontal} size={22} />
           <span>المزيد</span>
         </NavLink>
       </nav>

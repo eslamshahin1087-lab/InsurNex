@@ -3266,3 +3266,30 @@ html, body, #root, .mobile-shell {
   }
 }
 /* END INSURNEX_CAROUSEL_TRANSLATE_ENGINE_V37 */
+
+
+/* INSURNEX COPPER ICON SYSTEM */
+.inx-copper-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #C77A43;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 0 rgba(255, 224, 196, .42))
+          drop-shadow(0 2px 4px rgba(168, 90, 42, .24));
+}
+.inx-copper-icon > svg {
+  color: inherit;
+  stroke: currentColor;
+}
+.inx-3d-icon .inx-copper-icon {
+  color: #C77A43;
+}
+:root[data-theme="dark"] .inx-copper-icon {
+  color: #E7B18A;
+  filter: drop-shadow(0 0 5px rgba(199, 122, 67, .28));
+}
+@media (prefers-reduced-motion: reduce) {
+  .inx-copper-icon { filter: none; }
+}
+/* END INSURNEX COPPER ICON SYSTEM */
