@@ -27,11 +27,11 @@ import { usePlanFeatures } from '../features/subscription/PlanFeaturesProvider';
 import { buildViewModeHref, resolveViewMode } from './view-mode-preference';
 
 const navigation: { to: string; label: string; Icon: LucideIcon; feature?: PlatformFeatureKey }[] = [
-  { to: '/', label: 'الرئيسية', Icon: Home },
-  { to: '/clients', label: 'CRM', Icon: Users, feature: 'clients' },
-  { to: '/policies', label: 'الوثائق', Icon: ShieldCheck, feature: 'policies' },
-  { to: '/operations', label: 'العمليات', Icon: Settings2, feature: 'operations' },
-  { to: '/copilot', label: 'الذكاء', Icon: Sparkles, feature: 'copilot' },
+  { to: '/', label: 'الرئيسية', Icon: Home, asset: '01-dashboard.png' },
+  { to: '/clients', label: 'CRM', Icon: Users, asset: '03-clients-crm.png', feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', Icon: ShieldCheck, asset: '04-policies.png', feature: 'policies' },
+  { to: '/operations', label: 'العمليات', Icon: Settings2, asset: '26-automation.png', feature: 'operations' },
+  { to: '/copilot', label: 'الذكاء', Icon: Sparkles, asset: '12-ai-copilot.png', feature: 'copilot' },
 ];
 
 const INTERNAL_DISPLAY_NAMES = new Set([
@@ -202,19 +202,19 @@ export default function AppLayout() {
         className="app-tabbar s8-tabbar inx-tabbar-primary inx-tabbar-6"
         aria-label="التنقل الرئيسي"
       >
-        {visibleNavigation.map(({ to, label, Icon }) => (
+        {visibleNavigation.map(({ to, label, Icon, asset }) => (
   <NavLink
     key={to}
     to={to}
     end={to === '/'}
     className={to === '/copilot' ? 'nav-copilot' : undefined}
   >
-    <CopperIcon Icon={Icon} size={21} />
+    <CopperIcon Icon={Icon} asset={asset} size={21} />
     <span>{label}</span>
   </NavLink>
 ))}
         <NavLink to="/more">
-          <CopperIcon Icon={MoreHorizontal} size={22} />
+          <CopperIcon Icon={MoreHorizontal} asset="28-help-support.png" size={22} />
           <span>المزيد</span>
         </NavLink>
       </nav>
