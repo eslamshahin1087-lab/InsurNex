@@ -80,15 +80,15 @@ const roleLabels: Record<string, string> = {
   staff: 'عضو الفريق',
 };
 
-const shortcuts: { to: string; label: string; Icon: LucideIcon; tone: string; feature: PlatformFeatureKey | null }[] = [
-  { to: '/clients', label: 'العملاء', Icon: Users, tone: '', feature: 'clients' },
-  { to: '/policies', label: 'الوثائق', Icon: FileText, tone: 'tone-cyan', feature: 'policies' },
-  { to: '/claims', label: 'المطالبات', Icon: ShieldAlert, tone: 'tone-success', feature: 'claims' },
-  { to: '/renewals', label: 'التجديدات', Icon: RefreshCcw, tone: 'tone-warning', feature: 'renewals' },
-  { to: '/tasks', label: 'المهام', Icon: ListTodo, tone: '', feature: 'tasks' },
-  { to: '/insurers', label: 'الشركات', Icon: Building2, tone: 'tone-cyan', feature: 'insurers' },
-  { to: '/finance', label: 'المالية', Icon: Wallet, tone: 'tone-success', feature: 'finance' },
-  { to: '/more', label: 'المزيد', Icon: MoreHorizontal, tone: 'tone-purple', feature: null },
+const shortcuts: { to: string; label: string; Icon: LucideIcon; asset: string; tone: string; feature: PlatformFeatureKey | null }[] = [
+  { to: '/clients', label: 'العملاء', Icon: Users, asset: '03-clients-crm.png', tone: '', feature: 'clients' },
+  { to: '/policies', label: 'الوثائق', Icon: FileText, asset: '04-policies.png', tone: 'tone-cyan', feature: 'policies' },
+  { to: '/claims', label: 'المطالبات', Icon: ShieldAlert, asset: '07-claims.png', tone: 'tone-success', feature: 'claims' },
+  { to: '/renewals', label: 'التجديدات', Icon: RefreshCcw, asset: '06-renewals.png', tone: 'tone-warning', feature: 'renewals' },
+  { to: '/tasks', label: 'المهام', Icon: ListTodo, asset: '08-tasks-follow-ups.png', tone: '', feature: 'tasks' },
+  { to: '/insurers', label: 'الشركات', Icon: Building2, asset: '18-corporate.png', tone: 'tone-cyan', feature: 'insurers' },
+  { to: '/finance', label: 'المالية', Icon: Wallet, asset: '20-commissions.png', tone: 'tone-success', feature: 'finance' },
+  { to: '/more', label: 'المزيد', Icon: MoreHorizontal, asset: '28-help-support.png', tone: 'tone-purple', feature: null },
 ];
 
 export default function DashboardPage() {
@@ -313,9 +313,9 @@ export default function DashboardPage() {
         <div className="inx-shortcut-row inx-shortcut-carousel inx-dashboard-shortcuts" style={{ marginBottom: 18 }}>
           <div className="inx-shortcut-track">
             <div className="inx-shortcut-sequence" role="group" aria-label="اختصارات InsurNex">
-              {visibleShortcuts.map(({ to, label, Icon, tone }) => (
+              {visibleShortcuts.map(({ to, label, Icon, asset, tone }) => (
                 <Link key={to} to={to} className="inx-shortcut-card">
-                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><CopperIcon Icon={Icon} size={20} /></span>
+                  <span className={`inx-3d-icon ${tone} inx-animated-icon`}><CopperIcon Icon={Icon} asset={asset} size={20} /></span>
                   <span className="label">{label}</span>
                 </Link>
               ))}
