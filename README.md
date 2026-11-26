@@ -28,6 +28,8 @@ Vite embeds `VITE_*` values into the client bundle during build. They must be th
 - `npm run test:client-sensitive-separation-plan` — fail-closed field mapping proposal tests.
 - `npm run test:client-sensitive-separation-review` — plan safety and mapping invariants.
 - `npm run test:client-data-access-audit` — static audit privacy and query-scope regression tests.
+- `npm run audit:client-data-symbols` — TypeScript symbol-level inventory of deprecated client APIs and literal client collection call sites; it is review evidence, not authorization proof.
+- `npm run test:client-data-symbols` — regression tests for aliased imports, namespace calls, dynamic imports and client collection references.
 - `npm run audit:client-data-access` — source-only client-data access inventory; no cloud access.
 - `npm run lint`
 - `npm run build`
