@@ -108,6 +108,8 @@ jobs:
         run: npm run test:client-sensitive-separation-review
       - name: Client data-access audit safety regression tests
         run: npm run test:client-data-access-audit
+      - name: Client data-access symbol and import-graph audit tests
+        run: npm run test:client-data-symbols
       - name: Verify separated client collections remain default-denied and legacy RBAC unchanged
         run: npm run test:client-sensitive-default-deny
       - name: Client data-access static inventory
