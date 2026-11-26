@@ -69,12 +69,15 @@ function callLocation(sourceFile, node, repositoryRoot) {
 
 function literalClientCollection(node) {
   if (ts.isStringLiteralLike(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-    return node.text === 'clients' || node.text.startsWith('clients/');
+    if (node.text === 'clients' || node.text.startsWith('clients/')) return 'clients';
+    if (node.text === 'clientSummaries' || node.text.startsWith('clientSummaries/')) return 'clientSummaries';
+    return undefined;
   }
   if (ts.isTemplateExpression(node)) {
-    return node.head.text === 'clients/' || node.head.text === 'clients';
+    if (node.head.text === 'clients/' || node.head.text === 'clients') return 'clients';
+    if (node.head.text === 'clientSummaries/' || node.head.text === 'clientSummaries') return 'clientSummaries';
   }
-  return false;
+  return undefined;
 }
 
 export function auditClientDataAccessSymbols(rootFiles, repositoryRoot = process.cwd()) {
@@ -128,9 +131,13 @@ export function auditClientDataAccessSymbols(rootFiles, repositoryRoot = process
         if (api) callSites.push({ ...callLocation(sourceFile, node, root), api });
 
         const functionName = ts.isIdentifier(callee) ? callee.text : '';
-        if ((functionName === 'collection' || functionName === 'doc')
-          && node.arguments.slice(0, 2).some(literalClientCollection)) {
-          clientCollectionCallSites.push({ ...callLocation(sourceFile, node, root), operation: functionName });
+        const collectionName = node.arguments.slice(0, 2).map(literalClientCollection).find(Boolean);
+        if ((functionName === 'collection' || functionName === 'doc') && collectionName) {
+          clientCollectionCallSites.push({
+            ...callLocation(sourceFile, node, root),
+            collectionName,
+            operation: functionName,
+          });
         }
 
         if (expression.kind === ts.SyntaxKind.ImportKeyword) {
