@@ -2,7 +2,32 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { auditClientDataAccessSymbols } from './client-data-access-symbol-audit.mjs';
+import {
+  auditClientDataAccessSymbols,
+  collectClientDataSourceFiles,
+} from './client-data-access-symbol-audit.mjs';
+
+// This records the manually reviewed literal Firestore clients collection call
+// sites. It detects additions/removals that need review; it grants no access.
+const REVIEWED_CLIENT_COLLECTION_CALLS = [
+  ['functions/src/copilot/context-builder.ts', 'collection', 1],
+  ['src/features/clients/client-data-access.service.ts', 'collection', 1],
+  ['src/features/clients/client-data-access.service.ts', 'doc', 1],
+  ['src/features/clients/client-edit.service.ts', 'doc', 1],
+  ['src/features/clients/client.service.ts', 'collection', 4],
+  ['src/features/clients/client.service.ts', 'doc', 3],
+  ['src/features/clients/timeline.service.ts', 'collection', 2],
+  ['src/features/dashboard/dashboard.service.ts', 'collection', 1],
+  ['src/features/documents/legacy-client-documents.service.ts', 'doc', 1],
+  ['src/features/leads/lead.service.ts', 'collection', 2],
+  ['src/features/leads/lead.service.ts', 'doc', 1],
+  ['src/features/operations/operations-v80-foundation.service.ts', 'doc', 1],
+  ['src/features/policies/policy-lifecycle.service.ts', 'collection', 1],
+  ['src/features/quotes/quote.service.ts', 'collection', 2],
+  ['src/features/quotes/quote.service.ts', 'doc', 1],
+  ['src/features/rfq/rfq.service.ts', 'collection', 2],
+  ['src/features/rfq/rfq.service.ts', 'doc', 1],
+];
 
 const root = await mkdtemp(join(tmpdir(), 'insurnex-client-symbol-audit-'));
 try {
@@ -27,4 +52,24 @@ try {
 } finally {
   await rm(root, { recursive: true, force: true });
 }
+
+const repositoryRoot = process.cwd();
+const sourceFiles = await collectClientDataSourceFiles(repositoryRoot);
+const repositoryReport = auditClientDataAccessSymbols(sourceFiles, repositoryRoot);
+const actualClientCollectionCalls = Object.entries(
+  repositoryReport.clientCollectionCallSites.reduce((counts, call) => {
+    const key = `${call.path}\u0000${call.operation}`;
+    counts[key] = (counts[key] || 0) + 1;
+    return counts;
+  }, {}),
+).map(([key, count]) => {
+  const [path, operation] = key.split('\u0000');
+  return [path, operation, count];
+}).sort((left, right) => left[0].localeCompare(right[0]) || left[1].localeCompare(right[1]));
+assert.deepEqual(
+  actualClientCollectionCalls,
+  REVIEWED_CLIENT_COLLECTION_CALLS,
+  'literal Firestore clients call sites changed; manually review and update the baseline before merging',
+);
 console.log('Client data-access TypeScript symbol audit tests passed.');
+
