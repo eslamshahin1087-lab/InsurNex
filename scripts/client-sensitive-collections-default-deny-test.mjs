@@ -66,9 +66,15 @@ assert.deepEqual(
 );
 
 assert.match(service, /export async function listClientSummaries/);
-assert.match(service, /projectClientBaseSummary\(item\.id, item\.data\(\), scope\)/);
+assert.match(
+  service,
+  /projectClientBaseSummary\(\s*item\.id,\s*item\.data\(\),\s*scope,?\s*\)/,
+);
 assert.match(service, /export async function getLegacyClientWorkspace/);
-assert.match(service, /projectLegacyClientWorkspace\(snapshot\.id, legacyRecord, scope\)/);
+assert.match(
+  service,
+  /projectLegacyClientWorkspace\(\s*snapshot\.id,\s*legacyRecord,\s*scope,?\s*\)/,
+);
 assert.match(clientsPage, /listClientSummaries\(profile\)/);
 assert.match(detailsPage, /getLegacyClientWorkspace\(profile, id\)/);
 
