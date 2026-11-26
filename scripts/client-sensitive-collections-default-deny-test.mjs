@@ -54,9 +54,14 @@ assert.match(
   /allow create: if[\s\S]*?roleIs\(\['owner','admin','broker'\]\)/,
   'legacy client creation must not be widened to unsupported roles',
 );
-assert.match(
-  policy,
-  /LEGACY_CLIENT_READ_ROLES = Object\.freeze\(\['owner', 'admin', 'broker'\]\)/,
+const legacyRolesMatch = policy.match(
+  /LEGACY_CLIENT_READ_ROLES\s*=\s*Object\.freeze\(\[([\s\S]*?)\]\)/,
+);
+assert.ok(legacyRolesMatch, 'legacy client read-role policy must be declared');
+const legacyReadRoles = [...legacyRolesMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+assert.deepEqual(
+  legacyReadRoles,
+  ['owner', 'admin', 'broker'],
   'client-side preflight must mirror the current legacy Rules boundary',
 );
 
@@ -80,3 +85,4 @@ assert.match(adapterDocs, /does not migrate, redact, rewrite, delete or export c
 assert.match(adapterDocs, /Sales, Claims, Finance and Staff do not have direct read access/i);
 
 console.log('Client data separation guard passed: sensitive collections remain default-denied and legacy Client 360 RBAC is unchanged.');
+
