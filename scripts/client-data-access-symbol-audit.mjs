@@ -30,6 +30,13 @@ async function walk(root, collected = []) {
   return collected;
 }
 
+export async function collectClientDataSourceFiles(repositoryRoot = process.cwd()) {
+  const root = resolve(repositoryRoot);
+  const sourceFiles = [];
+  for (const sourceRoot of SOURCE_ROOTS) await walk(join(root, sourceRoot), sourceFiles);
+  return sourceFiles;
+}
+
 function unwrapSymbol(checker, initial) {
   let symbol = initial;
   const seen = new Set();
@@ -157,8 +164,7 @@ export function auditClientDataAccessSymbols(rootFiles, repositoryRoot = process
 
 async function main() {
   const root = resolve(process.cwd());
-  const sourceFiles = [];
-  for (const sourceRoot of SOURCE_ROOTS) await walk(join(root, sourceRoot), sourceFiles);
+  const sourceFiles = await collectClientDataSourceFiles(root);
   const report = auditClientDataAccessSymbols(sourceFiles, root);
   console.log(JSON.stringify(report, null, 2));
 }
@@ -170,3 +176,4 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
     process.exitCode = 1;
   });
 }
+
